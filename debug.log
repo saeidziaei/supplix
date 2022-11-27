@@ -1,0 +1,8 @@
+2022-11-27T07:11:12.702Z  +4604ms [debug] Searching for project root...
+2022-11-27T07:11:12.704Z     +2ms [debug] Searching C:\projects\supplix\sst.config.cjs
+2022-11-27T07:11:12.704Z     +0ms [debug] Searching C:\projects\supplix\sst.config.mjs
+2022-11-27T07:11:12.704Z     +0ms [debug] Searching C:\projects\supplix\sst.config.js
+2022-11-27T07:11:12.704Z     +0ms [debug] Searching C:\projects\supplix\sst.json
+2022-11-27T07:11:12.704Z     +0ms [debug] Found config C:\projects\supplix\sst.json
+2022-11-27T07:11:12.712Z     +8ms [debug] Using project root C:\projects\supplix
+2022-11-27T07:11:12.712Z     +0ms [debug] Using project out C:\projects\supplix\.sst
