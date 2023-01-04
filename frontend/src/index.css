@@ -12,6 +12,8 @@ h1, h2, h3, h4, h5, h6 {
     font-family: "PT Serif", serif;
 }
 
+/* tweak the styles of the form fields so that the mobile browser does not zoom in on them on 
+focus. We just need them to have a minimum font size of 16px to prevent the zoom.*/
 select.form-control,
 textarea.form-control,
 input.form-control {
@@ -20,3 +22,4 @@ input.form-control {
 input[type="file"] {
   width: 100%;
 }
+

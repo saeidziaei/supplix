@@ -23,7 +23,7 @@ function App() {
   }
   useEffect(() => {
     onLoad();
-  }, []);
+  }, []); // If we pass in an empty list of variables, then it’ll only run our function on the FIRST render
   async function onLoad() {
     try {
       await Auth.currentSession();
@@ -42,7 +42,7 @@ function App() {
       <Navbar collapseOnSelect bg="light" expand="md" className="mb-3">
         <LinkContainer to="/">
           <Navbar.Brand className="font-weight-bold text-muted">
-            Scratch
+            ISO Cloud
           </Navbar.Brand>
         </LinkContainer>
         <Navbar.Toggle />

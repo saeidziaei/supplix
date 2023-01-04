@@ -1,17 +1,19 @@
 import { Api, use } from "@serverless-stack/resources";
 import { StorageStack } from "./StorageStack";
 
+// TODO remove table and /notes paths
 export function ApiStack({ stack, app }) {
-  const { table } = use(StorageStack);
+  const { table, customerISOTable } = use(StorageStack);
 
   // Create the API
   const api = new Api(stack, "Api", {
     defaults: {
       authorizer: "iam",
       function: {
-        permissions: [table],
+        permissions: [table, customerISOTable],
         environment: {
           TABLE_NAME: table.tableName,
+          CUSTOMER_ISO_TABLE: customerISOTable.tableName,
         },
       },
     },
@@ -21,6 +23,8 @@ export function ApiStack({ stack, app }) {
       "GET /notes/{id}": "functions/get.main",
       "PUT /notes/{id}": "functions/update.main",
       "DELETE /notes/{id}": "functions/delete.main",
+
+      "POST   /customers/{customerId}/iso": "functions/createCustomerISO.main",
 
     },
   });

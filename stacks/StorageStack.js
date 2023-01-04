@@ -22,8 +22,18 @@ export function StorageStack({ stack }) {
     primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
   });
 
+  // table that holds customer customised template
+  const customerISOTable = new Table(stack , "CustomerISO", {
+    fields: {
+      customerId: "string",
+      isoId: "string", // unique id of this customised template
+    },
+    primaryIndex: { partitionKey: "customerId", sortKey: "isoId" },
+  })
+  ;
   // Return the bucket and table resources
   return {
+    customerISOTable,
     table,
     bucket,
   };
