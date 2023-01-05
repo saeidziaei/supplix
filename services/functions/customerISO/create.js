@@ -1,13 +1,20 @@
 import * as uuid from "uuid";
-import handler from "../util/handler";
-import dynamoDb from "../util/dynamodb";
+import handler from "../../util/handler";
+import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event) => {
   const data = JSON.parse(event.body);
 
   // TODO Check this user can make changes for this customer
-  // isIdentityAssociatedWithCustomer() || user is admin
+  // const isAssociated = await isIdentityAssociatedWithCustomer() || user is admin
+  if (!isAssociated) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ error: "Forbidden" }),
+    };
+  }
 
+  
   const params = {
     TableName: process.env.CUSTOMER_ISO_TABLE,
     Item: {

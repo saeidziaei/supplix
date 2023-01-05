@@ -3,28 +3,35 @@ import { StorageStack } from "./StorageStack";
 
 // TODO remove table and /notes paths
 export function ApiStack({ stack, app }) {
-  const { table, customerISOTable } = use(StorageStack);
+  const { table, customerTable, customerISOTable } = use(StorageStack);
 
   // Create the API
   const api = new Api(stack, "Api", {
     defaults: {
-      authorizer: "iam",
+      authorizer: "iam", 
       function: {
-        permissions: [table, customerISOTable],
+        permissions: [table, customerTable, customerISOTable], // TODO give permissions only to the endpoints that need it
         environment: {
           TABLE_NAME: table.tableName,
+          CUSTOMER_TABLE: customerTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
         },
       },
     },
     routes: {
-      "POST   /notes": "functions/create.main",
+      "POST   /notes": "functions/create.main", 
       "GET /notes": "functions/list.main",
       "GET /notes/{id}": "functions/get.main",
       "PUT /notes/{id}": "functions/update.main",
       "DELETE /notes/{id}": "functions/delete.main",
 
-      "POST   /customers/{customerId}/iso": "functions/createCustomerISO.main",
+      "GET /customers": "functions/customer/list.main",
+      "POST   /customers": "functions/customer/create.main",
+      "GET /customers/{id}": "functions/customer/get.main",
+      "PUT /customers/{id}": "functions/customer/update.main",
+      // "DELETE /customers/{id}": "functions/customer/delete.main",
+
+      "POST   /customers/{customerId}/iso": "functions/customerISO/create.main",
 
     },
   });

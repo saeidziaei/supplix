@@ -10,6 +10,7 @@ import { onError } from "../lib/errorLib";
 
 export default function Login() {
   const { userHasAuthenticated } = useAppContext();
+  
 
   const [fields, handleFieldChange] = useFormFields({
     email: "",

@@ -5,6 +5,7 @@ import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
 import Signup from "./containers/Signup";
 import NewNote from "./containers/NewNote";
+import NewCustomer from "./containers/NewCustomer";
 
 export default function Links() {
   return (
@@ -13,6 +14,7 @@ export default function Links() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/notes/new" element={<NewNote />} />
+      <Route path="/customers/new" element={<NewCustomer />} />
       <Route path="*" element={<NotFound />} />;
     </Routes>
   );

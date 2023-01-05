@@ -1,11 +1,13 @@
 import { ReactStaticSite, use } from "@serverless-stack/resources";
-import { ApiStack } from "./ApiStack";
-import { AuthStack } from "./AuthStack";
+// import { ApiStack } from "./ApiStack";
+// import { AuthStack } from "./AuthStack";
+import { MyStack } from "./MyStack";
 import { StorageStack } from "./StorageStack";
 
 export function FrontendStack({ stack, app }) {
-  const { api } = use(ApiStack);
-  const { auth } = use(AuthStack);
+  // const { api } = use(ApiStack);
+  // const { auth } = use(AuthStack);
+  const { api, auth } = use(MyStack);
   const { bucket } = use(StorageStack);
   // Define our React app
   const site = new ReactStaticSite(stack, "ReactSite", {
