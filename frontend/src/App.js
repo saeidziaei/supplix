@@ -7,6 +7,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { AppContext } from "./lib/contextLib";
 import { Auth } from "aws-amplify";
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 
 export default App;
 
@@ -30,7 +31,10 @@ function App() {
   async function onLoad() {
     try {
       const session = await Auth.currentSession();
-      setIsTopLevelAdmin(session.getAccessToken().payload["cognito:groups"]?.includes("top-level-admins"));
+      
+      const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
+      setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
+
       userHasAuthenticated(true);
       setjwtToken(session.getAccessToken().getJwtToken())
     } catch (e) {

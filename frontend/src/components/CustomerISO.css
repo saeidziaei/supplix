@@ -1,0 +1,22 @@
+.Process {
+  background-color: #ccc;
+}
+.Process.Plan {
+  color: white;
+  background-color: #011f4b ;
+}
+
+.Process.Do {
+  color: white;
+  background-color: #005b96 ;
+}
+
+.Process.Check {
+  color: white;
+  background-color: #6497b1 ;
+}
+
+.Process.Act {
+  color: black;
+  background-color: #b3cde0;
+}
