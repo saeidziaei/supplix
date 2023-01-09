@@ -1,0 +1,11 @@
+.odd {
+    background-color: #eee;
+}
+.heading {
+    background-color: #ccc;
+    font-weight: bold;
+    padding: 5px;
+}
+.text-right {
+    text-align: right;
+}

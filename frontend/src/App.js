@@ -63,11 +63,13 @@ function App() {
               <>
                 <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
                 
+                <LinkContainer to="/forms/NewEmployeeInductionChecklist/3324ee90-8fbe-11ed-a7e7-d3e89492ec58"><Nav.Link>Test</Nav.Link></LinkContainer>
               </>
             ) : (
               <>
                 <LinkContainer to="/signup"><Nav.Link>Signup</Nav.Link></LinkContainer>
                 <LinkContainer to="/login"><Nav.Link>Login</Nav.Link></LinkContainer>
+                
               </>
             )}
           </Nav>

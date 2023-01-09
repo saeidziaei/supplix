@@ -13,14 +13,7 @@ export function StorageStack({ stack }) {
     ],
   });
 
-  // Create the DynamoDB table
-  const table = new Table(stack, "Notes2", {
-    fields: {
-      userId: "string",
-      noteId: "string",
-    },
-    primaryIndex: { partitionKey: "userId", sortKey: "noteId" },
-  });
+  
 
 
   const customerTable = new Table(stack, "Customer", {
@@ -39,11 +32,19 @@ export function StorageStack({ stack }) {
     primaryIndex: { partitionKey: "customerId", sortKey: "isoId" },
   });
 
+  const formTable = new Table(stack , "Form", {
+    fields: {
+      customerIsoId: "string",
+      formId: "string", 
+    },
+    primaryIndex: { partitionKey: "customerIsoId", sortKey: "formId" },
+  });
+
   // Return the bucket and table resources
   return {
     customerTable,
     customerISOTable,
-    table,
+    formTable,
     bucket,
   };
 }

@@ -1,6 +1,4 @@
-// import { ApiStack } from "./ApiStack";
-// import { AuthStack } from "./AuthStack";
-import { MyStack } from "./MyStack";
+import { AuthAndApiStack } from "./AuthAndApiStack";
 import { StorageStack } from "./StorageStack";
 import { FrontendStack } from "./FrontendStack";
 
@@ -18,8 +16,6 @@ export default function (app) {
     },
   });
   app.stack(StorageStack)
-     // .stack(ApiStack)
-     // .stack(AuthStack)
-     .stack(MyStack)
+     .stack(AuthAndApiStack)
      .stack(FrontendStack);
 }
