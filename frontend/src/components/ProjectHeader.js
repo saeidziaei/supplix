@@ -1,6 +1,7 @@
 import React from "react";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Card from "react-bootstrap/Card";
 import Container from "react-bootstrap/Container";
 import "./FormHeader.css";
 import { useAppContext } from "../lib/contextLib";
@@ -11,15 +12,22 @@ export default function ProjectHeader() {
     const { currentCustomer, currentCustomerIso, canChangeProject } = useAppContext();
 
     return (
-      <>
-        <h3>Current Project</h3>
-        <Container>
+      <Card className="text-left mb-3">
+        <Card.Header>Current Project</Card.Header>
+        <Card.Body>
           <Row>
-            <Col sm={5}>
-              {currentCustomer && (<h2>{currentCustomer.companyName}</h2>)}
+            <Col className="px-3" sm={3}>
+              {currentCustomer && (
+                <img
+                  src={currentCustomer.logoURL}
+                  alt="Company Logo"
+                  style={{ width: "120px" }}
+                />
+              )}
             </Col>
-            <Col sm={5}>
-            {currentCustomerIso && (<h2>{currentCustomerIso.IsoName}</h2>)}
+            <Col className="px-3" sm={7}>
+              {currentCustomer && <h2>{currentCustomer.companyName}</h2>}
+              {currentCustomerIso && <h2>{currentCustomerIso.IsoName}</h2>}
             </Col>
             {canChangeProject && (
               <Col sm={2}>
@@ -28,8 +36,9 @@ export default function ProjectHeader() {
                 </LinkContainer>
               </Col>
             )}
-          </Row>
-        </Container>
-      </>
+          </Row>{" "}
+        </Card.Body>
+      </Card>
     );
+
 }

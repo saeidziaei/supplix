@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
-import NewEmployeeInductionChecklist from "../components/forms/NewEmployeeInductionChecklist";
-import "./ISOForm.css";
-
-import { useAppContext } from "../lib/contextLib";
+import  formConfig  from "../components/forms/formConfig"
 import { jwtApi } from "../lib/apiLib";
+import LoaderButton from "../components/LoaderButton";
+
+import "./ISOForm.css";
+import Row from "react-bootstrap/esm/Row";
+import Col from "react-bootstrap/esm/Col";
+
 
 export default function ISOForm() {
   const { formName, formId } = useParams();
@@ -18,13 +21,10 @@ export default function ISOForm() {
   const [isLoading, setIsLoading] = useState(false);
   //   const [isDeleting, setIsDeleting] = useState(false);
 
-  const components = {
-    NewEmployeeInductionChecklist: NewEmployeeInductionChecklist,
-  };
 
   function Form(props) {
     // Correct! JSX type can be a capitalized variable.
-    const SpecificForm = components[formName];
+    const SpecificForm = formConfig[formName].component;
     if (!SpecificForm) return <div>Unknown Form</div>;
     return <SpecificForm {...props} />;
   }
@@ -85,5 +85,21 @@ export default function ISOForm() {
     });
   }
 
-  return <Form onSubmit={handleSubmit} initialValues={formData} isLoading={isLoading} />;
+  return (
+    <>
+      <div id="print-area">
+        <Form
+          onSubmit={handleSubmit}
+          initialValues={formData}
+          isLoading={isLoading}
+        />
+      </div>
+      <Row>
+        <Col><LoaderButton type="submit" isLoading={isLoading}>Submit</LoaderButton></Col>
+        <Col className="text-right"><LoaderButton onClick={() => window.print()}>Print</LoaderButton></Col>
+      </Row>
+      
+      
+    </>
+  );
 }

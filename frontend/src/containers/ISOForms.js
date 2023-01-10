@@ -4,6 +4,9 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
 import { jwtApi } from "../lib/apiLib";
+import  formConfig  from "../components/forms/formConfig"
+import Row from "react-bootstrap/esm/Row";
+import Col from "react-bootstrap/esm/Col";
 
 export default function ISOForms() {
   const [forms, setForms] = useState([]);
@@ -34,7 +37,6 @@ export default function ISOForms() {
   function renderFormList(forms) {
     return (
       <>
-      
         <LinkContainer to={`/form/NewEmployeeInductionChecklist`}>
           <ListGroup.Item action className="py-3 text-nowrap text-truncate">
             <BsPencilSquare size={17} />
@@ -43,17 +45,29 @@ export default function ISOForms() {
             </span>
           </ListGroup.Item>
         </LinkContainer>
-        {forms.map(({ formId, formName, createdAt }) => (
-          <LinkContainer
-            key={formId}
-            to={`/form/${formName}/${formId}`}
-          >
+        {forms.map(({ formId, formName, createdAt, values }) => (
+          <LinkContainer key={formId} to={`/form/${formName}/${formId}`}>
             <ListGroup.Item action>
-              <span className="font-weight-bold">{formName}</span>
-              <br />
-              <span className="text-muted">
-                Created: {new Date(createdAt).toLocaleString()}
-              </span>
+              <Row>
+                <Col>
+                  <span className="font-weight-bold">{formName}</span>
+                  <br />
+                  <span className="text-muted">
+                    Created: {new Date(createdAt).toLocaleString()}
+                  </span>
+                </Col>
+                <Col>
+                  {formConfig[formName] &&
+                    formConfig[formName].titleFields &&
+                    formConfig[formName].titleFields.map((f) => (
+                      <div key={`${f}.${formId}`}>
+                        <span className="text-muted">{f}{"   "}</span>
+                        
+                        <span className="font-weight-bold">{values[f]}</span>
+                      </div>
+                    ))}
+                </Col>
+              </Row>
             </ListGroup.Item>
           </LinkContainer>
         ))}

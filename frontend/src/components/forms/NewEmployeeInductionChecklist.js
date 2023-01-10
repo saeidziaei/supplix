@@ -4,15 +4,14 @@ import Col from "react-bootstrap/Col";
 import FormHeader from "../FormHeader";
 import Card from 'react-bootstrap/Card';
 import { Formik, Field, Form } from 'formik';
-import LoaderButton from "../LoaderButton";
+
 
 export default function NewEmployeeInductionChecklist({
   onSubmit,
   initialValues,
-  isLoading
+  
 }) {
-    // useAppContext for company name and logoUrl    
-    const imgUrl = 'https://www.mecmining.com.au/wp-content/uploads/2017/09/GOLD-1024x576.jpg';
+
     const questions = [
       { name: "companyHistory", title: "Company history" },
       { name: "structureAndOrganisation", title: "Structure and organisation" },
@@ -94,50 +93,64 @@ export default function NewEmployeeInductionChecklist({
 
     return (
       <Card className="py-3 px-3">
-        <FormHeader
-          heading="New Employee Induction Checklist"
-          imageUrl={imgUrl}
-        />
-        <Formik
-          initialValues={values}
-          onSubmit={onSubmit}
-        >
+        <FormHeader heading="New Employee Induction Checklist" />
+        <Formik initialValues={values} onSubmit={onSubmit}>
           {({ handleSubmit, isSubmitting }) => (
             <Form onSubmit={handleSubmit}>
               <Card className="py-3 px-3 my-3">
-                <label htmlFor="employeeName">Employee Name</label>
-                <Field
-                  id="employeeName"
-                  name="employeeName"
-                  placeholder="Employee Name"
-                />
-              </Card>
-             
-                <Row className="heading">
-                  <Col sm="10">Item</Col>
-                  <Col sm="2">Completed</Col>
+                <Row className="mb-3">
+                  <Col sm="2">Employee Name</Col>
+                  <Col sm="5">
+                    <Field name="employeeName" id="employeeName" />
+                  </Col>
                 </Row>
-                {questions.map((q, i) => (
-                  <Row key={i} className={`my-1 ${i % 2 ? "odd" : "even"}`}>
-                    <Col sm="10">{q.title}</Col>
-                    <Col sm="2">
-                      <div role="group" aria-labelledby="my-radio-group">
-                        <label>
-                          <Field type="radio" name={q.name} value="Yes" />
-                          Yes
-                        </label>
-                        <label>
-                          <Field type="radio" name={q.name} value="No" />
-                          No
-                        </label>
-                      </div>
-                    </Col>
-                  </Row>
-                ))}
-     
-              <LoaderButton type="submit" isLoading={isLoading} >
-                Submit
-              </LoaderButton>
+                <Row>
+                  <Col sm="2">Position</Col>
+                  <Col sm="4">
+                    <Field name="position" id="position" />
+                  </Col>
+                  <Col sm="2">Induction Date</Col>
+                  <Col sm="4">
+                    <Field name="inductionDate" id="inductionDate" />
+                  </Col>
+                </Row>
+              </Card>
+
+              <Row className="heading">
+                <Col sm="10">Item</Col>
+                <Col sm="2">Completed</Col>
+              </Row>
+              {questions.map((q, i) => (
+                <Row key={i} className={`my-1 ${i % 2 ? "odd" : "even"}`}>
+                  <Col sm="10">{q.title}</Col>
+                  <Col sm="2">
+                    <div role="group" aria-labelledby="my-radio-group">
+                      <label>
+                        <Field type="radio" name={q.name} value="Yes" />
+                        Yes
+                      </label>
+                      <label>
+                        <Field type="radio" name={q.name} value="No" />
+                        No
+                      </label>
+                    </div>
+                  </Col>
+                </Row>
+              ))}
+              <Card className="py-3 px-3 my-3">
+                Comments
+                <Field as="textarea" name="comments" id="comments" rows="5" />
+              </Card>
+              <Card className="text-danger text-center"><p>
+                  Please ask if there was anything you did not understand or
+                  need to be repeated before signing.{" "}
+                </p>
+                <p>
+                  I (the undersigned) have attended the Company induction as
+                  requested and understand all the points discussed above.
+                </p></Card>
+
+
             </Form>
           )}
         </Formik>

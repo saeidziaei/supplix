@@ -4,6 +4,7 @@ import { onError } from "../lib/errorLib";
 import { jwtApi } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import Dropdown from 'react-bootstrap/Dropdown';
+import { Storage } from "aws-amplify";
 
 export default function ProjectContext() {
   const { currentCustomer, currentIso, setCurrentCustomer, setCurrentIso } = useAppContext();
@@ -40,7 +41,11 @@ export default function ProjectContext() {
       onError(e);
     }
   }
-  function handleCustomerChange(customer) {
+  async function handleCustomerChange(customer) {
+    if (customer.logo) {
+      customer.logoURL = await Storage.get(customer.logo);
+    }
+
     setCurrentCustomer(customer);
     setCurrentIso(null);
     return;
