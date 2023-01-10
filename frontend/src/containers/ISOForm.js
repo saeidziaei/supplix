@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
 import NewEmployeeInductionChecklist from "../components/forms/NewEmployeeInductionChecklist";
@@ -29,27 +29,25 @@ export default function ISOForm() {
     return <SpecificForm {...props} />;
   }
 
-  // Similar to componentDidMount and componentDidUpdate:
-  const componentMounted = useRef(false);
+
   useEffect(() => {
     function loadForm() {
-      return callJwtAPI(
-        "GET",
-        `/customer-isos/${customerIsoId}/forms/${formId}`
-      );
+      return callJwtAPI("GET", `/customer-isos/${customerIsoId}/forms/${formId}`);
     }
 
     async function onLoad() {
       try {
-        // Update the document title using the browser API
-        if (componentMounted.current && formId) {
+        if (formId) {
           const item = await loadForm();
           setFormData(item.values);
-        } else componentMounted.current = true;
+        } 
       } catch (e) {
         onError(e);
       }
+
+      setIsLoading(false);
     }
+
     onLoad();
   }, []);
 
@@ -75,17 +73,17 @@ export default function ISOForm() {
   }
 
   function createForm(values) {
-    callJwtAPI("POST", `/customer-isos/${customerIsoId}/forms`, {
+    return callJwtAPI("POST", `/customer-isos/${customerIsoId}/forms`, {
       formName: formName,
       values: values,
     });
   }
 
   function updateForm(values) {
-    callJwtAPI("PUT", `/customer-isos/${customerIsoId}/forms/${formId}`, {
+    return callJwtAPI("PUT", `/customer-isos/${customerIsoId}/forms/${formId}`, {
       values: values,
     });
   }
 
-  return <Form onSubmit={handleSubmit} initialValues={formData} />;
+  return <Form onSubmit={handleSubmit} initialValues={formData} isLoading={isLoading} />;
 }

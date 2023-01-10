@@ -5,7 +5,7 @@ export const main = handler(async (event) => {
 const params = {
   TableName: process.env.CUSTOMER_TABLE,
 };
-const result = await dynamoDb.query(params);
+const result = await dynamoDb.scan(params);
 // Return the matching list of items in response body
 return result.Items;
 });

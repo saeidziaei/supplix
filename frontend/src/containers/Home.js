@@ -1,8 +1,7 @@
 import React from "react";
 import "./Home.css";
 import CustomerISO from "../components/CustomerISO";
-import { useAppContext } from "../lib/contextLib";
-import MarkerMap from '../components/MarkerMap';
+import ProjectHeader from "../components/ProjectHeader";
 
 const template = {
   processes: [
@@ -174,7 +173,7 @@ const template = {
     },
     {
       ref: "XXX-FOR-001-Business Development Plan",
-      ref: "[[!COMP_NAME!]]-FOR-001-Business Development Plan",
+      title: "[[!COMP_NAME!]]-FOR-001-Business Development Plan",
     },
    
   ],
@@ -188,11 +187,11 @@ const params = {
 
 
 export default function Home() {
-  // const { isTopLevelAdmin } = useAppContext();
+  
 
   return (
     <div className="Home">
-      <MarkerMap imageUrl="https://i.pinimg.com/564x/55/fb/60/55fb60c012d409c0f04e39bf8c332644.jpg" />
+      <ProjectHeader />
       <CustomerISO template={ template } params={ params } /> 
     </div>
   );

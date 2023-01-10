@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
 import { jwtApi } from "../lib/apiLib";
 
-export default function AllISOForms() {
-  const [forms, setForms] = useState([]);
-  const customerIsoId = "iso-123";
+export default function Customers() {
+  const [customers, setCustomers] = useState([]);
+  // const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
   const callJwtAPI = jwtApi();
 
   useEffect(() => {
     async function onLoad() {
       try {
-        const forms = await loadForms();
-        console.log(forms);
-        setForms(forms);
+        const customers = await loadCustomers();
+        setCustomers(customers);
       } catch (e) {
         onError(e);
       }
@@ -27,28 +26,30 @@ export default function AllISOForms() {
     onLoad();
   }, []);
 
-  function loadForms() {
-    return callJwtAPI("GET", `/customer-isos/${customerIsoId}/forms`);
+  function loadCustomers() {
+    return callJwtAPI("GET", `/customers`);
   }
 
-  function renderFormList(forms) {
+  function renderCustomerList(customers) {
     return (
       <>
-        <LinkContainer to="/">
+        <LinkContainer to={`/customer`}>
           <ListGroup.Item action className="py-3 text-nowrap text-truncate">
             <BsPencilSquare size={17} />
             <span className="ml-2 font-weight-bold">
-              Create a new form (Coming Soon!)
+              Create a new Customer
             </span>
           </ListGroup.Item>
         </LinkContainer>
-        {forms.map(({ customerIsoId, formId, formName, createdAt }) => (
+        {customers.map(({ customerId, companyName, ABN, createdAt }) => (
           <LinkContainer
-            key={formId}
-            to={`/customer-isos/${customerIsoId}/forms/${formId}`}
+            key={customerId}
+            to={`/customer/${customerId}`}
           >
             <ListGroup.Item action>
-              <span className="font-weight-bold">{formName}</span>
+              <span className="font-weight-bold">{companyName}</span>
+              <br />
+              <span className="font-weight-bold">{ABN}</span>
               <br />
               <span className="text-muted">
                 Created: {new Date(createdAt).toLocaleString()}
@@ -59,13 +60,13 @@ export default function AllISOForms() {
       </>
     );
   }
-  function renderForms() {
+  function renderCustomers() {
     return (
-      <div className="notes">
-        <h2 className="pb-3 mt-4 mb-3 border-bottom">Forms</h2>
-        <ListGroup>{!isLoading && renderFormList(forms)}</ListGroup>
+      <div className="customers">
+        <h2 className="pb-3 mt-4 mb-3 border-bottom">Customers</h2>
+        <ListGroup>{!isLoading && renderCustomerList(customers)}</ListGroup>
       </div>
     );
   }
-  return renderForms();
+  return renderCustomers();
 }

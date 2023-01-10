@@ -16,6 +16,9 @@ function App() {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isTopLevelAdmin, setIsTopLevelAdmin] = useState(false);
   const [jwtToken, setjwtToken] = useState("");
+  const [currentCustomer, setCurrentCustomer] = useState(null);
+  const [currentIso, setCurrentIso] = useState(null);
+
 
   const nav = useNavigate();
 
@@ -61,9 +64,10 @@ function App() {
           <Nav activeKey={window.location.pathname}>
             {isAuthenticated ? (
               <>
+                <LinkContainer to="/project-context"><Nav.Link>Project</Nav.Link></LinkContainer>
+                <LinkContainer to="/customers"><Nav.Link>Customers</Nav.Link></LinkContainer>
+                <LinkContainer to="/forms"><Nav.Link>Forms</Nav.Link></LinkContainer>
                 <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-                
-                <LinkContainer to="/forms/NewEmployeeInductionChecklist/3324ee90-8fbe-11ed-a7e7-d3e89492ec58"><Nav.Link>Test</Nav.Link></LinkContainer>
               </>
             ) : (
               <>
@@ -75,7 +79,17 @@ function App() {
           </Nav>
         </Navbar.Collapse>
       </Navbar>
-      <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated, isTopLevelAdmin, jwtToken }}>
+      <AppContext.Provider value={{ 
+        isAuthenticated, 
+        userHasAuthenticated, 
+        isTopLevelAdmin, 
+        jwtToken,
+        currentCustomer, 
+        setCurrentCustomer,
+        currentIso, 
+        setCurrentIso,
+      
+        }}>
         <Routes />
       </AppContext.Provider>
     </div>

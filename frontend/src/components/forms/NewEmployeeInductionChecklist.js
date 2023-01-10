@@ -8,7 +8,8 @@ import LoaderButton from "../LoaderButton";
 
 export default function NewEmployeeInductionChecklist({
   onSubmit,
-  initialValues
+  initialValues,
+  isLoading
 }) {
     // useAppContext for company name and logoUrl    
     const imgUrl = 'https://www.mecmining.com.au/wp-content/uploads/2017/09/GOLD-1024x576.jpg';
@@ -134,7 +135,7 @@ export default function NewEmployeeInductionChecklist({
                   </Row>
                 ))}
      
-              <LoaderButton type="submit" >
+              <LoaderButton type="submit" isLoading={isLoading} >
                 Submit
               </LoaderButton>
             </Form>

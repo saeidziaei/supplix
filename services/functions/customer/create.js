@@ -11,13 +11,17 @@ export const main = handler(async (event) => {
       customerId: uuid.v1(), // A unique uuid
       companyName: data.companyName, 
       ABN: data.ABN, 
-      contact: data.contact,
+      contactName: data.contactName,
+      contactEmail: data.contactEmail,
+      contactPhone: data.contactPhone,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
+      notes: data.notes,
+      logo: data.logo,
     },
   };
 
-  await dynamoDb.put(params);
+  await dynamoDb.put(params); 
 
   return params.Item;
 }, TOP_LEVEL_ADMIN_GROUP);

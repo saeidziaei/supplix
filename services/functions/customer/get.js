@@ -4,9 +4,8 @@ import dynamoDb from "../../util/dynamodb";
 export const main = handler(async (event) => {
   const params = {
     TableName: process.env.CUSTOMER_TABLE,
-    // 'Key' defines the partition key and sort key of the item to be retrieved
     Key: {
-      customerId: event.pathParameters.id, 
+      customerId: event.pathParameters.customerId, 
     },
   };
 

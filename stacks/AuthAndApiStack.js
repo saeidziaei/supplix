@@ -52,9 +52,9 @@ export function AuthAndApiStack({ stack, app }) {
        "DELETE /notes/{id}": "functions/delete.main",
 
        "GET /customers": "functions/customer/list.main",
+       "GET /customers/{customerId}": "functions/customer/get.main", 
        "POST   /customers": "functions/customer/create.main",
-       "GET /customers/{id}": "functions/customer/get.main",
-       "PUT /customers/{id}": "functions/customer/update.main",
+       "PUT /customers/{customerId}": "functions/customer/update.main",
        // "DELETE /customers/{id}": "functions/customer/delete.main",
 
        "POST   /customers/{customerId}/iso":
@@ -95,11 +95,13 @@ export function AuthAndApiStack({ stack, app }) {
     api,
     
     // Policy granting access to a specific folder in the bucket
+    // TODO: Do we need this?
     new iam.PolicyStatement({
       actions: ["s3:*"],
       effect: iam.Effect.ALLOW,
       resources: [
-        bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*",
+        bucket.bucketArn,
+        bucket.bucketArn + "/public/*", // + "/private/${cognito-identity.amazonaws.com:sub}/*",
       ],
     }),
   ]);
