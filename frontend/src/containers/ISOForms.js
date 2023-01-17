@@ -58,8 +58,8 @@ export default function ISOForms() {
                 </Col>
                 <Col>
                   {formConfig[formName] &&
-                    formConfig[formName].titleFields &&
-                    formConfig[formName].titleFields.map((f) => (
+                    formConfig[formName].keyAttributes &&
+                    formConfig[formName].keyAttributes.map((f) => (
                       <div key={`${f}.${formId}`}>
                         <span className="text-muted">{f}{"   "}</span>
                         

@@ -9,6 +9,14 @@
 .text-right {
     text-align: right;
 }
-.inlineField{
-    margin-bottom: 5px;
+.show-in-print-only {
+    display: none;
+}
+@media print {
+    .hide-in-print {
+        display: none!important;
+    }
+    .show-in-print-only {
+        display: block!important;
+    }
 }

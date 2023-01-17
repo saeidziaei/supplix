@@ -1,46 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
-import  formConfig  from "../components/forms/formConfig"
+import formConfig from "../components/forms/formConfig";
 import { jwtApi } from "../lib/apiLib";
-import LoaderButton from "../components/LoaderButton";
-
 import "./ISOForm.css";
-import Row from "react-bootstrap/esm/Row";
-import Col from "react-bootstrap/esm/Col";
-
+import { useReactToPrint } from "react-to-print";
+import Stack from "react-bootstrap/esm/Stack";
+import LoaderButton from "../components/LoaderButton";
 
 export default function ISOForm() {
   const { formName, formId } = useParams();
   const customerIsoId = "iso-123";
-
   const callJwtAPI = jwtApi();
-
-  //   const nav = useNavigate();
   const [formData, setFormData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  //   const [isDeleting, setIsDeleting] = useState(false);
-
-
-  function Form(props) {
-    // Correct! JSX type can be a capitalized variable.
-    const SpecificForm = formConfig[formName].component;
-    if (!SpecificForm) return <div>Unknown Form</div>;
-    return <SpecificForm {...props} />;
-  }
-
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     function loadForm() {
-      return callJwtAPI("GET", `/customer-isos/${customerIsoId}/forms/${formId}`);
+      return callJwtAPI(
+        "GET",
+        `/customer-isos/${customerIsoId}/forms/${formId}`
+      );
     }
 
     async function onLoad() {
       try {
         if (formId) {
           const item = await loadForm();
+
           setFormData(item.values);
-        } 
+        }
       } catch (e) {
         onError(e);
       }
@@ -51,15 +40,11 @@ export default function ISOForm() {
     onLoad();
   }, []);
 
-  //   function validateForm() {
-  //     return true;
-  //   }
-
   async function handleSubmit(values) {
-    // event.preventDefault();
 
     setIsLoading(true);
     try {
+
       if (formId) {
         await updateForm(values);
       } else {
@@ -80,26 +65,59 @@ export default function ISOForm() {
   }
 
   function updateForm(values) {
-    return callJwtAPI("PUT", `/customer-isos/${customerIsoId}/forms/${formId}`, {
-      values: values,
-    });
+    return callJwtAPI(
+      "PUT",
+      `/customer-isos/${customerIsoId}/forms/${formId}`,
+      {
+        values: values,
+      }
+    );
   }
 
+  const componentRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
+  function DynamicForm(props) {
+    const SpecificForm = formConfig[formName].component;
+    if (!SpecificForm) return <div>Unknown Form</div>;
+
+    return (
+      <div ref={componentRef}>
+        <SpecificForm {...props} />
+        </div>
+    );
+  }
+
+  // const DynamicForm = React.forwardRef((props, ref) => {
+  //   const SpecificForm = formConfig[formName].component;
+  //   if (!SpecificForm) return <div>Unknown Form</div>;
+
+  //   return (
+  //     <div ref={ref}>
+  //       <SpecificForm {...props} />
+  //     </div>
+  //   );
+  // });
+
+  if (isLoading) {
+    return <>Loading...</>
+  }
   return (
     <>
-      <div id="print-area">
-        <Form
+      <React.StrictMode>
+        <DynamicForm
+          isLoading={isLoading}
           onSubmit={handleSubmit}
           initialValues={formData}
-          isLoading={isLoading}
+          // ref={componentRef}
         />
-      </div>
-      <Row>
-        <Col><LoaderButton type="submit" isLoading={isLoading}>Submit</LoaderButton></Col>
-        <Col className="text-right"><LoaderButton onClick={() => window.print()}>Print</LoaderButton></Col>
-      </Row>
-      
-      
+        <Stack className="hide-in-print" direction="horizontal" gap={3}>
+          <LoaderButton onClick={handlePrint}>Print</LoaderButton>
+          
+        </Stack>
+      </React.StrictMode>
     </>
   );
 }

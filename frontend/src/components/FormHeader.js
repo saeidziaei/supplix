@@ -14,12 +14,10 @@ export default function FormHeader({
       <Container>
         <Row>
           <Col sm={8} className="text-left">
-            {new Date().toLocaleString()}
-
-            <h2>
+            <h3 className="border-bottom">
               <BsCardText size={17} /> 
               {"  "}{heading}
-            </h2>
+            </h3>
           </Col>
           <Col sm={4} className="text-right">
             {currentCustomer && (

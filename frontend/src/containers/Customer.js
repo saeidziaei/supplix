@@ -102,7 +102,7 @@ export default function Customer() {
           // the user hasn't changed the log. Use the origianl value
           logo = customer.logo;
         }
-        console.log(logo);
+        
         await updateCustomer({ ...fields, logo });
         window.location.reload(); 
       } else {
