@@ -6,10 +6,6 @@ import LoaderButton from "../components/LoaderButton";
 
 
 export default function DisplayText({ text, editable }) {
-  if (!editable) 
-    return <ReactMarkdown children={text} />;
-
-    
   const [value, setValue] = useState(text);
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef(null);
@@ -27,7 +23,10 @@ export default function DisplayText({ text, editable }) {
       inputRef.current.focus();
     }
   }, [isEditing]);
-
+  
+  if (!editable) {
+    return <ReactMarkdown children={text} />;
+  }
   return (
     <div>
       {isEditing ? (

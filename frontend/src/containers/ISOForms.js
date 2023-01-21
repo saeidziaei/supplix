@@ -3,7 +3,7 @@ import { BsPencilSquare } from "react-icons/bs";
 import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { jwtApi } from "../lib/apiLib";
+import { JwtApi } from "../lib/apiLib";
 import  formConfig  from "../components/forms/formConfig"
 import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
@@ -12,7 +12,7 @@ export default function ISOForms() {
   const [forms, setForms] = useState([]);
   const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
-  const callJwtAPI = jwtApi();
+  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {

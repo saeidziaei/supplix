@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
 import formConfig from "../components/forms/formConfig";
-import { jwtApi } from "../lib/apiLib";
+import { JwtApi } from "../lib/apiLib";
 import "./ISOForm.css";
 import { useReactToPrint } from "react-to-print";
 import Stack from "react-bootstrap/esm/Stack";
@@ -11,7 +11,7 @@ import LoaderButton from "../components/LoaderButton";
 export default function ISOForm() {
   const { formName, formId } = useParams();
   const customerIsoId = "iso-123";
-  const callJwtAPI = jwtApi();
+  const callJwtAPI = JwtApi();
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -1,6 +1,5 @@
 // import * as debug from "./debug";
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
-// import { getUserPoolId } from "../../stacks/AuthStack";
 
 
 

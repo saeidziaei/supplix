@@ -9,6 +9,8 @@ import Customers from "./containers/Customers";
 import ISOForm from "./containers/ISOForm";
 import ISOForms from "./containers/ISOForms";
 import ProjectContext from "./containers/ProjectContext";
+import Users from "./containers/Users";
+import GenericForm from "./containers/GenericForm";
 
 export default function Links() {
   return (
@@ -19,6 +21,9 @@ export default function Links() {
       <Route path="/customer/:customerId?" element={<Customer />} />
       <Route path="/customers" element={<Customers />} />
       <Route path="/project-context" element={<ProjectContext />} />
+      
+      <Route path="/users" element={<Users />} />
+      <Route path="/dynamic-form" element={<GenericForm />} />
       
       <Route path="/form/:formName/:formId?" element={<ISOForm />} />
       <Route path="/forms" element={<ISOForms />} /> {/* for a given customer and given customer-iso */}      

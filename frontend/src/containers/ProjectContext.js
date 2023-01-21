@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { jwtApi } from "../lib/apiLib";
+import { JwtApi } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Storage } from "aws-amplify";
@@ -12,7 +12,7 @@ export default function ProjectContext() {
   const [isos, setIsos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const callJwtAPI = jwtApi();
+  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {

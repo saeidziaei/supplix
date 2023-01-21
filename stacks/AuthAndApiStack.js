@@ -8,6 +8,7 @@ import { StorageStack } from "./StorageStack";
 
 export function AuthAndApiStack({ stack, app }) {
   
+
   const { bucket, formTable, customerTable, customerISOTable } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -86,9 +87,29 @@ export function AuthAndApiStack({ stack, app }) {
            permissions: [formTable],
          },
        },
+       "GET   /users": {
+        function: {
+          handler: "functions/user/list.main",
+          // permissions: [formTable],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            REGION_ID: app.region
+          }
+        },
+      },
+
      },
    });
 
+   api.attachPermissionsToRoute("GET /users", [
+     new iam.PolicyStatement({
+       actions: ["cognito-idp:*"],
+       effect: iam.Effect.ALLOW,
+       resources: ["*"
+         // `arn:aws:cognito-idp:${app.region}:${stack.accountId}:userpool/${auth.userPoolId}`,
+       ],
+     }),
+   ]);
   
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API

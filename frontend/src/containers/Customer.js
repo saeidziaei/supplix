@@ -12,7 +12,7 @@ import { useFormFields } from "../lib/hooksLib";
 import "./Customer.css";
 import { Storage } from "aws-amplify";
 import { s3Upload } from "../lib/awsLib";
-import { jwtApi } from "../lib/apiLib";
+import { JwtApi } from "../lib/apiLib";
 
 export default function Customer() {
   const file = useRef(null);
@@ -30,7 +30,7 @@ export default function Customer() {
   const [customer, setCustomer] = useState(); // Original customer before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const callJwtAPI = jwtApi();
+  const callJwtAPI = JwtApi();
 
   function validateForm() {
     return fields.companyName.length > 0;

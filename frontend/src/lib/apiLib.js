@@ -2,7 +2,7 @@ import { API } from "aws-amplify";
 import { useAppContext } from "./contextLib";
 
 
-export function jwtApi() {
+export function JwtApi() {
     const { jwtToken } = useAppContext();
     const apiName = "iso-cloud"; // TODO get from config
     const headers = {

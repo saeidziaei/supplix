@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import DisplayText from './DisplayText';
 import Table from 'react-bootstrap/Table'
 import "./CustomerISO.css";
+// import { Card } from 'semantic-ui-react'
 
 export default function CustomerISO({template, params}) { 
   const [currentSubProcess, setCurrentSubProcess] = useState(null);
