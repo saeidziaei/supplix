@@ -1,7 +1,7 @@
 import React from "react";
 import "./Home.css";
 import CustomerISO from "../components/CustomerISO";
-import ProjectHeader from "../components/ProjectHeader";
+// import ProjectHeader from "../components/ProjectHeader";
 
 const template = {
   processes: [
@@ -191,7 +191,7 @@ export default function Home() {
 
   return (
     <div className="Home">
-      <ProjectHeader />
+      {/* <ProjectHeader /> */}
       <CustomerISO template={ template } params={ params } /> 
     </div>
   );

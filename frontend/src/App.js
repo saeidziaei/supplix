@@ -119,18 +119,13 @@ function App() {
   return (
     !isAuthenticating && (
     <>
-      <Grid columns={6} divided padded>
+      <Grid columns={10}  padded>
         
         <Grid.Column verticalAlign="middle" >
-          <Button icon="bars"onClick={() => setIsSidebarVisible(!isSidebarVisible)}></Button>
+          <Image size="small" rounded alt="logo" src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"/>
         </Grid.Column>
-        <Grid.Column floated="right">
-          <Image
-            size="medium"
-            rounded
-            alt="logo"
-            src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"
-          />
+        <Grid.Column  verticalAlign="middle">
+          <Button color="black" icon="bars"onClick={() => setIsSidebarVisible(!isSidebarVisible)}></Button>
         </Grid.Column>
 
       </Grid>
@@ -196,7 +191,7 @@ function App() {
                     setCurrentIso,
                   }}
                 >
-                  <div>Sidebar</div>
+                  
                   <Routes />
                 </AppContext.Provider>
               </Segment>

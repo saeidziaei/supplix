@@ -1,13 +1,12 @@
-import React from "react";
-import LoaderButton from "../components/LoaderButton";
-import Card from "react-bootstrap/Card";
-import { Formik, Field, Form } from "formik";
-import Table from "react-bootstrap/Table";
+import React from 'react';
+import { Formik } from 'formik';
+import { Form, Input, SubmitButton, ResetButton, FormikDebug, Radio, Select } from 'formik-semantic-ui-react';
 import FormHeader from "../components/FormHeader";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import { Checkbox, Grid, Header, Icon, Segment, Table, Button, Label } from 'semantic-ui-react';
 
-export default function GenericForm() {
+
+
+export default function GenericForm({values}) {
   // const [isLoading, setIsLoading] = useState(true);
 
 
@@ -15,13 +14,14 @@ export default function GenericForm() {
     title: "New Employee Induction Checklist",
     sections: [
       {
+        title: "First Part", 
         fields: [
-          { name: "q1", title: "First Question", type: "text" },
-          { name: "q11", title: "XYZ Question", type: "text" },
-          { name: "q12", title: "A Question", type: "text" },
+          { name: "q1", title: "This is to show the type email", type: "email" },
+          { name: "q11", title: "This is an info field", type: "info", description: "Be careful. This section has implications!" },
+          { name: "q12", title: "A Question - This is a long sentence that needs to fit in the form", type: "text" },
           { name: "q13", title: "B Question", type: "text" },
           {
-            name: "q2",
+            name: "q14",
             title: "Second Question",
             type: "radio",
             options: ["Yes", "No", "N/A"],
@@ -29,85 +29,224 @@ export default function GenericForm() {
         ],
       },
       {
+        title: "This is the second part",
         fields: [
-          { name: "q1", title: "First Question", type: "text" },
-          { name: "q11", title: "XYZ Question", type: "text" },
-          { name: "q12", title: "A Question", type: "text" },
-          { name: "q13", title: "B Question", type: "text" },
+          { name: "q21", title: "First Question", type: "text" },
+          { name: "q24", title: "B Question", type: "text" },
           {
-            name: "q2",
-            title: "Second Question",
-            type: "radio",
-            options: ["Yes", "No", "N/A"],
+            name: "q26",
+            title: "Gender ?",
+            type: "select",
+            options: ["Male", "Female", "Prefer not to say"],
           },
+          {
+            name: "q25",
+            title: "Gender ?",
+            type: "radio",
+            options: ["Male", "Female"],
+          },
+          { name: "q22", title: "XYZ Question", type: "text" },
+          { name: "q23", title: "A Question", type: "email" },
         ],
       },
     ],
   };
+  const defaultValues = {
+  ...formDef.sections.reduce((acc, section) => {
+    return acc.concat(section.fields);
+  }, []).reduce((acc, field) => {
+      acc[field.name] = '';
+      return acc;
+    }, {})
 
-  const values ={
-    q1: "", q2: ""
-  }
+  };
+
+  const initialValues = values || defaultValues;
 
   function renderField(f) {
-    if (f.type == "text")
-      return <Field name={f.name} id={f.name} />;
-    else if (f.type == "radio") return (
-      <div role="group" aria-labelledby="my-radio-group">
-        {f.options.map((option) => (
-          <label>
-            <Field type="radio" name={f.name} value={option} />
-            {option}
-          </label>
-        ))}
-      </div>
-    );
-    else 
-       return <div>Unsupported Field</div>
+    const name = f.name;
+    const id = `input-${f.name}`;
+    switch (f.type) {
+      case "info":
+        return (
+          <Label as="a" color="teal" pointing="below">
+            {f.description}
+          </Label>
+        );
+
+      case "text":
+        return <Input size="small" name={name} id={id} />;
+
+      case "email":
+        return <Input name={name} id={id} icon="at" fluid errorPrompt />;
+      // code block to be executed if expression === value2
+
+      case "radio":
+        return (
+          <Button.Group>
+            {f.options.map((o) => (
+              <Button basic color="blue" key={o}>
+                <Radio label={o} name={name} value={o} />
+              </Button>
+            ))}
+          </Button.Group>
+        );
+
+      case "select":
+        const options = f.options.map((o) => ({value: o, text: o}));
+        return <Select options={options} name={name} id={id} />;
+
+      default:
+        return <div>Unsupported Field</div>;
+    }
   }
+
   return (
-    <>
-
-      <Card className="py-3 px-3 print-container">
-
+    
+      <Segment>
         <FormHeader heading={formDef.title} />
-        <Formik initialValues={values}>
-          {({ handleSubmit, isSubmitting, setFieldValue }) => (
-            <Form onSubmit={handleSubmit}>
-              {formDef.sections.map((section) => (
-                <>
-                  <Row> 
-                    <Col sm="10">
-                      {" "}
-                      <Table size="sm" responsive striped hover>
-                        <tbody>
-                          {section.fields.map((f) => (
-                            <tr>
-                              <td>{f.title}</td>
-                              <td colSpan={3}>{renderField(f)}</td>
-                            </tr>
+        <Formik
+          initialValues={initialValues}
+        >
+          <Form size="small">
+          
+     
+            {formDef.sections.map((section, i) => (
+                <Segment color="teal" key={section.title}>
+                  <Grid>
+                  <Grid.Column width={14}>
+                  <Table celled striped  compact stackable>
+                        <Table.Header>
+                          <Table.Row>
+                            <Table.HeaderCell colSpan="5">
+                              {section.title}
+                            </Table.HeaderCell>
+                          </Table.Row>
+                        </Table.Header>
+
+                        <Table.Body>
+                          
+                          {section.fields.map((f, i) => (
+                            <Table.Row key={f.name}>
+                              <Table.Cell width={1} ><Checkbox label='' /></Table.Cell>
+                              <Table.Cell width={6}>{f.title}</Table.Cell>
+                              <Table.Cell width={6} textAlign="center">
+                                {renderField(f)}
+                              </Table.Cell>
+                              <Table.Cell width={1} >
+                                {
+                                  (i % 3 == 0 ) && <Icon name="check" color="green" size='large' />
+                                }
+                                {
+                                  (i % 3 == 1 ) && <Icon name="crosshairs" color="red" size='large' />
+                                }
+                                {
+                                  (i % 3 == 2 ) && <Icon name="star" color="yellow" size='large' />
+                                }
+                            </Table.Cell>
+                            <Table.Cell  width={1} >
+                              <Header as="h2" textAlign="center">
+                                A
+                              </Header>
+                            </Table.Cell>
+                            </Table.Row>
                           ))}
-                        </tbody>
+                        </Table.Body>
                       </Table>
-                    </Col>
-                    <Col sm="2">Owner</Col>
-                  </Row>
+                    </Grid.Column>
+                    <Grid.Column width={2} verticalAlign="middle" textAlign='center'>Owner</Grid.Column>
+                  </Grid>
+                </Segment>
 
-                  <hr />
-                </>
-              ))}
+            ))}
 
-              <LoaderButton type="submit" className="ms-auto hide-in-print bg-success">
-                Submit
-              </LoaderButton>
-              <LoaderButton  className="bg-primary">Primary</LoaderButton>
-              <LoaderButton  className="bg-secondary">Secondary</LoaderButton>
-              <LoaderButton  className="bg-danger">Dander</LoaderButton>
-
-            </Form>
-          )}
+            <SubmitButton fluid primary>
+              Login
+            </SubmitButton>
+            <ResetButton fluid secondary>
+              Reset
+            </ResetButton>
+            <FormikDebug />
+          </Form>
         </Formik>
-      </Card>
-    </>
+      </Segment>
+    
   );
 }
+
+
+
+// import React from "react";
+// import { Formik } from "formik";
+// import {
+//   Checkbox,
+//   Form,
+//   FormikDebug,
+//   Input,
+//   ResetButton,
+//   SubmitButton
+// } from "formik-semantic-ui-react";
+
+
+// export default function GenericForm() {
+//   const initialValues = {
+//     email: "a@a.com",
+//     password: "12345678",
+//     remember: false
+//   };
+
+
+//   return (
+    
+//       <Formik
+//         initialValues={initialValues}
+        
+//         onSubmit={(_, { setSubmitting }) => {
+//           setTimeout(() => {
+//             setSubmitting(false);
+//           }, 1000);
+//         }}
+//       >
+//         <Form size="large">
+//           <Input
+//             id="input-email"
+//             inputLabel="Email"
+//             name="email"
+//             icon="at"
+//             iconPosition="right"
+//             placeholder="Email"
+//             focus
+//             fluid
+//             errorPrompt
+//           />
+//           <Input
+//             id="input-password"
+//             inputLabel={{ color: "purple", content: "Password" }}
+//             name="password"
+//             icon="key"
+//             iconPosition="right"
+//             type="password"
+//             placeholder="Password"
+//             autoComplete="on"
+//             focus
+//             fluid
+//             errorPrompt
+//           />
+//           <Checkbox
+//             id="checkbox-remember"
+//             name="remember"
+//             label="Remember ?"
+//             errorPrompt={{ pointing: "left" }}
+//           />
+//           <SubmitButton fluid primary>
+//             Login
+//           </SubmitButton>
+//           <ResetButton fluid color="green">
+//             Reset
+//           </ResetButton>
+//           <FormikDebug />
+//         </Form>
+//       </Formik>
+
+//   );
+// };
