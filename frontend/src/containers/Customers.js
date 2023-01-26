@@ -4,6 +4,7 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
 import { JwtApi } from "../lib/apiLib";
+import { Loader } from "semantic-ui-react";
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
@@ -68,5 +69,5 @@ export default function Customers() {
       </div>
     );
   }
-  return renderCustomers();
+  return isLoading ? (<Loader active/>) : renderCustomers();
 }

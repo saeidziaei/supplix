@@ -10,9 +10,9 @@ export const main = handler(async (event) => {
       customerIsoId: event.pathParameters.customerIsoId, 
       formId: event.pathParameters.formId, 
     },
-    UpdateExpression: "SET values = :values",
+    UpdateExpression: "SET formValues = :formValues",
     ExpressionAttributeValues: {
-      ":values": data.values,
+      ":formValues": data.formValues,
     },
     // 'ReturnValues' specifies if and how to return the item's attributes,
     // where ALL_NEW returns all attributes of the item after the update; you

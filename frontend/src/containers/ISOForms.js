@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { BsPencilSquare } from "react-icons/bs";
-import ListGroup from "react-bootstrap/ListGroup";
+import  { Icon, Button, List, Segment, Card, Divider } from "semantic-ui-react";
+
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
 import { JwtApi } from "../lib/apiLib";
-import  formConfig  from "../components/forms/formConfig"
-import Row from "react-bootstrap/esm/Row";
-import Col from "react-bootstrap/esm/Col";
+import  formConfig from "../components/forms/formConfig"
+import { Loader, Header, Table } from "semantic-ui-react";
+import FormHeader from "../components/FormHeader";
+
 
 export default function ISOForms() {
   const [forms, setForms] = useState([]);
@@ -18,7 +19,7 @@ export default function ISOForms() {
     async function onLoad() {
       try {
         const forms = await loadForms();
-        console.log(forms);
+        
         setForms(forms);
       } catch (e) {
         onError(e);
@@ -34,52 +35,67 @@ export default function ISOForms() {
     return callJwtAPI("GET", `/customer-isos/${customerIsoId}/forms`);
   }
 
-  function renderFormList(forms) {
+  function renderFormList() {
     return (
-      <>
-        <LinkContainer to={`/form/NewEmployeeInductionChecklist`}>
-          <ListGroup.Item action className="py-3 text-nowrap text-truncate">
-            <BsPencilSquare size={17} />
-            <span className="ml-2 font-weight-bold">
-              Create a new form - NewEmployeeInductionChecklist
-            </span>
-          </ListGroup.Item>
-        </LinkContainer>
-        {forms.map(({ formId, formName, createdAt, values }) => (
-          <LinkContainer key={formId} to={`/form/${formName}/${formId}`}>
-            <ListGroup.Item action>
-              <Row>
-                <Col>
-                  <span className="font-weight-bold">{formName}</span>
-                  <br />
-                  <span className="text-muted">
-                    Created: {new Date(createdAt).toLocaleString()}
-                  </span>
-                </Col>
-                <Col>
-                  {formConfig[formName] &&
-                    formConfig[formName].keyAttributes &&
-                    formConfig[formName].keyAttributes.map((f) => (
-                      <div key={`${f}.${formId}`}>
-                        <span className="text-muted">{f}{"   "}</span>
-                        
-                        <span className="font-weight-bold">{values[f]}</span>
-                      </div>
-                    ))}
-                </Col>
-              </Row>
-            </ListGroup.Item>
-          </LinkContainer>
-        ))}
-      </>
+      <Table celled striped compact stackable attached>
+        <Table.Body>
+          {forms.map(({ formId, formKey, createdAt, formValues }, i) => (
+            <Table.Row key={formId}>
+              <Table.Cell width={4}> 
+              <Header 
+              as='h4'
+              content={formConfig[formKey].title}
+              subheader={formConfig[formKey] &&
+                formConfig[formKey].keyAttributes &&
+                formConfig[formKey].keyAttributes.map((f) => (
+                  <div key={`${f}.${formId}`}>
+                    <span className="font-weight-bold">{formValues[f]}</span>
+                  </div>
+                ))} 
+          />
+                
+                
+              </Table.Cell>
+              <Table.Cell width={1}>
+                Created: {new Date(createdAt).toLocaleString()}
+              </Table.Cell>
+                 
+              <Table.Cell width={1} textAlign="center">
+                <LinkContainer key={formId} to={`/form/${formKey}/${formId}`}>
+                  <Button animated="vertical" size="mini">
+                    <Button.Content hidden>Edit</Button.Content>
+                    <Button.Content visible><Icon name="edit"  /></Button.Content>
+                  </Button>
+                </LinkContainer>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
     );
   }
   function renderForms() {
     return (
-      <div className="notes">
-        <h2 className="pb-3 mt-4 mb-3 border-bottom">Forms</h2>
-        <ListGroup>{!isLoading && renderFormList(forms)}</ListGroup>
-      </div>
+      <>
+        <FormHeader heading="Forms" />
+
+        {isLoading && <Loader active />}
+        {!isLoading && renderFormList()}
+
+        <Segment>
+          <Header>
+            <Icon name="add" color="green" />
+            Create New
+          </Header>
+          <List horizontal>
+            {Object.keys(formConfig).map((f) => (
+              <LinkContainer key={f} to={`/form/${f}`}>
+                <Button primary>{formConfig[f].title}</Button>
+              </LinkContainer>)
+            )}
+          </List>
+        </Segment>
+      </>
     );
   }
   return renderForms();

@@ -19,6 +19,7 @@ import {
   Sidebar,
   Container,
   Label,
+  List,
   
 } from 'semantic-ui-react'
 
@@ -118,8 +119,25 @@ function App() {
 
   return (
     !isAuthenticating && (
-    <>
-      <Grid columns={10}  padded>
+      <>
+        <List divided horizontal >
+          <List.Item>
+            <Image
+              size="medium"
+              rounded
+              alt="logo"
+              src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"
+            />
+          </List.Item>
+          <List.Item>
+            <Button
+              color="black"
+              icon="bars"
+              onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+            ></Button>
+          </List.Item>
+        </List>
+        {/* <Grid columns={10}  padded>
         
         <Grid.Column verticalAlign="middle" >
           <Image size="small" rounded alt="logo" src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"/>
@@ -128,77 +146,128 @@ function App() {
           <Button color="black" icon="bars"onClick={() => setIsSidebarVisible(!isSidebarVisible)}></Button>
         </Grid.Column>
 
-      </Grid>
-      <Grid columns={1}>
-        <Grid.Column>
-          <Sidebar.Pushable as={Segment}>
-            <Sidebar
-              as={Menu}
-              visible={isSidebarVisible}
-              inverted
-              vertical
-              animation="push"
-            >
-              <Menu.Item>
-                <LinkContainer to="/">
-                  <Nav.Link><Icon name="home"/>Home</Nav.Link>
-                </LinkContainer>
-              </Menu.Item>
+      </Grid> */}
+        <Grid columns={1}>
+          <Grid.Column>
+            <Sidebar.Pushable as={Segment}>
+              <Sidebar
+                as={Menu}
+                visible={isSidebarVisible}
+                inverted
+                vertical
+                animation="push"
+              >
+                <Menu.Item>
+                  <LinkContainer to="/">
+                    <Nav.Link>
+                      <Icon name="home" />
+                      Home
+                    </Nav.Link>
+                  </LinkContainer>
+                </Menu.Item>
 
-              <Menu.Item as="a">
-                <Label color="teal">5</Label>
-                Tasks
-              </Menu.Item>
-              
-              
-                         {isAuthenticated ? (
-              <>
-              
-                <Menu.Item><LinkContainer to="/dynamic-form"><Nav.Link><Icon  name="strava"/>Generic Form</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><LinkContainer to="/users"><Nav.Link><Icon  name="users"/>Users</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><LinkContainer to="/project-context"><Nav.Link><Icon  name="product hunt"/>Project</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><LinkContainer to="/customers"><Nav.Link><Icon  name="users"/>Customers</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><LinkContainer to="/forms"><Nav.Link><Icon  name="forumbee"/>Forms</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><Nav.Link onClick={handleLogout}><Icon  name="log out"/>Logout</Nav.Link></Menu.Item>
-              </>
-            ) : (
-              <>
-                <Menu.Item><LinkContainer to="/signup"><Nav.Link><Icon  name="signup"/>Signup</Nav.Link></LinkContainer></Menu.Item>
-                <Menu.Item><LinkContainer to="/login"><Nav.Link><Icon  name="sign-in"/>Login</Nav.Link></LinkContainer></Menu.Item>
-                
-              </>
-            )}
+                <Menu.Item as="a">
+                  <Label color="teal">5</Label>
+                  Tasks
+                </Menu.Item>
 
+                {isAuthenticated ? (
+                  <>
+                    <Menu.Item>
+                      <LinkContainer to="/dynamic-form">
+                        <Nav.Link>
+                          <Icon name="strava" />
+                          Generic Form
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/users">
+                        <Nav.Link>
+                          <Icon name="users" />
+                          Users
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/project-context">
+                        <Nav.Link>
+                          <Icon name="product hunt" />
+                          Project
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/customers">
+                        <Nav.Link>
+                          <Icon name="users" />
+                          Customers
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/forms">
+                        <Nav.Link>
+                          <Icon name="forumbee" />
+                          Forms
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <Nav.Link onClick={handleLogout}>
+                        <Icon name="log out" />
+                        Logout
+                      </Nav.Link>
+                    </Menu.Item>
+                  </>
+                ) : (
+                  <>
+                    <Menu.Item>
+                      <LinkContainer to="/signup">
+                        <Nav.Link>
+                          <Icon name="signup" />
+                          Signup
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/login">
+                        <Nav.Link>
+                          <Icon name="sign-in" />
+                          Login
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                  </>
+                )}
 
+                <Menu.Item>
+                  <img alt="logo" src="/iso_cloud.png" />
+                </Menu.Item>
+              </Sidebar>
 
-
-              <Menu.Item>
-                <img alt="logo" src="/iso_cloud.png" />
-              </Menu.Item>
-            </Sidebar>
-
-            <Sidebar.Pusher>
-              <Segment basic style={{ minHeight: "100vh" }}>
-                <AppContext.Provider
-                  value={{
-                    isAuthenticated,
-                    userHasAuthenticated,
-                    isTopLevelAdmin,
-                    jwtToken,
-                    currentCustomer,
-                    setCurrentCustomer,
-                    currentIso,
-                    setCurrentIso,
-                  }}
-                >
-                  
-                  <Routes />
-                </AppContext.Provider>
-              </Segment>
-            </Sidebar.Pusher>
-          </Sidebar.Pushable>
-        </Grid.Column>
-      </Grid>
-    </>)
+              <Sidebar.Pusher>
+                <Segment basic style={{ minHeight: "100vh" }}>
+                  <AppContext.Provider
+                    value={{
+                      isAuthenticated,
+                      userHasAuthenticated,
+                      isTopLevelAdmin,
+                      jwtToken,
+                      currentCustomer,
+                      setCurrentCustomer,
+                      currentIso,
+                      setCurrentIso,
+                    }}
+                  >
+                    <Routes />
+                  </AppContext.Provider>
+                </Segment>
+              </Sidebar.Pusher>
+            </Sidebar.Pushable>
+          </Grid.Column>
+        </Grid>
+      </>
+    )
   );
 }

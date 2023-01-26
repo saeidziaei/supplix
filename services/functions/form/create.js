@@ -9,8 +9,8 @@ export const main = handler(async (event) => {
     Item: {
       customerIsoId: event.pathParameters.customerIsoId, 
       formId: uuid.v1(), // A unique uuid
-      formName: data.formName,
-      values: data.values,
+      formKey: data.formKey,
+      formValues: data.formValues,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
     },
