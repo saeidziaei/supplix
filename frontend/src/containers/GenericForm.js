@@ -8,6 +8,7 @@ import  formConfig  from "../components/forms/formConfig"
 import { onError } from "../lib/errorLib";
 import { JwtApi } from "../lib/apiLib";
 import LoaderButton from '../components/LoaderButton';
+import Competency from '../components/Competency';
 
 export default function GenericForm() {
   const { formKey, formId } = useParams();
@@ -91,13 +92,24 @@ export default function GenericForm() {
         field.options.map((o) => {
           acc[field.name + o] = false;
         });
-      } else {
+      } else if (field.type == "competency") {
+        acc[field.name] = {
+          required: "",
+          competency: "",
+          courseName: "",
+          plannedFor: "",
+          conductedOn: "",
+          trainingProvider: "",
+        };
+      }
+      else {
         acc[field.name] = "";
       }
       return acc;
     }, {})
 
   };
+  
   function renderField(f) {
     const name = f.name;
     const id = `input-${f.name}`;
@@ -138,12 +150,13 @@ export default function GenericForm() {
           </Button.Group>
         );
         
-
-
       case "select":
         const options = f.options.map((o) => ({value: o, text: o}));
         return <Select options={options} name={name} id={id} />;
 
+
+      case "competency":
+        return <Competency name={name} />
       default:
         return <div>Unsupported Field</div>;
     }
@@ -153,7 +166,7 @@ export default function GenericForm() {
   return (
     <Segment>
       <FormHeader heading={formDef.title} />
-      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
+      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit} >
         <Form size="small">
           {formDef.sections.map((section) => (
             <Segment  key={section.title}>
@@ -170,30 +183,11 @@ export default function GenericForm() {
                     <Table.Body>
                       {section.fields.map((f, i) => (
                         <Table.Row key={f.name}>
-                          <Table.Cell width={6}>{f.title}</Table.Cell>
-                          <Table.Cell width={6} textAlign="center">
+                          <Table.Cell width={4}>{f.title}</Table.Cell>
+                          <Table.Cell width={8} textAlign="center">
                             {renderField(f)}
                           </Table.Cell>
-                          <Table.Cell width={1}>
-                            {i % 3 == 0 && (
-                              <Icon name="check" color="green" size="large" />
-                            )}
-                            {i % 3 == 1 && (
-                              <Icon
-                                name="crosshairs"
-                                color="red"
-                                size="large"
-                              />
-                            )}
-                            {i % 3 == 2 && (
-                              <Icon name="star" color="yellow" size="large" />
-                            )}
-                          </Table.Cell>
-                          <Table.Cell width={1}>
-                            <Header as="h2" textAlign="center">
-                              A
-                            </Header>
-                          </Table.Cell>
+                          
                         </Table.Row>
                       ))}
                     </Table.Body>
@@ -216,8 +210,10 @@ export default function GenericForm() {
           >
             Submit
           </LoaderButton>
+          {/* <Button secondary>Back</Button> */}
           <FormikDebug />
         </Form>
+        
       </Formik>
     </Segment>
   );

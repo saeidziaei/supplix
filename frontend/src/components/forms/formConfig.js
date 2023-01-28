@@ -63,13 +63,50 @@ const formConfig = {
     ],
   },
   PetFile: {
-    keyAttributes: ["PetName", ],
+    keyAttributes: ["PetName"],
     title: "Pet Management",
     sections: [
       {
         title: "This is a sectoin with one question only",
         fields: [
           { name: "PetName", title: "What is your pet's name?", type: "text" },
+        ],
+      },
+    ],
+  },
+  FarhdForm: {
+    keyAttributes: ["BridgeName"],
+    title: "Concrete Bridge Inspection",
+    sections: [
+      {
+        title: "Bridge",
+        fields: [
+          {
+            name: "BridgeName",
+            title: "What was the name of the bridge you visisted?",
+            type: "text",
+          },
+        ],
+      },
+    ],
+  },
+  EmployeeSkill: {
+    keyAttributes: ["User"],
+    title: "Employee Skill Form",
+    sections: [
+      {
+        title: "Skills",
+        fields: [
+          {
+            name: "User",
+            title: "Select Employee",
+            type: "text",
+            
+          },
+          { name: "q1", title: "Data Entry", type: "competency" },
+          { name: "q2", title: "Reading", type: "competency" },
+          { name: "q3", title: "Writing", type: "competency" },
+          { name: "q4", title: "Speaking", type: "competency" },
         ],
       },
     ],

@@ -42,8 +42,9 @@ export default function ISOForms() {
           {forms.map(({ formId, formKey, createdAt, formValues }, i) => (
             <Table.Row key={formId}>
               <Table.Cell width={4}> 
+              <LinkContainer key={formId} to={`/form/${formKey}/${formId}`} as='a'>
               <Header 
-              as='h4'
+              as='h5'
               content={formConfig[formKey].title}
               subheader={formConfig[formKey] &&
                 formConfig[formKey].keyAttributes &&
@@ -52,9 +53,7 @@ export default function ISOForms() {
                     <span className="font-weight-bold">{formValues[f]}</span>
                   </div>
                 ))} 
-          />
-                
-                
+          /></LinkContainer>
               </Table.Cell>
               <Table.Cell width={1}>
                 Created: {new Date(createdAt).toLocaleString()}
