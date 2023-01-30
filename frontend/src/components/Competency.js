@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./FormHeader.css";
-import { Grid, Icon, Menu } from "semantic-ui-react";
+import { Button, Grid, Icon, Menu } from "semantic-ui-react";
 import "./Competency.css";
 import { Input, Radio,   } from "formik-semantic-ui-react";
 import { useField } from "formik";
@@ -134,53 +134,56 @@ export default function Competency(props) {
     else return null;
   }
   const courseDisabled = !required || required.key == 'notApplicable';
-  return (
-     
-      <Grid textAlign="left" stackable>
-        <Grid.Column width={1}><Icon name={compact ? "chevron down" : "chevron up"} color="grey" onClick={() => setCompact(!compact)}/></Grid.Column>
-        <Grid.Column width={6}>{!compact && renderRequired()}</Grid.Column>
-        <Grid.Column width={6}>{!compact && renderCompetency()}</Grid.Column>
-        <Grid.Column width={3} verticalAlign="middle">
-          {renderIcons()}
-        </Grid.Column>
-        {
-          !compact && 
-          <>
-            <Grid.Column width={7}>
-              <Input
-                disabled={courseDisabled}
-                inputLabel="Course Name"
-                name={`${name}.courseName`}
-                size="mini"
-              />
-            </Grid.Column>
-            <Grid.Column width={7}>
-              <Input
-                disabled={courseDisabled}
-                inputLabel="Planned for"
-                name={`${name}.plannedFor`}
-                size="mini"
-              />
-            </Grid.Column>
-            <Grid.Column width={7}>
-              <Input
-                disabled={courseDisabled}
-                inputLabel="Conducten on date"
-                name={`${name}.conductedOn`}
-                size="mini"
-              />
-            </Grid.Column>
-            <Grid.Column width={7}>
-              <Input
-                disabled={courseDisabled}
-                inputLabel="Training Provider"
-                name={`${name}.trainingProvider`}
-                size="mini"
-              />
-            </Grid.Column>
-          </>
-        }
-      </Grid>
+  function renderCourseDetails() {
+    return <>
+      <Grid.Column width={7}>
+        <Input
+          disabled={courseDisabled}
+          inputLabel="Course Name"
+          name={`${name}.courseName`}
+          size="mini" />
+      </Grid.Column>
+      <Grid.Column width={7}>
+        <Input
+          disabled={courseDisabled}
+          inputLabel="Planned for"
+          name={`${name}.plannedFor`}
+          size="mini" />
+      </Grid.Column>
+      <Grid.Column width={7}>
+        <Input
+          disabled={courseDisabled}
+          inputLabel="Conducten on date"
+          name={`${name}.conductedOn`}
+          size="mini" />
+      </Grid.Column>
+      <Grid.Column width={7}>
+        <Input
+          disabled={courseDisabled}
+          inputLabel="Training Provider"
+          name={`${name}.trainingProvider`}
+          size="mini" />
+      </Grid.Column>
+    </>;
+  }
 
+  return (
+    <Grid textAlign="left" stackable>
+      <Grid.Column width={1}>
+          <Icon
+            style={{cursor:"pointer"}}
+            name={compact ? "caret down" : "caret right"}
+            color="grey"
+            onClick={() => setCompact(!compact)}
+          />
+      </Grid.Column>
+      <Grid.Column width={6}>{!compact && renderRequired()}</Grid.Column>
+      <Grid.Column width={6}>{!compact && renderCompetency()}</Grid.Column>
+      <Grid.Column width={3} verticalAlign="middle">
+        {renderIcons()}
+      </Grid.Column>
+      {!compact && renderCourseDetails()}
+    </Grid>
   );
+
 }

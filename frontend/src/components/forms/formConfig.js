@@ -99,14 +99,66 @@ const formConfig = {
         fields: [
           {
             name: "User",
-            title: "Select Employee",
+            title: "Employee",
             type: "text",
-            
           },
           { name: "q1", title: "Data Entry", type: "competency" },
           { name: "q2", title: "Reading", type: "competency" },
           { name: "q3", title: "Writing", type: "competency" },
           { name: "q4", title: "Speaking", type: "competency" },
+        ],
+      },
+    ],
+  },
+  Tender: {
+    title: "Project Tender",
+    keyAttributes: ["client"],
+    sections: [
+      {
+        name: "project",
+        title: "Project",
+        fields: [{ name: "project", title: "Project", type: "text" }],
+      },
+      {
+        name: "tender",
+        title: "Tender",
+        fields: [
+          { name: "client", title: "Client/ Organisation", type: "text" },
+          { name: "tenderCode", title: "Tender Code", type: "text" },
+          { name: "dollarValue", title: "$ Value", type: "number" },
+          { name: "dateSubmitted2", title: "Date Submitted", type: "date" },
+          { name: "dateFollowup", title: "Date Follow up", type: "date" },
+          {
+            name: "status",
+            title: "Status",
+            type: "radio",
+            options: ["Won", "Lost", "-"],
+          },
+          { name: "notes", title: "Notes", type: "text" },
+        ],
+      },
+    ],
+  },
+  Contract: {
+    title: "Project Contract",
+    keyAttributes: ["client"],
+    sections: [
+      {
+        title: "Contract",
+        fields: [
+          { name: "client", title: "Client/ Organisation", type: "text" },
+          { name: "tenderCode", title: "Tender Code", type: "text" },
+          { name: "project", title: "Project", type: "text" },
+          { name: "dollarValue", title: "$ Value", type: "text" },
+          { name: "dateSubmitted", title: "Date Submitted", type: "text" },
+          { name: "dateFollowup", title: "Date Follow up", type: "text" },
+          {
+            name: "status",
+            title: "Status",
+            type: "radio",
+            options: ["Won", "Lost", "-"],
+          },
+          { name: "notes", title: "Notes", type: "text" },
         ],
       },
     ],

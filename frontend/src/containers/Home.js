@@ -10,7 +10,7 @@ const template = {
       title: "Business Management and **Planning**",
       subProcesses: [
         {
-          title: "Strategic Planning",
+          title: "Strategic Planning 2",
           input: {
             title: "Input Sources",
             placeholder: "List of all sources",
@@ -192,7 +192,9 @@ export default function Home() {
   return (
     <div className="Home">
       {/* <ProjectHeader /> */}
+      
       <CustomerISO template={ template } params={ params } /> 
+      
     </div>
   );
 }
