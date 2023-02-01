@@ -70,7 +70,7 @@ export default function GenericForm() {
       setIsLoading(false);
     }
   }
-
+// TODO Error handling
   function createForm(values) {
     return callJwtAPI("POST", `/customer-isos/${customerIsoId}/forms`, {
       formKey: formKey,
@@ -90,32 +90,16 @@ export default function GenericForm() {
   if (!formDef) {
     return <Segment><Header as="h3">Form definition does not exist.</Header></Segment>
   }
-  const defaultValues = {
-  ...formDef.sections.reduce((acc, section) => {
-    return acc.concat(section.fields);
-  }, []).reduce((acc, field) => {
-      if (field.type == "checkbox") { // each checkbox is a quesiton!
-        field.options.map((o) => {
-          acc[field.name + o] = false;
-        });
-      } else if (field.type == "competency") {
-        acc[field.name] = {
-          required: "",
-          competency: "",
-          courseName: "",
-          plannedFor: "",
-          conductedOn: "",
-          trainingProvider: "",
-        };
-      }
-      else {
-        acc[field.name] = "";
-      }
-      return acc;
-    }, {})
 
-  };
   
+
+
+  if (isLoading) return <Loader active />;
+  return (
+    GenericFormComponent(formDef, formData, handleSubmit)
+  );
+}
+export function GenericFormComponent(formDef, formData, handleSubmit) {
   function renderField(f, values, setFieldValue) {
     const size = "mini";
     const name = f.name;
@@ -197,12 +181,35 @@ export default function GenericForm() {
         return <div>Unsupported Field</div>;
     }
   }
+  const defaultValues = {
+    ...formDef.sections.reduce((acc, section) => {
+      return acc.concat(section.fields);
+    }, []).reduce((acc, field) => {
+        if (field.type == "checkbox") { // each checkbox is a quesiton!
+          field.options.map((o) => {
+            acc[field.name + o] = false;
+          });
+        } else if (field.type == "competency") {
+          acc[field.name] = {
+            required: "",
+            competency: "",
+            courseName: "",
+            plannedFor: "",
+            conductedOn: "",
+            trainingProvider: "",
+          };
+        }
+        else {
+          acc[field.name] = "";
+        }
+        return acc;
+      }, {})
+  
+    };
 
-  if (isLoading) return <Loader active />;
-  return (
-    <Segment>
-      <FormHeader heading={formDef.title} />
-      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
+  return <Segment>
+    <FormHeader heading={formDef.title} />
+    <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
       {({ isSubmitting, values, setFieldValue }) => (
         <Form size="small">
           {formDef.sections.map((s) => (
@@ -226,7 +233,7 @@ export default function GenericForm() {
                           </Table.Cell>
                         </Table.Row>
                       ))}
-                
+
                     </Table.Body>
                   </Table>
                 </Grid.Column>
@@ -240,17 +247,17 @@ export default function GenericForm() {
               </Grid>
             </Segment>
           ))}
-          <LoaderButton
+          {handleSubmit && <LoaderButton
             type="submit"
-            className="ms-auto hide-in-print"
-            isLoading={isLoading}
-          >
+            className="ms-auto hide-in-print">
             Submit
-          </LoaderButton>
+          </LoaderButton>}
           {/* <Button secondary>Back</Button> */}
           <FormikDebug />
         </Form>)}
-      </Formik>
-    </Segment>
-  );
+    </Formik>
+  </Segment>;
+   
+
 }
+

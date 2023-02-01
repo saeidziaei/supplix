@@ -2,6 +2,7 @@ import React from "react";
 import "./Home.css";
 import CustomerISO from "../components/CustomerISO";
 // import ProjectHeader from "../components/ProjectHeader";
+import FormTemplateBuilder from "./FormTemplateBuilder";
 
 const template = {
   processes: [
@@ -192,8 +193,8 @@ export default function Home() {
   return (
     <div className="Home">
       {/* <ProjectHeader /> */}
-      
-      <CustomerISO template={ template } params={ params } /> 
+      <FormTemplateBuilder />
+      {/* <CustomerISO template={ template } params={ params } />  */}
       
     </div>
   );
