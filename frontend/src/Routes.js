@@ -6,10 +6,12 @@ import Login from "./containers/Login";
 import Signup from "./containers/Signup";
 import Customer from "./containers/Customer";
 import Customers from "./containers/Customers";
-import ISOForms from "./containers/ISOForms";
 import ProjectContext from "./containers/ProjectContext";
 import Users from "./containers/Users";
-import GenericForm from "./containers/GenericForm";
+import FormTemplates from "./containers/FormTemplates";
+import FormTemplate from "./containers/FormTemplate";
+import FormRegister from "./containers/FormRegister";
+import TemplatedForm from "./containers/TemplatedForm";
 
 export default function Links() {
   return (
@@ -22,10 +24,13 @@ export default function Links() {
       <Route path="/project-context" element={<ProjectContext />} />
       
       <Route path="/users" element={<Users />} />
+      <Route path="/templates" element={<FormTemplates />} />
+      <Route path="/template/:templateId?" element={<FormTemplate />} />
       
+      <Route path="/register" element={<FormRegister />} />
+      <Route path="/register/:templateId" element={<FormRegister />} />
       
-      <Route path="/form/:formKey/:formId?" element={<GenericForm />} />
-      <Route path="/forms" element={<ISOForms />} /> {/* for a given customer and given customer-iso */}      
+      <Route path="/form/:templateId/:formId?" element={<TemplatedForm />} /> 
       <Route path="*" element={<NotFound />} />;
     </Routes>
   );

@@ -16,13 +16,13 @@ import { NumericFormat } from 'react-number-format';
 
 
 
-export default function GenericForm() {
-  const { formKey, formId } = useParams();
+export default function TemplatedForm() {
+  const { formId, templateId } = useParams();
   const customerIsoId = "iso-123";
   const callJwtAPI = JwtApi();
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const formDef = formConfig[formKey];
+  const [template, setTemplate] = useState(null);
   const nav = useNavigate();
   
   
@@ -35,13 +35,26 @@ export default function GenericForm() {
       );
     }
 
+    function loadTemplate() {
+      return callJwtAPI(
+        "GET",
+        `/customer-isos/${customerIsoId}/templates/${templateId}`
+      );
+    }
     async function onLoad() {
       try {
         if (formId) {
           const item = await loadForm();
 
           setFormData(item.formValues);
-        } 
+          // the api populates template as well
+          setTemplate(item.template);
+        } else {
+          // new form - just load the template 
+          const item = await loadTemplate();
+          
+          setTemplate(item);
+        }
 
       } catch (e) {
         onError(e);
@@ -56,14 +69,12 @@ export default function GenericForm() {
   async function handleSubmit(values) {
     setIsLoading(true);
     try {
-      let newFormId;
       if (formId) {
         await updateForm(values);
       } else {
-        const ret = await createForm(values);
-        newFormId = ret.formId;
+        await createForm(values);
       }
-      nav(`/forms`);
+      nav(`/register/${templateId}`);// todo navigate to form register page ??
     } catch (e) {
       onError(e);
     } finally {
@@ -72,7 +83,7 @@ export default function GenericForm() {
   }
   function createForm(values) {
     return callJwtAPI("POST", `/customer-isos/${customerIsoId}/forms`, {
-      formKey: formKey,
+      templateId: template.templateId,
       formValues: values,
     });
   }
@@ -86,16 +97,17 @@ export default function GenericForm() {
       }
     );
   }
-  if (!formDef) {
+  if (isLoading) return <Loader active />;
+
+  if (!template || !template.templateDefinition) {
     return <Segment><Header as="h3">Form definition does not exist.</Header></Segment>
   }
 
   
 
 
-  if (isLoading) return <Loader active />;
   return (
-    GenericFormComponent(formDef, formData, handleSubmit)
+    GenericFormComponent(template.templateDefinition, formData, handleSubmit)
   );
 }
 export function GenericFormComponent(formDef, formData, handleSubmit) {
@@ -206,6 +218,7 @@ export function GenericFormComponent(formDef, formData, handleSubmit) {
   
     };
 
+  
   return <Segment>
     <FormHeader heading={formDef.title} />
     <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Grid } from "semantic-ui-react";
+import { Button, Item,   } from "semantic-ui-react";
 
 export function SortableItem(props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -14,20 +14,19 @@ export function SortableItem(props) {
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Grid>
-        <Grid.Column width={1} textAlign="center" verticalAlign="middle">
           <Button
+          
             className="grabbable"
-            style={{ boxShadow: "none" }}
+            style={{ boxShadow: "none", opacity: "50%" }}
             basic
             icon="th"
             size="tiny"
             {...listeners}
             {...attributes}
           />
-        </Grid.Column>
-        <Grid.Column width={15}>{props.children}</Grid.Column>
-      </Grid>
+          <div style={{float: "right"}}>{props.children}</div>
+        
+      
     </div>
   );
 }

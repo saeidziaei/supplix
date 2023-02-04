@@ -205,14 +205,24 @@ function App() {
                         </Nav.Link>
                       </LinkContainer>
                     </Menu.Item>
+                   
                     <Menu.Item>
-                      <LinkContainer to="/forms">
+                      <LinkContainer to="/templates">
                         <Nav.Link>
-                          <Icon name="forumbee" />
-                          Forms
+                          <Icon color="blue" name="pencil alternate" />
+                          Templates
                         </Nav.Link>
                       </LinkContainer>
                     </Menu.Item>
+                    <Menu.Item>
+                      <LinkContainer to="/register">
+                        <Nav.Link>
+                          <Icon color="orange" name="browser" />
+                          Register
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+
                     <Menu.Item>
                       <Nav.Link onClick={handleLogout}>
                         <Icon name="log out" />

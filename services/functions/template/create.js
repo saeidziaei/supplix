@@ -5,12 +5,11 @@ import dynamoDb from "../../util/dynamodb";
 export const main = handler(async (event) => {
   const data = JSON.parse(event.body);
   const params = {
-    TableName: process.env.FORM_TABLE,
+    TableName: process.env.TEMPLATE_TABLE,
     Item: {
       customerIsoId: event.pathParameters.customerIsoId, 
-      formId: uuid.v1(), // A unique uuid
-      templateId: data.templateId,
-      formValues: data.formValues,
+      templateId: uuid.v1(), // A unique uuid
+      templateDefinition: data.templateDefinition,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
     },
