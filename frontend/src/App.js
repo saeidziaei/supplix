@@ -209,7 +209,7 @@ function App() {
                     <Menu.Item>
                       <LinkContainer to="/templates">
                         <Nav.Link>
-                          <Icon color="blue" name="pencil alternate" />
+                          <Icon color="blue" name="clipboard list" />
                           Templates
                         </Nav.Link>
                       </LinkContainer>
@@ -217,7 +217,7 @@ function App() {
                     <Menu.Item>
                       <LinkContainer to="/register">
                         <Nav.Link>
-                          <Icon color="orange" name="browser" />
+                          <Icon  name="folder open outline" />
                           Register
                         </Nav.Link>
                       </LinkContainer>

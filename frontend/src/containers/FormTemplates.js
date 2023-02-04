@@ -43,20 +43,24 @@ export default function FormTemplates() {
 
   function renderTemplate(t) {
     const td = t.templateDefinition;
+    let fieldCount = 0;
+    if (td && td.sections) 
+      td.sections.forEach(s => fieldCount += s.fields.length);
     return (
       <Card key={t.templateId}>
-        <Card.Content>{td.title}</Card.Content>
+        <Card.Content>
+          <Card.Header>{td.title}</Card.Header>
+          <Card.Meta>{fieldCount} fields</Card.Meta>
+        </Card.Content>
         <Card.Content extra>
-          <div className="ui two buttons">
-            <Button basic color="green">
-              Duplicate this
-            </Button>
+          <div className="ui one buttons">
             <LinkContainer
               key={t.templateId}
               to={`/template/${t.templateId}`}
               as="a"
             >
-              <Button basic color="blue">
+              <Button basic color="blue" compact >
+                <Icon name="pencil" />
                 Edit
               </Button>
             </LinkContainer>
