@@ -21,40 +21,32 @@ import { NumericFormat } from "react-number-format";
 export default function FormRegister() {
   const { templateId } = useParams();
   const [formDef, setFormDef] = useState(null);
-  const [templates, setTemplates] = useState(null);
   const [forms, setForms] = useState(null);
   const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
       setIsLoading(true);
       try {
-        if (templateId) {
           // todo: how do we avoid two roundtrips?
           const template = await loadTemplate(templateId);
           setFormDef(template.templateDefinition);
 
           const forms = await loadTemplateForms(templateId);
           setForms(forms);
-        } else {
-          const templates = await loadTemplates();
-
-          setTemplates(templates);
-        }
       } catch (e) {
+        setHasError(true);
         onError(e);
       }
 
       setIsLoading(false);
     }
     onLoad();
-  }, [templateId]);
+  }, []);
 
-  function loadTemplates() {
-    return callJwtAPI("GET", `/customer-isos/${customerIsoId}/templates`);
-  }
   function loadTemplate(templateId) {
     return callJwtAPI(
       "GET",
@@ -155,7 +147,7 @@ export default function FormRegister() {
           />
         )}
         {hasEntries && (
-          <Table compact>
+          <Table compact celled >
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Edit</Table.HeaderCell>
@@ -192,62 +184,24 @@ export default function FormRegister() {
             </Table.Body>
           </Table>
         )}
+        <LinkContainer to={`/registers`}>
+          <Button basic secondary>
+            Back
+          </Button>
+        </LinkContainer>
         <LinkContainer to={`/form/${templateId}`}>
           <Button basic primary>
             Create New Form
           </Button>
         </LinkContainer>
+
       </>
     );
   }
 
-  function renderTemplatesList() {
-    return (
-      <>
-        {(!templates || templates.length == 0) && (
-          <Message
-            header="No Template found"
-            content="Start by creating your first template!"
-            icon="exclamation"
-          />
-        )}
-        <List divided relaxed>
-          {templates &&
-            templates.map((t) => {
-              const def = t.templateDefinition;
-              return (
-                <List.Item key={t.templateId}>
-                  <List.Icon
-                    name="folder open outline"
-                    color="blue"
-                    size="large"
-                    verticalAlign="middle"
-                  />
-                  <List.Content>
-                    <LinkContainer to={`/register/${t.templateId}`}>
-                      <List.Header as="a">{def.title}</List.Header>
-                    </LinkContainer>
-                    <List.Description>{`used by ${t.formCount}`}</List.Description>
-                  </List.Content>
-                </List.Item>
-              );
-            })}
-          <Divider />
-          <LinkContainer to={`/template`}>
-            <Button basic primary>
-              Create New Template
-            </Button>
-          </LinkContainer>
-        </List>
-      </>
-    );
-  }
+
 
   if (isLoading) return <Loader active />;
-
-  if (templateId) {
-    return renderRegister();
-  } else {
-    return renderTemplatesList();
-  }
+  if (hasError) return <Message>:/</Message>
+  return renderRegister();
 }

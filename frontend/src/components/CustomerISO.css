@@ -2,22 +2,22 @@
   background-color: #ccc;
 }
 .Process.Plan {
-  color: white;
+  color: white!important;
   background-color: #011f4b ;
 }
 
 .Process.Do {
-  color: white;
+  color: white!important;
   background-color: #005b96 ;
 }
 
 .Process.Check {
-  color: white;
+  color: white!important;
   background-color: #6497b1 ;
 }
 
 .Process.Act {
-  color: black;
+  color: black!important;
   background-color: #b3cde0;
 }
 

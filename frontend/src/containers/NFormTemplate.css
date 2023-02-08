@@ -1,0 +1,10 @@
+.x:hover {
+  color: red!important;
+}
+.plus:hover {
+  color: green!important;
+}
+
+.field:hover{
+  background-color: #eee!important;
+}

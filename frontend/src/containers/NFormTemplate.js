@@ -18,7 +18,7 @@ import {
   SegmentGroup,
 } from "semantic-ui-react";
 
-import "./FormTemplate.css";
+import "./NFormTemplate.css";
 import {
   DndContext,
   closestCenter,
@@ -38,23 +38,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import { JwtApi } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { v4 as uuidv4 } from 'uuid';
-import { GenericForm } from "../components/GenericForm";
+import { NGenericForm } from "../components/NGenericForm";
 
-export default function FormTemplate() {
+export default function NFormTemplate() {
   const {templateId} = useParams();
   const customerIsoId = "iso-123";
   const callJwtAPI = JwtApi();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
-  const [title, setTitle] = useState("");
-  const [sections, setSections] = useState([]);
+  const [title, setTitle] = useState("Comprehensive Exam");
+  const [sections, setSections] = useState([
+    {title: "Exam Appointment", fields: [
+      {guid:"1", title:"Dentist", type:"text"},
+      {guid:"2", title:"DA", type:"text"},
+      {guid:"3", title:"C/C", type:"multi", options:["Nil", "Pain", "Bleeding gums", "Broken tooth", "Loss of tooth", "Cavities", "Appearance", "Sensitivity", "Other!!"]},
+      {guid:"4", title:"Reason for attendance", type:"radio", options:["Routine recall exam", "New patient exam", "Patient has a specific concern"]},
+    ]}]);
 
   useEffect(() => {
     function loadTemplate() {
       return callJwtAPI(
         "GET",
-        `/customer-isos/${customerIsoId}/templates/${templateId}`
+        `/ntemplates/${templateId}`
       );
     }
 
@@ -63,12 +69,7 @@ export default function FormTemplate() {
         if (templateId) {
           const item = await loadTemplate();
           const formDef = item.templateDefinition;
-          // inject a new guid for each field to use for drag&drop, other attributes can change
-          formDef.sections.forEach(section => {
-            section.fields.forEach(field => {
-              field.guid = uuidv4();
-            });
-          });
+
           setTitle(formDef.title);
           setSections(formDef.sections)
         } 
@@ -86,18 +87,13 @@ export default function FormTemplate() {
   async function handleSubmit() {
     setIsLoading(true);
     try {
-      // clear guid as it was only needed for drag&drop
-      sections.forEach(section => {
-        section.fields.forEach(field => {
-          delete field.guid;
-        });
-      });
+
       if (templateId) {
         await updateTemplate({title, sections});
       } else {
         await createTemplate({title, sections});
       }
-      nav(`/templates`);
+      nav(`/ntemplates`);
     } catch (e) {
       onError(e);
     } finally {
@@ -105,7 +101,7 @@ export default function FormTemplate() {
     }
   }
   function createTemplate(def) {
-    return callJwtAPI("POST", `/customer-isos/${customerIsoId}/templates`, {
+    return callJwtAPI("POST", `/ntemplates`, {
       templateDefinition: def,
     });
   }
@@ -113,7 +109,7 @@ export default function FormTemplate() {
   function updateTemplate(def) {
     return callJwtAPI(
       "PUT",
-      `/customer-isos/${customerIsoId}/templates/${templateId}`,
+      `/ntemplates/${templateId}`,
       {
         templateDefinition: def,
       }
@@ -143,7 +139,7 @@ export default function FormTemplate() {
     setSections([
       ...sections,
       {
-        name: "",
+        guid: uuidv4(),
         title: "",
         fields: [],
       },
@@ -158,14 +154,10 @@ export default function FormTemplate() {
 
   const addField = (sectionIndex) => {
     const newSections = [...sections];
-    const fieldName = `field${sectionIndex + 1}_${
-      newSections[sectionIndex].fields.length + 1
-    }`;
     newSections[sectionIndex].fields.push({
-      name: fieldName,
-      title: "What is ... ?",
+      guid: uuidv4(),
+      title: "Field Title",
       type: "text",
-      guid: uuidv4()
     });
     setSections(newSections);
   };
@@ -208,7 +200,6 @@ export default function FormTemplate() {
     { key: "date", text: "Date", value: "date" },
     { key: "radio", text: "Radio", value: "radio" },
     { key: "select", text: "Select", value: "select" },
-    { key: "competency", text: "Competency", value: "competency" },
   ];
   
   function rednerEditor() {
@@ -300,20 +291,9 @@ export default function FormTemplate() {
                           }
                         ></Button>
 
+               
                         <Form.Input
-                          label="Field name"
-                          type="text"
-                          value={field.name}
-                          onChange={(e) => {
-                            const newSections = [...sections];
-                            newSections[sectionIndex].fields[
-                              fieldIndex
-                            ].name = e.target.value;
-                            setSections(newSections);
-                          }}
-                        />
-                        <Form.Input
-                          label="Question"
+                          label="Title"
                           type="text"
                           value={field.title}
                           onChange={(e) => {
@@ -342,14 +322,11 @@ export default function FormTemplate() {
                                   ].type = newType;
                                   if (
                                     newType == "radio" ||
+                                    newType == "multi" ||
                                     newType == "select"
                                   ) {
-                                    newSections[sectionIndex].fields[
-                                      fieldIndex
-                                    ].options =
-                                      newSections[sectionIndex].fields[
-                                        fieldIndex
-                                      ].options || [];
+                                    newSections[sectionIndex].fields[fieldIndex].options =
+                                      newSections[sectionIndex].fields[fieldIndex].options || ["Option1", "Option2"];
                                   }
                                   setSections(newSections);
                                 }}
@@ -359,7 +336,9 @@ export default function FormTemplate() {
                         </Form.Dropdown>
 
                         {(field.type === "radio" ||
-                          field.type === "select") && (
+                        field.type === "multi" ||
+                          field.type === "select"
+                          ) && (
                           <>
                             
                             <List>
@@ -427,7 +406,7 @@ export default function FormTemplate() {
     </Button>
     <Divider />
     <Button primary onClick={handleSubmit} ><Icon name="save"/>Save</Button>
-
+    <p>{JSON.stringify(sections)}</p>
     </>)
   }
 
@@ -445,7 +424,7 @@ export default function FormTemplate() {
         <Header as="h1" color="blue">
           Preivew
         </Header>
-        <GenericForm  formDef={{title, sections}} />
+        <NGenericForm  formDef={{title, sections}} />
       </Grid.Column>
     </Grid>
   );

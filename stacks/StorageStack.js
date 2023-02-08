@@ -48,12 +48,21 @@ export function StorageStack({ stack }) {
     primaryIndex: { partitionKey: "customerIsoId", sortKey: "templateId" },
   });
 
+  const processTable = new Table(stack , "Process", {
+    fields: {
+      customerIsoId: "string",
+      processId: "string", 
+    },
+    primaryIndex: { partitionKey: "customerIsoId", sortKey: "processId" },
+  });
+
   // Return the bucket and table resources
   return {
     customerTable,
     customerISOTable,
     formTable,
     templateTable,
+    processTable,
     bucket,
   };
 }

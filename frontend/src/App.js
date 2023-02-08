@@ -117,27 +117,146 @@ function App() {
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false)
 
-  return (
-    !isAuthenticating && (
-      <>
-        <List divided horizontal >
-          <List.Item>
-            <Image
-              size="medium"
-              rounded
-              alt="logo"
-              src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"
-            />
-          </List.Item>
-          <List.Item>
-            <Button
-              color="black"
-              icon="bars"
-              onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-            ></Button>
-          </List.Item>
-        </List>
-        {/* <Grid columns={10}  padded>
+  function renderNotesApp() {
+    return (
+      !isAuthenticating && (
+        <>
+          <List divided horizontal>
+            <List.Item>
+              <Image
+                size="medium"
+                rounded
+                alt="logo"
+                src="/notes/DentalNotes.png"
+              />
+            </List.Item>
+            <List.Item>
+              <Button
+                color="black"
+                icon="bars"
+                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+              ></Button>
+            </List.Item>
+          </List>
+         
+          <Grid columns={1}>
+            <Grid.Column>
+              <Sidebar.Pushable as={Segment}>
+                <Sidebar
+                  as={Menu}
+                  visible={isSidebarVisible}
+                  vertical
+                  animation="push"
+                >
+                  <Menu.Item>
+                    <LinkContainer to="/">
+                      <Nav.Link>
+                        <Icon name="home" />
+                        Home
+                      </Nav.Link>
+                    </LinkContainer>
+                  </Menu.Item>
+
+                  {isAuthenticated ? (
+                    <>
+
+                      <Menu.Item>
+                        <LinkContainer to="/ntemplates">
+                          <Nav.Link>
+                            <Icon color="blue" name="clipboard list" />
+                            Note Templates
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/nregisters">
+                          <Nav.Link>
+                            <Icon name="folder open outline" />
+                            Note Register
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+
+                      <Menu.Item>
+                        <Nav.Link onClick={handleLogout}>
+                          <Icon name="log out" />
+                          Logout
+                        </Nav.Link>
+                      </Menu.Item>
+                    </>
+                  ) : (
+                    <>
+                      <Menu.Item>
+                        <LinkContainer to="/signup">
+                          <Nav.Link>
+                            <Icon name="signup" />
+                            Signup
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/login">
+                          <Nav.Link>
+                            <Icon name="sign-in" />
+                            Login
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                    </>
+                  )}
+
+                  <Menu.Item>
+                    <img alt="logo" src="/notes/DentalNotes.png" />
+                  </Menu.Item>
+                </Sidebar>
+
+                <Sidebar.Pusher>
+                  <Segment basic style={{ minHeight: "100vh" }}>
+                    <AppContext.Provider
+                      value={{
+                        isAuthenticated,
+                        userHasAuthenticated,
+                        isTopLevelAdmin,
+                        jwtToken,
+                        currentCustomer,
+                        setCurrentCustomer,
+                        currentIso,
+                        setCurrentIso,
+                      }}
+                    >
+                      <Routes />
+                    </AppContext.Provider>
+                  </Segment>
+                </Sidebar.Pusher>
+              </Sidebar.Pushable>
+            </Grid.Column>
+          </Grid>
+        </>
+      )
+    );    
+  }
+  function renderApp() {
+    return (
+      !isAuthenticating && (
+        <>
+          <List divided horizontal>
+            <List.Item>
+              <Image
+                size="medium"
+                rounded
+                alt="logo"
+                src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"
+              />
+            </List.Item>
+            <List.Item>
+              <Button
+                color="black"
+                icon="bars"
+                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+              ></Button>
+            </List.Item>
+          </List>
+          {/* <Grid columns={10}  padded>
         
         <Grid.Column verticalAlign="middle" >
           <Image size="small" rounded alt="logo" src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"/>
@@ -147,137 +266,152 @@ function App() {
         </Grid.Column>
 
       </Grid> */}
-        <Grid columns={1}>
-          <Grid.Column>
-            <Sidebar.Pushable as={Segment}>
-              <Sidebar
-                as={Menu}
-                visible={isSidebarVisible}
-                inverted
-                vertical
-                animation="push"
-              >
-                <Menu.Item>
-                  <LinkContainer to="/">
-                    <Nav.Link>
-                      <Icon name="home" />
-                      Home
-                    </Nav.Link>
-                  </LinkContainer>
-                </Menu.Item>
-
-                <Menu.Item as="a">
-                  <Label color="teal">5</Label>
-                  Tasks
-                </Menu.Item>
-
-                {isAuthenticated ? (
-                  <>
-                    <Menu.Item>
-                      <LinkContainer to="/dynamic-form">
-                        <Nav.Link>
-                          <Icon name="strava" />
-                          Generic Form
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <LinkContainer to="/users">
-                        <Nav.Link>
-                          <Icon name="users" />
-                          Users
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <LinkContainer to="/project-context">
-                        <Nav.Link>
-                          <Icon name="product hunt" />
-                          Project
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <LinkContainer to="/customers">
-                        <Nav.Link>
-                          <Icon name="users" />
-                          Customers
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                   
-                    <Menu.Item>
-                      <LinkContainer to="/templates">
-                        <Nav.Link>
-                          <Icon color="blue" name="clipboard list" />
-                          Templates
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <LinkContainer to="/register">
-                        <Nav.Link>
-                          <Icon  name="folder open outline" />
-                          Register
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-
-                    <Menu.Item>
-                      <Nav.Link onClick={handleLogout}>
-                        <Icon name="log out" />
-                        Logout
+          <Grid columns={1}>
+            <Grid.Column>
+              <Sidebar.Pushable as={Segment}>
+                <Sidebar
+                  as={Menu}
+                  visible={isSidebarVisible}
+                  inverted
+                  vertical
+                  animation="push"
+                >
+                  <Menu.Item>
+                    <LinkContainer to="/">
+                      <Nav.Link>
+                        <Icon name="home" />
+                        Home
                       </Nav.Link>
-                    </Menu.Item>
-                  </>
-                ) : (
-                  <>
-                    <Menu.Item>
-                      <LinkContainer to="/signup">
-                        <Nav.Link>
-                          <Icon name="signup" />
-                          Signup
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <LinkContainer to="/login">
-                        <Nav.Link>
-                          <Icon name="sign-in" />
-                          Login
-                        </Nav.Link>
-                      </LinkContainer>
-                    </Menu.Item>
-                  </>
-                )}
+                    </LinkContainer>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <LinkContainer to="/iso">
+                      <Nav.Link>
+                        <Icon name="sitemap" />
+                        ISO
+                      </Nav.Link>
+                    </LinkContainer>
+                  </Menu.Item>
+                  <Menu.Item as="a">
+                    <Label color="teal">5</Label>
+                    Tasks
+                  </Menu.Item>
+                  <Menu.Item as="a">
+                    <Label color="orange">3</Label>
+                    Notifications
+                  </Menu.Item>
 
-                <Menu.Item>
-                  <img alt="logo" src="/iso_cloud.png" />
-                </Menu.Item>
-              </Sidebar>
+                  {isAuthenticated ? (
+                    <>
+                      <Menu.Item>
+                        <LinkContainer to="/dynamic-form">
+                          <Nav.Link>
+                            <Icon name="strava" />
+                            Generic Form
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/users">
+                          <Nav.Link>
+                            <Icon name="users" />
+                            Users
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/project-context">
+                          <Nav.Link>
+                            <Icon name="product hunt" />
+                            Project
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/customers">
+                          <Nav.Link>
+                            <Icon name="users" />
+                            Customers
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
 
-              <Sidebar.Pusher>
-                <Segment basic style={{ minHeight: "100vh" }}>
-                  <AppContext.Provider
-                    value={{
-                      isAuthenticated,
-                      userHasAuthenticated,
-                      isTopLevelAdmin,
-                      jwtToken,
-                      currentCustomer,
-                      setCurrentCustomer,
-                      currentIso,
-                      setCurrentIso,
-                    }}
-                  >
-                    <Routes />
-                  </AppContext.Provider>
-                </Segment>
-              </Sidebar.Pusher>
-            </Sidebar.Pushable>
-          </Grid.Column>
-        </Grid>
-      </>
-    )
-  );
+                      <Menu.Item>
+                        <LinkContainer to="/templates">
+                          <Nav.Link>
+                            <Icon color="blue" name="clipboard list" />
+                            Templates
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/registers">
+                          <Nav.Link>
+                            <Icon name="folder open outline" />
+                            Register
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+
+                      <Menu.Item>
+                        <Nav.Link onClick={handleLogout}>
+                          <Icon name="log out" />
+                          Logout
+                        </Nav.Link>
+                      </Menu.Item>
+                    </>
+                  ) : (
+                    <>
+                      <Menu.Item>
+                        <LinkContainer to="/signup">
+                          <Nav.Link>
+                            <Icon name="signup" />
+                            Signup
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <LinkContainer to="/login">
+                          <Nav.Link>
+                            <Icon name="sign-in" />
+                            Login
+                          </Nav.Link>
+                        </LinkContainer>
+                      </Menu.Item>
+                    </>
+                  )}
+
+                  <Menu.Item>
+                    <img alt="logo" src="/iso_cloud.png" />
+                  </Menu.Item>
+                </Sidebar>
+
+                <Sidebar.Pusher>
+                  <Segment basic style={{ minHeight: "100vh" }}>
+                    <AppContext.Provider
+                      value={{
+                        isAuthenticated,
+                        userHasAuthenticated,
+                        isTopLevelAdmin,
+                        jwtToken,
+                        currentCustomer,
+                        setCurrentCustomer,
+                        currentIso,
+                        setCurrentIso,
+                      }}
+                    >
+                      <Routes />
+                    </AppContext.Provider>
+                  </Segment>
+                </Sidebar.Pusher>
+              </Sidebar.Pushable>
+            </Grid.Column>
+          </Grid>
+        </>
+      )
+    );
+  }
+  
+  return renderApp();
+  // return renderNotesApp()
 }
