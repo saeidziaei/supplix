@@ -185,18 +185,19 @@ const params = {
 
 
 const data = {
+  guid: "0",
   title: 'Top level',
   content: 'top level text',
   type: '-',
   children: [
-    { title: 'Process One Title', content: 'P 1', type:'process',
+    { guid: "1", title: 'Process One Title', content: 'P 1', type:'process',
       children: [
-        { title: 'Subprocess 1.1', content: 'This is a sub process', type:'sub-process' },    
-        { title: 'Subprocess 1.2', content: 'This is another one', type:'sub-process' },    
+        { guid: "11", title: 'Subprocess 1.1', content: 'This is a sub process', type:'sub-process' },    
+        { guid: "12", title: 'Subprocess 1.2', content: 'This is another one', type:'sub-process' },    
       ]
      },
-    { title: 'Child Two Title', content: 'P 2', type:'process' },
-    { title: 'Child Three Title', content: 'M 1', type:'manual' },
+    { guid: "2", title: 'Child Two Title', content: 'P 2', type:'process' },
+    { guid: "3", title: 'Child Three Title', content: 'M 1', type:'manual' },
 
   ]
 }
@@ -207,7 +208,7 @@ export default function ISO() {
   return (
     <div className="Home">
       {/* <CustomerISO template={ template } params={ params } />  */}
-      <Tree data={data} />
+      <Tree data={data}  onSave={(d) => console.log("save this", d)} />
     </div>
   );
 }
