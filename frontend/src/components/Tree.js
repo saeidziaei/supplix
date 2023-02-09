@@ -1,32 +1,37 @@
 import React, { useState } from 'react';
 import DisplayText from "./DisplayText";
-import { Button, Card, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb } from "semantic-ui-react";
+import { Button, Card, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm  from 'remark-gfm';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Tree({  data, onSave, startPath}) {
   const [tree, setTree] = useState(data);
-  const [path, setPath] = useState(startPath || data.guid); // start from the top, use file system path model to go to children
+  const [path, setPath] = useState(startPath || ""); // start from the top, use file system path model to go to children
 
-  const EditNode = ({ initialValues, onSave }) => {
+  const EditNode = ({ initialValues, onSave, onCancel }) => {
     const [values, setValues] = useState(initialValues || {});
 
     const handleSave = () => {
       onSave(values);
     };
-
+    const handleCancel = () => {
+      onCancel();
+    };
     return (
       <Form>
-        <Input type="text"  value={values.title} onChange={(e) => setValues({...values, title: e.target.value})} />
+        <Input label="Title" type="text"  value={values.title} onChange={(e) => setValues({...values, title: e.target.value})} />
+        <Input label="Type" type="text"  value={values.type} onChange={(e) => setValues({...values, type: e.target.value})} />
         <TextArea rows={12} type="text"  value={values.content} onChange={(e) => setValues({...values, content: e.target.value})} />
-        <Button onClick={handleSave}>Save</Button>
+        <Button circular size='small' icon="arrow left" onClick={handleCancel} />
+        <Button circular positive size='small' icon="check" onClick={handleSave} />
       </Form>
     );
   };
 
-  const Node = ({ values,  onEdit, onPathChange }) => {
+  const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const handleSave = (newValues) => {
@@ -37,10 +42,13 @@ export default function Tree({  data, onSave, startPath}) {
 
     const content = values.content;
     const title = values.title;
-    const children = values.children;
+    const children = values.children || [];
+    const type = values.type;
     const parentPath = getParentPath(path); 
 
-    const groupedChildren = !children ? null : 
+    const canBeDeleted = children.length == 0;
+
+    const groupedChildren = children.length == 0 ? [] : 
         children.reduce((result, child) => {
             const group = result.find((group) => group[0].type === child.type);
         
@@ -53,24 +61,47 @@ export default function Tree({  data, onSave, startPath}) {
             return result;
       }, []);
 
+    
     return (
       <>
         {isEditing ? (
-          <EditNode initialValues={values} onSave={handleSave} />
+          <EditNode
+            initialValues={values}
+            onSave={handleSave}
+            onCancel={() => setIsEditing(false)}
+          />
         ) : (
           <>
-            
             <Header as="h3">{title}</Header>
-            
-            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]}/>
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
+            <Label>{type}</Label>
+            <Divider hidden />
+            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />
+            <Button circular basic size='small' icon="pencil" color='blue' onClick={() => setIsEditing(true)}/>
+            { path && <Popup content={canBeDeleted ? "Delete this node" : "This node has children and cannot be deleted."} trigger={
+            <Button  circular basic size='small' icon="x" color={canBeDeleted ? "red" : "grey"} onClick={() => { if(canBeDeleted) onDelete(path);}} /> } /> }
+            { groupedChildren.length == 0 && (
+              <Button
+                basic
+                color="green"
+                size="tiny"
+                onClick={() => {
+                  const newChild = {
+                    type: "child",
+                    title: "New",
+                    content: "New",
+                    guid: uuidv4(),
+                  };
+                  onAddChild(newChild);
+                }}
+              >{`New child`}</Button>
+            )}
             {groupedChildren &&
               groupedChildren.map((group, groupIndex) => (
                 <div key={groupIndex}>
                   <Divider horizontal>
-                    <Header as="h2">
+                    <Header as="h3">
                       <Icon name="tag" />
-                      { pluralize(capitalizeFirstLetter(group[0].type)) }
+                      {pluralize(capitalizeFirstLetter(group[0].type))}
                     </Header>
                   </Divider>
                   <Item.Group divided>
@@ -80,12 +111,14 @@ export default function Tree({  data, onSave, startPath}) {
                           <Item.Header>
                             <DisplayText text={child.title} />
                           </Item.Header>
-                          <Item.Description>paragraph</Item.Description>
+                          <Item.Description></Item.Description>
                           <Item.Extra>
+         
                             <Button
                               basic
-                              color="blue"
-                              onClick={() => onPathChange(path + "/" + child.guid)}
+                              onClick={() =>
+                                onPathChange(path + "/" + child.guid)
+                              }
                             >
                               <Icon color="blue" name="expand" />
                               Details
@@ -94,11 +127,34 @@ export default function Tree({  data, onSave, startPath}) {
                         </Item.Content>
                       </Item>
                     ))}
+                    <Item>
+                      <Button
+                        basic
+                        color="green"
+                        size="tiny"
+                        onClick={() => {
+                          const newChild = {
+                            type: group[0].type,
+                            title: "New",
+                            content: "New",
+                            guid: uuidv4(),
+                          };
+                          onAddChild(newChild);
+                        }}
+                      >{`New ${group[0].type}`}</Button>
+                    </Item>
                   </Item.Group>
                 </div>
               ))}
-              {path && <><Divider/><Button  secondary  onClick={() => onPathChange(parentPath)}><Icon name='arrow circle left'/>Back</Button></> }
-              
+            {path && (
+              <>
+                <Divider />
+                <Button secondary onClick={() => onPathChange(parentPath)}>
+                  <Icon name="arrow circle left" />
+                  Back
+                </Button>
+              </>
+            )}
           </>
         )}
       </>
@@ -149,21 +205,63 @@ export default function Tree({  data, onSave, startPath}) {
     );
   
   }
+  function deleteNodeByPath(tree, path) {
+    // find the parent and delete this child
+    const parentPath = getParentPath(path);
+    const guidToDelete = path.substring(path.lastIndexOf("/") + 1);
+    console.log("parentPath", parentPath, "guidToDelete", guidToDelete);
+    const pathArray = parentPath.split('/').splice(1);
+    const updatedTree = JSON.parse(JSON.stringify(tree));
 
+    let currentNode = updatedTree;
+    for (const guid of pathArray) {
+      
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+  
+      if (!nextNode) return null; // error , node not found
+        
+      currentNode = nextNode;
+    }
+    
+    currentNode.children = currentNode.children.filter(child => child.guid !== guidToDelete);
+
+    setPath(parentPath);
+    setTree(updatedTree);    
+  }
+  function addNodeToPath(tree, path, newDataNode) {
+    const pathArray = path.split('/').splice(1);
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+
+    let currentNode = updatedTree;
+    for (const guid of pathArray) {
+      
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+  
+      if (!nextNode) return null; // error , node not found
+        
+      currentNode = nextNode;
+    }
+    if (!currentNode.children)
+      currentNode.children = [];
+    currentNode.children.push(newDataNode);
+    
+    setTree(updatedTree);
+  }
   function setNodeByPath(tree, path, newDataNode) {
     const pathArray = path.split('/').splice(1);
     let currentNode = tree;
     for (const guid of pathArray) {
+      
       const nextNode = currentNode.children.find(child => child.guid === guid);
   
-      if (!nextNode) return; // error , node not found
-  
+      if (!nextNode) return null; // error , node not found
+   
       currentNode = nextNode;
     }
   
     Object.assign(currentNode, newDataNode);
 
-    return tree;
+    setTree(tree);
   }
   const currentDataNode = getNodeByPath(tree, path);
   
@@ -173,10 +271,11 @@ export default function Tree({  data, onSave, startPath}) {
     <Node
       values={currentDataNode}
       onEdit={(newDataNode) => { 
-        setTree(setNodeByPath(tree, path, newDataNode));
+        setNodeByPath(tree, path, newDataNode);
         onSave(tree);
       }}
-        
+      onAddChild={(newDataNode) => addNodeToPath(tree, path, newDataNode)} 
+      onDelete={(p) => deleteNodeByPath(tree, p)}
       onPathChange={(p) => setPath(p)}
     />
     </>
