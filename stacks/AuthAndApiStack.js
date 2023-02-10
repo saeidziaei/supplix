@@ -6,7 +6,7 @@ import { Cognito, Api, use } from "@serverless-stack/resources";
 import { StorageStack } from "./StorageStack";
 
 export function AuthAndApiStack({ stack, app }) {
-  const { bucket, formTable, templateTable, customerTable, customerISOTable } =
+  const { bucket, formTable, templateTable, customerTable, customerISOTable, processTable } =
     use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -49,6 +49,7 @@ export function AuthAndApiStack({ stack, app }) {
           TEMPLATE_TABLE: templateTable.tableName,
           CUSTOMER_TABLE: customerTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
+          PROCESS_TABLE: processTable.tableName,
         },
       },
     },
@@ -114,6 +115,21 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "functions/template/listForms.main",
           permissions: [formTable],
+        },
+      },
+
+      // for now just support one top level process
+      "GET   /customer-isos/{customerIsoId}/processes/top-level": {
+        function: {
+          handler: "functions/process/get.main",
+          permissions: [processTable],
+        },
+      },
+      // for now just support one top level process
+      "PUT   /customer-isos/{customerIsoId}/processes/top-level": {
+        function: {
+          handler: "functions/process/update.main",
+          permissions: [processTable],
         },
       },
 

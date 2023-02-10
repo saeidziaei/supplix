@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DisplayText from "./DisplayText";
-import { Button, Card, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
+import { Button, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
@@ -10,6 +10,14 @@ import { v4 as uuidv4 } from 'uuid';
 export default function Tree({  data, onSave, startPath}) {
   const [tree, setTree] = useState(data);
   const [path, setPath] = useState(startPath || ""); // start from the top, use file system path model to go to children
+  useEffect(() => {
+    window.history.pushState({ path }, path, `?path=${path}`);
+  }, [path]);
+
+  useEffect(() => {
+    if (data != tree)
+      onSave(tree);
+  }, [tree]);
 
   const EditNode = ({ initialValues, onSave, onCancel }) => {
     const [values, setValues] = useState(initialValues || {});
@@ -24,7 +32,7 @@ export default function Tree({  data, onSave, startPath}) {
       <Form>
         <Input label="Title" type="text"  value={values.title} onChange={(e) => setValues({...values, title: e.target.value})} />
         <Input label="Type" type="text"  value={values.type} onChange={(e) => setValues({...values, type: e.target.value})} />
-        <TextArea rows={12} type="text"  value={values.content} onChange={(e) => setValues({...values, content: e.target.value})} />
+        <TextArea rows={22} type="text"  value={values.content} onChange={(e) => setValues({...values, content: e.target.value})} />
         <Button circular size='small' icon="arrow left" onClick={handleCancel} />
         <Button circular positive size='small' icon="check" onClick={handleSave} />
       </Form>
@@ -33,9 +41,9 @@ export default function Tree({  data, onSave, startPath}) {
 
   const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [isCompact, setIsCompact] =useState(true);
 
     const handleSave = (newValues) => {
-      console.log("Node handleSave", newValues);
       onEdit(newValues);
       setIsEditing(false);
     };
@@ -75,7 +83,9 @@ export default function Tree({  data, onSave, startPath}) {
             <Header as="h3">{title}</Header>
             <Label>{type}</Label>
             <Divider hidden />
-            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />
+            { isCompact && <><Icon name='chevron right' size='small' color='grey' onClick={() => setIsCompact(false)}/>Expand<Divider /></>}
+            { !isCompact && <><Icon name='chevron down' size='small' color='grey' onClick={() => setIsCompact(true)}/> 
+            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} /></> }
             <Button circular basic size='small' icon="pencil" color='blue' onClick={() => setIsEditing(true)}/>
             { path && <Popup content={canBeDeleted ? "Delete this node" : "This node has children and cannot be deleted."} trigger={
             <Button  circular basic size='small' icon="x" color={canBeDeleted ? "red" : "grey"} onClick={() => { if(canBeDeleted) onDelete(path);}} /> } /> }
@@ -99,7 +109,7 @@ export default function Tree({  data, onSave, startPath}) {
               groupedChildren.map((group, groupIndex) => (
                 <div key={groupIndex}>
                   <Divider horizontal>
-                    <Header as="h3">
+                    <Header as="h3" >
                       <Icon name="tag" />
                       {pluralize(capitalizeFirstLetter(group[0].type))}
                     </Header>
@@ -249,7 +259,9 @@ export default function Tree({  data, onSave, startPath}) {
   }
   function setNodeByPath(tree, path, newDataNode) {
     const pathArray = path.split('/').splice(1);
-    let currentNode = tree;
+
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+    let currentNode = updatedTree;
     for (const guid of pathArray) {
       
       const nextNode = currentNode.children.find(child => child.guid === guid);
@@ -261,7 +273,7 @@ export default function Tree({  data, onSave, startPath}) {
   
     Object.assign(currentNode, newDataNode);
 
-    setTree(tree);
+    setTree(updatedTree);
   }
   const currentDataNode = getNodeByPath(tree, path);
   
@@ -272,18 +284,19 @@ export default function Tree({  data, onSave, startPath}) {
       values={currentDataNode}
       onEdit={(newDataNode) => { 
         setNodeByPath(tree, path, newDataNode);
-        onSave(tree);
+        // onSave(tree);
       }}
-      onAddChild={(newDataNode) => addNodeToPath(tree, path, newDataNode)} 
-      onDelete={(p) => deleteNodeByPath(tree, p)}
+      onAddChild={(newDataNode) => { 
+        addNodeToPath(tree, path, newDataNode);
+        // onSave(tree);
+      }} 
+      onDelete={(p) => {
+        deleteNodeByPath(tree, p);
+        // onSave(tree);
+      }}
       onPathChange={(p) => setPath(p)}
     />
     </>
   );
 
 }
-
-
-
-
-

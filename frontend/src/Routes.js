@@ -18,11 +18,14 @@ import ISO from "./containers/ISO";
 import NFormTemplate from "./containers/NFormTemplate";
 
 
-export default function Links() {
+export default function Links({tenant}) {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/iso" element={<ISO />} />
+      {/* <Route path={`${tenant}/`} element={<Home />} />
+      <Route path={`${tenant}/iso`}  element={<ISO />} /> */}
+      <Route path={`/`} element={<Home />} />
+      <Route path={`/iso`}  element={<ISO />} />
+
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/customer/:customerId?" element={<Customer />} />

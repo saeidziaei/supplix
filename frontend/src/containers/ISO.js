@@ -1,214 +1,353 @@
-import React from "react";
-import "./Home.css";
-import CustomerISO from "../components/CustomerISO";
-import Tree from "../components/Tree";
+import React, { useState, useEffect } from 'react';
+import "./ISO.css";
+import { onError } from "../lib/errorLib";
+import { JwtApi } from "../lib/apiLib";
+import { Loader } from "semantic-ui-react";
+import DisplayText from '../components/DisplayText';
+import { Button, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
+import  pluralize from "pluralize";
+import { capitalizeFirstLetter } from '../lib/helpers';
+import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
+import remarkGfm  from 'remark-gfm';
+import { v4 as uuidv4 } from 'uuid';
 
-const template = {
-  processes: [
-    {
-      category: "Plan",
-      title: "Business Management and **Planning**",
-      subProcesses: [
-        {
-          title: "Strategic Planning 2 - see [Employee Form](http://localhost:3000/template/16d7bfd0-a4d9-11ed-a505-09d7d7d3c8a3)",
-          input: {
-            title: "Input Sources",
-            placeholder: "List of all sources",
-            default:
-              "* All IMS processes \n * Clients \n  * Authorities & regulatory bodies",
-          },
-          table: {
-            cols: [
-              { ref: "activity", title: "Activity" },
-              { ref: "documentation", title: "Documentation", editable: true },
-              {
-                ref: "responsibility",
-                title: "Responsibility",
-                editable: true,
-              },
-            ],
-            rows: [
-              {
-                activity: "Business *planning*",
-                documentation: {
-                  title: "A bunch of documents",
-                  documents: [
-                    {
-                      ref: "XXX-MAN-001-XXX-MAN-001-Management System Manual (section 1 & 3)",
-                    },
-                    { ref: "XXX-FOR-001-Business Development Plan" },
-                  ],
-                },
-                responsibility: { title: "Managing Director" },
-              },
-              {
-                activity: "Establish/Maintain IMS and relevant policies",
-                documentation: {},
-                responsibility: { default: "Managing Director" },
-              },
-            ],
-          },
-          output: {
-            placeholder: "List of all outputs",
-            default:
-              "* All IMS processes \n * Clients \n  * Authorities & regulatory bodies",
-          },
-        },
-        {
-          title: "Management Review",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Change Management",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Communication",
-        },
-      ],
-    },
-    {
-      category: "Plan",
-      title: "Support",
-      subProcesses: [
-        {
-          title: "Test",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Human Resources",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Competency and Awareness",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-      ],
-    },
-    {
-      category: "Do",
-      title: "Operations",
-      subProcesses: [
-        {
-          title: "Marketing",
-        },
-        {
-          title: "Sales",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Exernal vendor evaluation",
-          input: {
-            placeholder: "List of all sources",
-          },
-          output: {
-            placeholder: "List of all outputs",
-          },
-        },
-        {
-          title: "Producrement ...",
-        },
-      ],
-    },
-    {
-      category: "Check",
-      title: "Performance Evaluation",
-      subProcesses: [
-        {
-          title: "Internal Audit",
-        },
-        {
-          title: "Monitoring & evaluation",
-        },
-      ],
-    },
-    {
-      category: "Act",
-      title: "Continuous Improvement",
-      subProcesses: [
-        {
-          title: "Non-Conformance",
-        },
-        {
-          title: "Corrective Actions",
-        },
-      ],
-    },
-  ],
-  files: [
-    {
-      ref: "XXX-MAN-001-XXX-MAN-001-Management System Manual (section 1 & 3)",
-      title:
-        "[[!COMP_NAME!]]-MAN-001-[[!COMP_NAME!]]-MAN-001-Management System Manual (section 1 & 3)",
-    },
-    {
-      ref: "XXX-FOR-001-Business Development Plan",
-      title: "[[!COMP_NAME!]]-FOR-001-Business Development Plan",
-    },
-   
-  ],
-};
-
-const params = {
-  COMP_NAME: "Tesla"
-};
-
-
-const data = {
-  guid: "0",
-  title: 'Top level',
-  content: 'top level text',
-  type: '-',
-  children: [
-    { guid: "1", title: 'Process One Title', content: 'P 1', type:'process',
-      children: [
-        { guid: "11", title: 'Subprocess 1.1', content: 'This is a sub process', type:'sub-process' },    
-        { guid: "12", title: 'Subprocess 1.2', content: 'This is another one', type:'sub-process' },    
-      ]
-     },
-    { guid: "2", title: 'Child Two Title', content: 'P 2', type:'process' },
-    { guid: "3", title: 'Child Three Title', content: 'M 1', type:'manual' },
-
-  ]
-}
 
 export default function ISO() {
+  const customerIsoId = "iso-123";
+  const callJwtAPI = JwtApi();
+  const [tree, setTree] = useState(null);
+  const [savedTree, setSavedTree] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
+  useEffect(() => {
+    window.history.pushState({ path }, path, `?path=${path}`);
+  }, [path]);
+
+  useEffect(() => {
+    if (savedTree != tree)
+      handleSubmit(tree);
+  }, [tree]);
+
+  const EditNode = ({ initialValues, onSave, onCancel }) => {
+    const [values, setValues] = useState(initialValues || {});
+
+    const handleSave = () => {
+      onSave(values);
+    };
+    const handleCancel = () => {
+      onCancel();
+    };
+    return (
+      <Form>
+        <Input label="Title" type="text"  value={values.title} onChange={(e) => setValues({...values, title: e.target.value})} />
+        <Input label="Type" type="text"  value={values.type} onChange={(e) => setValues({...values, type: e.target.value})} />
+        <TextArea rows={22} type="text"  value={values.content} onChange={(e) => setValues({...values, content: e.target.value})} />
+        <Button circular size='small' icon="arrow left" onClick={handleCancel} />
+        <Button circular positive size='small' icon="check" onClick={handleSave} />
+      </Form>
+    );
+  };
+
+  const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [isCompact, setIsCompact] =useState(true);
+
+    const handleSave = (newValues) => {
+      onEdit(newValues);
+      setIsEditing(false);
+    };
+
+    const content = values.content;
+    const title = values.title;
+    const children = values.children || [];
+    const type = values.type;
+    const parentPath = getParentPath(path); 
+
+    const canBeDeleted = children.length == 0;
+
+    const groupedChildren = children.length == 0 ? [] : 
+        children.reduce((result, child) => {
+            const group = result.find((group) => group[0].type === child.type);
+        
+            if (group) {
+            group.push(child);
+            } else {
+            result.push([child]);
+            }
+        
+            return result;
+      }, []);
+
+    
+    return (
+      <>
+        {isEditing ? (
+          <EditNode
+            initialValues={values}
+            onSave={handleSave}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <>
+            <Header as="h3">{title}</Header>
+            <Label>{type}</Label>
+            <Divider hidden />
+            { isCompact && <><Icon name='chevron right' size='small' color='grey' onClick={() => setIsCompact(false)}/>Expand<Divider /></>}
+            { !isCompact && <><Icon name='chevron down' size='small' color='grey' onClick={() => setIsCompact(true)}/> 
+            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} /></> }
+            <Button circular basic size='small' icon="pencil" color='blue' onClick={() => setIsEditing(true)}/>
+            { path && <Popup content={canBeDeleted ? "Delete this node" : "This node has children and cannot be deleted."} trigger={
+            <Button  circular basic size='small' icon="x" color={canBeDeleted ? "red" : "grey"} onClick={() => { if(canBeDeleted) onDelete(path);}} /> } /> }
+            { groupedChildren.length == 0 && (
+              <Button
+                basic
+                color="green"
+                size="tiny"
+                onClick={() => {
+                  const newChild = {
+                    type: "child",
+                    title: "New",
+                    content: "New",
+                    guid: uuidv4(),
+                  };
+                  onAddChild(newChild);
+                }}
+              >{`New child`}</Button>
+            )}
+            {groupedChildren &&
+              groupedChildren.map((group, groupIndex) => (
+                <div key={groupIndex}>
+                  <Divider horizontal>
+                    <Header as="h3" >
+                      <Icon name="tag" />
+                      {pluralize(capitalizeFirstLetter(group[0].type))}
+                    </Header>
+                  </Divider>
+                  <Item.Group divided>
+                    {group.map((child, index) => (
+                      <Item key={index}>
+                        <Item.Content>
+                          <Item.Header>
+                            <DisplayText text={child.title} />
+                          </Item.Header>
+                          <Item.Description></Item.Description>
+                          <Item.Extra>
+         
+                            <Button
+                              basic
+                              onClick={() =>
+                                onPathChange(path + "/" + child.guid)
+                              }
+                            >
+                              <Icon color="blue" name="expand" />
+                              Details
+                            </Button>
+                          </Item.Extra>
+                        </Item.Content>
+                      </Item>
+                    ))}
+                    <Item>
+                      <Button
+                        basic
+                        color="green"
+                        size="tiny"
+                        onClick={() => {
+                          const newChild = {
+                            type: group[0].type,
+                            title: "New",
+                            content: "New",
+                            guid: uuidv4(),
+                          };
+                          onAddChild(newChild);
+                        }}
+                      >{`New ${group[0].type}`}</Button>
+                    </Item>
+                  </Item.Group>
+                </div>
+              ))}
+            {path && (
+              <>
+                <Divider />
+                <Button secondary onClick={() => onPathChange(parentPath)}>
+                  <Icon name="arrow circle left" />
+                  Back
+                </Button>
+              </>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
+  function getParentPath(path) {
+    return path.substring(0, path.lastIndexOf('/'));
+  }
+  function getNodeByPath(tree, path) {
+    const pathArray = path.split('/').splice(1);
+    let currentNode = tree;
+    for (const guid of pathArray) {
+      const nextNode = currentNode.children.find(child => child.guid === guid);
   
+      if (!nextNode) return null;
+  
+      currentNode = nextNode;
+    }
+  
+    return currentNode;
+  }
+
+  function renderBreadcrumb(tree, path) {
+    const pathArray = path.split('/').splice(1);
+    let currentNode = tree;
+    let subPath = "";
+    let crumbs = [{label:"Home", path: subPath}];
+    for (const guid of pathArray) {
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+      subPath += "/" + nextNode.guid;
+      crumbs.push({label: nextNode.title, path: subPath})
+      if (!nextNode) return null;
+  
+      currentNode = nextNode;
+    }
+    
+    return (<>
+    <Breadcrumb size='massive'>
+      {crumbs.slice(0, -1).map((crumb, index) => <span key={index}>
+        <Breadcrumb.Section link onClick={() => setPath(crumb.path)}>{crumb.label}</Breadcrumb.Section>
+        <Breadcrumb.Divider icon='right chevron' />
+      </span>)
+      }
+    <Breadcrumb.Section active>{crumbs[crumbs.length - 1].label}</Breadcrumb.Section>
+
+    </Breadcrumb>
+    <Divider hidden /></>
+    );
+  
+  }
+  function deleteNodeByPath(tree, path) {
+    // find the parent and delete this child
+    const parentPath = getParentPath(path);
+    const guidToDelete = path.substring(path.lastIndexOf("/") + 1);
+    console.log("parentPath", parentPath, "guidToDelete", guidToDelete);
+    const pathArray = parentPath.split('/').splice(1);
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+
+    let currentNode = updatedTree;
+    for (const guid of pathArray) {
+      
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+  
+      if (!nextNode) return null; // error , node not found
+        
+      currentNode = nextNode;
+    }
+    
+    currentNode.children = currentNode.children.filter(child => child.guid !== guidToDelete);
+
+    setPath(parentPath);
+    setTree(updatedTree);    
+  }
+  function addNodeToPath(tree, path, newDataNode) {
+    const pathArray = path.split('/').splice(1);
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+
+    let currentNode = updatedTree;
+    for (const guid of pathArray) {
+      
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+  
+      if (!nextNode) return null; // error , node not found
+        
+      currentNode = nextNode;
+    }
+    if (!currentNode.children)
+      currentNode.children = [];
+    currentNode.children.push(newDataNode);
+    
+    setTree(updatedTree);
+  }
+  function setNodeByPath(tree, path, newDataNode) {
+    const pathArray = path.split('/').splice(1);
+
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+    let currentNode = updatedTree;
+    for (const guid of pathArray) {
+      
+      const nextNode = currentNode.children.find(child => child.guid === guid);
+  
+      if (!nextNode) return null; // error , node not found
+   
+      currentNode = nextNode;
+    }
+  
+    Object.assign(currentNode, newDataNode);
+
+    setTree(updatedTree);
+  }
+  const currentDataNode = getNodeByPath(tree, path);
+
+  useEffect(() => {
+    function loadProcess() {
+      return callJwtAPI(
+        "GET",
+        `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level)
+      );
+    }
+
+    async function onLoad() {
+      try {
+        const item = await loadProcess();
+
+        setTree(item.tree);
+
+      } catch (e) {
+        onError(e);
+      }
+
+      setIsLoading(false);
+    }
+
+    onLoad();
+  }, []);
+
+  async function handleSubmit(data) {
+    setIsLoading(true);
+    try {
+      await updateProcess(data);
+      setTree(data);
+      setSavedTree(data);
+    } catch (e) {
+      onError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+
+  function updateProcess(tree) {
+    return callJwtAPI(
+      "PUT",
+      `/customer-isos/${customerIsoId}/processes/top-level`,
+      {
+        tree: tree,
+      }
+    );
+  }
+  if (isLoading) return <Loader active />;
+
+
+
 
   return (
-    <div className="Home">
-      {/* <CustomerISO template={ template } params={ params } />  */}
-      <Tree data={data}  onSave={(d) => console.log("save this", d)} />
-    </div>
+    <>
+    { renderBreadcrumb(tree, path) }
+    <Node
+      values={currentDataNode}
+      onEdit={(newDataNode) => setNodeByPath(tree, path, newDataNode) }
+      onAddChild={(newDataNode) => addNodeToPath(tree, path, newDataNode) } 
+      onDelete={(p) => deleteNodeByPath(tree, p) }
+      onPathChange={(p) => setPath(p)}
+    />
+    </>
   );
 }

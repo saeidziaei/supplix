@@ -9,6 +9,13 @@ import { useFormFields } from "../lib/hooksLib";
 import { onError } from "../lib/errorLib";
 
 export default function Login() {
+// TODO
+  // configure Amplify to use the correct user pool based on the tenant
+// Auth.configure({
+//   userPoolId: `us-west-2_${tenant}`,
+//   userPoolWebClientId: `${tenant}_web_client`,
+// });
+
   const { userHasAuthenticated } = useAppContext();
   
 

@@ -36,6 +36,10 @@ export default function Signup() {
       const newUser = await Auth.signUp({
         username: fields.email,
         password: fields.password,
+        attributes: {
+          "custom:tenant": "tenant_1"
+        }
+        
       });
       setIsLoading(false);
       setNewUser(newUser);
