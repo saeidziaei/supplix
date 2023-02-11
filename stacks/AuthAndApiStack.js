@@ -6,7 +6,9 @@ import { Cognito, Api, use } from "@serverless-stack/resources";
 import { StorageStack } from "./StorageStack";
 
 export function AuthAndApiStack({ stack, app }) {
-  const { bucket, formTable, templateTable, customerTable, customerISOTable, processTable } =
+  const { bucket, 
+    formTable, templateTable, customerTable, customerISOTable, processTable,
+    nformTable, ntemplateTable } =
     use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -50,6 +52,10 @@ export function AuthAndApiStack({ stack, app }) {
           CUSTOMER_TABLE: customerTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
           PROCESS_TABLE: processTable.tableName,
+
+          NFORM_TABLE: nformTable.tableName,
+          NTEMPLATE_TABLE: ntemplateTable.tableName,
+
         },
       },
     },
@@ -145,6 +151,59 @@ export function AuthAndApiStack({ stack, app }) {
           },
         },
       },
+
+// ###############  N Sectoin ####################
+"GET   /customers/{customerId}/forms": {
+  function: {
+    handler: "functions/nform/list.main",
+    permissions: [nformTable],
+  },
+},
+"GET   /customers/{customerId}/nforms/{formId}": {
+  function: {
+    handler: "functions/nform/get.main",
+    permissions: [ntemplateTable, nformTable],
+  },
+},
+"POST   /customers/{customerId}/nforms": {
+  function: {
+    handler: "functions/nform/create.main",
+    permissions: [nformTable],
+  },
+},
+"PUT   /customers/{customerId}/nforms/{formId}": {
+  function: {
+    handler: "functions/nform/update.main",
+    permissions: [nformTable],
+  },
+},
+
+"GET   /customers/{customerId}/ntemplates": {
+  function: {
+    handler: "functions/ntemplate/list.main",
+    permissions: [ntemplateTable, nformTable],
+  }, 
+},
+"GET   /customers/{customerId}/ntemplates/{templateId}": {
+  function: {
+    handler: "functions/ntemplate/get.main",
+    permissions: [ntemplateTable, nformTable],
+  },
+},
+"POST   /customers/{customerId}/ntemplates": {
+  function: {
+    handler: "functions/ntemplate/create.main",
+    permissions: [ntemplateTable],
+  },
+},
+"PUT   /customers/{customerId}/ntemplates/{templateId}": {
+  function: {
+    handler: "functions/ntemplate/update.main",
+    permissions: [ntemplateTable],
+  },
+},
+// ###############################################
+
     },
   });
 

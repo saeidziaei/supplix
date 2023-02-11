@@ -56,6 +56,23 @@ export function StorageStack({ stack }) {
     primaryIndex: { partitionKey: "customerIsoId", sortKey: "processId" },
   });
 
+
+  const nformTable = new Table(stack , "NForm", {
+    fields: {
+      customerId: "string",
+      formId: "string", 
+    },
+    primaryIndex: { partitionKey: "customerId", sortKey: "formId" },
+  });
+
+  const ntemplateTable = new Table(stack , "NTemplate", {
+    fields: {
+      customerId: "string",
+      templateId: "string", 
+    },
+    primaryIndex: { partitionKey: "customerId", sortKey: "templateId" },
+  });
+
   // Return the bucket and table resources
   return {
     customerTable,
@@ -64,5 +81,7 @@ export function StorageStack({ stack }) {
     templateTable,
     processTable,
     bucket,
+    nformTable,
+    ntemplateTable
   };
 }

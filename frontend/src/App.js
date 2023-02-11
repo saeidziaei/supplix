@@ -417,6 +417,6 @@ function App() {
   // Check tenant is valid
   // if (tenantName  != "t1" && tenantName != "t2") return <h1>Wrong way, go back!</h1>;
 
-  return renderApp();
-  // return renderNotesApp()
+  // return renderApp();
+  return renderNotesApp()
 }

@@ -434,7 +434,7 @@ export default function FormTemplate() {
   if (isLoading) return <Loader active />;
 
   return (
-    <Grid>
+    <Grid stackable>
       <Grid.Column width={8}>
         <Header as="h1" color="blue">
           Editor

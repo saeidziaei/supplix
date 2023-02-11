@@ -10,6 +10,7 @@ import { capitalizeFirstLetter } from '../lib/helpers';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm  from 'remark-gfm';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from 'react-router-dom';
 
 
 export default function ISO() {
@@ -18,6 +19,9 @@ export default function ISO() {
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // const location = useLocation();
+  // const pathInURL = new URLSearchParams(location.search).get('path');
+  // alert(pathInURL);
   const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
   useEffect(() => {
     window.history.pushState({ path }, path, `?path=${path}`);
@@ -50,7 +54,7 @@ export default function ISO() {
 
   const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [isCompact, setIsCompact] =useState(true);
+    const [isCompact, setIsCompact] =useState(false);
 
     const handleSave = (newValues) => {
       onEdit(newValues);
@@ -336,15 +340,13 @@ export default function ISO() {
   if (isLoading) return <Loader active />;
 
 
-
-
   return (
     <>
     { renderBreadcrumb(tree, path) }
     <Node
       values={currentDataNode}
       onEdit={(newDataNode) => setNodeByPath(tree, path, newDataNode) }
-      onAddChild={(newDataNode) => addNodeToPath(tree, path, newDataNode) } 
+      onAddChild={(newDataNode) => {addNodeToPath(tree, path, newDataNode);  setPath(path + "/" + newDataNode.guid)} }
       onDelete={(p) => deleteNodeByPath(tree, p) }
       onPathChange={(p) => setPath(p)}
     />

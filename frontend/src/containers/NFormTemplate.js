@@ -42,25 +42,27 @@ import { NGenericForm } from "../components/NGenericForm";
 
 export default function NFormTemplate() {
   const {templateId} = useParams();
-  const customerIsoId = "iso-123";
+  const customerId = "c-123";
   const callJwtAPI = JwtApi();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
   const [title, setTitle] = useState("Comprehensive Exam");
-  const [sections, setSections] = useState([
-    {title: "Exam Appointment", fields: [
-      {guid:"1", title:"Dentist", type:"text"},
-      {guid:"2", title:"DA", type:"text"},
-      {guid:"3", title:"C/C", type:"multi", options:["Nil", "Pain", "Bleeding gums", "Broken tooth", "Loss of tooth", "Cavities", "Appearance", "Sensitivity", "Other!!"]},
-      {guid:"4", title:"Reason for attendance", type:"radio", options:["Routine recall exam", "New patient exam", "Patient has a specific concern"]},
-    ]}]);
+  // const [sections, setSections] = useState([
+  //   {title: "Exam Appointment", fields: [
+  //     {guid:"1", title:"Dentist", type:"text"},
+  //     {guid:"2", title:"DA", type:"text"},
+  //     {guid:"3", title:"C/C", type:"multi", options:["Nil", "Pain", "Bleeding gums", "Broken tooth", "Loss of tooth", "Cavities", "Appearance", "Sensitivity", "Other!!"]},
+  //     {guid:"4", title:"Reason for attendance", type:"radio", options:["Routine recall exam", "New patient exam", "Patient has a specific concern"]},
+  //   ]}]);
+
+  const [sections, setSections] = useState(null);
 
   useEffect(() => {
     function loadTemplate() {
       return callJwtAPI(
         "GET",
-        `/ntemplates/${templateId}`
+        `/customers/${customerId}/ntemplates/${templateId}`
       );
     }
 
@@ -101,7 +103,7 @@ export default function NFormTemplate() {
     }
   }
   function createTemplate(def) {
-    return callJwtAPI("POST", `/ntemplates`, {
+    return callJwtAPI("POST", `/customers/${customerId}/ntemplates`, {
       templateDefinition: def,
     });
   }
@@ -109,7 +111,7 @@ export default function NFormTemplate() {
   function updateTemplate(def) {
     return callJwtAPI(
       "PUT",
-      `/ntemplates/${templateId}`,
+      `/customers/${customerId}/ntemplates/${templateId}`,
       {
         templateDefinition: def,
       }
@@ -197,6 +199,7 @@ export default function NFormTemplate() {
   const fieldTypes = [
     { key: "text", text: "Text", value: "text" },
     { key: "number", text: "Number", value: "number" },
+    { key: "multi", text: "Multi", value: "multi" },
     { key: "date", text: "Date", value: "date" },
     { key: "radio", text: "Radio", value: "radio" },
     { key: "select", text: "Select", value: "select" },
@@ -258,7 +261,7 @@ export default function NFormTemplate() {
             items={section.fields.map((f, i) => f.guid)}
             strategy={verticalListSortingStrategy}
           >
-            <Item.Group divided>
+            <Item.Group >
               <Confirm
                 size="mini"
                 header="This will delete the field."
@@ -413,7 +416,7 @@ export default function NFormTemplate() {
   if (isLoading) return <Loader active />;
 
   return (
-    <Grid>
+    <Grid stackable>
       <Grid.Column width={8}>
         <Header as="h1" color="blue">
           Editor

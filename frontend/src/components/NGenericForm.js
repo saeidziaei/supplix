@@ -75,23 +75,27 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
       case "multi":
         return (
           <div>
-            {f.options.map((o) => {
-              const val = `__${o}__`;
+            {f.options.map((o) => {     
               let newValues = values[name];
-              const selected = newValues && newValues.includes(val);
+              const selected = Array.isArray(newValues) && newValues.includes(o);// check to see newValues is actually an array as the type might have changed.
               return (
                 <Button
                   key={o}
                   basic
-                  color={selected ? "green" : ""}
+                  color={selected ? "green" : "grey"}
                   size={size}
                   style={{ marginBottom: "2px" }}
                   onClick={(e) => {
                     e.preventDefault();
                     
-                    if (selected)
-                      newValues = newValues.replace(val, "");
-                    else newValues = newValues + val;
+                    if (selected) {
+                      newValues = newValues.filter(item => item !== o);
+                    }
+                    else {
+                      if (!Array.isArray(newValues))
+                        newValues =[];
+                      newValues.push(o);
+                    }
                     setFieldValue(name, newValues);
                   }}
                 >
@@ -154,7 +158,10 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
           field.options.map((o) => {
             acc[field.guid + o] = false;
           });
-        } else {
+        } else if (field.type == "multi") { 
+          acc[field.guid] = [];
+        }
+        else {
           acc[field.guid] = "";
         }
         return acc;
@@ -168,25 +175,14 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
         {({ isSubmitting, values, setFieldValue }) => (
           <Form size="small">
             {formDef.sections.map((s) => (
-              <Segment vertical key={s.title} size="tiny">
-                <Table basic="very" compact stackable>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.HeaderCell colSpan="5">{s.title}</Table.HeaderCell>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {s.fields.map((f, i) => (
-                      <Table.Row key={f.guid}>
-                        <Table.Cell width={4}>{f.title}</Table.Cell>
-                        <Table.Cell width={8} textAlign="center">
-                          {renderField(f, values, setFieldValue)}
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table>
-              </Segment>
+              <Item.Group key={s.title}>
+                <Item.Header>{s.title}</Item.Header>
+                {s.fields.map((f, i) => (
+                  <Item key={f.guid}><Label pointing="right" color="teal">{f.title}</Label> {renderField(f, values, setFieldValue)}</Item>
+                  ))}
+                <Item></Item>
+              </Item.Group>
+             
             ))}
             {handleSubmit && (
               <LoaderButton type="submit" className="ms-auto hide-in-print">
