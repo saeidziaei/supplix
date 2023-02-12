@@ -51,17 +51,24 @@ function App() {
       const session = await Auth.currentSession();
       
       const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (decodedJwt.exp < currentTime) {
+        console.log("Expiered Token");
+        handleLogout();
+      }
+      
       setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
 
       userHasAuthenticated(true);
-      setjwtToken(session.getAccessToken().getJwtToken())
+      setjwtToken(session.getAccessToken().getJwtToken());
     } catch (e) {
       if (e !== "No current user") {
         alert(e);
       }
+      nav("/login");
     }
-    
     setIsAuthenticating(false);
+    
   }
 
 
@@ -274,24 +281,20 @@ function App() {
                   visible={isSidebarVisible}
                   inverted
                   vertical
+                  onHide={() => setIsSidebarVisible(false)}
+                  onClick={() => setIsSidebarVisible(false)}
                   animation="push"
                 >
-                  <Menu.Item>
-                    <LinkContainer to="/">
-                      <Nav.Link>
+                  <LinkContainer to="/">
+                    <Nav.Link as={Menu.Item}>
+                      <span>
                         <Icon name="home" />
                         Home
-                      </Nav.Link>
-                    </LinkContainer>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <LinkContainer to="/iso">
-                      <Nav.Link>
-                        <Icon name="sitemap" />
-                        ISO
-                      </Nav.Link>
-                    </LinkContainer>
-                  </Menu.Item>
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
+
+
                   <Menu.Item as="a">
                     <Label color="teal">5</Label>
                     Tasks
@@ -303,62 +306,45 @@ function App() {
 
                   {isAuthenticated ? (
                     <>
-                      <Menu.Item>
-                        <LinkContainer to="/dynamic-form">
-                          <Nav.Link>
-                            <Icon name="strava" />
-                            Generic Form
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/users">
-                          <Nav.Link>
-                            <Icon name="users" />
-                            Users
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/project-context">
-                          <Nav.Link>
-                            <Icon name="product hunt" />
-                            Project
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/customers">
-                          <Nav.Link>
-                            <Icon name="users" />
-                            Customers
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
+                    <LinkContainer to="/iso">
+                    <Nav.Link as={Menu.Item}>
+                      <span>
+                        <Icon name="sitemap" />
+                        ISO
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
 
-                      <Menu.Item>
-                        <LinkContainer to="/templates">
-                          <Nav.Link>
-                            <Icon color="blue" name="clipboard list" />
-                            Templates
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/registers">
-                          <Nav.Link>
-                            <Icon name="folder open outline" />
-                            Register
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
+                
+                  <LinkContainer to="/templates">
+                    <Nav.Link as={Menu.Item}>
+                      <span>
+                        <Icon name="clipboard list" />
+                        Templates
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
 
-                      <Menu.Item>
-                        <Nav.Link onClick={handleLogout}>
-                          <Icon name="log out" />
-                          Logout
-                        </Nav.Link>
-                      </Menu.Item>
+                  <LinkContainer to="/registers">
+                    <Nav.Link as={Menu.Item}>
+                      <span>
+                        <Icon name="folder open outline" />
+                        Register
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
+                     
+                  <LinkContainer to="/registers">
+                    <Nav.Link as={Menu.Item} onClick={handleLogout}>
+                      <span>
+                        <Icon name="log out" />
+                        Logout
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
+                  
+
+              
                     </>
                   ) : (
                     <>
@@ -394,6 +380,7 @@ function App() {
                         userHasAuthenticated,
                         isTopLevelAdmin,
                         jwtToken,
+                        setjwtToken,
                         currentCustomer,
                         setCurrentCustomer,
                         currentIso,
@@ -401,7 +388,7 @@ function App() {
                       }}
                     >
                       {/* <Routes tenant={tenantName} /> */}
-                      <Routes  />
+                      <Routes />
                     </AppContext.Provider>
                   </Segment>
                 </Sidebar.Pusher>
@@ -417,6 +404,6 @@ function App() {
   // Check tenant is valid
   // if (tenantName  != "t1" && tenantName != "t2") return <h1>Wrong way, go back!</h1>;
 
-  // return renderApp();
-  return renderNotesApp()
+  return renderApp();
+  // return renderNotesApp()
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import "./ISO.css";
 import { onError } from "../lib/errorLib";
 import { JwtApi } from "../lib/apiLib";
-import { Loader } from "semantic-ui-react";
+import { List, Loader } from "semantic-ui-react";
 import DisplayText from '../components/DisplayText';
 import { Button, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
 import  pluralize from "pluralize";
@@ -96,13 +96,59 @@ export default function ISO() {
             <Header as="h3">{title}</Header>
             <Label>{type}</Label>
             <Divider hidden />
-            { isCompact && <><Icon name='chevron right' size='small' color='grey' onClick={() => setIsCompact(false)}/>Expand<Divider /></>}
-            { !isCompact && <><Icon name='chevron down' size='small' color='grey' onClick={() => setIsCompact(true)}/> 
-            <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} /></> }
-            <Button circular basic size='small' icon="pencil" color='blue' onClick={() => setIsEditing(true)}/>
-            { path && <Popup content={canBeDeleted ? "Delete this node" : "This node has children and cannot be deleted."} trigger={
-            <Button  circular basic size='small' icon="x" color={canBeDeleted ? "red" : "grey"} onClick={() => { if(canBeDeleted) onDelete(path);}} /> } /> }
-            { groupedChildren.length == 0 && (
+            {isCompact && (
+              <>
+                <Icon
+                  name="chevron right"
+                  size="small"
+                  color="grey"
+                  onClick={() => setIsCompact(false)}
+                />
+                Expand
+                <Divider />
+              </>
+            )}
+            {!isCompact && (
+              <>
+                <Icon
+                  name="chevron down"
+                  size="small"
+                  color="grey"
+                  onClick={() => setIsCompact(true)}
+                />
+                <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />
+              </>
+            )}
+            <Button
+              circular
+              basic
+              size="small"
+              icon="pencil"
+              color="blue"
+              onClick={() => setIsEditing(true)}
+            />
+            {path && (
+              <Popup
+                content={
+                  canBeDeleted
+                    ? "Delete this node"
+                    : "This node has children and cannot be deleted."
+                }
+                trigger={
+                  <Button
+                    circular
+                    basic
+                    size="small"
+                    icon="x"
+                    color={canBeDeleted ? "red" : "grey"}
+                    onClick={() => {
+                      if (canBeDeleted) onDelete(path);
+                    }}
+                  />
+                }
+              />
+            )}
+            {groupedChildren.length == 0 && (
               <Button
                 basic
                 color="green"
@@ -122,7 +168,7 @@ export default function ISO() {
               groupedChildren.map((group, groupIndex) => (
                 <div key={groupIndex}>
                   <Divider horizontal>
-                    <Header as="h3" >
+                    <Header as="h3">
                       <Icon name="tag" />
                       {pluralize(capitalizeFirstLetter(group[0].type))}
                     </Header>
@@ -131,22 +177,20 @@ export default function ISO() {
                     {group.map((child, index) => (
                       <Item key={index}>
                         <Item.Content>
+                          <Button
+                            circular
+                            basic
+                            icon="ellipsis horizontal"
+                            size="mini"
+                            onClick={() => 
+                              onPathChange(path + "/" + child.guid)
+                            }
+
+                          />
                           <Item.Header>
                             <DisplayText text={child.title} />
                           </Item.Header>
                           <Item.Description></Item.Description>
-                          <Item.Extra>
-         
-                            <Button
-                              basic
-                              onClick={() =>
-                                onPathChange(path + "/" + child.guid)
-                              }
-                            >
-                              <Icon color="blue" name="expand" />
-                              Details
-                            </Button>
-                          </Item.Extra>
                         </Item.Content>
                       </Item>
                     ))}

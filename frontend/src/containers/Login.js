@@ -16,7 +16,7 @@ export default function Login() {
 //   userPoolWebClientId: `${tenant}_web_client`,
 // });
 
-  const { userHasAuthenticated } = useAppContext();
+  const { userHasAuthenticated, setjwtToken } = useAppContext();
   
 
   const [fields, handleFieldChange] = useFormFields({
@@ -38,7 +38,10 @@ export default function Login() {
 
     try {
       await Auth.signIn(fields.email, fields.password);
+      const session = await Auth.currentSession();
       userHasAuthenticated(true);
+      console.log(session.getAccessToken().getJwtToken());
+      setjwtToken(session.getAccessToken().getJwtToken());
       nav("/");
     } catch (e) {
       onError(e);
