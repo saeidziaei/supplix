@@ -3,12 +3,11 @@ import { BsPencilSquare } from "react-icons/bs";
 import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -25,8 +24,8 @@ export default function Users() {
     onLoad();
   }, []);
 
-  function loadUsers() {
-    return callJwtAPI("GET", `/users`);
+  async function loadUsers() {
+    return await makeApiCall("GET", `/users`);
   }
   function getAttribute(user, attributeName) {
     const attribute = user.Attributes.find(

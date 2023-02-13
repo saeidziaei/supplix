@@ -35,7 +35,7 @@ import {
 } from "@dnd-kit/sortable";
 import { SortableItem } from "../components/SortableItem";
 import { useParams, useNavigate } from "react-router-dom";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { v4 as uuidv4 } from 'uuid';
 import { NGenericForm } from "../components/NGenericForm";
@@ -43,7 +43,6 @@ import { NGenericForm } from "../components/NGenericForm";
 export default function NFormTemplate() {
   const {templateId} = useParams();
   const customerId = "c-123";
-  const callJwtAPI = JwtApi();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
@@ -59,8 +58,8 @@ export default function NFormTemplate() {
   const [sections, setSections] = useState(null);
 
   useEffect(() => {
-    function loadTemplate() {
-      return callJwtAPI(
+    async function loadTemplate() {
+      return await makeApiCall(
         "GET",
         `/customers/${customerId}/ntemplates/${templateId}`
       );
@@ -102,14 +101,14 @@ export default function NFormTemplate() {
       setIsLoading(false);
     }
   }
-  function createTemplate(def) {
-    return callJwtAPI("POST", `/customers/${customerId}/ntemplates`, {
+  async function createTemplate(def) {
+    return await makeApiCall("POST", `/customers/${customerId}/ntemplates`, {
       templateDefinition: def,
     });
   }
 
-  function updateTemplate(def) {
-    return callJwtAPI(
+  async function updateTemplate(def) {
+    return await makeApiCall(
       "PUT",
       `/customers/${customerId}/ntemplates/${templateId}`,
       {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import "./ISO.css";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
 import { List, Loader } from "semantic-ui-react";
 import DisplayText from '../components/DisplayText';
 import { Button, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
@@ -10,19 +9,22 @@ import { capitalizeFirstLetter } from '../lib/helpers';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import remarkGfm  from 'remark-gfm';
 import { v4 as uuidv4 } from 'uuid';
-import { useLocation } from 'react-router-dom';
-
+import { useLocation, useNavigate } from 'react-router-dom';
+import { makeApiCall } from '../lib/apiLib';
 
 export default function ISO() {
   const customerIsoId = "iso-123";
-  const callJwtAPI = JwtApi();
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
+  
+  const nav = useNavigate();
+
+
   // const location = useLocation();
   // const pathInURL = new URLSearchParams(location.search).get('path');
   // alert(pathInURL);
-  const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
   useEffect(() => {
     window.history.pushState({ path }, path, `?path=${path}`);
   }, [path]);
@@ -31,6 +33,7 @@ export default function ISO() {
     if (savedTree != tree)
       handleSubmit(tree);
   }, [tree]);
+
 
   const EditNode = ({ initialValues, onSave, onCancel }) => {
     const [values, setValues] = useState(initialValues || {});
@@ -52,7 +55,7 @@ export default function ISO() {
     );
   };
 
-  const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete }) => {
+  const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete, onMoveChildUp, onMoveChildDown }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isCompact, setIsCompact] =useState(false);
 
@@ -191,6 +194,10 @@ export default function ISO() {
                             <DisplayText text={child.title} />
                           </Item.Header>
                           <Item.Description></Item.Description>
+                          <Item.Extra>
+                            { index > 0 && <Button size='tiny' floated='right' basic circular icon="arrow up" onClick={() => onMoveChildUp(child.guid)} /> }
+                            { index < group.length - 1 && <Button size='tiny' floated='right' basic circular icon="arrow down" onClick={() => onMoveChildDown(child.guid)} /> }
+                          </Item.Extra>
                         </Item.Content>
                       </Item>
                     ))}
@@ -296,18 +303,9 @@ export default function ISO() {
     setTree(updatedTree);    
   }
   function addNodeToPath(tree, path, newDataNode) {
-    const pathArray = path.split('/').splice(1);
     const updatedTree = JSON.parse(JSON.stringify(tree));
+    const currentNode = getNodeByPath(updatedTree, path);
 
-    let currentNode = updatedTree;
-    for (const guid of pathArray) {
-      
-      const nextNode = currentNode.children.find(child => child.guid === guid);
-  
-      if (!nextNode) return null; // error , node not found
-        
-      currentNode = nextNode;
-    }
     if (!currentNode.children)
       currentNode.children = [];
     currentNode.children.push(newDataNode);
@@ -315,31 +313,46 @@ export default function ISO() {
     setTree(updatedTree);
   }
   function setNodeByPath(tree, path, newDataNode) {
-    const pathArray = path.split('/').splice(1);
-
     const updatedTree = JSON.parse(JSON.stringify(tree));
-    let currentNode = updatedTree;
-    for (const guid of pathArray) {
-      
-      const nextNode = currentNode.children.find(child => child.guid === guid);
-  
-      if (!nextNode) return null; // error , node not found
-   
-      currentNode = nextNode;
-    }
-  
+    let currentNode = getNodeByPath(updatedTree, path);
+
     Object.assign(currentNode, newDataNode);
 
     setTree(updatedTree);
   }
+  function moveChild(tree, path, childGuid, direction) {
+    const updatedTree = JSON.parse(JSON.stringify(tree));
+    let currentNode = getNodeByPath(updatedTree, path);
+    let array = currentNode.children;
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].guid === childGuid) {
+        if (direction === 'up' && i > 0) {
+          // Swap the current object with the one above it
+          [array[i], array[i - 1]] = [array[i - 1], array[i]];
+          break;
+        } else if (direction === 'down' && i < array.length - 1) {
+          // Swap the current object with the one below it
+          [array[i], array[i + 1]] = [array[i + 1], array[i]];
+          break;
+        }
+      }
+    }
+
+    setTree(updatedTree);
+  }
+
+
   const currentDataNode = getNodeByPath(tree, path);
 
+ 
   useEffect(() => {
-    function loadProcess() {
-      return callJwtAPI(
-        "GET",
-        `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level)
+    async function loadProcess() {
+      return await makeApiCall("GET", `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level))
       );
+      // return jwtApi(
+      //   "GET",
+      //   `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level)
+      // );
     }
 
     async function onLoad() {
@@ -354,6 +367,7 @@ export default function ISO() {
 
       setIsLoading(false);
     }
+
 
     onLoad();
   }, []);
@@ -372,8 +386,8 @@ export default function ISO() {
   }
 
 
-  function updateProcess(tree) {
-    return callJwtAPI(
+  async function updateProcess(tree) {
+    return await makeApiCall(
       "PUT",
       `/customer-isos/${customerIsoId}/processes/top-level`,
       {
@@ -381,8 +395,11 @@ export default function ISO() {
       }
     );
   }
+
+
   if (isLoading) return <Loader active />;
 
+  if (!currentDataNode) return <Header>Nothing to see here!</Header>;
 
   return (
     <>
@@ -393,6 +410,8 @@ export default function ISO() {
       onAddChild={(newDataNode) => {addNodeToPath(tree, path, newDataNode);  setPath(path + "/" + newDataNode.guid)} }
       onDelete={(p) => deleteNodeByPath(tree, p) }
       onPathChange={(p) => setPath(p)}
+      onMoveChildDown={(childGuid) => moveChild(tree, path, childGuid, 'down') }
+      onMoveChildUp={(childGuid) => moveChild(tree, path, childGuid, 'up') }
     />
     </>
   );

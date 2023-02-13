@@ -12,11 +12,11 @@ import {
 
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
 import { Loader, Header, Table } from "semantic-ui-react";
 import { useParams } from "react-router-dom";
 import { parseISO } from "date-fns";
 import { NumericFormat } from "react-number-format";
+import { makeApiCall } from "../lib/apiLib";
 
 export default function FormRegister() {
   const { templateId } = useParams();
@@ -25,7 +25,6 @@ export default function FormRegister() {
   const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -47,14 +46,14 @@ export default function FormRegister() {
     onLoad();
   }, []);
 
-  function loadTemplate(templateId) {
-    return callJwtAPI(
+  async function loadTemplate(templateId) {
+    return await makeApiCall(
       "GET",
       `/customer-isos/${customerIsoId}/templates/${templateId}`
     );
   }
-  function loadTemplateForms(templateId) {
-    return callJwtAPI(
+  async function loadTemplateForms(templateId) {
+    return await makeApiCall(
       "GET",
       `/customer-isos/${customerIsoId}/templates/${templateId}/forms`
     );

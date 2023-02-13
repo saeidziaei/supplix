@@ -12,14 +12,13 @@ import {
 
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 import { Loader, Header, Table } from "semantic-ui-react";
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
   const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -37,8 +36,8 @@ export default function FormTemplates() {
     onLoad();
   }, []);
 
-  function loadTemplates() {
-    return callJwtAPI("GET", `/customer-isos/${customerIsoId}/templates`);
+  async function loadTemplates() {
+    return await makeApiCall("GET", `/customer-isos/${customerIsoId}/templates`);
   }
 
   function renderTemplate(t) {

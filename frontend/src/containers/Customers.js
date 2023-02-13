@@ -3,14 +3,13 @@ import { BsPencilSquare } from "react-icons/bs";
 import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
 import { Loader } from "semantic-ui-react";
+import { makeApiCall } from "../lib/apiLib";
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   // const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -27,8 +26,8 @@ export default function Customers() {
     onLoad();
   }, []);
 
-  function loadCustomers() {
-    return callJwtAPI("GET", `/customers`);
+  async function loadCustomers() {
+    return await makeApiCall("GET", `/customers`);
   }
 
   function renderCustomerList(customers) {

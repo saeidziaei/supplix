@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Storage } from "aws-amplify";
@@ -12,7 +12,6 @@ export default function ProjectContext() {
   const [isos, setIsos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -29,13 +28,13 @@ export default function ProjectContext() {
     onLoad();
   }, []);
 
-  function loadCustomers() {
-    return callJwtAPI("GET", `/customers`);
+  async function loadCustomers() {
+    return await makeApiCall("GET", `/customers`);
   }
 
   async function loadIsos(customerId) {
     try {
-      const isos = await callJwtAPI("GET", `/customers/${customerId}/isos`);
+      const isos = await makeApiCall("GET", `/customers/${customerId}/isos`);
       setIsos(isos);
     } catch (e) {
       onError(e);

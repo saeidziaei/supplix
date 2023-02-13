@@ -38,10 +38,9 @@ export default function Login() {
 
     try {
       await Auth.signIn(fields.email, fields.password);
-      const session = await Auth.currentSession();
+      
       userHasAuthenticated(true);
-      console.log(session.getAccessToken().getJwtToken());
-      setjwtToken(session.getAccessToken().getJwtToken());
+      
       nav("/");
     } catch (e) {
       onError(e);

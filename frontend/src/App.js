@@ -30,7 +30,6 @@ function App() {
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isTopLevelAdmin, setIsTopLevelAdmin] = useState(false);
-  const [jwtToken, setjwtToken] = useState("");
   const [currentCustomer, setCurrentCustomer] = useState(null);
   const [currentIso, setCurrentIso] = useState(null);
 
@@ -46,21 +45,18 @@ function App() {
   useEffect(() => {
     onLoad();
   }, []); // If we pass in an empty list of variables, then it’ll only run our function on the FIRST render
+
+
+
   async function onLoad() {
     try {
+      console.log("app load");
       const session = await Auth.currentSession();
-      
+
       const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (decodedJwt.exp < currentTime) {
-        console.log("Expiered Token");
-        handleLogout();
-      }
-      
       setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
 
       userHasAuthenticated(true);
-      setjwtToken(session.getAccessToken().getJwtToken());
     } catch (e) {
       if (e !== "No current user") {
         alert(e);
@@ -224,7 +220,6 @@ function App() {
                         isAuthenticated,
                         userHasAuthenticated,
                         isTopLevelAdmin,
-                        jwtToken,
                         currentCustomer,
                         setCurrentCustomer,
                         currentIso,
@@ -379,8 +374,6 @@ function App() {
                         isAuthenticated,
                         userHasAuthenticated,
                         isTopLevelAdmin,
-                        jwtToken,
-                        setjwtToken,
                         currentCustomer,
                         setCurrentCustomer,
                         currentIso,

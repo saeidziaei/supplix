@@ -35,15 +35,14 @@ import {
 } from "@dnd-kit/sortable";
 import { SortableItem } from "../components/SortableItem";
 import { useParams, useNavigate } from "react-router-dom";
-import { JwtApi } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { v4 as uuidv4 } from 'uuid';
 import { GenericForm } from "../components/GenericForm";
+import { makeApiCall } from "../lib/apiLib";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
   const customerIsoId = "iso-123";
-  const callJwtAPI = JwtApi();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
@@ -51,8 +50,8 @@ export default function FormTemplate() {
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
-    function loadTemplate() {
-      return callJwtAPI(
+    async function loadTemplate() {
+      return await makeApiCall(
         "GET",
         `/customer-isos/${customerIsoId}/templates/${templateId}`
       );
@@ -104,14 +103,14 @@ export default function FormTemplate() {
       setIsLoading(false);
     }
   }
-  function createTemplate(def) {
-    return callJwtAPI("POST", `/customer-isos/${customerIsoId}/templates`, {
+  async function createTemplate(def) {
+    return await makeApiCall("POST", `/customer-isos/${customerIsoId}/templates`, {
       templateDefinition: def,
     });
   }
 
-  function updateTemplate(def) {
-    return callJwtAPI(
+  async function updateTemplate(def) {
+    return await makeApiCall(
       "PUT",
       `/customer-isos/${customerIsoId}/templates/${templateId}`,
       {

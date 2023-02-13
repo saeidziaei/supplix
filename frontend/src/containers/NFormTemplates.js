@@ -12,14 +12,13 @@ import {
 
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 import { Loader, Header, Table } from "semantic-ui-react";
 
 export default function NFormTemplates() {
   const [templates, setTemplates] = useState([]);
   const customerId = "c-123";
   const [isLoading, setIsLoading] = useState(true);
-  const callJwtAPI = JwtApi();
 
   useEffect(() => {
     async function onLoad() {
@@ -37,8 +36,8 @@ export default function NFormTemplates() {
     onLoad();
   }, []);
 
-  function loadTemplates() {
-    return callJwtAPI("GET", `/customers/${customerId}/ntemplates`);
+  async function loadTemplates() {
+    return await makeApiCall("GET", `/customers/${customerId}/ntemplates`);
   }
 
   function renderTemplate(t) {

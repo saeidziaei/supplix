@@ -12,7 +12,7 @@ import { useFormFields } from "../lib/hooksLib";
 import "./Customer.css";
 import { Storage } from "aws-amplify";
 import { s3Upload } from "../lib/awsLib";
-import { JwtApi } from "../lib/apiLib";
+import { makeApiCall } from "../lib/apiLib";
 
 export default function Customer() {
   const file = useRef(null);
@@ -30,15 +30,14 @@ export default function Customer() {
   const [customer, setCustomer] = useState(); // Original customer before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const callJwtAPI = JwtApi();
 
   function validateForm() {
     return fields.companyName.length > 0;
   }
 
   useEffect(() => {
-    function loadCustomer() {
-      return callJwtAPI("GET", `/customers/${customerId}`);
+    async function loadCustomer() {
+      return await makeApiCall("GET", `/customers/${customerId}`);
     }
 
     async function onLoad() {
@@ -114,11 +113,11 @@ export default function Customer() {
       setIsLoading(false);
     }
   }
-  function createCustomer(customer) {
-    return callJwtAPI("POST", "/customers", customer);
+  async function createCustomer(customer) {
+    return await makeApiCall("POST", "/customers", customer);
   }
-  function updateCustomer(customer) {
-    return callJwtAPI("PUT", `/customers/${customerId}`, customer);
+  async function updateCustomer(customer) {
+    return await makeApiCall("PUT", `/customers/${customerId}`, customer);
   }
 
   return (
