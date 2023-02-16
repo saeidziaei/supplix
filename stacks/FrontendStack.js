@@ -5,8 +5,6 @@ import { AuthAndApiStack } from "./AuthAndApiStack";
 import { StorageStack } from "./StorageStack";
 
 export function FrontendStack({ stack, app }) {
-  // const { api } = use(ApiStack);
-  // const { auth } = use(AuthStack);
   const { api, auth } = use(AuthAndApiStack);
   const { bucket } = use(StorageStack);
   // Define our React app

@@ -12,7 +12,9 @@ import { useFormFields } from "../lib/hooksLib";
 import "./Customer.css";
 import { Storage } from "aws-amplify";
 import { s3Upload } from "../lib/awsLib";
-import { makeApiCall } from "../lib/apiLib";
+import { makeApiCall, uploadFile } from "../lib/apiLib";
+import axios from "axios";
+
 
 export default function Customer() {
   const file = useRef(null);
@@ -25,7 +27,7 @@ export default function Customer() {
     contactPhone: "",
     logo: "",
   });
-  
+
   const { customerId } = useParams();
   const [customer, setCustomer] = useState(); // Original customer before save
   const nav = useNavigate();
@@ -44,8 +46,8 @@ export default function Customer() {
       try {
         if (customerId) {
           const item = await loadCustomer();
-          
-          setFields({...item});
+
+          setFields({ ...item });
           if (item.logo) {
             item.logoURL = await Storage.get(item.logo);
           }
@@ -71,8 +73,36 @@ export default function Customer() {
   }
 
   async function handleSubmit(event) {
+
+
     event.preventDefault();
     // other validatoins ... TODO
+    const signedUrl = await makeApiCall(
+      "POST",
+      `/docs/upload-url`, {fileName: file.current.name, contentType: file.current.type}
+    );
+    console.log(signedUrl);
+    
+    const reader = new FileReader();
+    reader.addEventListener('load', async (event) => {
+      const fileContent = event.target.result;
+      console.log(fileContent, file.current.type);
+
+      // Upload the file to S3 using Axios
+      await axios.put(signedUrl, fileContent, {
+        headers: {
+          'Content-Type': file.current.type
+        }
+      });
+    });
+  
+    reader.readAsArrayBuffer(file.current);
+    return;
+
+    uploadFile(signedUrl, file.current);
+
+
+    return;
 
     if (file.current && file.current.size > config.MAX_ATTACHMENT_SIZE) {
       alert(
@@ -89,21 +119,21 @@ export default function Customer() {
       let logo = file.current ? await s3Upload(file.current) : null;
 
       if (customerId) {
-        if (logo) { 
+        if (logo) {
           // the user has picked a new logo. Delete the original file if any exists
-          if (customer.logo) 
-          try {
-            await Storage.remove(customer.logo);
-          } catch (e) {
-            console.log(e);// ignore
-          }
+          if (customer.logo)
+            try {
+              await Storage.remove(customer.logo);
+            } catch (e) {
+              console.log(e); // ignore
+            }
         } else {
           // the user hasn't changed the log. Use the origianl value
           logo = customer.logo;
         }
-        
+
         await updateCustomer({ ...fields, logo });
-        window.location.reload(); 
+        window.location.reload();
       } else {
         await createCustomer({ ...fields, logo });
         nav("/customers");
@@ -136,8 +166,11 @@ export default function Customer() {
             <Form.Label>Logo</Form.Label>
             {customer && customer.logoURL && (
               <p>
-                
-                <img src={customer.logoURL} alt="Company Logo" style={{width: "250px"}} />
+                <img
+                  src={customer.logoURL}
+                  alt="Company Logo"
+                  style={{ width: "250px" }}
+                />
               </p>
             )}
             <Form.Control onChange={handleFileChange} type="file" />
@@ -199,7 +232,7 @@ export default function Customer() {
             isLoading={isLoading}
             disabled={!validateForm()}
           >
-            {customerId ?  "Update" : "Create" }
+            {customerId ? "Update" : "Create"}
           </LoaderButton>
         </Stack>
       </Form>

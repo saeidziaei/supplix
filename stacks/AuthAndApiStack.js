@@ -58,25 +58,37 @@ export function AuthAndApiStack({ stack, app }) {
           CUSTOMER_TABLE: customerTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
           PROCESS_TABLE: processTable.tableName,
-
+          BUCKET: bucket.bucketName,
           NFORM_TABLE: nformTable.tableName,
           NTEMPLATE_TABLE: ntemplateTable.tableName,
         },
       },
     },
     routes: {
-      "GET /customers": "functions/customer/list.main",
-      "GET /customers/{customerId}": "functions/customer/get.main",
-      "POST   /customers": "functions/customer/create.main",
-      "PUT /customers/{customerId}": "functions/customer/update.main",
-      // "DELETE /customers/{id}": "functions/customer/delete.main",
+      "POST /docs/upload-url": {
+        function: {
+          handler: "functions/doc/getUrlForPut.main",
+        },
+      },
+      "GET /docs/{docId}": {
+        function: { handler: "functions/doc/get.main" },
+      },
+      "POST /docs": {
+        function: {
+          handler: "functions/doc/create.main",
+        },
+      },
+      "DELETE /docs/{docId}": {
+        function: {
+          handler: "functions/doc/delete.main",
+        },
+      },
 
       "POST   /customers/{customerId}/iso": "functions/customerISO/create.main",
 
       "GET   /customer-isos/{customerIsoId}/forms": {
         function: {
           handler: "functions/form/list.main",
-          permissions: [formTable],
         },
       },
       "GET   /customer-isos/{customerIsoId}/forms/{formId}": {
@@ -209,32 +221,52 @@ export function AuthAndApiStack({ stack, app }) {
     },
   });
 
-  api.attachPermissionsToRoute("GET /users", [
-    new iam.PolicyStatement({
-      actions: ["cognito-idp:*"],
-      effect: iam.Effect.ALLOW,
-      resources: [
-        "*",
-        // `arn:aws:cognito-idp:${app.region}:${stack.accountId}:userpool/${auth.userPoolId}`,
-      ],
-    }),
+  // api.attachPermissionsToRoute("GET /users", [
+  //   new iam.PolicyStatement({
+  //     actions: ["cognito-idp:*"],
+  //     effect: iam.Effect.ALLOW,
+  //     resources: [
+  //       "*",
+  //       // `arn:aws:cognito-idp:${app.region}:${stack.accountId}:userpool/${auth.userPoolId}`,
+  //     ],
+  //   }),
+  // ]);
+  api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
+    // new iam.PolicyStatement({
+    //   actions: ["s3:*"],
+    //   effect: iam.Effect.ALLOW,
+    //   resources: [
+    //     bucket.bucketArn,
+    //     bucket.bucketArn + "/*",
+    //     // bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:custom:tenant}/*",
+    //   ],
+    // }),
   ]);
+
 
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API
     api,
 
-    // Policy granting access to a specific folder in the bucket
-    // TODO: Do we need this?
-    new iam.PolicyStatement({
-      actions: ["s3:*"],
-      effect: iam.Effect.ALLOW,
-      resources: [
-        bucket.bucketArn,
-        bucket.bucketArn + "/public/*", // + "/private/${cognito-identity.amazonaws.com:sub}/*",
-      ],
-    }),
+     // Policy granting access to a specific folder in the bucket
+    //  new iam.PolicyStatement({
+    //   actions: ["s3:*"],
+    //   effect: iam.Effect.ALLOW,
+    //   resources: [
+    //     bucket.bucketArn ,
+    //     bucket.bucketArn + "/*",
+    //     bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*",
+    //   ],
+    // }),
   ]);
+  
+ 
+ 
+ 
+
+  
+
+
   // Show the auth resources in the output
   stack.addOutputs({
     Region: app.region,

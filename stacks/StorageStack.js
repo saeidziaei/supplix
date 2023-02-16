@@ -1,8 +1,10 @@
 import { Bucket, Table } from "@serverless-stack/resources";
+import { tenants } from "./config";
 
-export function StorageStack({ stack }) {
+export function StorageStack({ stack, app }) {
   // Create an S3 bucket
-  const bucket = new Bucket(stack, "Uploads", {
+ 
+  const bucket = new Bucket(stack, "Uploads" , {
     cors: [
       {
         maxAge: "1 day",
@@ -13,7 +15,6 @@ export function StorageStack({ stack }) {
     ],
   });
 
-  
 
 
   const customerTable = new Table(stack, "Customer", {

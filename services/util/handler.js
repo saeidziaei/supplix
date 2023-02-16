@@ -6,17 +6,19 @@ import { CognitoIdentityServiceProvider } from 'aws-sdk';
 export default function handler(lambda, requiredGroup) {
   return async function (event, context) {
     let body, statusCode;
-
+    const tenant = getTenantFromRequest(event);
     // Start debugger
     // debug.init(event);
 
     try {
+      
       if (requiredGroup && !userInGroup(event, requiredGroup)) {
         body = {error: 'Unauthorised'};
         statusCode = 403;
       } else {
         // Run the Lambda
-        body = await lambda(event, context);
+        
+        body = await lambda(event, context, tenant);
         statusCode = 200;
       }
     } catch (e) {
@@ -25,6 +27,8 @@ export default function handler(lambda, requiredGroup) {
 
       body = { error: e.message };
       statusCode = 500;
+      // TODO Log to Cloudwatch
+      // {tenantId, e.message .... other info}
     }
 
     // Return HTTP response
@@ -43,4 +47,9 @@ export default function handler(lambda, requiredGroup) {
 function userInGroup(event, requiredGroup) {
   const claims = event.requestContext.authorizer.jwt.claims;
   return (claims['cognito:groups'] && claims['cognito:groups'].includes(requiredGroup))
+}
+
+function getTenantFromRequest(event) {
+  const claims = event.requestContext.authorizer.jwt.claims;
+  return claims['custom:tenant'];
 }

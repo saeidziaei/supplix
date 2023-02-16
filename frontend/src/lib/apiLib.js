@@ -1,38 +1,23 @@
 import { Amplify, API, Auth } from 'aws-amplify';
+import axios from "axios";
 
 
+export async function uploadFile (presignedUrl, filePath)  {
+  try {
+    const reader = new FileReader();
+    const file = await reader.readAsArrayBuffer(filePath);
+    console.log(file, filePath);
+    const result = await axios.put(presignedUrl, file);
+    console.info(result.data);
+    return result.data;
+  }
+  catch (error) {
+    console.error(error.response.data, { request: error.request })
+  }
 
-// export function JwtApi(jwt) {
-//   console.log("JwtApi");
-//   //  const apiName = "iso-cloud"; // TODO get from config
-//   const apiName = Amplify.configure().API.endpoints[0].name;
+};
 
-//   const headers = {
-//     Authorization: `Bearer ${jwt}`,
-//   };
 
-//   return (method, route, body) => {
-//     switch (method) {
-//       case "POST":
-//         return API.post(apiName, route, {
-//           headers: headers,
-//           body: body,
-//         });
-//       case "PUT":
-//         return API.put(apiName, route, {
-//           headers: headers,
-//           body: body,
-//         });
-//       case "GET":
-//         return API.get(apiName, route, {
-//           headers: headers,
-//         });
-
-//       default:
-//         return null;
-//     }
-//   };
-// }
 
 
 export async function makeApiCall(method, endpoint, body) {

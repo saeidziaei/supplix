@@ -9,6 +9,7 @@ import {
   Item,
   Message,
 } from "semantic-ui-react";
+import  pluralize from "pluralize";
 
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
@@ -71,7 +72,7 @@ export default function FormRegister() {
                     <LinkContainer to={`/register/${t.templateId}`}>
                       <List.Header as="a">{def.title}</List.Header>
                     </LinkContainer>
-                    <List.Description>{`used by ${t.formCount}`}</List.Description>
+                    <List.Description>{`${t.formCount} ${pluralize("entry", t.formCount)}`}</List.Description>
                   </List.Content>
                 </List.Item>
               );

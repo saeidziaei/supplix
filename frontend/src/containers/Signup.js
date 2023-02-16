@@ -37,7 +37,7 @@ export default function Signup() {
         username: fields.email,
         password: fields.password,
         attributes: {
-          "custom:tenant": "tenant_1"
+          "custom:tenant": "tenant1"
         }
         
       });
