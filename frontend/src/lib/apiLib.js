@@ -2,22 +2,6 @@ import { Amplify, API, Auth } from 'aws-amplify';
 import axios from "axios";
 
 
-export async function uploadFile (presignedUrl, filePath)  {
-  try {
-    const reader = new FileReader();
-    const file = await reader.readAsArrayBuffer(filePath);
-    console.log(file, filePath);
-    const result = await axios.put(presignedUrl, file);
-    console.info(result.data);
-    return result.data;
-  }
-  catch (error) {
-    console.error(error.response.data, { request: error.request })
-  }
-
-};
-
-
 
 
 export async function makeApiCall(method, endpoint, body) {

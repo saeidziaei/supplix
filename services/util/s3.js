@@ -7,4 +7,5 @@ export default {
   putObject: (params) => s3.putObject(params).promise(),
   deleteObject: (params) => s3.deleteObject(params).promise(),
   getSignedUrlForPut: (params) => s3.getSignedUrlPromise("putObject", params),
+  getSignedUrlForGet: (params) => s3.getSignedUrlPromise("getObject", params),
 };

@@ -57,14 +57,51 @@ export default function ISO() {
 
   const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete, onMoveChildUp, onMoveChildDown }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [isCompact, setIsCompact] =useState(false);
+    const [isCompact, setIsCompact] = useState(false);
+    const [content, setContent] = useState(values.content);
+
+
+
+    useEffect(() => {
+      async function prepContent(text)  {
+        const tokenRegex = /!\[embedded\]\(\/doc\/([a-f\d-]+)\)/g; // matches ![embedded](/doc/{docId})
+        let match = tokenRegex.exec(text);
+        while (match) {
+          
+          const docId = match[1];
+
+          const { fileURL, note } = await makeApiCall("GET", `/docs/${docId}`);
+          const replacement = `![${note}](${fileURL} "${note}")`;
+          text = text.replace(match[0], replacement);
+          match = tokenRegex.exec(text);
+        }
+
+        return text;
+      }
+      async function onLoad() {
+        try {
+          const preppedContent = await prepContent(content);
+
+          setContent(preppedContent);
+
+        } catch (e) {
+          onError(e);
+        }
+
+        setIsLoading(false);
+      }
+  
+      onLoad();
+    }, [content]);
 
     const handleSave = (newValues) => {
       onEdit(newValues);
       setIsEditing(false);
     };
 
-    const content = values.content;
+
+
+    
     const title = values.title;
     const children = values.children || [];
     const type = values.type;
@@ -171,9 +208,10 @@ export default function ISO() {
               groupedChildren.map((group, groupIndex) => (
                 <div key={groupIndex}>
                   <Divider horizontal>
-                    <Header as="h3">
-                      <Icon name="tag" />
+                    <Header as="h4">
+                      <Label tag color='teal' >
                       {pluralize(capitalizeFirstLetter(group[0].type))}
+                      </Label>
                     </Header>
                   </Divider>
                   <Item.Group divided>
@@ -185,19 +223,33 @@ export default function ISO() {
                             basic
                             icon="ellipsis horizontal"
                             size="mini"
-                            onClick={() => 
+                            onClick={() =>
                               onPathChange(path + "/" + child.guid)
                             }
-
                           />
                           <Item.Header>
                             <DisplayText text={child.title} />
                           </Item.Header>
-                          <Item.Description></Item.Description>
-                          <Item.Extra>
-                            { index > 0 && <Button size='tiny' floated='right' basic circular icon="arrow up" onClick={() => onMoveChildUp(child.guid)} /> }
-                            { index < group.length - 1 && <Button size='tiny' floated='right' basic circular icon="arrow down" onClick={() => onMoveChildDown(child.guid)} /> }
-                          </Item.Extra>
+                          {index > 0 && (
+                            <Button
+                              size="tiny"
+                              floated="right"
+                              basic
+                              circular
+                              icon="arrow up"
+                              onClick={() => onMoveChildUp(child.guid)}
+                            />
+                          )}
+                          {index < group.length - 1 && (
+                            <Button
+                              size="tiny"
+                              floated="right"
+                              basic
+                              circular
+                              icon="arrow down"
+                              onClick={() => onMoveChildDown(child.guid)}
+                            />
+                          )}
                         </Item.Content>
                       </Item>
                     ))}
@@ -266,7 +318,7 @@ export default function ISO() {
     }
     
     return (<>
-    <Breadcrumb size='massive'>
+    <Breadcrumb size='tiny'>
       {crumbs.slice(0, -1).map((crumb, index) => <span key={index}>
         <Breadcrumb.Section link onClick={() => setPath(crumb.path)}>{crumb.label}</Breadcrumb.Section>
         <Breadcrumb.Divider icon='right chevron' />
@@ -283,7 +335,7 @@ export default function ISO() {
     // find the parent and delete this child
     const parentPath = getParentPath(path);
     const guidToDelete = path.substring(path.lastIndexOf("/") + 1);
-    console.log("parentPath", parentPath, "guidToDelete", guidToDelete);
+    
     const pathArray = parentPath.split('/').splice(1);
     const updatedTree = JSON.parse(JSON.stringify(tree));
 

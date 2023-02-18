@@ -18,7 +18,7 @@ export default function handler(lambda, requiredGroup) {
       } else {
         // Run the Lambda
         
-        body = await lambda(event, context, tenant);
+        body = await lambda(event, tenant, context);
         statusCode = 200;
       }
     } catch (e) {

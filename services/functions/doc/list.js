@@ -1,11 +1,17 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
 const params = {
-  TableName: process.env.CUSTOMER_TABLE,
+  TableName: process.env.DOC_TABLE,
+  KeyConditionExpression: "tenant = :tenant",
+  ExpressionAttributeValues: {
+    ":tenant": tenant
+  },
 };
-const result = await dynamoDb.scan(params);
+const result = await dynamoDb.query(params);
 // Return the matching list of items in response body
 return result.Items;
 });
+
+

@@ -13,6 +13,7 @@ export function AuthAndApiStack({ stack, app }) {
     customerTable,
     customerISOTable,
     processTable,
+    docTable,
     nformTable,
     ntemplateTable,
   } = use(StorageStack);
@@ -58,6 +59,7 @@ export function AuthAndApiStack({ stack, app }) {
           CUSTOMER_TABLE: customerTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
           PROCESS_TABLE: processTable.tableName,
+          DOC_TABLE: docTable.tableName,
           BUCKET: bucket.bucketName,
           NFORM_TABLE: nformTable.tableName,
           NTEMPLATE_TABLE: ntemplateTable.tableName,
@@ -70,12 +72,22 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "functions/doc/getUrlForPut.main",
         },
       },
+      "GET /docs": {
+        function: {
+          handler: "functions/doc/list.main",
+          permissions: [docTable],
+        },
+      },
       "GET /docs/{docId}": {
-        function: { handler: "functions/doc/get.main" },
+        function: {
+          handler: "functions/doc/get.main",
+          permissions: [docTable],
+        },
       },
       "POST /docs": {
         function: {
           handler: "functions/doc/create.main",
+          permissions: [docTable],
         },
       },
       "DELETE /docs/{docId}": {
@@ -242,6 +254,7 @@ export function AuthAndApiStack({ stack, app }) {
     //   ],
     // }),
   ]);
+  api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
 
 
   auth.attachPermissionsForAuthUsers(auth, [

@@ -57,6 +57,13 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "customerIsoId", sortKey: "processId" },
   });
 
+  const docTable = new Table(stack , "Doc", {
+    fields: {
+      tenant: "string",
+      docId: "string", 
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "docId" },
+  });
 
   const nformTable = new Table(stack , "NForm", {
     fields: {
@@ -81,6 +88,7 @@ export function StorageStack({ stack, app }) {
     formTable,
     templateTable,
     processTable,
+    docTable,
     bucket,
     nformTable,
     ntemplateTable

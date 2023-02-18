@@ -4,8 +4,8 @@ import Home from "./containers/Home";
 import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
 import Signup from "./containers/Signup";
-import Customer from "./containers/Customer";
-import Customers from "./containers/Customers";
+import Doc from "./containers/Doc";
+import Docs from "./containers/Docs";
 import ProjectContext from "./containers/ProjectContext";
 import Users from "./containers/Users";
 import FormTemplates from "./containers/FormTemplates";
@@ -30,8 +30,8 @@ export default function Links({tenant}) {
 
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/customer/:customerId?" element={<Customer />} />
-      <Route path="/customers" element={<Customers />} />
+      <Route path="/doc/:docId?" element={<Doc />} />
+      <Route path="/docs" element={<Docs />} />
       <Route path="/project-context" element={<ProjectContext />} />
       <Route path="/users" element={<Users />} />
       <Route path="/templates" element={<FormTemplates />} />

@@ -1,7 +1,7 @@
 import handler from "../../util/handler";
 import s3 from "../../util/s3";
 
-export const main = handler(async (event, context, tenant) => {
+export const main = handler(async (event, tenant) => {
 
   const data = JSON.parse(event.body);
   

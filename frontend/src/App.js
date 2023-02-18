@@ -53,6 +53,9 @@ function App() {
       console.log("app load");
       const session = await Auth.currentSession();
 
+      //const att = await Auth.userAttributes();
+      //console.log("userAttributes", att);
+
       const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
       setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
 
@@ -329,7 +332,7 @@ function App() {
                     </Nav.Link>
                   </LinkContainer>
                      
-                  <LinkContainer to="/registers">
+                  <LinkContainer to="/logout">
                     <Nav.Link as={Menu.Item} onClick={handleLogout}>
                       <span>
                         <Icon name="log out" />
