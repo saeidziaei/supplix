@@ -47,13 +47,7 @@ export default function NFormTemplate() {
   const nav = useNavigate();
 
   const [title, setTitle] = useState("Comprehensive Exam");
-  // const [sections, setSections] = useState([
-  //   {title: "Exam Appointment", fields: [
-  //     {guid:"1", title:"Dentist", type:"text"},
-  //     {guid:"2", title:"DA", type:"text"},
-  //     {guid:"3", title:"C/C", type:"multi", options:["Nil", "Pain", "Bleeding gums", "Broken tooth", "Loss of tooth", "Cavities", "Appearance", "Sensitivity", "Other!!"]},
-  //     {guid:"4", title:"Reason for attendance", type:"radio", options:["Routine recall exam", "New patient exam", "Patient has a specific concern"]},
-  //   ]}]);
+
 
   const [sections, setSections] = useState(null);
 
@@ -201,6 +195,7 @@ export default function NFormTemplate() {
     { key: "multi", text: "Multi", value: "multi" },
     { key: "date", text: "Date", value: "date" },
     { key: "radio", text: "Radio", value: "radio" },
+    
     { key: "select", text: "Select", value: "select" },
   ];
   
@@ -237,7 +232,7 @@ export default function NFormTemplate() {
               })
             }
           >
-            <Icon name="x" />
+            <Icon name="trash alternate outline" />
             Remove Section
           </Button>
           <Input
@@ -282,7 +277,8 @@ export default function NFormTemplate() {
                         <Button
                           size="mini"
                           basic
-                          icon="x"
+                          icon="trash alternate outline"
+                          tooltip="delete"
                           circular
                           onClick={() =>
                             setRemoveFieldConfirm({

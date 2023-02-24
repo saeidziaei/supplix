@@ -1,3 +1,4 @@
+// TODO !!! dompurify - sanitize html input
 import React, { useState, useEffect } from 'react';
 import "./ISO.css";
 import { onError } from "../lib/errorLib";
@@ -156,7 +157,7 @@ export default function ISO() {
                   color="grey"
                   onClick={() => setIsCompact(true)}
                 />
-                <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />
+                {isLoading ? <Loader active/> : <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />}
               </>
             )}
             <Button
@@ -232,7 +233,7 @@ export default function ISO() {
                           </Item.Header>
                           {index > 0 && (
                             <Button
-                              size="tiny"
+                              size="mini"
                               floated="right"
                               basic
                               circular
@@ -242,7 +243,7 @@ export default function ISO() {
                           )}
                           {index < group.length - 1 && (
                             <Button
-                              size="tiny"
+                              size="mini"
                               floated="right"
                               basic
                               circular

@@ -9,7 +9,7 @@ import { NGenericForm } from '../components/NGenericForm';
 
 export default function NTemplatedForm() {
   const { formId, templateId } = useParams();
-  const customerIsoId = "iso-123";
+  const customerId = "c-123";
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [template, setTemplate] = useState(null);
@@ -19,18 +19,19 @@ export default function NTemplatedForm() {
 
   useEffect(() => {
     async function loadForm() {
-      return await makeApiCall(
-        "GET",
-        `/customer-isos/${customerIsoId}/forms/${formId}`
-      );
+      // return await makeApiCall(
+      //   "GET",
+      //   `/customer-isos/${customerIsoId}/forms/${formId}`
+      // );
     }
-
     async function loadTemplate() {
       return await makeApiCall(
         "GET",
-        `/customer-isos/${customerIsoId}/templates/${templateId}`
+        `/customers/${customerId}/ntemplates/${templateId}`
       );
     }
+
+
     async function onLoad() {
       try {
         if (formId) {
@@ -72,20 +73,20 @@ export default function NTemplatedForm() {
     }
   }
   async function createForm(values) {
-    return await makeApiCall("POST", `/customer-isos/${customerIsoId}/forms`, {
-      templateId: template.templateId,
-      formValues: values,
-    });
+    // return await makeApiCall("POST", `/customer-isos/${customerIsoId}/forms`, {
+    //   templateId: template.templateId,
+    //   formValues: values,
+    // });
   }
 
   async function updateForm(values) {
-    return await makeApiCall(
-      "PUT",
-      `/customer-isos/${customerIsoId}/forms/${formId}`,
-      {
-        formValues: values,
-      }
-    );
+    // return await makeApiCall(
+    //   "PUT",
+    //   `/customer-isos/${customerIsoId}/forms/${formId}`,
+    //   {
+    //     formValues: values,
+    //   }
+    // );
   }
   if (isLoading) return <Loader active />;
 

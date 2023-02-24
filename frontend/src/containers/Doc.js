@@ -8,6 +8,7 @@ import axios from "axios";
 import { Form, Header, Input, Label, Loader, Segment, Grid, Message, Icon, Button, Image, Card } from "semantic-ui-react";
 import { Formik } from "formik";
 import placeholderImage from './fileplaceholder.jpg'
+import { LinkContainer } from "react-router-bootstrap";
 
 
 export default function Doc() {
@@ -148,9 +149,11 @@ export default function Doc() {
                     value={values.note}
                     onChange={handleChange}
                   />
+                  <LinkContainer to={`/docs`}><Button>Back</Button></LinkContainer> 
                   <Button primary type="submit" disabled={isSubmitting}>
                     Submit
                   </Button>
+                  
                 </Segment>
               </Form>
             )}
@@ -169,19 +172,23 @@ export default function Doc() {
           verticalAlign="middle"
         >
           <Grid.Column width="8" >
+              
+
               <Image
                 src={doc.fileURL}
                 wrapped
                 alt={doc.fileName}
-                
-                
                 onError={(e) => {
                   e.target.src = placeholderImage;
                 }}
               />
               <Header>{doc.note}</Header>
               <Label>{doc.category}</Label>
-              <p className="basic disabled">{doc.fileName}</p>
+              <p><br/>
+              <a href={doc.fileURL} download={doc.fileName}>Download {doc.fileName}</a>
+              
+              </p>
+              
           </Grid.Column>
         </Grid>
       </>

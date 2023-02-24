@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import "./App.css";
 import Routes from "./Routes";
 import { LinkContainer } from "react-router-bootstrap";
@@ -20,6 +20,7 @@ import {
   Container,
   Label,
   List,
+  ButtonOr,
   
 } from 'semantic-ui-react'
 
@@ -144,7 +145,7 @@ function App() {
               ></Button>
             </List.Item>
           </List>
-         
+
           <Grid columns={1}>
             <Grid.Column>
               <Sidebar.Pushable as={Segment}>
@@ -152,43 +153,47 @@ function App() {
                   as={Menu}
                   visible={isSidebarVisible}
                   vertical
+                  onHide={() => setIsSidebarVisible(false)}
+                  onClick={() => setIsSidebarVisible(false)}
                   animation="push"
                 >
-                  <Menu.Item>
-                    <LinkContainer to="/">
-                      <Nav.Link>
+                  <LinkContainer to="/">
+                    <Nav.Link as={Menu.Item}>
+                      <span>
                         <Icon name="home" />
                         Home
-                      </Nav.Link>
-                    </LinkContainer>
-                  </Menu.Item>
+                      </span>
+                    </Nav.Link>
+                  </LinkContainer>
 
                   {isAuthenticated ? (
                     <>
-
-                      <Menu.Item>
-                        <LinkContainer to="/ntemplates">
-                          <Nav.Link>
+                      <LinkContainer to="/ntemplates">
+                        <Nav.Link as={Menu.Item}>
+                          <span>
                             <Icon color="blue" name="clipboard list" />
                             Note Templates
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/nregisters">
-                          <Nav.Link>
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
+
+                      <LinkContainer to="/nregisters">
+                        <Nav.Link as={Menu.Item}>
+                          <span>
                             <Icon name="folder open outline" />
                             Note Register
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-
-                      <Menu.Item>
-                        <Nav.Link onClick={handleLogout}>
-                          <Icon name="log out" />
-                          Logout
+                          </span>
                         </Nav.Link>
-                      </Menu.Item>
+                      </LinkContainer>
+
+                      <LinkContainer to="/logout">
+                        <Nav.Link as={Menu.Item} onClick={handleLogout}>
+                          <span>
+                            <Icon name="log out" />
+                            Logout
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
                     </>
                   ) : (
                     <>
@@ -280,7 +285,6 @@ function App() {
                   inverted
                   vertical
                   onHide={() => setIsSidebarVisible(false)}
-                  onClick={() => setIsSidebarVisible(false)}
                   animation="push"
                 >
                   <LinkContainer to="/">
@@ -291,7 +295,6 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-
 
                   <Menu.Item as="a">
                     <Label color="teal">5</Label>
@@ -304,45 +307,66 @@ function App() {
 
                   {isAuthenticated ? (
                     <>
-                    <LinkContainer to="/iso">
-                    <Nav.Link as={Menu.Item}>
-                      <span>
-                        <Icon name="sitemap" />
-                        ISO
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
+                      <Menu.Item>
+                        <Menu.Header color="white">ISOs</Menu.Header>
+                        <Menu.Menu>
+                          <LinkContainer to="/iso">
+                            <Nav.Link as={Menu.Item}>
+                              <span>
+                                <Icon name="sitemap" />
+                                9001
+                              </span>
+                            </Nav.Link>
+                          </LinkContainer>
+                          <LinkContainer to="/iso">
+                            <Nav.Link as={Menu.Item}>
+                              <span>
+                                <Icon name="sitemap" />
+                                27001
+                              </span>
+                            </Nav.Link>
+                          </LinkContainer>
+                          <Menu.Item>
+                            <Button basic color="blue" size="tiny">
+                              Create New
+                            </Button>
+                          </Menu.Item>
+                        </Menu.Menu>
+                      </Menu.Item>
+                      <LinkContainer to="/templates">
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="clipboard list" />
+                            Templates
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
 
-                
-                  <LinkContainer to="/templates">
-                    <Nav.Link as={Menu.Item}>
-                      <span>
-                        <Icon name="clipboard list" />
-                        Templates
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
+                      <LinkContainer to="/registers">
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="folder open outline" />
+                            Register
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
+                      <LinkContainer to="/library">
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="book" />
+                            Library
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
 
-                  <LinkContainer to="/registers">
-                    <Nav.Link as={Menu.Item}>
-                      <span>
-                        <Icon name="folder open outline" />
-                        Register
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
-                     
-                  <LinkContainer to="/logout">
-                    <Nav.Link as={Menu.Item} onClick={handleLogout}>
-                      <span>
-                        <Icon name="log out" />
-                        Logout
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
-                  
-
-              
+                      <LinkContainer to="/logout">
+                        <Nav.Link as={Menu.Item} onClick={handleLogout}>
+                          <span>
+                            <Icon name="log out" />
+                            Logout
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
                     </>
                   ) : (
                     <>

@@ -39,6 +39,7 @@ export default function Links({tenant}) {
       <Route path="/registers" element={<FormRegisters />} />
       <Route path="/register/:templateId" element={<FormRegister />} />
       <Route path="/form/:templateId/:formId?" element={<TemplatedForm />} />
+      <Route path="/library" element={<Docs />} />
 
       <Route path="/ntemplates" element={<NFormTemplates />} />
       <Route path="/ntemplate/:templateId?" element={<NFormTemplate />} />

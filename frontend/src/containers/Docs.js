@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { Divider, Header, Label, List, Loader, Message, Segment } from "semantic-ui-react";
+import { Button, Divider, Header, Label, List, Loader, Message, Segment } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
@@ -49,7 +49,7 @@ export default function Docs() {
     header="No docs found in your library"
     content="Start by creating your first doc!"
     icon="exclamation"
-  />); else return (
+  />); else return (<>
     <Segment>
       <Header as="h2">Library</Header>
       <Divider />
@@ -85,7 +85,9 @@ export default function Docs() {
             </List>
           </div>
         ))}
+        
     </Segment>
+    <LinkContainer to={`/doc`}><Button>New</Button></LinkContainer> </>
   );
   }
   return isLoading ? (<Loader active/>) : renderDocs();
