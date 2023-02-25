@@ -17,11 +17,11 @@ export function StorageStack({ stack, app }) {
 
 
 
-  const customerTable = new Table(stack, "Customer", {
+  const tenantTable = new Table(stack, "Tenant", {
     fields: {
-      customerId: "string",
+      tenantId: "string",
     },
-    primaryIndex: { partitionKey: "customerId" },
+    primaryIndex: { partitionKey: "tenantId" },
   });
 
   // table that holds customer customised template
@@ -83,7 +83,7 @@ export function StorageStack({ stack, app }) {
 
   // Return the bucket and table resources
   return {
-    customerTable,
+    tenantTable,
     customerISOTable,
     formTable,
     templateTable,

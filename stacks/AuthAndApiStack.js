@@ -2,15 +2,15 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { Cognito, Api, use } from "@serverless-stack/resources";
-
 import { StorageStack } from "./StorageStack";
+import { TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
 
 export function AuthAndApiStack({ stack, app }) {
   const {
     bucket,
     formTable,
     templateTable,
-    customerTable,
+    tenantTable,
     customerISOTable,
     processTable,
     docTable,
@@ -27,7 +27,7 @@ export function AuthAndApiStack({ stack, app }) {
     this,
     "TopLevelAdmins",
     {
-      groupName: "top-level-admins",
+      groupName: TOP_LEVEL_ADMIN_GROUP,
       userPoolId: auth.userPoolId,
     }
   );
@@ -47,16 +47,10 @@ export function AuthAndApiStack({ stack, app }) {
     defaults: {
       authorizer: "jwt",
       function: {
-        permissions: [
-          formTable,
-          templateTable,
-          customerTable,
-          customerISOTable,
-        ], // TODO give permissions only to the endpoints that need it
         environment: {
           FORM_TABLE: formTable.tableName,
           TEMPLATE_TABLE: templateTable.tableName,
-          CUSTOMER_TABLE: customerTable.tableName,
+          TENANT_TABLE: tenantTable.tableName,
           CUSTOMER_ISO_TABLE: customerISOTable.tableName,
           PROCESS_TABLE: processTable.tableName,
           DOC_TABLE: docTable.tableName,
@@ -178,6 +172,49 @@ export function AuthAndApiStack({ stack, app }) {
           },
         },
       },
+      "GET   /tenants": {
+        function: {
+          handler: "functions/tenant/list.main",
+          permissions: [tenantTable],
+          environment: {
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "GET   /tenants/{tenantId}": {
+        function: {
+          handler: "functions/tenant/get.main",
+          permissions: [tenantTable],
+          environment: {
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "POST   /tenants": {
+        function: {
+          handler: "functions/tenant/create.main",
+          permissions: [tenantTable],
+          environment: {
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "PUT   /tenants/{tenantId}": {
+        function: {
+          handler: "functions/tenant/update.main",
+          permissions: [tenantTable],
+          environment: {
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+
+      "GET   /mytenant": {
+        function: {
+          handler: "functions/tenant/getmytenant.main",
+          permissions: [tenantTable],
+        },
+      },
 
       // ###############  N Sectoin ####################
       "GET   /customers/{customerId}/forms": {
@@ -262,15 +299,14 @@ export function AuthAndApiStack({ stack, app }) {
     api,
 
      // Policy granting access to a specific folder in the bucket
-    //  new iam.PolicyStatement({
-    //   actions: ["s3:*"],
-    //   effect: iam.Effect.ALLOW,
-    //   resources: [
-    //     bucket.bucketArn ,
-    //     bucket.bucketArn + "/*",
-    //     bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*",
-    //   ],
-    // }),
+     // this is non sensitive files such as logos
+     new iam.PolicyStatement({
+      actions: ["s3:*"],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        bucket.bucketArn + "/public/*",
+      ],
+    }),
   ]);
   
  

@@ -3,7 +3,7 @@ import { CognitoIdentityServiceProvider } from 'aws-sdk';
 
 
 
-export default function handler(lambda, requiredGroup) {
+export default function handler(lambda) {
   return async function (event, context) {
     let body, statusCode;
     const tenant = getTenantFromRequest(event);
@@ -11,15 +11,15 @@ export default function handler(lambda, requiredGroup) {
     // debug.init(event);
 
     try {
-      
-      if (requiredGroup && !userInGroup(event, requiredGroup)) {
-        body = {error: 'Unauthorised'};
-        statusCode = 403;
-      } else {
-        // Run the Lambda
-        
+      const allowedGroups = process.env.ALLOWED_GROUPS ? process.env.ALLOWED_GROUPS.split(",") : [];
+      const userGroups = event.requestContext.authorizer.jwt.claims['cognito:groups'] || [];
+
+      if (allowedGroups.length === 0 || allowedGroups.some(group => userGroups.includes(group))) {
         body = await lambda(event, tenant, context);
         statusCode = 200;
+      } else {
+        body = {error: 'Unauthorised'};
+        statusCode = 403;
       }
     } catch (e) {
       // Print debug messages
@@ -44,10 +44,6 @@ export default function handler(lambda, requiredGroup) {
 }
 
 
-function userInGroup(event, requiredGroup) {
-  const claims = event.requestContext.authorizer.jwt.claims;
-  return (claims['cognito:groups'] && claims['cognito:groups'].includes(requiredGroup))
-}
 
 function getTenantFromRequest(event) {
   const claims = event.requestContext.authorizer.jwt.claims;

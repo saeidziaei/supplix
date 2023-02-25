@@ -9,20 +9,20 @@ import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import {
   Button,
-  Checkbox,
   Grid,
-  Header,
   Icon,
   Image,
   Menu,
   Segment,
   Sidebar,
-  Container,
   Label,
   List,
-  ButtonOr,
-  
-} from 'semantic-ui-react'
+  Card
+} from "semantic-ui-react";
+import { s3Get } from "./lib/awsLib";
+import { makeApiCall } from "./lib/apiLib";
+import placeholderImage from './containers/fileplaceholder.jpg'
+
 
 export default App;
 
@@ -31,9 +31,9 @@ function App() {
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isTopLevelAdmin, setIsTopLevelAdmin] = useState(false);
-  const [currentCustomer, setCurrentCustomer] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [currentIso, setCurrentIso] = useState(null);
-
+  const [tenant, setTenant] = useState(null);
 
   const nav = useNavigate();
 
@@ -44,32 +44,43 @@ function App() {
     nav("/login");
   }
   useEffect(() => {
-    onLoad();
-  }, []); // If we pass in an empty list of variables, then it’ll only run our function on the FIRST render
-
-
-
-  async function onLoad() {
-    try {
-      console.log("app load");
-      const session = await Auth.currentSession();
-
-      //const att = await Auth.userAttributes();
-      //console.log("userAttributes", att);
-
-      const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-      setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
-
-      userHasAuthenticated(true);
-    } catch (e) {
-      if (e !== "No current user") {
-        alert(e);
+    async function loadMyTenant() {
+      const tenant = await makeApiCall("GET", `/mytenant`);
+      if (tenant && tenant.logo) {
+        tenant.logoURL = await s3Get(tenant.logo);
       }
-      nav("/login");
+      return tenant;
     }
-    setIsAuthenticating(false);
-    
-  }
+    async function onLoad() {
+      try {
+        console.log("app load");
+        const session = await Auth.currentSession();
+  
+        const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
+        setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
+  
+        setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
+
+        userHasAuthenticated(true);
+        
+        const tenant = await loadMyTenant();
+        setTenant(tenant);
+  
+      } catch (e) {
+        if (e !== "No current user") {
+          alert(e);
+        }
+        nav("/login");
+      }
+      setIsAuthenticating(false);
+      
+    }
+  
+    onLoad();
+  }, []); 
+
+
+
 
 
   // return (
@@ -228,8 +239,6 @@ function App() {
                         isAuthenticated,
                         userHasAuthenticated,
                         isTopLevelAdmin,
-                        currentCustomer,
-                        setCurrentCustomer,
                         currentIso,
                         setCurrentIso,
                       }}
@@ -251,11 +260,16 @@ function App() {
         <>
           <List divided horizontal>
             <List.Item>
+
               <Image
                 size="medium"
                 rounded
                 alt="logo"
-                src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"
+                src={tenant.logoURL}
+                onError={(e) => {
+                  e.target.src = placeholderImage;
+                }}
+
               />
             </List.Item>
             <List.Item>
@@ -350,7 +364,7 @@ function App() {
                           </span>
                         </Nav.Link>
                       </LinkContainer>
-                      <LinkContainer to="/library">
+                      <LinkContainer to="/docs">
                         <Nav.Link as={Menu.Item}>
                           <span>
                             <Icon name="book" />
@@ -392,6 +406,10 @@ function App() {
                   <Menu.Item>
                     <img alt="logo" src="/iso_cloud.png" />
                   </Menu.Item>
+                  <Menu.Item color="blue">
+                    <p style={{fontSize: "0.8em"}}><br/><br/><br/>{tenant.tenantName}<br/><br/>{currentUser}</p>
+                  </Menu.Item>
+
                 </Sidebar>
 
                 <Sidebar.Pusher>
@@ -401,8 +419,6 @@ function App() {
                         isAuthenticated,
                         userHasAuthenticated,
                         isTopLevelAdmin,
-                        currentCustomer,
-                        setCurrentCustomer,
                         currentIso,
                         setCurrentIso,
                       }}

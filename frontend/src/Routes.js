@@ -18,6 +18,7 @@ import ISO from "./containers/ISO";
 import NFormTemplate from "./containers/NFormTemplate";
 import NTemplatedForm from "./containers/NTemplatedForm";
 import NFormTemplates from "./containers/NFormTemplates";
+import Tenant from "./containers/Tenant";
 
 
 export default function Links({tenant}) {
@@ -39,12 +40,14 @@ export default function Links({tenant}) {
       <Route path="/registers" element={<FormRegisters />} />
       <Route path="/register/:templateId" element={<FormRegister />} />
       <Route path="/form/:templateId/:formId?" element={<TemplatedForm />} />
-      <Route path="/library" element={<Docs />} />
+
 
       <Route path="/ntemplates" element={<NFormTemplates />} />
       <Route path="/ntemplate/:templateId?" element={<NFormTemplate />} />
       <Route path="/nform/:templateId/:formId?" element={<NTemplatedForm />} /> 
 
+      <Route path="/tenant/:tenantId?" element={<Tenant />} />
+      <Route path="/tenants" element={<Tenant />} />
 
       <Route path="*" element={<NotFound />} />;
     </Routes>

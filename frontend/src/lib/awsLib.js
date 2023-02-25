@@ -13,3 +13,10 @@ export async function s3Upload(file) {
 
   return stored.key;
 }
+
+export async function s3Remove(filePath) {
+  return await Storage.remove(filePath);
+}
+export async function s3Get(filePath) {
+  return await Storage.get(filePath);
+}
