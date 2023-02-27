@@ -19,6 +19,8 @@ import NFormTemplate from "./containers/NFormTemplate";
 import NTemplatedForm from "./containers/NTemplatedForm";
 import NFormTemplates from "./containers/NFormTemplates";
 import Tenant from "./containers/Tenant";
+import Tenants from "./containers/Tenants";
+import User from "./containers/User";
 
 
 export default function Links({tenant}) {
@@ -34,7 +36,11 @@ export default function Links({tenant}) {
       <Route path="/doc/:docId?" element={<Doc />} />
       <Route path="/docs" element={<Docs />} />
       <Route path="/project-context" element={<ProjectContext />} />
-      <Route path="/users" element={<Users />} />
+
+      <Route path="/users" element={<Users />} /> 
+      <Route path="/tenants/:tenantId/users" element={<Users />} />
+      <Route path="/user/:username?" element={<User />} />
+      <Route path="/tenants/:tenantId/user/:username?" element={<User />} />
       <Route path="/templates" element={<FormTemplates />} />
       <Route path="/template/:templateId?" element={<FormTemplate />} />
       <Route path="/registers" element={<FormRegisters />} />
@@ -47,7 +53,7 @@ export default function Links({tenant}) {
       <Route path="/nform/:templateId/:formId?" element={<NTemplatedForm />} /> 
 
       <Route path="/tenant/:tenantId?" element={<Tenant />} />
-      <Route path="/tenants" element={<Tenant />} />
+      <Route path="/tenants" element={<Tenants />} />
 
       <Route path="*" element={<NotFound />} />;
     </Routes>

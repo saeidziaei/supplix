@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Nav } from 'react-bootstrap';
+import { Nav } from "react-bootstrap";
 import "./App.css";
 import Routes from "./Routes";
 import { LinkContainer } from "react-router-bootstrap";
@@ -17,15 +17,14 @@ import {
   Sidebar,
   Label,
   List,
-  Card
+  Loader,
+  PlaceholderImage,
 } from "semantic-ui-react";
 import { s3Get } from "./lib/awsLib";
 import { makeApiCall } from "./lib/apiLib";
-import placeholderImage from './containers/fileplaceholder.jpg'
-
+import placeholderImage from "./containers/fileplaceholder.jpg";
 
 export default App;
-
 
 function App() {
   const [isAuthenticated, userHasAuthenticated] = useState(false);
@@ -44,7 +43,41 @@ function App() {
     nav("/login");
   }
   useEffect(() => {
+
+    async function onLoad() {
+      try {
+        console.log("app load");
+        const session = await Auth.currentSession();
+
+        const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
+        setIsTopLevelAdmin(
+          decodedJwt["cognito:groups"] &&
+            decodedJwt["cognito:groups"].includes("top-level-admins")
+        );
+
+        setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
+
+        userHasAuthenticated(true);
+      } catch (e) {
+       
+        if (e !== "No current user") {
+          alert(e);
+        }
+        await Auth.signOut();
+        nav("/login");
+      }
+
+      setIsAuthenticating(false);
+    }
+
+    onLoad();
+  }, []);
+
+  useEffect(() => {
     async function loadMyTenant() {
+      if (!isAuthenticated)
+        return;
+        
       const tenant = await makeApiCall("GET", `/mytenant`);
       if (tenant && tenant.logo) {
         tenant.logoURL = await s3Get(tenant.logo);
@@ -53,46 +86,27 @@ function App() {
     }
     async function onLoad() {
       try {
-        console.log("app load");
-        const session = await Auth.currentSession();
-  
-        const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-        setIsTopLevelAdmin(decodedJwt["cognito:groups"] && decodedJwt["cognito:groups"].includes("top-level-admins"));
-  
-        setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
-
-        userHasAuthenticated(true);
-        
         const tenant = await loadMyTenant();
         setTenant(tenant);
-  
       } catch (e) {
-        if (e !== "No current user") {
-          alert(e);
-        }
-        nav("/login");
+        alert(e);
       }
-      setIsAuthenticating(false);
-      
     }
-  
+    
+
     onLoad();
-  }, []); 
-
-
-
-
+  }, [isAuthenticated]);
 
   // return (
   //   !isAuthenticating && (
   //   <div className="App container py-3">
-      
+
   //     <Navbar collapseOnSelect bg="light" expand="md" className="mb-3 hide-on-print">
   //       <LinkContainer to="/">
   //         <Navbar.Brand className="font-weight-bold text-muted">
   //           ISO Cloud {isTopLevelAdmin ? <div>Hi Top Gun!</div> : <div>Hey Consultant</div>}
   //         </Navbar.Brand>
-          
+
   //       </LinkContainer>
   //       <Navbar.Toggle />
   //       <Navbar.Collapse className="justify-content-end">
@@ -110,22 +124,22 @@ function App() {
   //             <>
   //               <LinkContainer to="/signup"><Nav.Link>Signup</Nav.Link></LinkContainer>
   //               <LinkContainer to="/login"><Nav.Link>Login</Nav.Link></LinkContainer>
-                
+
   //             </>
   //           )}
   //         </Nav>
   //       </Navbar.Collapse>
-  //     </Navbar> 
-  //     <AppContext.Provider value={{ 
-  //       isAuthenticated, 
-  //       userHasAuthenticated, 
-  //       isTopLevelAdmin, 
+  //     </Navbar>
+  //     <AppContext.Provider value={{
+  //       isAuthenticated,
+  //       userHasAuthenticated,
+  //       isTopLevelAdmin,
   //       jwtToken,
-  //       currentCustomer, 
+  //       currentCustomer,
   //       setCurrentCustomer,
-  //       currentIso, 
+  //       currentIso,
   //       setCurrentIso,
-      
+
   //       }}><div>Sidebar</div>
   //       <Routes />
   //     </AppContext.Provider>
@@ -133,7 +147,7 @@ function App() {
   //   )
   // );
 
-  const [isSidebarVisible, setIsSidebarVisible] = React.useState(false)
+  const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
   function renderNotesApp() {
     return (
@@ -252,25 +266,30 @@ function App() {
           </Grid>
         </>
       )
-    );    
+    );
   }
   function renderApp() {
+    const logoURL =
+      tenant && tenant.logoURL ? tenant.logoURL : "/iso_cloud.png";
+    
     return (
       !isAuthenticating && (
         <>
           <List divided horizontal>
             <List.Item>
-
-              <Image
-                size="medium"
-                rounded
-                alt="logo"
-                src={tenant.logoURL}
-                onError={(e) => {
-                  e.target.src = placeholderImage;
-                }}
-
-              />
+              {tenant ? (
+                <Image
+                  size="medium"
+                  rounded
+                  alt="logo"
+                  src={logoURL}
+                  onError={(e) => {
+                    e.target.src = placeholderImage;
+                  }}
+                />
+              ) : (
+                <PlaceholderImage />
+              )}
             </List.Item>
             <List.Item>
               <Button
@@ -407,9 +426,16 @@ function App() {
                     <img alt="logo" src="/iso_cloud.png" />
                   </Menu.Item>
                   <Menu.Item color="blue">
-                    <p style={{fontSize: "0.8em"}}><br/><br/><br/>{tenant.tenantName}<br/><br/>{currentUser}</p>
+                    <p style={{ fontSize: "0.8em" }}>
+                      <br />
+                      <br />
+                      <br />
+                      {tenant ? tenant.tenantName : ""}
+                      <br />
+                      <br />
+                      {currentUser}
+                    </p>
                   </Menu.Item>
-
                 </Sidebar>
 
                 <Sidebar.Pusher>
@@ -436,9 +462,11 @@ function App() {
     );
   }
 
-  const tenantName = window.location.pathname.split('/')[1];
+  const tenantName = window.location.pathname.split("/")[1];
   // Check tenant is valid
   // if (tenantName  != "t1" && tenantName != "t2") return <h1>Wrong way, go back!</h1>;
+
+  if (isAuthenticating) return <Loader active />;
 
   return renderApp();
   // return renderNotesApp()

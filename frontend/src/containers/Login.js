@@ -16,7 +16,7 @@ export default function Login() {
 //   userPoolWebClientId: `${tenant}_web_client`,
 // });
 
-  const { userHasAuthenticated, setjwtToken } = useAppContext();
+  const { userHasAuthenticated } = useAppContext();
   
 
   const [fields, handleFieldChange] = useFormFields({
@@ -52,7 +52,7 @@ export default function Login() {
   return (
     <div className="Login">
       <Form onSubmit={handleSubmit}>
-        <Form.Group size="lg" controlId="email">
+        <Form.Group size="large" controlId="email">
           <Form.Label>Email</Form.Label>
           <Form.Control
             autoFocus
@@ -61,7 +61,7 @@ export default function Login() {
             onChange={handleFieldChange}
           />
         </Form.Group>
-        <Form.Group size="lg" controlId="password">
+        <Form.Group size="large" controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -71,7 +71,7 @@ export default function Login() {
         </Form.Group>
         <LoaderButton
           block="true"
-          size="lg"
+          size="large"
           type="submit"
           isLoading={isLoading}
           disabled={!validateForm()}

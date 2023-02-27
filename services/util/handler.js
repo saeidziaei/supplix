@@ -49,3 +49,6 @@ function getTenantFromRequest(event) {
   const claims = event.requestContext.authorizer.jwt.claims;
   return claims['custom:tenant'];
 }
+
+
+

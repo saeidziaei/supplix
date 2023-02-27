@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { BsPencilSquare } from "react-icons/bs";
-import ListGroup from "react-bootstrap/ListGroup";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
 import { makeApiCall } from "../lib/apiLib";
+import { useParams } from "react-router-dom";
+import { s3Get } from "../lib/awsLib";
+import { Button, Header, Icon, Image, Item, Label, Loader, Message, Table } from "semantic-ui-react";
+import placeholderImage from './fileplaceholder.jpg'
+import { parseISO } from "date-fns";
 
 export default function Users() {
+  const { tenantId } = useParams(null);
   const [users, setUsers] = useState([]);
+  const [tenant, setTenant] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
     async function onLoad() {
       try {
-        const users = await loadUsers();
+        const [users, tenant] = await Promise.all([loadUsers(), loadTenant()]);
+
         setUsers(users);
+        setTenant(tenant);
       } catch (e) {
         onError(e);
       }
@@ -24,8 +32,25 @@ export default function Users() {
     onLoad();
   }, []);
 
+  async function loadTenant() {
+    let tenant = null;
+
+    if (tenantId) {
+      tenant = await makeApiCall("GET", `/tenants/${tenantId}`);
+
+      if (tenant && tenant.logo) {
+        tenant.logoURL = await s3Get(tenant.logo);
+      }
+    }
+    return tenant;
+  }
+
   async function loadUsers() {
-    return await makeApiCall("GET", `/users`);
+    if (tenantId) {
+      return await makeApiCall("GET", `/tenants/${tenantId}/users`); // TOP LEVEL ADMIN
+    } else {
+      return await makeApiCall("GET", `/users`); // ADMIN
+    }
   }
   function getAttribute(user, attributeName) {
     const attribute = user.Attributes.find(
@@ -37,47 +62,70 @@ export default function Users() {
       return undefined;
     }
   }
-  function renderUserList(users) {
-    if (!users) return <div>No user found</div>
+  function renderUsers() {
+    if (!users) return 
+    (<Message
+    header="No user found"
+    content="Start by creating your first user!"
+    icon="exclamation"
+  />);
+
     return (
       <>
+        {tenant.logoURL && (
+          <Image
+            src={tenant.logoURL}
+            rounded
+            alt="Logo"
+            onError={(e) => {
+              e.target.src = placeholderImage;
+            }}
+          />
+        )}
+        <Table basic="very" celled collapsing>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Action</Table.HeaderCell>
+              <Table.HeaderCell>User</Table.HeaderCell>
+              <Table.HeaderCell>Email Verified</Table.HeaderCell>
+              <Table.HeaderCell>Enabled</Table.HeaderCell>
+              <Table.HeaderCell>Status</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {users.map((u) => (
+              <Table.Row key={u.Username}>
+                <Table.Cell>
+                  <LinkContainer key={u.Username} to={tenantId ? `/tenants/${tenantId}/user/${u.Username}` : `/user/${u.Username}`}>
+                    <Button basic>Edit</Button>
+                  </LinkContainer>
+                </Table.Cell>
+                <Table.Cell>
+                  <Header as="h4" image>
+                    <Icon name="user circle" size="mini" />
+                    <Header.Content>
+                      {getAttribute(u, "email")}
+                      <Header.Subheader>Human Resources</Header.Subheader>
+                    </Header.Content>
+                  </Header>
+                </Table.Cell>
+                <Table.Cell>{getAttribute(u, "email_verified")}</Table.Cell>
+                <Table.Cell><Label basic color={u.Enabled ? "green" : "grey"}>{u.Enabled ? "Yes" : "No"}</Label></Table.Cell>
+                <Table.Cell>{u.UserStatus}</Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
         <LinkContainer to={`/user`}>
-          <ListGroup.Item action className="py-3 text-nowrap text-truncate">
-            <BsPencilSquare size={17} />
-            <span className="ml-2 font-weight-bold">
-              Create a new User
-            </span>
-          </ListGroup.Item>
+          <Button primary>Create new user</Button>
         </LinkContainer>
-        {users.map((u) => (
-          <LinkContainer
-            key={u.Username}
-            to={`/user/${u.Username}`}
-          >
-            <ListGroup.Item action>
-              <span className="font-weight-bold">{getAttribute(u, "email")}</span>
-              <br />
-              <span className="font-weight-bold">Other User Data</span>
-              <br />
-              <span className="text-muted">User Create Date {u.UserCreateDate}</span> <br/>
-              <span className="text-muted">User Last Modified Date {u.UserLastModifiedDate}</span> <br/>
-              <span className="text-muted">Enabled {u.Enabled}</span> <br/>
-              <span className="text-muted">User Status {u.UserStatus}</span> <br/>
 
-              
-            </ListGroup.Item>
-          </LinkContainer>
-        ))}
       </>
     );
   }
-  function renderUsers() {
-    return (
-      <div className="users">
-        <h2 className="pb-3 mt-4 mb-3 border-bottom">Users</h2>
-        <ListGroup>{!isLoading && renderUserList(users)}</ListGroup>
-      </div>
-    );
-  }
+
+
+  if (isLoading) return <Loader active/>;
+
   return renderUsers();
 }

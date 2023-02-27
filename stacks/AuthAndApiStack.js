@@ -3,7 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { Cognito, Api, use } from "@serverless-stack/resources";
 import { StorageStack } from "./StorageStack";
-import { TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
+import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
 
 export function AuthAndApiStack({ stack, app }) {
   const {
@@ -162,16 +162,7 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-      "GET   /users": {
-        function: {
-          handler: "functions/user/list.main",
-          // permissions: [formTable],
-          environment: {
-            USER_POOL_ID: auth.userPoolId,
-            REGION_ID: app.region,
-          },
-        },
-      },
+
       "GET   /tenants": {
         function: {
           handler: "functions/tenant/list.main",
@@ -213,6 +204,42 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "functions/tenant/getmytenant.main",
           permissions: [tenantTable],
+        },
+      },
+      "GET /users": {
+        function: {
+          handler: "functions/user/list.main",
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP
+          },
+        },
+      },
+      "GET /tenants/{tenantId}/users": {
+        function: {
+          handler: "functions/user/list.main",
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "GET /users/{username}": {
+        function: {
+          handler: "functions/user/get.main",
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP
+          },
+        },
+      },
+      "GET /tenants/{tenantId}/users/{username}": {
+        function: {
+          handler: "functions/user/get.main",
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
         },
       },
 
@@ -270,16 +297,28 @@ export function AuthAndApiStack({ stack, app }) {
     },
   });
 
-  // api.attachPermissionsToRoute("GET /users", [
-  //   new iam.PolicyStatement({
-  //     actions: ["cognito-idp:*"],
-  //     effect: iam.Effect.ALLOW,
-  //     resources: [
-  //       "*",
-  //       // `arn:aws:cognito-idp:${app.region}:${stack.accountId}:userpool/${auth.userPoolId}`,
-  //     ],
-  //   }),
-  // ]);
+  const cognitoAccessPolicy =     new iam.PolicyStatement({
+    actions: ["cognito-idp:*"],
+    effect: iam.Effect.ALLOW,
+    resources: [
+      `arn:aws:cognito-idp:${app.region}:${app.account}:userpool/${auth.userPoolId}`,
+    ],
+  });
+
+  api.attachPermissionsToRoute("GET /users", [
+    cognitoAccessPolicy
+  ]);
+  api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", [
+    cognitoAccessPolicy
+  ]);
+  api.attachPermissionsToRoute("GET /users/{username}", [
+    cognitoAccessPolicy
+  ]);
+  api.attachPermissionsToRoute("GET /tenants/{tenantId}/users/{username}", [
+    cognitoAccessPolicy
+  ]);
+  
+
   api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
     // new iam.PolicyStatement({
     //   actions: ["s3:*"],
@@ -318,6 +357,7 @@ export function AuthAndApiStack({ stack, app }) {
 
   // Show the auth resources in the output
   stack.addOutputs({
+    Account: app.account,
     Region: app.region,
     UserPoolId: auth.userPoolId,
     IdentityPoolId: auth.cognitoIdentityPoolId,
