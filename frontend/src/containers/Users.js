@@ -69,10 +69,13 @@ export default function Users() {
     content="Start by creating your first user!"
     icon="exclamation"
   />);
-
+  
     return (
       <>
-        {tenant.logoURL && (
+        {tenant && (
+          <Message icon="users" content={`You are viewing users of ${tenant.tenantName}`} />
+        )}
+        {tenant && tenant.logoURL && (
           <Image
             src={tenant.logoURL}
             rounded
@@ -82,6 +85,7 @@ export default function Users() {
             }}
           />
         )}
+
         <Table basic="very" celled collapsing>
           <Table.Header>
             <Table.Row>
@@ -96,7 +100,14 @@ export default function Users() {
             {users.map((u) => (
               <Table.Row key={u.Username}>
                 <Table.Cell>
-                  <LinkContainer key={u.Username} to={tenantId ? `/tenants/${tenantId}/user/${u.Username}` : `/user/${u.Username}`}>
+                  <LinkContainer
+                    key={u.Username}
+                    to={
+                      tenantId
+                        ? `/tenants/${tenantId}/user/${u.Username}`
+                        : `/user/${u.Username}`
+                    }
+                  >
                     <Button basic>Edit</Button>
                   </LinkContainer>
                 </Table.Cell>
@@ -105,12 +116,30 @@ export default function Users() {
                     <Icon name="user circle" size="mini" />
                     <Header.Content>
                       {getAttribute(u, "email")}
-                      <Header.Subheader>Human Resources</Header.Subheader>
+                      <Header.Subheader></Header.Subheader>
                     </Header.Content>
                   </Header>
                 </Table.Cell>
-                <Table.Cell>{getAttribute(u, "email_verified")}</Table.Cell>
-                <Table.Cell><Label basic color={u.Enabled ? "green" : "grey"}>{u.Enabled ? "Yes" : "No"}</Label></Table.Cell>
+                <Table.Cell textAlign="center">
+                  <Icon
+                    size="large"
+                    color={
+                      getAttribute(u, "email_verified") == "true"
+                        ? "green"
+                        : "black"
+                    }
+                    name={
+                      getAttribute(u, "email_verified") == "true"
+                        ? "check circle outline"
+                        : "x"
+                    }
+                  />
+                </Table.Cell>
+                <Table.Cell>
+                  <Label basic color={u.Enabled ? "green" : "grey"}>
+                    {u.Enabled ? "Yes" : "No"}
+                  </Label>
+                </Table.Cell>
                 <Table.Cell>{u.UserStatus}</Table.Cell>
               </Table.Row>
             ))}
@@ -119,7 +148,6 @@ export default function Users() {
         <LinkContainer to={`/user`}>
           <Button primary>Create new user</Button>
         </LinkContainer>
-
       </>
     );
   }

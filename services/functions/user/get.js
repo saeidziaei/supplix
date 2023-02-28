@@ -4,8 +4,8 @@ import AWS from "aws-sdk";
 export const main = handler(async (event, tenant) => {
     // if TOP_LEVEL_ADMIN is calling, get tenant from query string as they can add to any tenant
   // otherwise, use tenant in the lambda contxt.
-  const tenantId = event.pathParameters.tenantId ?? tenant;
-
+  const tenantId = event.pathParameters && event.pathParameters.tenantId ? event.pathParameters.tenantId : tenant;
+  
   const username = event.pathParameters.username;
   const userPoolId = process.env.USER_POOL_ID;
   const client = new AWS.CognitoIdentityServiceProvider();

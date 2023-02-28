@@ -32,6 +32,13 @@ export function AuthAndApiStack({ stack, app }) {
     }
   );
 
+  const cognitoAccessPolicy =     new iam.PolicyStatement({
+    actions: ["cognito-idp:*"],
+    effect: iam.Effect.ALLOW,
+    resources: [
+      `arn:aws:cognito-idp:${app.region}:${app.account}:userpool/${auth.userPoolId}`,
+    ],
+  });
   // Create the API
   const api = new Api(stack, "Api", {
     cors: true,
@@ -209,6 +216,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /users": {
         function: {
           handler: "functions/user/list.main",
+          permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
             ALLOWED_GROUPS: ADMIN_GROUP
@@ -218,6 +226,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /tenants/{tenantId}/users": {
         function: {
           handler: "functions/user/list.main",
+          permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
@@ -227,6 +236,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /users/{username}": {
         function: {
           handler: "functions/user/get.main",
+          permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
             ALLOWED_GROUPS: ADMIN_GROUP
@@ -236,6 +246,47 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /tenants/{tenantId}/users/{username}": {
         function: {
           handler: "functions/user/get.main",
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "POST /users": {
+        function: {
+          handler: "functions/user/create.main",
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP
+          },
+        },
+      },
+      "POST /tenants/{tenantId}/users": {
+        function: {
+          handler: "functions/user/create.main",
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      "PUT /users/{username}": {
+        function: {
+          handler: "functions/user/update.main",
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP
+          },
+        },
+      },
+      "PUT /tenants/{tenantId}/users/{username}": {
+        function: {
+          handler: "functions/user/update.main",
+          permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
@@ -297,27 +348,9 @@ export function AuthAndApiStack({ stack, app }) {
     },
   });
 
-  const cognitoAccessPolicy =     new iam.PolicyStatement({
-    actions: ["cognito-idp:*"],
-    effect: iam.Effect.ALLOW,
-    resources: [
-      `arn:aws:cognito-idp:${app.region}:${app.account}:userpool/${auth.userPoolId}`,
-    ],
-  });
 
-  api.attachPermissionsToRoute("GET /users", [
-    cognitoAccessPolicy
-  ]);
-  api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", [
-    cognitoAccessPolicy
-  ]);
-  api.attachPermissionsToRoute("GET /users/{username}", [
-    cognitoAccessPolicy
-  ]);
-  api.attachPermissionsToRoute("GET /tenants/{tenantId}/users/{username}", [
-    cognitoAccessPolicy
-  ]);
-  
+
+
 
   api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
     // new iam.PolicyStatement({
