@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
 import { makeApiCall } from "../lib/apiLib";
-import { Form, Header, Loader, Segment, Grid, Icon, Button, Image } from "semantic-ui-react";
+import { Form, Header, Loader, Segment, Grid, Icon, Button } from "semantic-ui-react";
 import { Formik } from "formik";
 
 
 
 export default function User() {
   const { username, tenantId } = useParams();
-  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", password:"" }); 
+  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", phone: "", password:"" }); 
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
@@ -39,6 +39,7 @@ export default function User() {
           setUser({
             firstName: getAttribute(item, "given_name") || "",
             lastName: getAttribute(item, "family_name") || "",
+            phone: getAttribute(item, "phone_number") || "",
             email: getAttribute(item, "email") || "",
             username: username
           });
@@ -55,6 +56,24 @@ export default function User() {
 
   function validateForm() {
     return true; // file.current
+  }
+  async function handlePasswordReset(){
+    setIsLoading(true);
+    try {
+      if (tenantId) {
+        return await makeApiCall("POST", `/tenants/${tenantId}/users/${username}/reset-password`, {
+          username,
+        });
+      } else {
+        return await makeApiCall("POST", `/users/${username}/reset-password`, {
+          username,
+        });
+      }
+      
+    } catch (e) {
+      onError(e);
+    }
+    setIsLoading(false);
   }
 
   async function handleSubmit(values) {
@@ -113,7 +132,6 @@ export default function User() {
           }) => (
             <Form onSubmit={handleSubmit} autoComplete="off">
               <Segment>
-
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -122,7 +140,7 @@ export default function User() {
                   placeholder="First Name"
                   value={values.firstName}
                   onChange={handleChange}
-                />                
+                />
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -142,22 +160,34 @@ export default function User() {
                   value={values.email}
                   onChange={handleChange}
                 />
-
-                {!username && <Form.Input
+                <Form.Input
                   fluid
                   iconPosition="left"
-                  icon="asterisk"
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  value={values.password}
+                  icon="phone"
+                  name="phone"
+                  autoComplete="off"
+                  placeholder="Phone"
+                  value={values.phone}
                   onChange={handleChange}
-                />}
-                
+                />
+                <p>Include country code, e.g. +61412345678</p>
+                {!username && (
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="asterisk"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    value={values.password}
+                    onChange={handleChange}
+                  />
+                )}
 
                 <Button color="olive" type="submit" disabled={isSubmitting}>
                   Submit
                 </Button>
+                {username && <Button onClick={handlePasswordReset}>Reset Password</Button>}
               </Segment>
             </Form>
           )}

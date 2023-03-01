@@ -59,7 +59,7 @@ export default function Users() {
     if (attribute) {
       return attribute.Value;
     } else {
-      return undefined;
+      return "";
     }
   }
   function renderUsers() {
@@ -91,7 +91,9 @@ export default function Users() {
             <Table.Row>
               <Table.HeaderCell>Action</Table.HeaderCell>
               <Table.HeaderCell>User</Table.HeaderCell>
+              <Table.HeaderCell>Email</Table.HeaderCell>
               <Table.HeaderCell>Email Verified</Table.HeaderCell>
+              <Table.HeaderCell>Phone</Table.HeaderCell>
               <Table.HeaderCell>Enabled</Table.HeaderCell>
               <Table.HeaderCell>Status</Table.HeaderCell>
             </Table.Row>
@@ -115,11 +117,12 @@ export default function Users() {
                   <Header as="h4" image>
                     <Icon name="user circle" size="mini" />
                     <Header.Content>
-                      {getAttribute(u, "email")}
+                    {`${getAttribute(u, "given_name")} ${getAttribute(u, "family_name")}`}
                       <Header.Subheader></Header.Subheader>
                     </Header.Content>
                   </Header>
                 </Table.Cell>
+                <Table.Cell>{getAttribute(u, "email")}</Table.Cell>
                 <Table.Cell textAlign="center">
                   <Icon
                     size="large"
@@ -135,6 +138,7 @@ export default function Users() {
                     }
                   />
                 </Table.Cell>
+                <Table.Cell>{getAttribute(u, "phone_number")}</Table.Cell>
                 <Table.Cell>
                   <Label basic color={u.Enabled ? "green" : "grey"}>
                     {u.Enabled ? "Yes" : "No"}

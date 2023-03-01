@@ -359,11 +359,6 @@ function App() {
                               </span>
                             </Nav.Link>
                           </LinkContainer>
-                          <Menu.Item>
-                            <Button basic color="blue" size="tiny">
-                              Create New
-                            </Button>
-                          </Menu.Item>
                         </Menu.Menu>
                       </Menu.Item>
                       <LinkContainer to="/templates">
@@ -404,14 +399,6 @@ function App() {
                   ) : (
                     <>
                       <Menu.Item>
-                        <LinkContainer to="/signup">
-                          <Nav.Link>
-                            <Icon name="signup" />
-                            Signup
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
                         <LinkContainer to="/login">
                           <Nav.Link>
                             <Icon name="sign-in" />
@@ -449,8 +436,8 @@ function App() {
                         setCurrentIso,
                       }}
                     >
-                      {/* <Routes tenant={tenantName} /> */}
-                      <Routes />
+                      <Routes tenant={tenant} />
+                      {/* <Routes /> */}
                     </AppContext.Provider>
                   </Segment>
                 </Sidebar.Pusher>

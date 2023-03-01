@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./containers/Home";
 import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
-import Signup from "./containers/Signup";
 import Doc from "./containers/Doc";
 import Docs from "./containers/Docs";
 import ProjectContext from "./containers/ProjectContext";
@@ -23,16 +22,16 @@ import Tenants from "./containers/Tenants";
 import User from "./containers/User";
 
 
-export default function Links({tenant}) {
+export default function Links(tenant) {
+  const pathPrefix = tenant.tenantName;
   return (
     <Routes>
-      {/* <Route path={`${tenant}/`} element={<Home />} />
-      <Route path={`${tenant}/iso`}  element={<ISO />} /> */}
+      {/* <Route path={`${pathPrefix}/`} element={<Home />} />
+      <Route path={`${pathPrefix}/iso`}  element={<ISO />} /> */}
       <Route path={`/`} element={<Home />} />
       <Route path={`/iso`}  element={<ISO />} />
 
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
       <Route path="/doc/:docId?" element={<Doc />} />
       <Route path="/docs" element={<Docs />} />
       <Route path="/project-context" element={<ProjectContext />} />

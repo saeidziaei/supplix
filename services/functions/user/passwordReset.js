@@ -24,32 +24,12 @@ export const main = handler(async (event, tenant) => {
     throw new Error("User does not belong to the given tenant");
   }
 
-  const updateParams = {
+  const resetParams = {
     UserPoolId: userPoolId,
-    Username: data.username, // the username of the user to update
-    UserAttributes: [
-      {
-        Name: "given_name",
-        Value: data.firstName // First name of the user to update
-      },
-      {
-        Name: "family_name",
-        Value: data.lastName // Last name of the user to update
-      },
-      {
-        Name: "phone_number",
-        Value: data.phone // Last name of the new user
-      },
-      {Name: "phone_number_verified", Value: "true" },
-      {
-        Name: "email",
-        Value: data.email // Email address of the user to update
-      },
-      {Name: "email_verified", Value: "true" },
-    ]
+    Username: data.username, // the username of the user to reset the password for
   };
 
-  const result = await client.adminUpdateUserAttributes(updateParams).promise();
+  const result = await client.adminResetUserPassword(resetParams).promise();
 
   return result;
 });

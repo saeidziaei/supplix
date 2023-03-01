@@ -1,44 +1,53 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Form from "react-bootstrap/Form";
-import LoaderButton from "../components/LoaderButton";
 import { Auth } from "aws-amplify";
 import "./Login.css";
 import { useAppContext } from "../lib/contextLib";
-import { useFormFields } from "../lib/hooksLib";
 import { onError } from "../lib/errorLib";
+import { Form, Header, Loader, Segment, Grid, Icon, Button, Label } from "semantic-ui-react";
+import * as Yup from 'yup';
+import { Formik } from "formik";
 
 export default function Login() {
-// TODO
-  // configure Amplify to use the correct user pool based on the tenant
-// Auth.configure({
-//   userPoolId: `us-west-2_${tenant}`,
-//   userPoolWebClientId: `${tenant}_web_client`,
-// });
-
   const { userHasAuthenticated } = useAppContext();
-  
-
-  const [fields, handleFieldChange] = useFormFields({
-    email: "",
-    password: "",
-  });
-
   const [isLoading, setIsLoading] = useState(false);
-
+  const [user, setUser] = useState(null);
+  const [newPasswordRequired, setNewPasswordRequired] = useState(false);
+  const [values, setValues] = useState({ email: "", password:"", newPassword: "", newPasswordConfirm: "" }); 
   const nav = useNavigate();
 
-  function validateForm() {
-    return fields.email.length > 0 && fields.password.length > 0;
-  }
-  async function handleSubmit(event) {
-    event.preventDefault();
+  const Schema = Yup.object().shape({
+    email: Yup.string().email('Invalid email').required('Required'),
+    password: Yup.string().min(8, 'Too Short!').required('Required'),
+    newPassword: Yup.string()
+      .min(8, 'Password must be 8 characters long')
+      .matches(/[0-9]/, 'Password requires a number')
+      .matches(/[a-z]/, 'Password requires a lowercase letter')
+      .matches(/[A-Z]/, 'Password requires an uppercase letter')
+      .matches(/[^\w]/, 'Password requires a symbol'),
+    newPasswordConfirm: Yup.string().oneOf([Yup.ref('newPassword'), null], 'Passwords must match'),
+  });
 
+
+
+  async function handleSubmit(values) {
+    
     setIsLoading(true);
 
     try {
-      await Auth.signIn(fields.email, fields.password);
-      
+      let ret;
+      if (newPasswordRequired) {
+        await Auth.completeNewPassword(user, values.newPassword);
+      } else {
+        ret = await Auth.signIn(values.email, values.password);
+
+        if (ret.challengeName === "NEW_PASSWORD_REQUIRED") {
+          setUser(ret);
+          setNewPasswordRequired(true);
+          setIsLoading(false);
+          return;
+        }
+      }
       userHasAuthenticated(true);
       
       nav("/");
@@ -50,35 +59,111 @@ export default function Login() {
   }
 
   return (
-    <div className="Login">
-      <Form onSubmit={handleSubmit}>
-        <Form.Group size="large" controlId="email">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            autoFocus
-            type="email"
-            value={fields.email}
-            onChange={handleFieldChange}
-          />
-        </Form.Group>
-        <Form.Group size="large" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={fields.password}
-            onChange={handleFieldChange}
-          />
-        </Form.Group>
-        <LoaderButton
-          block="true"
-          size="large"
-          type="submit"
-          isLoading={isLoading}
-          disabled={!validateForm()}
+    <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
+      <Grid.Column style={{ maxWidth: 450 }}>
+        <Header as="h2" color="olive" textAlign="left">
+          <Icon name="user outline" color="olive" />{newPasswordRequired ? "Choose a new password" : "Login"}
+        </Header>
+        <Formik
+          initialValues={{ ...values }}
+          validationSchema={Schema}
+          onSubmit={handleSubmit}
         >
-          Login
-        </LoaderButton>
-      </Form>
-    </div>
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleSubmit,
+            isSubmitting,
+          }) => (
+            <Form onSubmit={handleSubmit} autoComplete="off">
+              <Segment>
+                {!newPasswordRequired && <>
+                {errors.email && touched.email ? (
+                  <Label pointing="below" color="orange">
+                    {errors.email}
+                  </Label>
+                ) : null}
+                <Form.Input
+                  fluid
+                  iconPosition="left"
+                  icon="mail"
+                  name="email"
+                  autoComplete="off"
+                  placeholder="Email"
+                  value={values.email}
+                  onChange={handleChange}
+                />
+                {errors.password && touched.password ? (
+                  <Label pointing="below" color="orange">
+                    {errors.password}
+                  </Label>
+                ) : null}
+                <Form.Input
+                  fluid
+                  iconPosition="left"
+                  icon="asterisk"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  value={values.password}
+                  onChange={handleChange}
+                />
+                </> }
+                { newPasswordRequired && <>
+                
+                {errors.newPassword && touched.newPassword ? (
+                  <Label pointing="below" color="orange">
+                    {errors.newPassword}
+                  </Label>
+                ) : null}
+                <Form.Input
+                  fluid
+                  iconPosition="left"
+                  icon="asterisk"
+                  name="newPassword"
+                  type="password"
+                  placeholder="New Password"
+                  value={values.newPassword}
+                  onChange={handleChange}
+                /> {errors.newPasswordConfirm && touched.newPasswordConfirm ? (
+                  <Label pointing="below" color="orange">
+                    {errors.newPasswordConfirm}
+                  </Label>
+                ) : null}
+                <Form.Input
+                  fluid
+                  iconPosition="left"
+                  icon="asterisk"
+                  name="newPasswordConfirm"
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={values.newPasswordConfirm}
+                  onChange={handleChange}
+                />
+<p style={{ textAlign: "left" }}>
+                  <li>At least 8 characters</li>
+                  <li>at least 1 number</li>
+                  <li>at least 1 special character</li>
+                  <li>at least 1 uppercase letter</li>
+                  <li>at least 1 lowercase letter</li>
+                </p>
+                
+                </>}
+
+                {isLoading ? (
+                  <Loader active />
+                ) : (
+                  <Button color="olive" type="submit" disabled={isSubmitting}>
+                    Submit
+                  </Button>
+                )}
+              </Segment>
+            </Form>
+          )}
+        </Formik>
+      </Grid.Column>
+    </Grid>
   );
 }
