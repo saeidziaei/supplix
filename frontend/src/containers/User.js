@@ -57,24 +57,6 @@ export default function User() {
   function validateForm() {
     return true; // file.current
   }
-  async function handlePasswordReset(){
-    setIsLoading(true);
-    try {
-      if (tenantId) {
-        return await makeApiCall("POST", `/tenants/${tenantId}/users/${username}/reset-password`, {
-          username,
-        });
-      } else {
-        return await makeApiCall("POST", `/users/${username}/reset-password`, {
-          username,
-        });
-      }
-      
-    } catch (e) {
-      onError(e);
-    }
-    setIsLoading(false);
-  }
 
   async function handleSubmit(values) {
     setIsLoading(true);
@@ -160,7 +142,7 @@ export default function User() {
                   value={values.email}
                   onChange={handleChange}
                 />
-                <Form.Input
+                {/* <Form.Input
                   fluid
                   iconPosition="left"
                   icon="phone"
@@ -170,7 +152,7 @@ export default function User() {
                   value={values.phone}
                   onChange={handleChange}
                 />
-                <p>Include country code, e.g. +61412345678</p>
+                <p>Include country code, e.g. +61412345678</p> */}
                 {!username && (
                   <Form.Input
                     fluid
@@ -187,7 +169,7 @@ export default function User() {
                 <Button color="olive" type="submit" disabled={isSubmitting}>
                   Submit
                 </Button>
-                {username && <Button onClick={handlePasswordReset}>Reset Password</Button>}
+                
               </Segment>
             </Form>
           )}

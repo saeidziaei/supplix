@@ -20,6 +20,7 @@ import NFormTemplates from "./containers/NFormTemplates";
 import Tenant from "./containers/Tenant";
 import Tenants from "./containers/Tenants";
 import User from "./containers/User";
+import ResetPassword from "./containers/ResetPassword";
 
 
 export default function Links(tenant) {
@@ -54,7 +55,9 @@ export default function Links(tenant) {
       <Route path="/tenant/:tenantId?" element={<Tenant />} />
       <Route path="/tenants" element={<Tenants />} />
 
-      <Route path="*" element={<NotFound />} />;
+      <Route path="*" element={<NotFound />} />
+      <Route path="/login/reset" element={<ResetPassword />} />
+
     </Routes>
   );
 }

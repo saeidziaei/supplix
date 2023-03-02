@@ -7,6 +7,7 @@ import { onError } from "../lib/errorLib";
 import { Form, Header, Loader, Segment, Grid, Icon, Button, Label } from "semantic-ui-react";
 import * as Yup from 'yup';
 import { Formik } from "formik";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const { userHasAuthenticated } = useAppContext();
@@ -31,7 +32,6 @@ export default function Login() {
 
 
   async function handleSubmit(values) {
-    
     setIsLoading(true);
 
     try {
@@ -52,6 +52,7 @@ export default function Login() {
       
       nav("/");
     } catch (e) {
+      console.log(e);
       onError(e);
 
       setIsLoading(false);
@@ -62,7 +63,8 @@ export default function Login() {
     <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
       <Grid.Column style={{ maxWidth: 450 }}>
         <Header as="h2" color="olive" textAlign="left">
-          <Icon name="user outline" color="olive" />{newPasswordRequired ? "Choose a new password" : "Login"}
+          <Icon name="user outline" color="olive" />
+          {newPasswordRequired ? "Choose a new password" : "Login"}
         </Header>
         <Formik
           initialValues={{ ...values }}
@@ -79,79 +81,84 @@ export default function Login() {
           }) => (
             <Form onSubmit={handleSubmit} autoComplete="off">
               <Segment>
-                {!newPasswordRequired && <>
-                {errors.email && touched.email ? (
-                  <Label pointing="below" color="orange">
-                    {errors.email}
-                  </Label>
-                ) : null}
-                <Form.Input
-                  fluid
-                  iconPosition="left"
-                  icon="mail"
-                  name="email"
-                  autoComplete="off"
-                  placeholder="Email"
-                  value={values.email}
-                  onChange={handleChange}
-                />
-                {errors.password && touched.password ? (
-                  <Label pointing="below" color="orange">
-                    {errors.password}
-                  </Label>
-                ) : null}
-                <Form.Input
-                  fluid
-                  iconPosition="left"
-                  icon="asterisk"
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  value={values.password}
-                  onChange={handleChange}
-                />
-                </> }
-                { newPasswordRequired && <>
-                
-                {errors.newPassword && touched.newPassword ? (
-                  <Label pointing="below" color="orange">
-                    {errors.newPassword}
-                  </Label>
-                ) : null}
-                <Form.Input
-                  fluid
-                  iconPosition="left"
-                  icon="asterisk"
-                  name="newPassword"
-                  type="password"
-                  placeholder="New Password"
-                  value={values.newPassword}
-                  onChange={handleChange}
-                /> {errors.newPasswordConfirm && touched.newPasswordConfirm ? (
-                  <Label pointing="below" color="orange">
-                    {errors.newPasswordConfirm}
-                  </Label>
-                ) : null}
-                <Form.Input
-                  fluid
-                  iconPosition="left"
-                  icon="asterisk"
-                  name="newPasswordConfirm"
-                  type="password"
-                  placeholder="Confirm New Password"
-                  value={values.newPasswordConfirm}
-                  onChange={handleChange}
-                />
-<p style={{ textAlign: "left" }}>
-                  <li>At least 8 characters</li>
-                  <li>at least 1 number</li>
-                  <li>at least 1 special character</li>
-                  <li>at least 1 uppercase letter</li>
-                  <li>at least 1 lowercase letter</li>
+                {!newPasswordRequired && (
+                  <>
+                    {errors.email && touched.email ? (
+                      <Label pointing="below" color="orange">
+                        {errors.email}
+                      </Label>
+                    ) : null}
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      icon="mail"
+                      name="email"
+                      autoComplete="off"
+                      placeholder="Email"
+                      value={values.email}
+                      onChange={handleChange}
+                    />
+                    {errors.password && touched.password ? (
+                      <Label pointing="below" color="orange">
+                        {errors.password}
+                      </Label>
+                    ) : null}
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      icon="asterisk"
+                      name="password"
+                      type="password"
+                      placeholder="Password"
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                  </>
+                )}
+                {newPasswordRequired && (
+                  <>
+                    {errors.newPassword && touched.newPassword ? (
+                      <Label pointing="below" color="orange">
+                        {errors.newPassword}
+                      </Label>
+                    ) : null}
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      icon="asterisk"
+                      name="newPassword"
+                      type="password"
+                      placeholder="New Password"
+                      value={values.newPassword}
+                      onChange={handleChange}
+                    />{" "}
+                    {errors.newPasswordConfirm && touched.newPasswordConfirm ? (
+                      <Label pointing="below" color="orange">
+                        {errors.newPasswordConfirm}
+                      </Label>
+                    ) : null}
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      icon="asterisk"
+                      name="newPasswordConfirm"
+                      type="password"
+                      placeholder="Confirm New Password"
+                      value={values.newPasswordConfirm}
+                      onChange={handleChange}
+                    />
+                    <p style={{ textAlign: "left" }}>
+                      <li>At least 8 characters</li>
+                      <li>at least 1 number</li>
+                      <li>at least 1 special character</li>
+                      <li>at least 1 uppercase letter</li>
+                      <li>at least 1 lowercase letter</li>
+                    </p>
+                  </>
+                )}
+                <p style={{ textAlign: "left" }}>
+                  <Link to="/login/reset">Forgot password?</Link>
                 </p>
-                
-                </>}
-
                 {isLoading ? (
                   <Loader active />
                 ) : (

@@ -293,26 +293,7 @@ export function AuthAndApiStack({ stack, app }) {
           }
         },
       },
-      "POST /users/{username}/reset-password": {
-        function: {
-          handler: "functions/user/passwordReset.main",
-          permissions: [cognitoAccessPolicy],
-          environment: {
-            USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: ADMIN_GROUP
-          },
-        },
-      },
-      "POST /tenants/{tenantId}/users/{username}/reset-password": {
-        function: {
-          handler: "functions/user/passwordReset.main",
-          permissions: [cognitoAccessPolicy],
-          environment: {
-            USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
-        },
-      },
+     
       // ###############  N Sectoin ####################
       "GET   /customers/{customerId}/forms": {
         function: {

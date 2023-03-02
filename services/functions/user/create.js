@@ -26,11 +26,11 @@ export const main = handler(async (event, tenant) => {
         Name: "family_name",
         Value: data.lastName // Last name of the new user
       },
-      {
-        Name: "phone_number",
-        Value: data.phone // Last name of the new user
-      },
-      {Name: "phone_number_verified", Value: "true" },
+      // {
+      //   Name: "phone_number",
+      //   Value: data.phone // Last name of the new user
+      // },
+      // {Name: "phone_number_verified", Value: "true" },
       {
         Name: "email",
         Value: data.email // Email address of the new user
