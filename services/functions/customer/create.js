@@ -24,4 +24,4 @@ export const main = handler(async (event) => {
   await dynamoDb.put(params); 
 
   return params.Item;
-}, TOP_LEVEL_ADMIN_GROUP);
+});

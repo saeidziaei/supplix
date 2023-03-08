@@ -1,19 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Icon,
-  Button,
-  List,
-  Segment,
-  Card,
-  Divider,
-  Item,
-  Message,
+  Button, Card,
+  Divider, Icon, Message
 } from "semantic-ui-react";
 
 import { LinkContainer } from "react-router-bootstrap";
-import { onError } from "../lib/errorLib";
+import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
-import { Loader, Header, Table } from "semantic-ui-react";
+import { onError } from "../lib/errorLib";
 
 export default function NFormTemplates() {
   const [templates, setTemplates] = useState([]);

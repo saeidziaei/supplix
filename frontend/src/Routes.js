@@ -5,7 +5,6 @@ import NotFound from "./containers/NotFound";
 import Login from "./containers/Login";
 import Doc from "./containers/Doc";
 import Docs from "./containers/Docs";
-import ProjectContext from "./containers/ProjectContext";
 import Users from "./containers/Users";
 import FormTemplates from "./containers/FormTemplates";
 import FormTemplate from "./containers/FormTemplate";
@@ -21,42 +20,44 @@ import Tenant from "./containers/Tenant";
 import Tenants from "./containers/Tenants";
 import User from "./containers/User";
 import ResetPassword from "./containers/ResetPassword";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
+import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
 
 
 export default function Links(tenant) {
-  const pathPrefix = tenant.tenantName;
+
   return (
     <Routes>
       {/* <Route path={`${pathPrefix}/`} element={<Home />} />
       <Route path={`${pathPrefix}/iso`}  element={<ISO />} /> */}
       <Route path={`/`} element={<Home />} />
       <Route path={`/iso`}  element={<ISO />} />
+      <Route path="/login" element={ <UnauthenticatedRoute><Login /></UnauthenticatedRoute>} />
+      <Route path="/login/reset" element={<UnauthenticatedRoute><ResetPassword /></UnauthenticatedRoute>} />
+      
+      <Route path="/doc/:docId?" element={<AuthenticatedRoute><Doc /></AuthenticatedRoute>} />
+      <Route path="/docs" element={<AuthenticatedRoute><Docs /></AuthenticatedRoute>} />
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/doc/:docId?" element={<Doc />} />
-      <Route path="/docs" element={<Docs />} />
-      <Route path="/project-context" element={<ProjectContext />} />
-
-      <Route path="/users" element={<Users />} /> 
-      <Route path="/tenants/:tenantId/users" element={<Users />} />
-      <Route path="/user/:username?" element={<User />} />
-      <Route path="/tenants/:tenantId/user/:username?" element={<User />} />
-      <Route path="/templates" element={<FormTemplates />} />
-      <Route path="/template/:templateId?" element={<FormTemplate />} />
-      <Route path="/registers" element={<FormRegisters />} />
-      <Route path="/register/:templateId" element={<FormRegister />} />
-      <Route path="/form/:templateId/:formId?" element={<TemplatedForm />} />
+      <Route path="/users" element={<AuthenticatedRoute><Users /></AuthenticatedRoute>} /> 
+      <Route path="/tenants/:tenantId/users" element={<AuthenticatedRoute><Users /></AuthenticatedRoute>} />
+      <Route path="/user/:username?" element={<AuthenticatedRoute><User /></AuthenticatedRoute>} />
+      <Route path="/tenants/:tenantId/user/:username?" element={<AuthenticatedRoute><User /></AuthenticatedRoute>} />
+      <Route path="/templates" element={<AuthenticatedRoute><FormTemplates /></AuthenticatedRoute>} />
+      <Route path="/template/:templateId?" element={<AuthenticatedRoute><FormTemplate /></AuthenticatedRoute>} />
+      <Route path="/registers" element={<AuthenticatedRoute><FormRegisters /></AuthenticatedRoute>} />
+      <Route path="/register/:templateId" element={<AuthenticatedRoute><FormRegister /></AuthenticatedRoute>} />
+      <Route path="/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
 
 
       <Route path="/ntemplates" element={<NFormTemplates />} />
       <Route path="/ntemplate/:templateId?" element={<NFormTemplate />} />
       <Route path="/nform/:templateId/:formId?" element={<NTemplatedForm />} /> 
 
-      <Route path="/tenant/:tenantId?" element={<Tenant />} />
-      <Route path="/tenants" element={<Tenants />} />
+      <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
+      <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />
 
       <Route path="*" element={<NotFound />} />
-      <Route path="/login/reset" element={<ResetPassword />} />
+      
 
     </Routes>
   );

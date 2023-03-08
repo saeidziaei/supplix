@@ -1,7 +1,6 @@
 import * as uuid from "uuid";
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
-import { TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 
 export const main = handler(async (event) => {
   const data = JSON.parse(event.body);

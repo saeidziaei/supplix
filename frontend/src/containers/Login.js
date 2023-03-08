@@ -1,13 +1,12 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Auth } from "aws-amplify";
-import "./Login.css";
+import { Formik } from "formik";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, Form, Grid, Header, Icon, Label, Loader, Segment } from "semantic-ui-react";
+import * as Yup from 'yup';
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
-import { Form, Header, Loader, Segment, Grid, Icon, Button, Label } from "semantic-ui-react";
-import * as Yup from 'yup';
-import { Formik } from "formik";
-import { Link } from "react-router-dom";
+import "./Login.css";
 
 export default function Login() {
   const { userHasAuthenticated } = useAppContext();
@@ -15,7 +14,6 @@ export default function Login() {
   const [user, setUser] = useState(null);
   const [newPasswordRequired, setNewPasswordRequired] = useState(false);
   const [values, setValues] = useState({ email: "", password:"", newPassword: "", newPasswordConfirm: "" }); 
-  const nav = useNavigate();
 
   const Schema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
@@ -50,7 +48,6 @@ export default function Login() {
       }
       userHasAuthenticated(true);
       
-      nav("/");
     } catch (e) {
       console.log(e);
       onError(e);

@@ -2,7 +2,7 @@ import { AuthAndApiStack } from "./AuthAndApiStack";
 import { StorageStack } from "./StorageStack";
 import { FrontendStack } from "./FrontendStack";
 
-import { App } from "@serverless-stack/resources";
+import { App } from "sst/constructs";
 
 /**
  * @param {App} app
@@ -10,8 +10,7 @@ import { App } from "@serverless-stack/resources";
 export default function (app) {
   app.setDefaultFunctionProps({
     runtime: "nodejs16.x",
-    srcPath: "services",
-    bundle: {
+    nodejs: {
       format: "esm",
     },
   });

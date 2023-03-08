@@ -1,7 +1,7 @@
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 
-import { Cognito, Api, use } from "@serverless-stack/resources";
+import { Cognito, Api, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
 
@@ -70,110 +70,110 @@ export function AuthAndApiStack({ stack, app }) {
     routes: {
       "POST /docs/upload-url": {
         function: {
-          handler: "functions/doc/getUrlForPut.main",
+          handler: "services/functions/doc/getUrlForPut.main",
         },
       },
       "GET /docs": {
         function: {
-          handler: "functions/doc/list.main",
-          permissions: [docTable],
+          handler: "services/functions/doc/list.main",
+          bind: [docTable],
         },
       },
       "GET /docs/{docId}": {
         function: {
-          handler: "functions/doc/get.main",
-          permissions: [docTable],
+          handler: "services/functions/doc/get.main",
+          bind: [docTable],
         },
       },
       "POST /docs": {
         function: {
-          handler: "functions/doc/create.main",
-          permissions: [docTable],
+          handler: "services/functions/doc/create.main",
+          bind: [docTable],
         },
       },
       "DELETE /docs/{docId}": {
         function: {
-          handler: "functions/doc/delete.main",
+          handler: "services/functions/doc/delete.main",
         },
       },
 
-      "POST   /customers/{customerId}/iso": "functions/customerISO/create.main",
+      "POST   /customers/{customerId}/iso": "services/functions/customerISO/create.main",
 
       "GET   /customer-isos/{customerIsoId}/forms": {
         function: {
-          handler: "functions/form/list.main",
+          handler: "services/functions/form/list.main",
         },
       },
       "GET   /customer-isos/{customerIsoId}/forms/{formId}": {
         function: {
-          handler: "functions/form/get.main",
-          permissions: [templateTable, formTable],
+          handler: "services/functions/form/get.main",
+          bind: [templateTable, formTable],
         },
       },
       "POST   /customer-isos/{customerIsoId}/forms": {
         function: {
-          handler: "functions/form/create.main",
-          permissions: [formTable],
+          handler: "services/functions/form/create.main",
+          bind: [formTable],
         },
       },
       "PUT   /customer-isos/{customerIsoId}/forms/{formId}": {
         function: {
-          handler: "functions/form/update.main",
-          permissions: [formTable],
+          handler: "services/functions/form/update.main",
+          bind: [formTable],
         },
       },
 
       "GET   /customer-isos/{customerIsoId}/templates": {
         function: {
-          handler: "functions/template/list.main",
-          permissions: [templateTable, formTable],
+          handler: "services/functions/template/list.main",
+          bind: [templateTable, formTable],
         },
       },
       "GET   /customer-isos/{customerIsoId}/templates/{templateId}": {
         function: {
-          handler: "functions/template/get.main",
-          permissions: [templateTable, formTable],
+          handler: "services/functions/template/get.main",
+          bind: [templateTable, formTable],
         },
       },
       "POST   /customer-isos/{customerIsoId}/templates": {
         function: {
-          handler: "functions/template/create.main",
-          permissions: [templateTable],
+          handler: "services/functions/template/create.main",
+          bind: [templateTable],
         },
       },
       "PUT   /customer-isos/{customerIsoId}/templates/{templateId}": {
         function: {
-          handler: "functions/template/update.main",
-          permissions: [templateTable],
+          handler: "services/functions/template/update.main",
+          bind: [templateTable],
         },
       },
       "GET   /customer-isos/{customerIsoId}/templates/{templateId}/forms": {
         function: {
-          handler: "functions/template/listForms.main",
-          permissions: [formTable],
+          handler: "services/functions/template/listForms.main",
+          bind: [formTable],
         },
       },
 
       // for now just support one top level process
       "GET   /customer-isos/{customerIsoId}/processes/top-level": {
         function: {
-          handler: "functions/process/get.main",
-          permissions: [processTable],
+          handler: "services/functions/process/get.main",
+          bind: [processTable],
         },
       },
       // for now just support one top level process
       "PUT   /customer-isos/{customerIsoId}/processes/top-level": {
         function: {
-          handler: "functions/process/update.main",
-          permissions: [processTable],
+          handler: "services/functions/process/update.main",
+          bind: [processTable],
         },
       },
 
 
       "GET   /tenants": {
         function: {
-          handler: "functions/tenant/list.main",
-          permissions: [tenantTable],
+          handler: "services/functions/tenant/list.main",
+          bind: [tenantTable],
           environment: {
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
           }
@@ -181,8 +181,8 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "GET   /tenants/{tenantId}": {
         function: {
-          handler: "functions/tenant/get.main",
-          permissions: [tenantTable],
+          handler: "services/functions/tenant/get.main",
+          bind: [tenantTable],
           environment: {
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
           }
@@ -190,8 +190,8 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "POST   /tenants": {
         function: {
-          handler: "functions/tenant/create.main",
-          permissions: [tenantTable],
+          handler: "services/functions/tenant/create.main",
+          bind: [tenantTable],
           environment: {
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
           }
@@ -199,8 +199,8 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "PUT   /tenants/{tenantId}": {
         function: {
-          handler: "functions/tenant/update.main",
-          permissions: [tenantTable],
+          handler: "services/functions/tenant/update.main",
+          bind: [tenantTable],
           environment: {
             ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
           }
@@ -209,13 +209,13 @@ export function AuthAndApiStack({ stack, app }) {
 
       "GET   /mytenant": {
         function: {
-          handler: "functions/tenant/getmytenant.main",
-          permissions: [tenantTable],
+          handler: "services/functions/tenant/getmytenant.main",
+          bind: [tenantTable],
         },
       },
       "GET /users": {
         function: {
-          handler: "functions/user/list.main",
+          handler: "services/functions/user/list.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -225,7 +225,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "GET /tenants/{tenantId}/users": {
         function: {
-          handler: "functions/user/list.main",
+          handler: "services/functions/user/list.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -235,7 +235,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "GET /users/{username}": {
         function: {
-          handler: "functions/user/get.main",
+          handler: "services/functions/user/get.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -245,7 +245,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "GET /tenants/{tenantId}/users/{username}": {
         function: {
-          handler: "functions/user/get.main",
+          handler: "services/functions/user/get.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -255,7 +255,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "POST /users": {
         function: {
-          handler: "functions/user/create.main",
+          handler: "services/functions/user/create.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -265,7 +265,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "POST /tenants/{tenantId}/users": {
         function: {
-          handler: "functions/user/create.main",
+          handler: "services/functions/user/create.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -275,7 +275,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "PUT /users/{username}": {
         function: {
-          handler: "functions/user/update.main",
+          handler: "services/functions/user/update.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -285,7 +285,7 @@ export function AuthAndApiStack({ stack, app }) {
       },
       "PUT /tenants/{tenantId}/users/{username}": {
         function: {
-          handler: "functions/user/update.main",
+          handler: "services/functions/user/update.main",
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -297,89 +297,89 @@ export function AuthAndApiStack({ stack, app }) {
       // ###############  N Sectoin ####################
       "GET   /customers/{customerId}/forms": {
         function: {
-          handler: "functions/nform/list.main",
-          permissions: [nformTable],
+          handler: "services/functions/nform/list.main",
+          bind: [nformTable],
         },
       },
       "GET   /customers/{customerId}/nforms/{formId}": {
         function: {
-          handler: "functions/nform/get.main",
-          permissions: [ntemplateTable, nformTable],
+          handler: "services/functions/nform/get.main",
+          bind: [ntemplateTable, nformTable],
         },
       },
       "POST   /customers/{customerId}/nforms": {
         function: {
-          handler: "functions/nform/create.main",
-          permissions: [nformTable],
+          handler: "services/functions/nform/create.main",
+          bind: [nformTable],
         },
       },
       "PUT   /customers/{customerId}/nforms/{formId}": {
         function: {
-          handler: "functions/nform/update.main",
-          permissions: [nformTable],
+          handler: "services/functions/nform/update.main",
+          bind: [nformTable],
         },
       },
 
       "GET   /customers/{customerId}/ntemplates": {
         function: {
-          handler: "functions/ntemplate/list.main",
-          permissions: [ntemplateTable, nformTable],
+          handler: "services/functions/ntemplate/list.main",
+          bind: [ntemplateTable, nformTable],
         },
       },
       "GET   /customers/{customerId}/ntemplates/{templateId}": {
         function: {
-          handler: "functions/ntemplate/get.main",
-          permissions: [ntemplateTable, nformTable],
+          handler: "services/functions/ntemplate/get.main",
+          bind: [ntemplateTable, nformTable],
         },
       },
       "POST   /customers/{customerId}/ntemplates": {
         function: {
-          handler: "functions/ntemplate/create.main",
-          permissions: [ntemplateTable],
+          handler: "services/functions/ntemplate/create.main",
+          bind: [ntemplateTable],
         },
       },
       "PUT   /customers/{customerId}/ntemplates/{templateId}": {
         function: {
-          handler: "functions/ntemplate/update.main",
-          permissions: [ntemplateTable],
+          handler: "services/functions/ntemplate/update.main",
+          bind: [ntemplateTable],
         },
       },
       // ###############################################
-    },
+     },
   });
 
 
 
 
 
-  api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
-    // new iam.PolicyStatement({
-    //   actions: ["s3:*"],
-    //   effect: iam.Effect.ALLOW,
-    //   resources: [
-    //     bucket.bucketArn,
-    //     bucket.bucketArn + "/*",
-    //     // bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:custom:tenant}/*",
-    //   ],
-    // }),
-  ]);
-  api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
+  // api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
+  //   // new iam.PolicyStatement({
+  //   //   actions: ["s3:*"],
+  //   //   effect: iam.Effect.ALLOW,
+  //   //   resources: [
+  //   //     bucket.bucketArn,
+  //   //     bucket.bucketArn + "/*",
+  //   //     // bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:custom:tenant}/*",
+  //   //   ],
+  //   // }),
+  // ]);
+  // api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
 
 
-  auth.attachPermissionsForAuthUsers(auth, [
-    // Allow access to the API
-    api,
+  // auth.attachPermissionsForAuthUsers(auth, [
+  //   // Allow access to the API
+  //   api,
 
-     // Policy granting access to a specific folder in the bucket
-     // this is non sensitive files such as logos
-     new iam.PolicyStatement({
-      actions: ["s3:*"],
-      effect: iam.Effect.ALLOW,
-      resources: [
-        bucket.bucketArn + "/public/*",
-      ],
-    }),
-  ]);
+  //    // Policy granting access to a specific folder in the bucket
+  //    // this is non sensitive files such as logos
+  //    new iam.PolicyStatement({
+  //     actions: ["s3:*"],
+  //     effect: iam.Effect.ALLOW,
+  //     resources: [
+  //       bucket.bucketArn + "/public/*",
+  //     ],
+  //   }),
+  // ]);
   
  
  

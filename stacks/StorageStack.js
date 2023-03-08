@@ -1,4 +1,4 @@
-import { Bucket, Table } from "@serverless-stack/resources";
+import { Bucket, Table } from "sst/constructs";
 import { tenants } from "./config";
 
 export function StorageStack({ stack, app }) {

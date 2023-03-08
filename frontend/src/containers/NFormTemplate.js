@@ -5,40 +5,33 @@ import {
   Divider,
   Dropdown,
   Form,
-  Grid,
-  GridColumn,
-  Header,
+  Grid, Header,
   Icon,
   Input,
-  Item,
-  Label,
-  List,
+  Item, List,
   Loader,
-  Segment,
-  SegmentGroup,
+  Segment
 } from "semantic-ui-react";
 
-import "./NFormTemplate.css";
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
+  closestCenter, DndContext, KeyboardSensor,
   PointerSensor,
   useSensor,
-  useSensors,
+  useSensors
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { SortableItem } from "../components/SortableItem";
-import { useParams, useNavigate } from "react-router-dom";
-import { makeApiCall } from "../lib/apiLib";
-import { onError } from "../lib/errorLib";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 import { NGenericForm } from "../components/NGenericForm";
+import { SortableItem } from "../components/SortableItem";
+import { makeApiCall } from "../lib/apiLib";
+import { onError } from "../lib/errorLib";
+import "./NFormTemplate.css";
 
 export default function NFormTemplate() {
   const {templateId} = useParams();

@@ -1,15 +1,12 @@
+import { Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { onError } from "../lib/errorLib";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Form, Grid, Header, Icon, Image, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
-import axios from "axios";
-import { Form, Header, Input, Label, Loader, Segment, Grid, Message, Icon, Button, Image, Card } from "semantic-ui-react";
-import { Formik } from "formik";
-import placeholderImage from './fileplaceholder.jpg'
-import { LinkContainer } from "react-router-bootstrap";
-import { s3Upload, s3Remove, s3Get } from "../lib/awsLib";
+import { s3Get, s3Remove, s3Upload } from "../lib/awsLib";
+import { onError } from "../lib/errorLib";
+import placeholderImage from './fileplaceholder.jpg';
 
 export default function Tenant() {
   const file = useRef(null);

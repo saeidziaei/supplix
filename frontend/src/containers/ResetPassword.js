@@ -1,20 +1,13 @@
-import React, { useState } from "react";
 import { Auth } from "aws-amplify";
-import { onError } from "../lib/errorLib";
+import { Formik } from "formik";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Form,
-  Header,
-  Loader,
-  Segment,
-  Grid,
-  Icon,
-  Button,
-  Label,
-  Message,
+  Button, Form, Grid, Header, Icon, Label,
+  Message, Segment
 } from "semantic-ui-react";
 import * as Yup from "yup";
-import { Formik } from "formik";
-import { Link } from "react-router-dom";
+import { onError } from "../lib/errorLib";
 
 export default function ResetPassword() {
   const [values, setValues] = useState({

@@ -29,9 +29,8 @@ export default App;
 function App() {
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [isTopLevelAdmin, setIsTopLevelAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [currentIso, setCurrentIso] = useState(null);
+  const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [tenant, setTenant] = useState(null);
 
   const nav = useNavigate();
@@ -50,10 +49,7 @@ function App() {
         const session = await Auth.currentSession();
 
         const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-        setIsTopLevelAdmin(
-          decodedJwt["cognito:groups"] &&
-            decodedJwt["cognito:groups"].includes("top-level-admins")
-        );
+        setCurrentUserRoles(decodedJwt["cognito:groups"])
 
         setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
 
@@ -252,9 +248,7 @@ function App() {
                       value={{
                         isAuthenticated,
                         userHasAuthenticated,
-                        isTopLevelAdmin,
-                        currentIso,
-                        setCurrentIso,
+                        currentUserRoles
                       }}
                     >
                       <Routes />
@@ -269,6 +263,9 @@ function App() {
     );
   }
   function renderApp() {
+    const isAdmin = currentUserRoles.includes('admins');
+    const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
+
     const logoURL =
       tenant && tenant.logoURL ? tenant.logoURL : "/iso_cloud.png";
     
@@ -299,16 +296,7 @@ function App() {
               ></Button>
             </List.Item>
           </List>
-          {/* <Grid columns={10}  padded>
-        
-        <Grid.Column verticalAlign="middle" >
-          <Image size="small" rounded alt="logo" src="https://technocrete.com.au/wp-content/uploads/2021/07/Logo.svg"/>
-        </Grid.Column>
-        <Grid.Column  verticalAlign="middle">
-          <Button color="black" icon="bars"onClick={() => setIsSidebarVisible(!isSidebarVisible)}></Button>
-        </Grid.Column>
 
-      </Grid> */}
           <Grid columns={1}>
             <Grid.Column>
               <Sidebar.Pushable as={Segment}>
@@ -361,6 +349,7 @@ function App() {
                           </LinkContainer>
                         </Menu.Menu>
                       </Menu.Item>
+                      {(isAdmin || isTopLevelAdmin) &&
                       <LinkContainer to="/templates">
                         <Nav.Link as={Menu.Item}>
                           <span>
@@ -369,7 +358,7 @@ function App() {
                           </span>
                         </Nav.Link>
                       </LinkContainer>
-
+                    }
                       <LinkContainer to="/registers">
                         <Nav.Link as={Menu.Item}>
                           <span>
@@ -431,12 +420,10 @@ function App() {
                       value={{
                         isAuthenticated,
                         userHasAuthenticated,
-                        isTopLevelAdmin,
-                        currentIso,
-                        setCurrentIso,
+                        currentUserRoles
                       }}
                     >
-                      <Routes tenant={tenant} />
+                      <Routes tenant={tenant} currentUserRoles={currentUserRoles} />
                       {/* <Routes /> */}
                     </AppContext.Provider>
                   </Segment>
