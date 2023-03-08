@@ -1,14 +1,14 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const data = JSON.parse(event.body);
   const params = {
-    TableName: process.env.PROCESS_TABLE,
+    TableName: process.env.ISO_TABLE,
 
     Key: {
-      customerIsoId: event.pathParameters.customerIsoId, 
-      processId: 'top-level', 
+      tenant: tenant,
+      isoId: 'top-level', 
     },
     UpdateExpression: "SET tree = :tree",
     ExpressionAttributeValues: {

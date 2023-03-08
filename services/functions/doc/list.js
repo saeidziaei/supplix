@@ -2,11 +2,7 @@ import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
-    // TODO remove this
-    if (!tenant) {
-      tenant = 'tenant1';
-    }
-  
+
 const params = {
   TableName: process.env.DOC_TABLE,
   KeyConditionExpression: "tenant = :tenant",

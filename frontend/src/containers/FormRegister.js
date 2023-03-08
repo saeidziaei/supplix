@@ -22,7 +22,6 @@ export default function FormRegister() {
   const { templateId } = useParams();
   const [formDef, setFormDef] = useState(null);
   const [forms, setForms] = useState(null);
-  const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -49,13 +48,13 @@ export default function FormRegister() {
   async function loadTemplate(templateId) {
     return await makeApiCall(
       "GET",
-      `/customer-isos/${customerIsoId}/templates/${templateId}`
+      `/templates/${templateId}`
     );
   }
   async function loadTemplateForms(templateId) {
     return await makeApiCall(
       "GET",
-      `/customer-isos/${customerIsoId}/templates/${templateId}/forms`
+      `/templates/${templateId}/forms`
     );
   }
 

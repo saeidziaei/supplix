@@ -1,9 +1,10 @@
 import { Bucket, Table } from "sst/constructs";
-import { tenants } from "./config";
+import * as cdk from "aws-cdk-lib";
+import { App,  } from "sst/constructs";
 
 export function StorageStack({ stack, app }) {
   // Create an S3 bucket
- 
+
   const bucket = new Bucket(stack, "Uploads" , {
     cors: [
       {
@@ -23,39 +24,39 @@ export function StorageStack({ stack, app }) {
     },
     primaryIndex: { partitionKey: "tenantId" },
   });
+ 
 
-  // table that holds customer customised template
-  const customerISOTable = new Table(stack , "CustomerISO", {
+  const isoTable = new Table(stack , "Iso", {
     fields: {
-      customerId: "string",
+      tenant: "string",
       isoId: "string", // unique id of this customised template
     },
-    primaryIndex: { partitionKey: "customerId", sortKey: "isoId" },
+    primaryIndex: { partitionKey: "tenant", sortKey: "isoId" }, 
   });
 
-  const formTable = new Table(stack , "Form", {
+  const formTable = new Table(stack , "Form", { 
     fields: {
-      customerIsoId: "string",
+      tenant: "string",
       formId: "string", 
     },
-    primaryIndex: { partitionKey: "customerIsoId", sortKey: "formId" },
+    primaryIndex: { partitionKey: "tenant", sortKey: "formId" },
   });
 
   const templateTable = new Table(stack , "Template", {
     fields: {
-      customerIsoId: "string",
+      tenant: "string",
       templateId: "string", 
     },
-    primaryIndex: { partitionKey: "customerIsoId", sortKey: "templateId" },
+    primaryIndex: { partitionKey: "tenant", sortKey: "templateId" },
   });
 
-  const processTable = new Table(stack , "Process", {
-    fields: {
-      customerIsoId: "string",
-      processId: "string", 
-    },
-    primaryIndex: { partitionKey: "customerIsoId", sortKey: "processId" },
-  });
+  // const processTable = new Table(stack , "Process", {
+  //   fields: {
+  //     customerIsoId: "string",
+  //     processId: "string", 
+  //   },
+  //   primaryIndex: { partitionKey: "customerIsoId", sortKey: "processId" },
+  // });
 
   const docTable = new Table(stack , "Doc", {
     fields: {
@@ -64,6 +65,7 @@ export function StorageStack({ stack, app }) {
     },
     primaryIndex: { partitionKey: "tenant", sortKey: "docId" },
   });
+
 
   const nformTable = new Table(stack , "NForm", {
     fields: {
@@ -84,10 +86,9 @@ export function StorageStack({ stack, app }) {
   // Return the bucket and table resources
   return {
     tenantTable,
-    customerISOTable,
+    isoTable,
     formTable,
     templateTable,
-    processTable,
     docTable,
     bucket,
     nformTable,

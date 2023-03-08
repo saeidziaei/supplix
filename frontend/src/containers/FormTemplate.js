@@ -42,7 +42,6 @@ import { makeApiCall } from "../lib/apiLib";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
-  const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
@@ -53,7 +52,7 @@ export default function FormTemplate() {
     async function loadTemplate() {
       return await makeApiCall(
         "GET",
-        `/customer-isos/${customerIsoId}/templates/${templateId}`
+        `/templates/${templateId}`
       );
     }
 
@@ -104,7 +103,7 @@ export default function FormTemplate() {
     }
   }
   async function createTemplate(def) {
-    return await makeApiCall("POST", `/customer-isos/${customerIsoId}/templates`, {
+    return await makeApiCall("POST", `/templates`, {
       templateDefinition: def,
     });
   }
@@ -112,7 +111,7 @@ export default function FormTemplate() {
   async function updateTemplate(def) {
     return await makeApiCall(
       "PUT",
-      `/customer-isos/${customerIsoId}/templates/${templateId}`,
+      `/templates/${templateId}`,
       {
         templateDefinition: def,
       }

@@ -11,7 +11,6 @@ import FormHeader from "../components/FormHeader";
 
 export default function ISOForms() {
   const [forms, setForms] = useState([]);
-  const customerIsoId = "iso-123";
   const [isLoading, setIsLoading] = useState(true);
   const callJwtAPI = JwtApi();
 
@@ -32,7 +31,7 @@ export default function ISOForms() {
   }, []);
 
   function loadForms() {
-    return callJwtAPI("GET", `/customer-isos/${customerIsoId}/forms`);
+    return callJwtAPI("GET", `/forms`);
   }
 
   function renderFormList() {

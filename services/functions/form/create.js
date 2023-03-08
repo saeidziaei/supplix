@@ -2,12 +2,13 @@ import * as uuid from "uuid";
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
+
   const data = JSON.parse(event.body);
   const params = {
     TableName: process.env.FORM_TABLE,
     Item: {
-      customerIsoId: event.pathParameters.customerIsoId, 
+      tenant: tenant,
       formId: uuid.v1(), // A unique uuid
       templateId: data.templateId,
       formValues: data.formValues,

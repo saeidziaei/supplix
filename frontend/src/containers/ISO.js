@@ -1,20 +1,18 @@
 // TODO !!! dompurify - sanitize html input
-import React, { useState, useEffect } from 'react';
-import "./ISO.css";
-import { onError } from "../lib/errorLib";
-import { List, Loader } from "semantic-ui-react";
-import DisplayText from '../components/DisplayText';
-import { Button, Divider, Header, Icon, Item, Label, Segment, Table, Grid, Input, TextArea, Form, Breadcrumb, Popup } from "semantic-ui-react";
-import  pluralize from "pluralize";
-import { capitalizeFirstLetter } from '../lib/helpers';
+import pluralize from "pluralize";
+import React, { useEffect, useState } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import remarkGfm  from 'remark-gfm';
+import { useNavigate } from 'react-router-dom';
+import remarkGfm from 'remark-gfm';
+import { Breadcrumb, Button, Divider, Form, Header, Icon, Input, Item, Label, Loader, Popup, TextArea } from "semantic-ui-react";
 import { v4 as uuidv4 } from 'uuid';
-import { useLocation, useNavigate } from 'react-router-dom';
+import DisplayText from '../components/DisplayText';
 import { makeApiCall } from '../lib/apiLib';
+import { onError } from "../lib/errorLib";
+import { capitalizeFirstLetter } from '../lib/helpers';
+import "./ISO.css";
 
 export default function ISO() {
-  const customerIsoId = "iso-123";
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -400,12 +398,9 @@ export default function ISO() {
  
   useEffect(() => {
     async function loadProcess() {
-      return await makeApiCall("GET", `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level))
+      return await makeApiCall("GET", `/isos/top-level` // returns one item (top level))
       );
-      // return jwtApi(
-      //   "GET",
-      //   `/customer-isos/${customerIsoId}/processes/top-level` // returns one item (top level)
-      // );
+ 
     }
 
     async function onLoad() {
@@ -442,7 +437,7 @@ export default function ISO() {
   async function updateProcess(tree) {
     return await makeApiCall(
       "PUT",
-      `/customer-isos/${customerIsoId}/processes/top-level`,
+      `/isos/top-level`,
       {
         tree: tree,
       }

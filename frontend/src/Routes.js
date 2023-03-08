@@ -28,8 +28,7 @@ export default function Links(tenant) {
 
   return (
     <Routes>
-      {/* <Route path={`${pathPrefix}/`} element={<Home />} />
-      <Route path={`${pathPrefix}/iso`}  element={<ISO />} /> */}
+
       <Route path={`/`} element={<Home />} />
       <Route path={`/iso`}  element={<ISO />} />
       <Route path="/login" element={ <UnauthenticatedRoute><Login /></UnauthenticatedRoute>} />

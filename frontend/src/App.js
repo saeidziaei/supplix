@@ -19,6 +19,7 @@ import {
   List,
   Loader,
   PlaceholderImage,
+  Divider,
 } from "semantic-ui-react";
 import { s3Get } from "./lib/awsLib";
 import { makeApiCall } from "./lib/apiLib";
@@ -317,14 +318,14 @@ function App() {
                     </Nav.Link>
                   </LinkContainer>
 
-                  <Menu.Item as="a">
+                  {/* <Menu.Item as="a">
                     <Label color="teal">5</Label>
                     Tasks
                   </Menu.Item>
                   <Menu.Item as="a">
                     <Label color="orange">3</Label>
                     Notifications
-                  </Menu.Item>
+                  </Menu.Item> */}
 
                   {isAuthenticated ? (
                     <>
@@ -339,14 +340,14 @@ function App() {
                               </span>
                             </Nav.Link>
                           </LinkContainer>
-                          <LinkContainer to="/iso">
+                          {/* <LinkContainer to="/iso">
                             <Nav.Link as={Menu.Item}>
                               <span>
                                 <Icon name="sitemap" />
                                 27001
                               </span>
                             </Nav.Link>
-                          </LinkContainer>
+                          </LinkContainer> */}
                         </Menu.Menu>
                       </Menu.Item>
                       {(isAdmin || isTopLevelAdmin) &&
@@ -359,6 +360,7 @@ function App() {
                         </Nav.Link>
                       </LinkContainer>
                     }
+                    
                       <LinkContainer to="/registers">
                         <Nav.Link as={Menu.Item}>
                           <span>
@@ -375,7 +377,28 @@ function App() {
                           </span>
                         </Nav.Link>
                       </LinkContainer>
-
+                      {(isTopLevelAdmin) &&
+                      <LinkContainer to="/tenants" >
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="building" color="red"/>
+                            Tenants
+                          </span>
+                          <Icon name="hand paper" color="red"/>
+                        </Nav.Link>
+                      </LinkContainer>
+                    }
+                      {(isAdmin || isTopLevelAdmin) &&
+                      <LinkContainer to="/users" >
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="users" color="red"/>
+                            Users
+                          </span>
+                          
+                        </Nav.Link>
+                      </LinkContainer>
+                    }
                       <LinkContainer to="/logout">
                         <Nav.Link as={Menu.Item} onClick={handleLogout}>
                           <span>
@@ -401,6 +424,7 @@ function App() {
                   <Menu.Item>
                     <img alt="logo" src="/iso_cloud.png" />
                   </Menu.Item>
+
                   <Menu.Item color="blue">
                     <p style={{ fontSize: "0.8em" }}>
                       <br />

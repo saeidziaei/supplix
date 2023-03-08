@@ -1,7 +1,8 @@
 import { Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
+import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Grid, Header, Icon, Image, Loader, Segment } from "semantic-ui-react";
+import { Button, Divider, Form, Grid, Header, Icon, Image, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { s3Get, s3Remove, s3Upload } from "../lib/awsLib";
@@ -107,10 +108,10 @@ export default function Tenant() {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="blue" textAlign="center">
-            <Icon name="users" color="blue" /> Tenant
+            <Icon name="building" color="blue" /> Tenant
           </Header>
           <Formik
-            initialValues={{...tenant}}
+            initialValues={{ ...tenant }}
             validate={validateForm}
             onSubmit={handleSubmit}
           >
@@ -124,25 +125,68 @@ export default function Tenant() {
               /* and other goodies */
             }) => (
               <Form onSubmit={handleSubmit}>
-                <Segment >
-                  <Form.Input  fluid iconPosition="left" icon="tag" name="tenantName" placeholder="Name" value={values.tenantName} onChange={handleChange} />
-                  <Header as="h5" floated="left">Logo</Header>
-                  
-                  {tenant.logoURL &&
-                  
-                   <Image
-                    src={tenant.logoURL}
-                    rounded
-                    alt="Logo"
-                    onError={(e) => {
-                      e.target.src = placeholderImage;
-                    }}
-                  /> }
+                <Segment>
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="tag"
+                    name="tenantName"
+                    placeholder="Name"
+                    value={values.tenantName}
+                    onChange={handleChange}
+                  />
+                  <Header as="h5" floated="left">
+                    Logo
+                  </Header>
+
+                  {tenant.logoURL && (
+                    <Image
+                      src={tenant.logoURL}
+                      rounded
+                      size="medium"
+                      alt="Logo"
+                      onError={(e) => {
+                        e.target.src = placeholderImage;
+                      }}
+                    />
+                  )}
                   <Form.Input onChange={handleFileChange} type="file" />
-                  <Form.Input  fluid iconPosition="left" icon="user outline" name="contactPerson" placeholder="Contact Person" value={values.contactPerson} onChange={handleChange} />
-                  <Form.Input  fluid iconPosition="left" icon="phone" name="contactNumber" placeholder="Contact Number" value={values.contactNumber} onChange={handleChange} />
-                  <Form.Input  fluid iconPosition="left" icon="mail" name="contactEmail" placeholder="Contact Email" value={values.contactEmail} onChange={handleChange} />
-                  <Form.Input  fluid iconPosition="left" icon="globe" name="website" placeholder="Website address" value={values.website} onChange={handleChange} />
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="user outline"
+                    name="contactPerson"
+                    placeholder="Contact Person"
+                    value={values.contactPerson}
+                    onChange={handleChange}
+                  />
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="phone"
+                    name="contactNumber"
+                    placeholder="Contact Number"
+                    value={values.contactNumber}
+                    onChange={handleChange}
+                  />
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="mail"
+                    name="contactEmail"
+                    placeholder="Contact Email"
+                    value={values.contactEmail}
+                    onChange={handleChange}
+                  />
+                  <Form.Input
+                    fluid
+                    iconPosition="left"
+                    icon="globe"
+                    name="website"
+                    placeholder="Website address"
+                    value={values.website}
+                    onChange={handleChange}
+                  />
                   <Form.Input
                     fluid
                     iconPosition="left"
@@ -160,6 +204,14 @@ export default function Tenant() {
               </Form>
             )}
           </Formik>
+          <Divider/>
+          {tenant && tenant.tenantId && (
+            <LinkContainer to={`/tenants/${tenant.tenantId}/users`}>
+              <Button basic secondary>
+                Manage users
+              </Button>
+            </LinkContainer>
+          )}
         </Grid.Column>
       </Grid>
     );

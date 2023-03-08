@@ -2,10 +2,6 @@ import handler from "../../util/handler";
 import s3 from "../../util/s3";
 
 export const main = handler(async (event, tenant) => {
-  // TODO remove this
-  if (!tenant) {
-    tenant = 'tenant1';
-  }
 
   const data = JSON.parse(event.body);
   

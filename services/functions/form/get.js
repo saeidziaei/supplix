@@ -1,11 +1,11 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const params = {
     TableName: process.env.FORM_TABLE,
     Key: {
-      customerIsoId: event.pathParameters.customerIsoId, 
+      tenant: tenant,
       formId: event.pathParameters.formId, 
     },
   };
@@ -16,7 +16,7 @@ export const main = handler(async (event) => {
     throw new Error("Item not found.");
   }
 
-  form.template = await getTemplate(form.customerIsoId, form.templateId);
+  form.template = await getTemplate(tenant, form.templateId);
   if (!form.template) {
     throw new Error("Template used for this form not found.");
   }
@@ -25,11 +25,11 @@ export const main = handler(async (event) => {
   return form;
 });
 
-async function getTemplate(customerIsoId, templateId) {
+async function getTemplate(tenant, templateId) {
   const params = {
     TableName: process.env.TEMPLATE_TABLE,
     Key: {
-      customerIsoId: customerIsoId, 
+      tenant: tenant, 
       templateId: templateId, 
     },
   };

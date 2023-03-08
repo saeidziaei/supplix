@@ -11,8 +11,7 @@ export function AuthAndApiStack({ stack, app }) {
     formTable,
     templateTable,
     tenantTable,
-    customerISOTable,
-    processTable,
+    isoTable,
     docTable,
     nformTable,
     ntemplateTable,
@@ -58,8 +57,7 @@ export function AuthAndApiStack({ stack, app }) {
           FORM_TABLE: formTable.tableName,
           TEMPLATE_TABLE: templateTable.tableName,
           TENANT_TABLE: tenantTable.tableName,
-          CUSTOMER_ISO_TABLE: customerISOTable.tableName,
-          PROCESS_TABLE: processTable.tableName,
+          ISO_TABLE: isoTable.tableName,
           DOC_TABLE: docTable.tableName,
           BUCKET: bucket.bucketName,
           NFORM_TABLE: nformTable.tableName,
@@ -97,75 +95,75 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-      "POST   /customers/{customerId}/iso": "services/functions/customerISO/create.main",
+      
 
-      "GET   /customer-isos/{customerIsoId}/forms": {
+      "GET   /forms": {
         function: {
           handler: "services/functions/form/list.main",
         },
       },
-      "GET   /customer-isos/{customerIsoId}/forms/{formId}": {
+      "GET   /forms/{formId}": {
         function: {
           handler: "services/functions/form/get.main",
           bind: [templateTable, formTable],
         },
       },
-      "POST   /customer-isos/{customerIsoId}/forms": {
+      "POST  /forms": {
         function: {
           handler: "services/functions/form/create.main",
           bind: [formTable],
         },
       },
-      "PUT   /customer-isos/{customerIsoId}/forms/{formId}": {
+      "PUT   /forms/{formId}": {
         function: {
           handler: "services/functions/form/update.main",
           bind: [formTable],
         },
       },
 
-      "GET   /customer-isos/{customerIsoId}/templates": {
+      "GET   /templates": {
         function: {
           handler: "services/functions/template/list.main",
           bind: [templateTable, formTable],
         },
       },
-      "GET   /customer-isos/{customerIsoId}/templates/{templateId}": {
+      "GET   /templates/{templateId}": {
         function: {
           handler: "services/functions/template/get.main",
           bind: [templateTable, formTable],
         },
       },
-      "POST   /customer-isos/{customerIsoId}/templates": {
+      "POST   /templates": {
         function: {
           handler: "services/functions/template/create.main",
           bind: [templateTable],
         },
       },
-      "PUT   /customer-isos/{customerIsoId}/templates/{templateId}": {
+      "PUT   /templates/{templateId}": {
         function: {
           handler: "services/functions/template/update.main",
           bind: [templateTable],
         },
       },
-      "GET   /customer-isos/{customerIsoId}/templates/{templateId}/forms": {
+      "GET   /templates/{templateId}/forms": {
         function: {
           handler: "services/functions/template/listForms.main",
           bind: [formTable],
         },
       },
 
-      // for now just support one top level process
-      "GET   /customer-isos/{customerIsoId}/processes/top-level": {
+      // for now just support one top level iso
+      "GET   /isos/top-level": {
         function: {
-          handler: "services/functions/process/get.main",
-          bind: [processTable],
+          handler: "services/functions/iso/get.main",
+          bind: [isoTable],
         },
       },
       // for now just support one top level process
-      "PUT   /customer-isos/{customerIsoId}/processes/top-level": {
+      "PUT   /isos/top-level": {
         function: {
-          handler: "services/functions/process/update.main",
-          bind: [processTable],
+          handler: "services/functions/iso/update.main",
+          bind: [isoTable],
         },
       },
 

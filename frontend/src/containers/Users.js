@@ -78,6 +78,7 @@ export default function Users() {
         {tenant && tenant.logoURL && (
           <Image
             src={tenant.logoURL}
+            size="small"
             rounded
             alt="Logo"
             onError={(e) => {

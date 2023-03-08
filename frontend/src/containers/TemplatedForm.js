@@ -9,7 +9,7 @@ import { onError } from "../lib/errorLib";
 
 export default function TemplatedForm() {
   const { formId, templateId } = useParams();
-  const customerIsoId = "iso-123";
+
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [template, setTemplate] = useState(null);
@@ -21,14 +21,14 @@ export default function TemplatedForm() {
     async function loadForm() {
       return await makeApiCall(
         "GET",
-        `/customer-isos/${customerIsoId}/forms/${formId}`
+        `/forms/${formId}`
       );
     }
 
     async function loadTemplate() {
       return await makeApiCall(
         "GET",
-        `/customer-isos/${customerIsoId}/templates/${templateId}`
+        `/templates/${templateId}`
       );
     }
     async function onLoad() {
@@ -72,7 +72,7 @@ export default function TemplatedForm() {
     }
   }
   async function createForm(values) {
-    return await makeApiCall("POST", `/customer-isos/${customerIsoId}/forms`, {
+    return await makeApiCall("POST", `/forms`, {
       templateId: template.templateId,
       formValues: values,
     });
@@ -81,7 +81,7 @@ export default function TemplatedForm() {
   async function updateForm(values) {
     return await makeApiCall(
       "PUT",
-      `/customer-isos/${customerIsoId}/forms/${formId}`,
+      `/forms/${formId}`,
       {
         formValues: values,
       }

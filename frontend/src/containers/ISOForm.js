@@ -10,7 +10,6 @@ import LoaderButton from "../components/LoaderButton";
 
 export default function ISOForm() {
   const { formName, formId } = useParams();
-  const customerIsoId = "iso-123";
   const callJwtAPI = JwtApi();
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +18,7 @@ export default function ISOForm() {
     function loadForm() {
       return callJwtAPI(
         "GET",
-        `/customer-isos/${customerIsoId}/forms/${formId}`
+        `/forms/${formId}`
       );
     }
 
@@ -58,7 +57,7 @@ export default function ISOForm() {
   }
 
   function createForm(values) {
-    return callJwtAPI("POST", `/customer-isos/${customerIsoId}/forms`, {
+    return callJwtAPI("POST", `/forms`, {
       formName: formName,
       values: values,
     });
@@ -67,7 +66,7 @@ export default function ISOForm() {
   function updateForm(values) {
     return callJwtAPI(
       "PUT",
-      `/customer-isos/${customerIsoId}/forms/${formId}`,
+      `/forms/${formId}`,
       {
         values: values,
       }
