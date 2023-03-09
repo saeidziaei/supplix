@@ -65,7 +65,7 @@ export default function Tenants() {
           
         
     </Segment>
-    <LinkContainer to={`/doc`}><Button>New</Button></LinkContainer> </>
+    <LinkContainer to={`/tenant`}><Button>New</Button></LinkContainer> </>
   );
   }
   return isLoading ? (<Loader active/>) : renderTenants();

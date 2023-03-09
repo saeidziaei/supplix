@@ -73,7 +73,10 @@ export default function Users() {
     return (
       <>
         {tenant && (
-          <Message icon="users" content={`You are viewing users of ${tenant.tenantName}`} />
+          <Message
+            icon="users"
+            content={`You are viewing users of ${tenant.tenantName}`}
+          />
         )}
         {tenant && tenant.logoURL && (
           <Image
@@ -118,7 +121,10 @@ export default function Users() {
                   <Header as="h4" image>
                     <Icon name="user circle" size="mini" />
                     <Header.Content>
-                    {`${getAttribute(u, "given_name")} ${getAttribute(u, "family_name")}`}
+                      {`${getAttribute(u, "given_name")} ${getAttribute(
+                        u,
+                        "family_name"
+                      )}`}
                       <Header.Subheader></Header.Subheader>
                     </Header.Content>
                   </Header>
@@ -150,9 +156,15 @@ export default function Users() {
             ))}
           </Table.Body>
         </Table>
-        <LinkContainer to={`/user`}>
-          <Button primary>Create new user</Button>
-        </LinkContainer>
+        {tenantId ? (
+          <LinkContainer to={`/tenants/${tenantId}/user`}>
+            <Button primary>Create new tenant user</Button>
+          </LinkContainer>
+        ) : (
+          <LinkContainer to={`/user`}>
+            <Button primary>Create new user</Button>
+          </LinkContainer>
+        )}
       </>
     );
   }

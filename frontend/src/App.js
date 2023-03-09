@@ -50,7 +50,7 @@ function App() {
         const session = await Auth.currentSession();
 
         const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-        setCurrentUserRoles(decodedJwt["cognito:groups"])
+        setCurrentUserRoles(decodedJwt["cognito:groups"] || [])
 
         setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
 

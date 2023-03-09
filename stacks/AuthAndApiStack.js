@@ -22,11 +22,20 @@ export function AuthAndApiStack({ stack, app }) {
     login: ["email"],
   });
 
+
   const topLevelAdminsGroup = new cognito.CfnUserPoolGroup(
     this,
     "TopLevelAdmins",
     {
       groupName: TOP_LEVEL_ADMIN_GROUP,
+      userPoolId: auth.userPoolId,
+    }
+  );  
+  const adminsGroup = new cognito.CfnUserPoolGroup(
+    this,
+    "Admins",
+    {
+      groupName: ADMIN_GROUP,
       userPoolId: auth.userPoolId,
     }
   );
@@ -350,34 +359,34 @@ export function AuthAndApiStack({ stack, app }) {
 
 
 
-  // api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
-  //   // new iam.PolicyStatement({
-  //   //   actions: ["s3:*"],
-  //   //   effect: iam.Effect.ALLOW,
-  //   //   resources: [
-  //   //     bucket.bucketArn,
-  //   //     bucket.bucketArn + "/*",
-  //   //     // bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:custom:tenant}/*",
-  //   //   ],
-  //   // }),
-  // ]);
-  // api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
+  api.attachPermissionsToRoute("POST /docs/upload-url", ["s3"
+    // new iam.PolicyStatement({
+    //   actions: ["s3:*"],
+    //   effect: iam.Effect.ALLOW,
+    //   resources: [
+    //     bucket.bucketArn,
+    //     bucket.bucketArn + "/*",
+    //     // bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:custom:tenant}/*",
+    //   ],
+    // }),
+  ]);
+  api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
 
 
-  // auth.attachPermissionsForAuthUsers(auth, [
-  //   // Allow access to the API
-  //   api,
+  auth.attachPermissionsForAuthUsers(auth, [
+    // Allow access to the API
+    api,
 
-  //    // Policy granting access to a specific folder in the bucket
-  //    // this is non sensitive files such as logos
-  //    new iam.PolicyStatement({
-  //     actions: ["s3:*"],
-  //     effect: iam.Effect.ALLOW,
-  //     resources: [
-  //       bucket.bucketArn + "/public/*",
-  //     ],
-  //   }),
-  // ]);
+     // Policy granting access to a specific folder in the bucket
+     // this is non sensitive files such as logos
+     new iam.PolicyStatement({
+      actions: ["s3:*"],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        bucket.bucketArn + "/public/*",
+      ],
+    }),
+  ]);
   
  
  

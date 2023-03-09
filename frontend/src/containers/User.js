@@ -66,7 +66,8 @@ export default function User() {
         window.location.reload();
       } else {
         await createUser(values);
-        nav("/users");
+        if (tenantId) nav(`/tenants/${tenantId}/users`);
+        else nav("/users");
       }
     } catch (e) {
       onError(e);
@@ -75,6 +76,7 @@ export default function User() {
   }
 
   async function createUser(values) {
+    console.debug("create user for tenant: ", tenantId);
     if (tenantId)
       return await makeApiCall("POST", `/tenants/${tenantId}/users`, values);
     else return await makeApiCall("POST", `/users`, values);

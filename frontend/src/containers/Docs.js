@@ -45,50 +45,60 @@ export default function Docs() {
 
   
   function renderDocs() {
-    if (!docs || docs.length == 0) return  (<Message
-    header="No docs found in your library"
-    content="Start by creating your first doc!"
-    icon="exclamation"
-  />); else return (<>
-    <Segment>
-      <Header as="h2">Library</Header>
-      <Divider />
-      {groupedChildren &&
-        groupedChildren.map((group, groupIndex) => (
-          <div key={groupIndex}>
-            <Divider horizontal>
-              <Header as="h4">
-                  {pluralize(capitalizeFirstLetter(group[0].category))}
-              </Header>
-            </Divider>
-            <List divided relaxed>
-              {group &&
-                group.map((d) => {
-                  return (
-                    <List.Item key={d.docId}>
-                      <List.Icon
-                        name="file text outline"
-                        color="blue"
-                        size="large"
-                        verticalAlign="middle"
-                      />
-                      <List.Content>
-                        <LinkContainer to={`/doc/${d.docId}`}>
-                          <List.Header as="a">{d.fileName}</List.Header>
-                        </LinkContainer>
+    return (<>
+    {
+      (!docs || docs.length == 0) && (
+        <Message
+          header="No docs found in your library"
+          content="Start by creating your first doc!"
+          icon="exclamation"
+        />
+      )
+    }
+    {
+      docs && docs.length > 0 && (
+        <Segment>
+          <Header as="h2">Library</Header>
+          <Divider />
+          {groupedChildren &&
+            groupedChildren.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                <Divider horizontal>
+                  <Header as="h4">
+                    {pluralize(capitalizeFirstLetter(group[0].category))}
+                  </Header>
+                </Divider>
+                <List divided relaxed>
+                  {group &&
+                    group.map((d) => {
+                      return (
+                        <List.Item key={d.docId}>
+                          <List.Icon
+                            name="file text outline"
+                            color="blue"
+                            size="large"
+                            verticalAlign="middle"
+                          />
+                          <List.Content>
+                            <LinkContainer to={`/doc/${d.docId}`}>
+                              <List.Header as="a">{d.fileName}</List.Header>
+                            </LinkContainer>
 
-                        {d.note}
-                      </List.Content>
-                    </List.Item>
-                  );
-                })}
-            </List>
-          </div>
-        ))}
-        
-    </Segment>
-    <LinkContainer to={`/doc`}><Button>New</Button></LinkContainer> </>
-  );
+                            {d.note}
+                          </List.Content>
+                        </List.Item>
+                      );
+                    })}
+                </List>
+              </div>
+            ))}
+        </Segment>
+      )
+    }
+    <LinkContainer to={`/doc`}>
+      <Button>New</Button>
+    </LinkContainer>
+    </>);
   }
   return isLoading ? (<Loader active/>) : renderDocs();
 }
