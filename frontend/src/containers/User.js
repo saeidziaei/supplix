@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { onError } from "../lib/errorLib";
 import { makeApiCall } from "../lib/apiLib";
-import { Form, Header, Loader, Segment, Grid, Icon, Button } from "semantic-ui-react";
-import { Formik } from "formik";
+import { Form, Header, Loader, Segment, Grid, Icon, Button, Checkbox, Label } from "semantic-ui-react";
+import { Field, Formik } from "formik";
 
 
 
 export default function User() {
   const { username, tenantId } = useParams();
-  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", phone: "", password:"" }); 
+  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", phone: "", password:"", isAdmin: false }); 
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
@@ -41,6 +41,7 @@ export default function User() {
             lastName: getAttribute(item, "family_name") || "",
             phone: getAttribute(item, "phone_number") || "",
             email: getAttribute(item, "email") || "",
+            isAdmin: item.isAdmin,
             username: username
           });
         }
@@ -168,10 +169,36 @@ export default function User() {
                   />
                 )}
 
+                    <Field
+                      name="isAdmin"
+                      render={({ field }) => (
+                        <Checkbox
+                          toggle
+                          label="Is Admin?"
+                          checked={field.value}
+                          onChange={(e, { checked }) =>
+                            field.onChange({
+                              target: { name: "isAdmin", value: checked },
+                            })
+                          }
+                        />
+                      )}
+                    />
+
+                <br />
+                <br />
+                {values.isAdmin && (
+                  <p>
+                    <Icon name="warning sign" size="large" color="red" /> Admins
+                    can add or remove users, change templates and ISO content.
+                  </p>
+                )}
+
+                <br />
+                <br />
                 <Button color="olive" type="submit" disabled={isSubmitting}>
                   Submit
                 </Button>
-                
               </Segment>
             </Form>
           )}

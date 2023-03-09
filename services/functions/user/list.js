@@ -1,5 +1,6 @@
 import handler from "../../util/handler";
 import AWS from "aws-sdk";
+import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 
 export const main = handler(async (event, tenant) => {
   // if TOP_LEVEL_ADMIN is calling, get tenant from query string as they can add to any tenant
@@ -16,6 +17,13 @@ export const main = handler(async (event, tenant) => {
 
   if (result && result.Users) {
     ret = result.Users.filter(u => getUserTenant(u) == tenantId);
+
+    for (let i = 0; i < ret.length; i++) {
+      const user = ret[i];
+      const groupsResult = await client.adminListGroupsForUser({ UserPoolId: userPoolId, Username: user.Username }).promise();
+      ret[i].isAdmin = groupsResult.Groups.some(group => group.GroupName === ADMIN_GROUP);
+      ret[i].isTopLevelAdmin = groupsResult.Groups.some(group => group.GroupName === TOP_LEVEL_ADMIN_GROUP);
+    }
   }
 
   return ret;

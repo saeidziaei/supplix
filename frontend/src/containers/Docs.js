@@ -96,7 +96,7 @@ export default function Docs() {
       )
     }
     <LinkContainer to={`/doc`}>
-      <Button>New</Button>
+      <Button basic primary>New</Button>
     </LinkContainer>
     </>);
   }

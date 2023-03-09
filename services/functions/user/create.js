@@ -45,5 +45,15 @@ export const main = handler(async (event, tenant) => {
 
   const result = await client.adminCreateUser(params).promise();
 
+  // Add user to or remove from "admins" group depending on the value of data.isAdmin
+  const groupParams = {
+    GroupName: "admins",
+    UserPoolId: userPoolId,
+    Username: data.email
+  };
+  if (data.isAdmin) {
+    await client.adminAddUserToGroup(groupParams).promise();
+  } 
+  
   return result;
 });

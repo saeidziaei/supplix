@@ -119,7 +119,15 @@ export default function Users() {
                 </Table.Cell>
                 <Table.Cell>
                   <Header as="h4" image>
-                    <Icon name="user circle" size="mini" />
+                    {u.isAdmin || u.isTopLevelAdmin ? (
+                      <Icon.Group size="big">
+                        <Icon name="user circle" color="black" />
+                        <Icon corner name="plus" color="red" />
+                      </Icon.Group>
+                    ) : (
+                      <Icon name="user circle" size="mini" />
+                    )}
+
                     <Header.Content>
                       {`${getAttribute(u, "given_name")} ${getAttribute(
                         u,
