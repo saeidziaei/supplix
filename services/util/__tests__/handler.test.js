@@ -1,3 +1,4 @@
+import { TOP_LEVEL_ADMIN_GROUP } from "../constants";
 import handler from "../handler";
 
 describe('handler', () => {
@@ -102,7 +103,7 @@ describe('handler', () => {
 
 describe('handler', () => {
   beforeEach(() => {
-    process.env.ALLOWED_GROUPS = 'top-level-admins'; // set the allowed groups environment variable
+    process.env.ALLOWED_GROUPS = TOP_LEVEL_ADMIN_GROUP; // set the allowed groups environment variable
   });
 
   afterEach(() => {
@@ -116,7 +117,7 @@ describe('handler', () => {
         authorizer: {
           jwt: {
             claims: {
-              'cognito:groups': ['top-level-admins'],
+              'cognito:groups': [TOP_LEVEL_ADMIN_GROUP],
               'custom:tenant': 'tenant'
             }
           }

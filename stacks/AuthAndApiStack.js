@@ -40,7 +40,33 @@ export function AuthAndApiStack({ stack, app }) {
     }
   );
 
-  const cognitoAccessPolicy =     new iam.PolicyStatement({
+
+  const adminUsername = process.env.ADMIN_USERNAME;
+
+  const adminUser = new cognito.CfnUserPoolUser(stack, "AdminUser", {
+    userPoolId: auth.userPoolId,
+    username: adminUsername,
+    desiredDeliveryMediums: ["EMAIL"], 
+    forceAliasCreation: true,
+    userAttributes: [
+      { name: "email", value: process.env.ADMIN_EMAIL },
+      { name: "custom:tenant", value: "isocloud" },
+    ],
+
+  });
+
+  const adminGroupMembership = new cognito.CfnUserPoolUserToGroupAttachment(
+    stack,
+    "AdminUserToTopLevelAdmins",
+    {
+      groupName: topLevelAdminsGroup.groupName,
+      username: adminUser.username,
+      userPoolId: auth.userPoolId,
+    }
+  );
+
+
+  const cognitoAccessPolicy = new iam.PolicyStatement({
     actions: ["cognito-idp:*"],
     effect: iam.Effect.ALLOW,
     resources: [
@@ -213,7 +239,16 @@ export function AuthAndApiStack({ stack, app }) {
           }
         },
       },
-
+      "DELETE   /tenants/{tenantId}": {
+        function: {
+          handler: "services/functions/tenant/delete.main",
+          bind: [tenantTable],
+          environment: {
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
+          }
+        },
+      },
+      
       "GET   /mytenant": {
         function: {
           handler: "services/functions/tenant/getmytenant.main",

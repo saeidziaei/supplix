@@ -1,24 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
-import { onError } from "../lib/errorLib";
+import { Link } from "react-router-dom";
 import {
   Button,
-  Divider,
-  Grid,
-  GridColumn,
-  Header,
-  Icon,
-  Label,
-  List,
-  Loader,
+  Divider, Header,
+  Icon, Loader,
   Message,
   Segment,
-  Table,
+  Table
 } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
-import pluralize from "pluralize";
-import { capitalizeFirstLetter } from "../lib/helpers";
-import { Link } from "react-router-dom";
+import { onError } from "../lib/errorLib";
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);

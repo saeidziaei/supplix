@@ -1,8 +1,3 @@
-// import * as debug from "./debug";
-import { CognitoIdentityServiceProvider } from 'aws-sdk';
-
-
-
 export default function handler(lambda) {
   return async function (event, context) {
     let body, statusCode;

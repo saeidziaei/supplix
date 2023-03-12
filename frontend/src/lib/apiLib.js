@@ -1,5 +1,4 @@
 import { Amplify, API, Auth } from 'aws-amplify';
-import axios from "axios";
 
 
 
@@ -30,7 +29,11 @@ export async function makeApiCall(method, endpoint, body) {
         headers: headers,
         body: body
       });
-    default:
+    case "DELETE":
+        return API.del(apiName, endpoint, {
+          headers: headers
+        });
+      default:
       return null;
   }
 }

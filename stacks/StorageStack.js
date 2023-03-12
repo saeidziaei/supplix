@@ -1,6 +1,6 @@
 import { Bucket, Table } from "sst/constructs";
-import * as cdk from "aws-cdk-lib";
-import { App,  } from "sst/constructs";
+import * as cdk from 'aws-cdk-lib';
+import * as cr from 'aws-cdk-lib/custom-resources';
 
 export function StorageStack({ stack, app }) {
   // Create an S3 bucket
@@ -23,9 +23,10 @@ export function StorageStack({ stack, app }) {
       tenantId: "string",
     },
     primaryIndex: { partitionKey: "tenantId" },
-  });
- 
 
+  });
+
+ 
   const isoTable = new Table(stack , "Iso", {
     fields: {
       tenant: "string",
