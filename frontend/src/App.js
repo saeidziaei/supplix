@@ -28,11 +28,13 @@ import placeholderImage from "./containers/fileplaceholder.jpg";
 export default App;
 
 function App() {
+  const IS_NOTE_MODE = true;
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [tenant, setTenant] = useState(null);
+  const [templates, setTemplates] = useState(null);
 
   const nav = useNavigate();
 
@@ -76,15 +78,28 @@ function App() {
         return;
         
       const tenant = await makeApiCall("GET", `/mytenant`);
+      
       if (tenant && tenant.logo) {
         tenant.logoURL = await s3Get(tenant.logo);
       }
       return tenant;
     }
+
+    async function loadTemplates() {
+      let ret;
+      if (IS_NOTE_MODE)
+        ret = await makeApiCall("GET", `/ntemplates`);
+      else
+        ret = await makeApiCall("GET", `/templates`);
+
+      return ret;
+    }
     async function onLoad() {
       try {
-        const tenant = await loadMyTenant();
+        const [templates, tenant] = await Promise.all([loadTemplates(), loadMyTenant()]);
+
         setTenant(tenant);
+        setTemplates(templates)
       } catch (e) {
         alert(e);
       }
@@ -194,19 +209,20 @@ function App() {
                         <Nav.Link as={Menu.Item}>
                           <span>
                             <Icon color="blue" name="clipboard list" />
-                            Note Templates
+                            All Note Templates
                           </span>
                         </Nav.Link>
                       </LinkContainer>
-
-                      <LinkContainer to="/nregisters">
+                      {templates && templates.map((t) => (
+                        <LinkContainer key={t.templateId} to={`/nform/${t.templateId}`}>
                         <Nav.Link as={Menu.Item}>
                           <span>
-                            <Icon name="folder open outline" />
-                            Note Register
+                            <Icon name="angle double right" />
+                            {`New ${t.templateDefinition.title}`}
                           </span>
                         </Nav.Link>
-                      </LinkContainer>
+                      </LinkContainer>)
+                        )}
 
                       <LinkContainer to="/logout">
                         <Nav.Link as={Menu.Item} onClick={handleLogout}>
@@ -466,6 +482,5 @@ function App() {
 
   if (isAuthenticating) return <Loader active />;
 
-  return renderApp();
-  // return renderNotesApp()
+  return IS_NOTE_MODE ? renderNotesApp() : renderApp();
 }

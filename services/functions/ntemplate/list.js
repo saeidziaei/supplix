@@ -1,18 +1,18 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const params = {
     TableName: process.env.NTEMPLATE_TABLE,
-    KeyConditionExpression: "customerId = :customerId",
+    KeyConditionExpression: "tenant = :tenant",
     ExpressionAttributeValues: {
-      ":customerId": event.pathParameters.customerId,
+      ":tenant": tenant,
     },
   };
   const result = await dynamoDb.query(params);
 
   const templates = result.Items;
   const promises = templates.map(async (template) => {
-    const formCount = await getFormCount(template.customerId, template.templateId);
+    const formCount = await getFormCount(tenant, template.templateId);
     template.formCount = formCount;
     return template;
   });
@@ -20,12 +20,12 @@ export const main = handler(async (event) => {
   return Promise.all(promises);
 });
 
-async function getFormCount(customerId, templateId) {
+async function getFormCount(tenant, templateId) {
   const params = {
     TableName: process.env.NFORM_TABLE,
-    FilterExpression: "customerId = :customerId and templateId = :templateId",
+    FilterExpression: "tenant = :tenant and templateId = :templateId",
     ExpressionAttributeValues: {
-      ":customerId": customerId,
+      ":tenant": tenant,
       ":templateId": templateId,
     },
   };

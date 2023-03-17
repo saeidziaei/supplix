@@ -1,12 +1,12 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const params = {
     TableName: process.env.NTEMPLATE_TABLE,
     // 'Key' defines the partition key and sort key of the item to be retrieved
     Key: {
-      customerId: event.pathParameters.customerId, 
+      tenant: tenant,
       templateId: event.pathParameters.templateId, 
     },
   };

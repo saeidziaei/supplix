@@ -25,15 +25,18 @@ import {
   Loader,
   List,
   Item,
+  Divider,
 } from "semantic-ui-react";
 import ContentEditable from "react-contenteditable";
 import { useState } from "react";
+import ToothSelector from "./ToothSelector";
 
 export function NGenericForm({ formDef, formData, handleSubmit }) {
   const [content, setContent] = useState({ html: "" });
 
 
   const handleChange = (e) => {
+    return;
     console.log('changing', e);
     const {guid, title } = e.field;
     let note = "";
@@ -60,7 +63,40 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
 
     setContent({ html: container.innerHTML });    
   }
+  const regenerateNote = (values) => {
+    const container = document.createElement("div");
 
+    formDef.sections.forEach(section => {
+      section.fields.forEach((field) => {
+        let value = values[field.guid];
+        if (field.type === "date") {
+          value = format(parseISO(value), "eeee dd/MMM/yyyy");
+        }
+        if (field.type == "multi") {
+          const options = value
+            .filter((obj) => obj.option) // filter out objects with no "option" property
+            .map((obj) => obj.option); // extract the "option" property values
+
+          const freeText = value.find((obj) => obj.freeText)?.freeText || "";
+
+          value =
+            options.length > 0
+              ? `${options.join(", ")}${freeText ? ", " + freeText : ""}`
+              : freeText;
+          
+          
+        }
+        const line = `<span><strong>${field.title}: </strong>${value}</span>`;
+        const newElement = document.createElement("div");
+        newElement.setAttribute("data-guid", field.guid);
+        newElement.innerHTML = line;
+        container.appendChild(newElement);
+      });
+    });
+    
+    setContent({ html: container.innerHTML });    
+
+  }
   function renderField(f, values, setFieldValue) {
     const size = "mini";
     const name = f.guid;
@@ -198,6 +234,8 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
         const options = f.options.map((o) => ({ value: o, text: o }));
         return <Select size={size} options={options} name={name} id={id} onChange={(event, data) => handleChange({field: f, newValue: data.value})} />;
 
+      case "toothselector":
+        return <ToothSelector name={name} value={values[name]} onChange={(data) => {setFieldValue(name, data); handleChange({field: f, newValue: data})}} />
       default:
         return <div>Unsupported Field</div>;
     }
@@ -246,18 +284,23 @@ export function NGenericForm({ formDef, formData, handleSubmit }) {
                 ))}
               </Item.Group>
             ))}
-            {handleSubmit && (
+            {/* {handleSubmit && (
               <LoaderButton type="submit" className="ms-auto hide-in-print">
                 Submit
               </LoaderButton>
-            )}
+            )} */}
             
+            <Header color="orange">Note:</Header>
             <ContentEditable
               html={content.html} // innerHTML of the editable div
               disabled={false} // use true to disable edition
               onChange={(evt) => setContent({ html: evt.target.value })} // handle innerHTML change
             />
-            <FormikDebug />
+            <Divider hidden />
+            <Button color="orange" size="tiny" basic onClick={(e) => {
+                e.preventDefault(); 
+                regenerateNote(values)}}>Generate Note</Button>
+            
           </Form>
         )}
       </Formik>

@@ -39,26 +39,14 @@ export default function FormTemplates() {
     if (td && td.sections) 
       td.sections.forEach(s => fieldCount += s.fields.length);
     return (
-      <Card key={t.templateId}>
-        <Card.Content>
-          <Card.Header>{td.title}</Card.Header>
-          <Card.Meta>{fieldCount} fields</Card.Meta>
-        </Card.Content>
-        <Card.Content extra>
-          <div className="ui one buttons">
-            <LinkContainer
-              key={t.templateId}
-              to={`/template/${t.templateId}`}
-              as="a"
-            >
-              <Button basic color="blue" compact >
-                <Icon name="pencil" />
-                Edit
-              </Button>
-            </LinkContainer>
-          </div>
-        </Card.Content>
-      </Card>
+      <LinkContainer key={t.templateId} to={`/template/${t.templateId}`} as="a">
+        <Card>
+          <Card.Content>
+            <Card.Header>{td.title}</Card.Header>
+            <Card.Meta>{fieldCount} fields</Card.Meta>
+          </Card.Content>
+        </Card>
+      </LinkContainer>
     );
   }
 

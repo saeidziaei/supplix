@@ -9,7 +9,6 @@ import { NGenericForm } from '../components/NGenericForm';
 
 export default function NTemplatedForm() {
   const { formId, templateId } = useParams();
-  const customerId = "c-123";
   const [formData, setFormData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [template, setTemplate] = useState(null);
@@ -27,7 +26,7 @@ export default function NTemplatedForm() {
     async function loadTemplate() {
       return await makeApiCall(
         "GET",
-        `/customers/${customerId}/ntemplates/${templateId}`
+        `/ntemplates/${templateId}`
       );
     }
 

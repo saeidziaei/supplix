@@ -35,20 +35,19 @@ import "./NFormTemplate.css";
 
 export default function NFormTemplate() {
   const {templateId} = useParams();
-  const customerId = "c-123";
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
 
-  const [title, setTitle] = useState("Comprehensive Exam");
+  const [title, setTitle] = useState("");
 
 
-  const [sections, setSections] = useState(null);
+  const [sections, setSections] = useState([]);
 
   useEffect(() => {
     async function loadTemplate() {
       return await makeApiCall(
         "GET",
-        `/customers/${customerId}/ntemplates/${templateId}`
+        `/ntemplates/${templateId}`
       );
     }
 
@@ -89,7 +88,7 @@ export default function NFormTemplate() {
     }
   }
   async function createTemplate(def) {
-    return await makeApiCall("POST", `/customers/${customerId}/ntemplates`, {
+    return await makeApiCall("POST", `/ntemplates`, {
       templateDefinition: def,
     });
   }
@@ -97,7 +96,7 @@ export default function NFormTemplate() {
   async function updateTemplate(def) {
     return await makeApiCall(
       "PUT",
-      `/customers/${customerId}/ntemplates/${templateId}`,
+      `/ntemplates/${templateId}`,
       {
         templateDefinition: def,
       }
@@ -188,7 +187,7 @@ export default function NFormTemplate() {
     { key: "multi", text: "Multi", value: "multi" },
     { key: "date", text: "Date", value: "date" },
     { key: "radio", text: "Radio", value: "radio" },
-    
+    { key: "toothselector", text: "Tooth Selector", value: "toothselector" },
     { key: "select", text: "Select", value: "select" },
   ];
   

@@ -48,9 +48,9 @@ export default function Links(tenant) {
       <Route path="/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
 
 
-      <Route path="/ntemplates" element={<NFormTemplates />} />
-      <Route path="/ntemplate/:templateId?" element={<NFormTemplate />} />
-      <Route path="/nform/:templateId/:formId?" element={<NTemplatedForm />} /> 
+      <Route path="/ntemplates" element={<AuthenticatedRoute><NFormTemplates /></AuthenticatedRoute>} />
+      <Route path="/ntemplate/:templateId?" element={<AuthenticatedRoute><NFormTemplate /></AuthenticatedRoute>} />
+      <Route path="/nform/:templateId/:formId?" element={<AuthenticatedRoute><NTemplatedForm /></AuthenticatedRoute>} /> 
 
       <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
       <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />

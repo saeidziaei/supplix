@@ -2,12 +2,12 @@ import * as uuid from "uuid";
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const data = JSON.parse(event.body);
   const params = {
     TableName: process.env.NTEMPLATE_TABLE,
     Item: {
-      customerId: event.pathParameters.customerId, 
+      tenant: tenant,
       templateId: uuid.v1(), // A unique uuid
       templateDefinition: data.templateDefinition,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,

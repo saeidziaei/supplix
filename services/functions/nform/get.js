@@ -1,11 +1,11 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
   const params = {
     TableName: process.env.NFORM_TABLE,
     Key: {
-      customerId: event.pathParameters.customerId, 
+      tenant: tenant,
       formId: event.pathParameters.formId, 
     },
   };
@@ -25,11 +25,11 @@ export const main = handler(async (event) => {
   return form;
 });
 
-async function getTemplate(customerId, templateId) {
+async function getTemplate(tenant, templateId) {
   const params = {
     TableName: process.env.NTEMPLATE_TABLE,
     Key: {
-      customerId: customerId, 
+      tenant: tenant, 
       templateId: templateId, 
     },
   };

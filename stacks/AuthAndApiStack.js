@@ -337,50 +337,50 @@ export function AuthAndApiStack({ stack, app }) {
       },
      
       // ###############  N Sectoin ####################
-      "GET   /customers/{customerId}/forms": {
+      "GET   /forms": {
         function: {
           handler: "services/functions/nform/list.main",
           bind: [nformTable],
         },
       },
-      "GET   /customers/{customerId}/nforms/{formId}": {
+      "GET   /nforms/{formId}": {
         function: {
           handler: "services/functions/nform/get.main",
           bind: [ntemplateTable, nformTable],
         },
       },
-      "POST   /customers/{customerId}/nforms": {
+      "POST  /nforms": {
         function: {
           handler: "services/functions/nform/create.main",
           bind: [nformTable],
         },
       },
-      "PUT   /customers/{customerId}/nforms/{formId}": {
+      "PUT   /nforms/{formId}": {
         function: {
           handler: "services/functions/nform/update.main",
           bind: [nformTable],
         },
       },
 
-      "GET   /customers/{customerId}/ntemplates": {
+      "GET   /ntemplates": {
         function: {
           handler: "services/functions/ntemplate/list.main",
           bind: [ntemplateTable, nformTable],
         },
       },
-      "GET   /customers/{customerId}/ntemplates/{templateId}": {
+      "GET   /ntemplates/{templateId}": {
         function: {
           handler: "services/functions/ntemplate/get.main",
           bind: [ntemplateTable, nformTable],
         },
       },
-      "POST   /customers/{customerId}/ntemplates": {
+      "POST   /ntemplates": {
         function: {
           handler: "services/functions/ntemplate/create.main",
           bind: [ntemplateTable],
         },
       },
-      "PUT   /customers/{customerId}/ntemplates/{templateId}": {
+      "PUT   /ntemplates/{templateId}": {
         function: {
           handler: "services/functions/ntemplate/update.main",
           bind: [ntemplateTable],

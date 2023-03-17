@@ -1,11 +1,11 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
-export const main = handler(async (event) => {
+export const main = handler(async (event, tenant) => {
 const params = {
   TableName: process.env.NFORM_TABLE,
-  KeyConditionExpression: "customerId = :customerId",
+  KeyConditionExpression: "tenant = :tenant",
   ExpressionAttributeValues: {
-    ":customerId": event.pathParameters.customerId,
+    ":tenant": tenant,
   },
 };
 const result = await dynamoDb.query(params);
