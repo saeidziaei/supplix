@@ -4,6 +4,8 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Cognito, Api, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
+import { StringAttribute } from "aws-cdk-lib/aws-cognito";
+
 
 export function AuthAndApiStack({ stack, app }) {
   const {
@@ -18,13 +20,26 @@ export function AuthAndApiStack({ stack, app }) {
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
-  const auth = new Cognito(stack, "Auth", {
-    login: ["email"],
+  const tenantAttribute = new StringAttribute({
+    name: 'custom:tenant',
+    mutable: false,
   });
 
+  const auth = new Cognito(stack, "Auth", {
+    login: ["email"],
+    cdk: {
+      userPool: {
+        customAttributes: {
+          tenant: tenantAttribute,
+        },
+      },
+    },
+  });
+
+  
 
   const topLevelAdminsGroup = new cognito.CfnUserPoolGroup(
-    this,
+    stack, // this
     "TopLevelAdmins",
     {
       groupName: TOP_LEVEL_ADMIN_GROUP,
@@ -32,13 +47,14 @@ export function AuthAndApiStack({ stack, app }) {
     }
   );  
   const adminsGroup = new cognito.CfnUserPoolGroup(
-    this,
+    stack, // this
     "Admins",
     {
       groupName: ADMIN_GROUP,
       userPoolId: auth.userPoolId,
     }
   );
+
 
 
   const adminUsername = process.env.ADMIN_USERNAME;
@@ -62,7 +78,9 @@ export function AuthAndApiStack({ stack, app }) {
       groupName: topLevelAdminsGroup.groupName,
       username: adminUser.username,
       userPoolId: auth.userPoolId,
+      dependsOn: [adminUser]
     }
+    
   );
 
 

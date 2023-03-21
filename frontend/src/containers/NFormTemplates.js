@@ -61,7 +61,7 @@ export default function NFormTemplates() {
           <Message
             header="No Template found"
             content="Start by creating your first template!"
-            icon="exclamation"
+            icon="compose"
           />
         )}
       </Card.Group>
