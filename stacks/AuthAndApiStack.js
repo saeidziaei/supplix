@@ -78,7 +78,7 @@ export function AuthAndApiStack({ stack, app }) {
       groupName: topLevelAdminsGroup.groupName,
       username: adminUser.username,
       userPoolId: auth.userPoolId,
-      dependsOn: [adminUser]
+      dependsOn: [adminUser, topLevelAdminsGroup]
     }
     
   );
