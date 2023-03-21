@@ -70,19 +70,19 @@ export function AuthAndApiStack({ stack, app }) {
     ],
 
   });
-  setTimeout(() => {
-  const adminGroupMembership = new cognito.CfnUserPoolUserToGroupAttachment(
-    stack,
-    "AdminUserToTopLevelAdmins",
-    {
-      groupName: topLevelAdminsGroup.groupName,
-      username: adminUser.username,
-      userPoolId: auth.userPoolId,
-      dependsOn: [adminUser, topLevelAdminsGroup]
-    }
+  // setTimeout(() => {
+  // const adminGroupMembership = new cognito.CfnUserPoolUserToGroupAttachment(
+  //   stack,
+  //   "AdminUserToTopLevelAdmins",
+  //   {
+  //     groupName: topLevelAdminsGroup.groupName,
+  //     username: adminUser.username,
+  //     userPoolId: auth.userPoolId,
+  //     dependsOn: [adminUser, topLevelAdminsGroup]
+  //   }
     
-  );
-  },  5000); // wait for 5 second before adding the user to the group
+  // );
+  // },  5000); // wait for 5 second before adding the user to the group
 
 
   const cognitoAccessPolicy = new iam.PolicyStatement({
