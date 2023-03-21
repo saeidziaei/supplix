@@ -70,7 +70,7 @@ export function AuthAndApiStack({ stack, app }) {
     ],
 
   });
-
+  setTimeout(() => {
   const adminGroupMembership = new cognito.CfnUserPoolUserToGroupAttachment(
     stack,
     "AdminUserToTopLevelAdmins",
@@ -82,6 +82,7 @@ export function AuthAndApiStack({ stack, app }) {
     }
     
   );
+  },  5000); // wait for 5 second before adding the user to the group
 
 
   const cognitoAccessPolicy = new iam.PolicyStatement({
