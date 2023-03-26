@@ -15,8 +15,6 @@ export function AuthAndApiStack({ stack, app }) {
     tenantTable,
     isoTable,
     docTable,
-    nformTable,
-    ntemplateTable,
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -114,8 +112,6 @@ export function AuthAndApiStack({ stack, app }) {
           ISO_TABLE: isoTable.tableName,
           DOC_TABLE: docTable.tableName,
           BUCKET: bucket.bucketName,
-          NFORM_TABLE: nformTable.tableName,
-          NTEMPLATE_TABLE: ntemplateTable.tableName,
         },
       },
     },
@@ -355,57 +351,7 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
      
-      // ###############  N Sectoin ####################
-      "GET   /forms": {
-        function: {
-          handler: "services/functions/nform/list.main",
-          bind: [nformTable],
-        },
-      },
-      "GET   /nforms/{formId}": {
-        function: {
-          handler: "services/functions/nform/get.main",
-          bind: [ntemplateTable, nformTable],
-        },
-      },
-      "POST  /nforms": {
-        function: {
-          handler: "services/functions/nform/create.main",
-          bind: [nformTable],
-        },
-      },
-      "PUT   /nforms/{formId}": {
-        function: {
-          handler: "services/functions/nform/update.main",
-          bind: [nformTable],
-        },
-      },
 
-      "GET   /ntemplates": {
-        function: {
-          handler: "services/functions/ntemplate/list.main",
-          bind: [ntemplateTable, nformTable],
-        },
-      },
-      "GET   /ntemplates/{templateId}": {
-        function: {
-          handler: "services/functions/ntemplate/get.main",
-          bind: [ntemplateTable, nformTable],
-        },
-      },
-      "POST   /ntemplates": {
-        function: {
-          handler: "services/functions/ntemplate/create.main",
-          bind: [ntemplateTable],
-        },
-      },
-      "PUT   /ntemplates/{templateId}": {
-        function: {
-          handler: "services/functions/ntemplate/update.main",
-          bind: [ntemplateTable],
-        },
-      },
-      // ###############################################
      },
   });
 

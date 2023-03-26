@@ -61,21 +61,6 @@ export function StorageStack({ stack, app }) {
   });
 
 
-  const nformTable = new Table(stack , "NForm", {
-    fields: {
-      tenant: "string",
-      formId: "string", 
-    },
-    primaryIndex: { partitionKey: "tenant", sortKey: "formId" },
-  });
-
-  const ntemplateTable = new Table(stack , "NTemplate", {
-    fields: {
-      tenant: "string",
-      templateId: "string", 
-    },
-    primaryIndex: { partitionKey: "tenant", sortKey: "templateId" },
-  });
 
   // Return the bucket and table resources
   return {
@@ -85,7 +70,5 @@ export function StorageStack({ stack, app }) {
     templateTable,
     docTable,
     bucket,
-    nformTable,
-    ntemplateTable
   };
 }

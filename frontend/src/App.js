@@ -1,34 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Nav } from "react-bootstrap";
-import "./App.css";
-import Routes from "./Routes";
-import { LinkContainer } from "react-router-bootstrap";
-import { AppContext } from "./lib/contextLib";
 import { Auth } from "aws-amplify";
-import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
+import React, { useEffect, useState } from "react";
+import { Nav } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Grid,
   Icon,
-  Image,
-  Menu,
-  Segment,
-  Sidebar,
-  Label,
-  List,
-  Loader,
-  PlaceholderImage,
-  Divider,
+  Image, List,
+  Loader, Menu, PlaceholderImage, Segment,
+  Sidebar
 } from "semantic-ui-react";
-import { s3Get } from "./lib/awsLib";
-import { makeApiCall } from "./lib/apiLib";
+import "./App.css";
 import placeholderImage from "./containers/fileplaceholder.jpg";
+import { makeApiCall } from "./lib/apiLib";
+import { s3Get } from "./lib/awsLib";
+import { AppContext } from "./lib/contextLib";
+import Routes from "./Routes";
 
 export default App;
 
 function App() {
-  const IS_NOTE_MODE = true;
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -86,13 +79,7 @@ function App() {
     }
 
     async function loadTemplates() {
-      let ret;
-      if (IS_NOTE_MODE)
-        ret = await makeApiCall("GET", `/ntemplates`);
-      else
-        ret = await makeApiCall("GET", `/templates`);
-
-      return ret;
+      return await makeApiCall("GET", `/templates`);
     }
     async function onLoad() {
       try {
@@ -109,176 +96,9 @@ function App() {
     onLoad();
   }, [isAuthenticated]);
 
-  // return (
-  //   !isAuthenticating && (
-  //   <div className="App container py-3">
-
-  //     <Navbar collapseOnSelect bg="light" expand="md" className="mb-3 hide-on-print">
-  //       <LinkContainer to="/">
-  //         <Navbar.Brand className="font-weight-bold text-muted">
-  //           ISO Cloud {isTopLevelAdmin ? <div>Hi Top Gun!</div> : <div>Hey Consultant</div>}
-  //         </Navbar.Brand>
-
-  //       </LinkContainer>
-  //       <Navbar.Toggle />
-  //       <Navbar.Collapse className="justify-content-end">
-  //         <Nav activeKey={window.location.pathname}>
-  //           {isAuthenticated ? (
-  //             <>
-  //               <LinkContainer to="/dynamic-form"><Nav.Link>Generic Form</Nav.Link></LinkContainer>
-  //               <LinkContainer to="/users"><Nav.Link>Users</Nav.Link></LinkContainer>
-  //               <LinkContainer to="/project-context"><Nav.Link>Project</Nav.Link></LinkContainer>
-  //               <LinkContainer to="/customers"><Nav.Link>Customers</Nav.Link></LinkContainer>
-  //               <LinkContainer to="/forms"><Nav.Link>Forms</Nav.Link></LinkContainer>
-  //               <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
-  //             </>
-  //           ) : (
-  //             <>
-  //               <LinkContainer to="/signup"><Nav.Link>Signup</Nav.Link></LinkContainer>
-  //               <LinkContainer to="/login"><Nav.Link>Login</Nav.Link></LinkContainer>
-
-  //             </>
-  //           )}
-  //         </Nav>
-  //       </Navbar.Collapse>
-  //     </Navbar>
-  //     <AppContext.Provider value={{
-  //       isAuthenticated,
-  //       userHasAuthenticated,
-  //       isTopLevelAdmin,
-  //       jwtToken,
-  //       currentCustomer,
-  //       setCurrentCustomer,
-  //       currentIso,
-  //       setCurrentIso,
-
-  //       }}><div>Sidebar</div>
-  //       <Routes />
-  //     </AppContext.Provider>
-  //   </div>
-  //   )
-  // );
-
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
-  function renderNotesApp() {
-    return (
-      !isAuthenticating && (
-        <>
-          <List divided horizontal>
-            <List.Item>
-              <Image
-                size="medium"
-                rounded
-                alt="logo"
-                src="/notes/DentalNotes.png"
-              />
-            </List.Item>
-            <List.Item>
-              <Button
-                color="black"
-                icon="bars"
-                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-              ></Button>
-            </List.Item>
-          </List>
 
-          <Grid columns={1}>
-            <Grid.Column>
-              <Sidebar.Pushable as={Segment}>
-                <Sidebar
-                  as={Menu}
-                  visible={isSidebarVisible}
-                  vertical
-                  onHide={() => setIsSidebarVisible(false)}
-                  onClick={() => setIsSidebarVisible(false)}
-                  animation="push"
-                >
-                  <LinkContainer to="/">
-                    <Nav.Link as={Menu.Item}>
-                      <span>
-                        <Icon name="home" />
-                        Home
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
-
-                  {isAuthenticated ? (
-                    <>
-                      <LinkContainer to="/ntemplates">
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon color="blue" name="clipboard list" />
-                            All Note Templates
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
-                      {templates && templates.map((t) => (
-                        <LinkContainer key={t.templateId} to={`/nform/${t.templateId}`}>
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="angle double right" />
-                            {`New ${t.templateDefinition.title}`}
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>)
-                        )}
-
-                      <LinkContainer to="/logout">
-                        <Nav.Link as={Menu.Item} onClick={handleLogout}>
-                          <span>
-                            <Icon name="log out" />
-                            Logout
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
-                    </>
-                  ) : (
-                    <>
-                      <Menu.Item>
-                        <LinkContainer to="/signup">
-                          <Nav.Link>
-                            <Icon name="signup" />
-                            Signup
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <LinkContainer to="/login">
-                          <Nav.Link>
-                            <Icon name="sign-in" />
-                            Login
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                    </>
-                  )}
-
-                  <Menu.Item>
-                    <img alt="logo" src="/notes/DentalNotes.png" />
-                  </Menu.Item>
-                </Sidebar>
-
-                <Sidebar.Pusher>
-                  <Segment basic style={{ minHeight: "100vh" }}>
-                    <AppContext.Provider
-                      value={{
-                        isAuthenticated,
-                        userHasAuthenticated,
-                        currentUserRoles
-                      }}
-                    >
-                      <Routes />
-                    </AppContext.Provider>
-                  </Segment>
-                </Sidebar.Pusher>
-              </Sidebar.Pushable>
-            </Grid.Column>
-          </Grid>
-        </>
-      )
-    );
-  }
   function renderApp() {
     const isAdmin = currentUserRoles.includes('admins');
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
@@ -371,7 +191,7 @@ function App() {
                         <Nav.Link as={Menu.Item}>
                           <span>
                             <Icon name="clipboard list" />
-                            Templates
+                            Forms
                           </span>
                         </Nav.Link>
                       </LinkContainer>
@@ -476,11 +296,7 @@ function App() {
     );
   }
 
-  const tenantName = window.location.pathname.split("/")[1];
-  // Check tenant is valid
-  // if (tenantName  != "t1" && tenantName != "t2") return <h1>Wrong way, go back!</h1>;
-
   if (isAuthenticating) return <Loader active />;
 
-  return IS_NOTE_MODE ? renderNotesApp() : renderApp();
+  return renderApp();
 }

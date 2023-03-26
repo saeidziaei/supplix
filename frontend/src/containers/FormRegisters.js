@@ -8,6 +8,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
+import FormHeader from "../components/FormHeader";
 
 export default function FormRegister() {
   const [templates, setTemplates] = useState(null);
@@ -39,10 +40,11 @@ export default function FormRegister() {
   function renderTemplatesList() {
     return (
       <>
+        <FormHeader heading="Records Register" />
         {(!templates || templates.length == 0) && (
           <Message
-            header="No Template found"
-            content="Start by creating your first template!"
+            header="No Record found"
+            content="Start by creating your first record!"
             icon="exclamation"
           />
         )}
@@ -62,7 +64,7 @@ export default function FormRegister() {
                     <LinkContainer to={`/register/${t.templateId}`}>
                       <List.Header as="a">{def.title}</List.Header>
                     </LinkContainer>
-                    <List.Description>{`${t.formCount} ${pluralize("entry", t.formCount)}`}</List.Description>
+                    <List.Description>{`${t.formCount} ${pluralize("record", t.formCount)}`}</List.Description>
                   </List.Content>
                 </List.Item>
               );

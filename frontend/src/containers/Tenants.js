@@ -9,6 +9,7 @@ import {
   Segment,
   Table
 } from "semantic-ui-react";
+import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 
@@ -37,55 +38,61 @@ export default function Tenants() {
   }
 
   function renderTenants() {
-    if (!tenants || tenants.length == 0)
-      return (
-        <Message
-          header="No tenats found"
-          content="Start by creating your first tenant!"
-          icon="exclamation"
-        />
-      );
-    else
-      return (
-        <>
+    return (
+      <>
+        <FormHeader heading="Tenants" />
+        {(!tenants || tenants.length == 0) && (
+          <Message
+            header="No tenats found"
+            content="Start by creating your first tenant!"
+            icon="exclamation"
+          />
+        )}
+        {tenants && tenants.length > 0 && (
           <Segment>
             <Header as="h2">Tenants</Header>
             <Divider />
-
             <Table basic>
               <Table.Body>
-              {tenants.map((t) => {
-                return (
-                  <Table.Row key={t.tenantId}>
-                    <Table.Cell>
-                      <Icon.Group size="large" >
-                        <Icon size="big" name="circle outline" color="yellow" />
-                        <Icon size="small" name="users" color="black" />
-                      </Icon.Group>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <strong>{t.tenantName}</strong>
-                    </Table.Cell>
-                    <Table.Cell>{t.contactPerson}</Table.Cell>
-                    <Table.Cell>
-                      <Link to={`/tenants/${t.tenantId}/users`}>
-                        Manage users
-                      </Link>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Link to={`/tenant/${t.tenantId}`}>Edit details</Link>
-                    </Table.Cell>
-                  </Table.Row>
-                );
-              })}
+                {tenants.map((t) => {
+                  return (
+                    <Table.Row key={t.tenantId}>
+                      <Table.Cell>
+                        <Icon.Group size="large">
+                          <Icon
+                            size="big"
+                            name="circle outline"
+                            color="yellow"
+                          />
+                          <Icon size="small" name="users" color="black" />
+                        </Icon.Group>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <strong>{t.tenantName}</strong>
+                      </Table.Cell>
+                      <Table.Cell>{t.contactPerson}</Table.Cell>
+                      <Table.Cell>
+                        <Link to={`/tenants/${t.tenantId}/users`}>
+                          Manage users
+                        </Link>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Link to={`/tenant/${t.tenantId}`}>Edit details</Link>
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                })}
               </Table.Body>
             </Table>
           </Segment>
-          <LinkContainer to={`/tenant`}>
-            <Button basic primary>New Tenant</Button>
-          </LinkContainer>
-        </>
-      );
+        )}
+        <LinkContainer to={`/tenant`}>
+          <Button basic primary>
+            New Tenant
+          </Button>
+        </LinkContainer>
+      </>
+    );
   }
   return isLoading ? <Loader active /> : renderTenants();
 }

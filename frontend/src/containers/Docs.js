@@ -5,6 +5,7 @@ import { Button, Divider, Header, Label, List, Loader, Message, Segment } from "
 import { makeApiCall } from "../lib/apiLib";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
+import FormHeader from "../components/FormHeader";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
@@ -46,6 +47,7 @@ export default function Docs() {
   
   function renderDocs() {
     return (<>
+    <FormHeader heading="Library" />
     {
       (!docs || docs.length == 0) && (
         <Message
@@ -57,8 +59,8 @@ export default function Docs() {
     }
     {
       docs && docs.length > 0 && (
-        <Segment>
-          <Header as="h2">Library</Header>
+        <>
+          
           <Divider />
           {groupedChildren &&
             groupedChildren.map((group, groupIndex) => (
@@ -92,9 +94,10 @@ export default function Docs() {
                 </List>
               </div>
             ))}
-        </Segment>
+        </>
       )
     }
+    <Divider hidden/>
     <LinkContainer to={`/doc`}>
       <Button basic primary>New</Button>
     </LinkContainer>

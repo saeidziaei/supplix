@@ -1,27 +1,24 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Home from "./containers/Home";
-import NotFound from "./containers/NotFound";
-import Login from "./containers/Login";
 import Doc from "./containers/Doc";
 import Docs from "./containers/Docs";
-import Users from "./containers/Users";
-import FormTemplates from "./containers/FormTemplates";
-import FormTemplate from "./containers/FormTemplate";
 import FormRegister from "./containers/FormRegister";
 import FormRegisters from "./containers/FormRegisters";
-import TemplatedForm from "./containers/TemplatedForm";
+import FormTemplate from "./containers/FormTemplate";
+import FormTemplates from "./containers/FormTemplates";
+import Home from "./containers/Home";
 import ISO from "./containers/ISO";
+import Login from "./containers/Login";
+import NotFound from "./containers/NotFound";
+import TemplatedForm from "./containers/TemplatedForm";
+import Users from "./containers/Users";
 
-import NFormTemplate from "./containers/NFormTemplate";
-import NTemplatedForm from "./containers/NTemplatedForm";
-import NFormTemplates from "./containers/NFormTemplates";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
+import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
+import ResetPassword from "./containers/ResetPassword";
 import Tenant from "./containers/Tenant";
 import Tenants from "./containers/Tenants";
 import User from "./containers/User";
-import ResetPassword from "./containers/ResetPassword";
-import AuthenticatedRoute from "./components/AuthenticatedRoute";
-import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
 
 
 export default function Links(tenant) {
@@ -48,9 +45,6 @@ export default function Links(tenant) {
       <Route path="/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
 
 
-      <Route path="/ntemplates" element={<AuthenticatedRoute><NFormTemplates /></AuthenticatedRoute>} />
-      <Route path="/ntemplate/:templateId?" element={<AuthenticatedRoute><NFormTemplate /></AuthenticatedRoute>} />
-      <Route path="/nform/:templateId/:formId?" element={<AuthenticatedRoute><NTemplatedForm /></AuthenticatedRoute>} /> 
 
       <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
       <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />

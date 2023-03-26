@@ -7,6 +7,7 @@ import { s3Get } from "../lib/awsLib";
 import { Button, Header, Icon, Image, Item, Label, Loader, Message, Table } from "semantic-ui-react";
 import placeholderImage from './fileplaceholder.jpg'
 import { parseISO } from "date-fns";
+import FormHeader from "../components/FormHeader";
 
 export default function Users() {
   const { tenantId } = useParams(null);
@@ -63,15 +64,17 @@ export default function Users() {
     }
   }
   function renderUsers() {
-    if (!users) return 
-    (<Message
-    header="No user found"
-    content="Start by creating your first user!"
-    icon="exclamation"
-  />);
-  
     return (
       <>
+        <FormHeader heading="Users" />
+        {!users && (
+          <Message
+            header="No user found"
+            content="Start by creating your first user!"
+            icon="exclamation"
+          />
+        )}
+
         {tenant && (
           <Message
             icon="users"
@@ -89,81 +92,82 @@ export default function Users() {
             }}
           />
         )}
-
-        <Table basic="very" celled collapsing>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Action</Table.HeaderCell>
-              <Table.HeaderCell>User</Table.HeaderCell>
-              <Table.HeaderCell>Email</Table.HeaderCell>
-              <Table.HeaderCell>Email Verified</Table.HeaderCell>
-              <Table.HeaderCell>Phone</Table.HeaderCell>
-              <Table.HeaderCell>Enabled</Table.HeaderCell>
-              <Table.HeaderCell>Status</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {users.map((u) => (
-              <Table.Row key={u.Username}>
-                <Table.Cell>
-                  <LinkContainer
-                    key={u.Username}
-                    to={
-                      tenantId
-                        ? `/tenants/${tenantId}/user/${u.Username}`
-                        : `/user/${u.Username}`
-                    }
-                  >
-                    <Button basic>Edit</Button>
-                  </LinkContainer>
-                </Table.Cell>
-                <Table.Cell>
-                  <Header as="h4" image>
-                    {u.isAdmin || u.isTopLevelAdmin ? (
-                      <Icon.Group size="big">
-                        <Icon name="user circle" color="black" />
-                        <Icon corner name="plus" color="red" />
-                      </Icon.Group>
-                    ) : (
-                      <Icon name="user circle" size="mini" />
-                    )}
-
-                    <Header.Content>
-                      {`${getAttribute(u, "given_name")} ${getAttribute(
-                        u,
-                        "family_name"
-                      )}`}
-                      <Header.Subheader></Header.Subheader>
-                    </Header.Content>
-                  </Header>
-                </Table.Cell>
-                <Table.Cell>{getAttribute(u, "email")}</Table.Cell>
-                <Table.Cell textAlign="center">
-                  <Icon
-                    size="large"
-                    color={
-                      getAttribute(u, "email_verified") == "true"
-                        ? "green"
-                        : "black"
-                    }
-                    name={
-                      getAttribute(u, "email_verified") == "true"
-                        ? "check circle outline"
-                        : "x"
-                    }
-                  />
-                </Table.Cell>
-                <Table.Cell>{getAttribute(u, "phone_number")}</Table.Cell>
-                <Table.Cell>
-                  <Label basic color={u.Enabled ? "green" : "grey"}>
-                    {u.Enabled ? "Yes" : "No"}
-                  </Label>
-                </Table.Cell>
-                <Table.Cell>{u.UserStatus}</Table.Cell>
+        {users && (
+          <Table basic="very" celled collapsing>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Action</Table.HeaderCell>
+                <Table.HeaderCell>User</Table.HeaderCell>
+                <Table.HeaderCell>Email</Table.HeaderCell>
+                <Table.HeaderCell>Email Verified</Table.HeaderCell>
+                <Table.HeaderCell>Phone</Table.HeaderCell>
+                <Table.HeaderCell>Enabled</Table.HeaderCell>
+                <Table.HeaderCell>Status</Table.HeaderCell>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+            </Table.Header>
+            <Table.Body>
+              {users.map((u) => (
+                <Table.Row key={u.Username}>
+                  <Table.Cell>
+                    <LinkContainer
+                      key={u.Username}
+                      to={
+                        tenantId
+                          ? `/tenants/${tenantId}/user/${u.Username}`
+                          : `/user/${u.Username}`
+                      }
+                    >
+                      <Button basic>Edit</Button>
+                    </LinkContainer>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Header as="h4" image>
+                      {u.isAdmin || u.isTopLevelAdmin ? (
+                        <Icon.Group size="big">
+                          <Icon name="user circle" color="black" />
+                          <Icon corner name="plus" color="red" />
+                        </Icon.Group>
+                      ) : (
+                        <Icon name="user circle" size="mini" />
+                      )}
+
+                      <Header.Content>
+                        {`${getAttribute(u, "given_name")} ${getAttribute(
+                          u,
+                          "family_name"
+                        )}`}
+                        <Header.Subheader></Header.Subheader>
+                      </Header.Content>
+                    </Header>
+                  </Table.Cell>
+                  <Table.Cell>{getAttribute(u, "email")}</Table.Cell>
+                  <Table.Cell textAlign="center">
+                    <Icon
+                      size="large"
+                      color={
+                        getAttribute(u, "email_verified") == "true"
+                          ? "green"
+                          : "black"
+                      }
+                      name={
+                        getAttribute(u, "email_verified") == "true"
+                          ? "check circle outline"
+                          : "x"
+                      }
+                    />
+                  </Table.Cell>
+                  <Table.Cell>{getAttribute(u, "phone_number")}</Table.Cell>
+                  <Table.Cell>
+                    <Label basic color={u.Enabled ? "green" : "grey"}>
+                      {u.Enabled ? "Yes" : "No"}
+                    </Label>
+                  </Table.Cell>
+                  <Table.Cell>{u.UserStatus}</Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        )}
         {tenantId ? (
           <LinkContainer to={`/tenants/${tenantId}/user`}>
             <Button primary>Create new tenant user</Button>
@@ -175,6 +179,7 @@ export default function Users() {
         )}
       </>
     );
+    
   }
 
 

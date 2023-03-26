@@ -45,11 +45,52 @@ export default function ISO() {
     };
     return (
       <Form>
-        <Input label="Title" type="text"  value={values.title} onChange={(e) => setValues({...values, title: e.target.value})} />
-        <Input label="Type" type="text"  value={values.type} onChange={(e) => setValues({...values, type: e.target.value})} />
-        <TextArea rows={22} type="text"  value={values.content} onChange={(e) => setValues({...values, content: e.target.value})} />
-        <Button circular size='small' icon="arrow left" onClick={handleCancel} />
-        <Button circular positive size='small' icon="check" onClick={handleSave} />
+        <Input
+        labelPosition="left"
+          fluid
+          type="text"
+          value={values.title}
+          onChange={(e) => setValues({ ...values, title: e.target.value })}
+        >
+          <Label basic>Title</Label>
+          <input />
+          
+        </Input>
+        <Divider hidden />
+        <Input
+          labelPosition="right"
+          type="text"
+          value={values.type}
+          onChange={(e) => setValues({ ...values, type: e.target.value })}
+        >
+          <Label basic>Type</Label>
+          <input />
+          <Label>
+            <i>Process, Sub-process, Manual, etc.</i>
+          </Label>
+        </Input>
+
+        <Divider hidden />
+        <Header as="h4">Content</Header>
+        <TextArea
+          rows={22}
+          type="text"
+          value={values.content}
+          onChange={(e) => setValues({ ...values, content: e.target.value })}
+        />
+        <Button
+          circular
+          size="small"
+          icon="arrow left"
+          onClick={handleCancel}
+        />
+        <Button
+          circular
+          positive
+          size="small"
+          icon="check"
+          onClick={handleSave}
+        />
       </Form>
     );
   };

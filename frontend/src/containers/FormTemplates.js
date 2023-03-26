@@ -8,6 +8,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
+import FormHeader from "../components/FormHeader";
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
@@ -54,12 +55,13 @@ export default function FormTemplates() {
 
   return (
     <>
+    <FormHeader heading="Forms" />
       <Card.Group>
         {templates.map((t) => renderTemplate(t))}
         {templates.length == 0 && (
           <Message
-            header="No Template found"
-            content="Start by creating your first template!"
+            header="No Record found"
+            content="Start by creating your first record!"
             icon="exclamation"
           />
         )}
@@ -67,7 +69,7 @@ export default function FormTemplates() {
       <Divider />
       <LinkContainer to={`/template`}>
         <Button basic primary>
-          Create New Template
+          Create New Form
         </Button>
       </LinkContainer>
     </>

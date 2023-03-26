@@ -139,8 +139,8 @@ export default function FormRegister() {
       <Header>{formDef.title}</Header>
         {!hasEntries && (
           <Message
-            header="No Form found for this template"
-            content="Start by creating your first form!"
+            header="No Record found for this form"
+            content="Start by creating your first record!"
             icon="exclamation"
           />
         )}
@@ -189,7 +189,7 @@ export default function FormRegister() {
         </LinkContainer>
         <LinkContainer to={`/form/${templateId}`}>
           <Button basic primary>
-            Create New Form
+            Create New Record
           </Button>
         </LinkContainer>
 
