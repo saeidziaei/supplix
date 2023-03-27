@@ -1,19 +1,18 @@
 // TODO !!! dompurify - sanitize html input
 import pluralize from "pluralize";
 import React, { useEffect, useState } from 'react';
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useNavigate } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
 import { Breadcrumb, Button, Divider, Form, Header, Icon, Input, Item, Label, Loader, Popup, TextArea } from "semantic-ui-react";
 import { v4 as uuidv4 } from 'uuid';
 import DisplayText from '../components/DisplayText';
 import { makeApiCall } from '../lib/apiLib';
 import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter } from '../lib/helpers';
+import ReactMde from "react-mde";
+import Showdown from "showdown";
 import "./ISO.css";
 
 
-// TODO Change Markdown to showdown https://codesandbox.io/s/react-lenv0h?file=/src/components/Editor.js:166-177
 
 export default function ISO() {
   const [tree, setTree] = useState(null);
@@ -22,7 +21,12 @@ export default function ISO() {
   const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
   
   const nav = useNavigate();
-
+  const converter = new Showdown.Converter({
+    tables: true,
+    simplifiedAutoLink: true,
+    strikethrough: true,
+    tasklists: true
+  });
 
   // const location = useLocation();
   // const pathInURL = new URLSearchParams(location.search).get('path');
@@ -39,6 +43,7 @@ export default function ISO() {
 
   const EditNode = ({ initialValues, onSave, onCancel }) => {
     const [values, setValues] = useState(initialValues || {});
+    const [selectedTab, setSelectedTab] = React.useState("write");
 
     const handleSave = () => {
       onSave(values);
@@ -75,12 +80,19 @@ export default function ISO() {
 
         <Divider hidden />
         <Header as="h4">Content</Header>
-        <TextArea
-          rows={22}
-          type="text"
-          value={values.content}
-          onChange={(e) => setValues({ ...values, content: e.target.value })}
-        />
+   
+        <ReactMde
+                    className="markdown"
+                    value={values.content}
+                    onChange={(m) => setValues({ ...values, content: m })}
+                    selectedTab={selectedTab}
+                    onTabChange={setSelectedTab}
+                    generateMarkdownPreview={(markdown) =>
+                      Promise.resolve(converter.makeHtml(markdown))
+                    }
+                    minEditorHeight={40}
+                    heightUnits="vh"
+                  />
         <Button
           circular
           size="small"
@@ -102,6 +114,7 @@ export default function ISO() {
     const [isEditing, setIsEditing] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
     const [content, setContent] = useState(values.content);
+    
 
 
 
@@ -199,7 +212,11 @@ export default function ISO() {
                   color="grey"
                   onClick={() => setIsCompact(true)}
                 />
-                {isLoading ? <Loader active/> : <ReactMarkdown className="markdown" children={content} remarkPlugins={[remarkGfm]} />}
+                {isLoading ? (
+                  <Loader active />
+                ) : (
+                  <div className="markdown" dangerouslySetInnerHTML={{ __html: converter.makeHtml(content) }} />
+                  )}
               </>
             )}
             <Button
@@ -252,8 +269,8 @@ export default function ISO() {
                 <div key={groupIndex}>
                   <Divider horizontal>
                     <Header as="h4">
-                      <Label tag color='teal' >
-                      {pluralize(capitalizeFirstLetter(group[0].type))}
+                      <Label tag color="teal">
+                        {pluralize(capitalizeFirstLetter(group[0].type))}
                       </Label>
                     </Header>
                   </Divider>
