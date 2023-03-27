@@ -1,13 +1,13 @@
+import { parseISO } from "date-fns";
 import { Formik } from 'formik';
-import LoaderButton from '../components/LoaderButton';
-import Competency from '../components/Competency';
+import { Checkbox, Form, FormikDebug, Input, Select } from 'formik-semantic-ui-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { parseISO } from "date-fns";
 import { NumericFormat } from 'react-number-format';
-import { Form, Input, FormikDebug, Radio, Select, Checkbox, Field } from 'formik-semantic-ui-react';
+import { Button, Grid, Header, Label, Segment, Table } from 'semantic-ui-react';
+import Competency from '../components/Competency';
 import FormHeader from "../components/FormHeader";
-import { Grid, Header, Icon, Segment, Table, Button, Label, Loader, List } from 'semantic-ui-react';
+import LoaderButton from '../components/LoaderButton';
 
 export function GenericForm({formDef, formData, handleSubmit}) {
     function renderField(f, values, setFieldValue) {
@@ -17,9 +17,9 @@ export function GenericForm({formDef, formData, handleSubmit}) {
       switch (f.type) {
         case "info":
           return (
-            <Label as="a" color="teal" pointing="below">
-              {f.description}
-            </Label>
+            <Header as="h4" color="grey">
+              {f.title}
+            </Header>
           );
           case "number":
             return (
@@ -51,17 +51,18 @@ export function GenericForm({formDef, formData, handleSubmit}) {
             <Input size={size} name={name} id={id} icon="at" fluid errorPrompt />
           );
   
-        case "radio":
+        case "select":
+        case "weightedSelect":
           return (
             <Button.Group size={size} >
-              {f.options.map((o) => (
-              <Button key={o} positive={o == values[name]} onClick={(e) => {
+              {f.options.map((o, optionIndex) => (
+              <Button key={optionIndex} positive={o.value == values[name]} onClick={(e) => {
                 e.preventDefault(); 
-                if (o == values[name]) // if already selected, clear
+                if (o.value == values[name]) // if already selected, clear
                   setFieldValue(name, "");
                 else
-                  setFieldValue(name, o);
-              }}>{o}</Button>
+                  setFieldValue(name, o.value);
+              }}>{o.value}</Button>
               ))}
             </Button.Group>
           );
@@ -77,7 +78,7 @@ export function GenericForm({formDef, formData, handleSubmit}) {
             </Button.Group>
           );
   
-        case "select":
+        case "dropdown":
           const options = f.options.map((o) => ({ value: o, text: o }));
           return <Select size={size} options={options} name={name} id={id} />;
   
@@ -133,9 +134,9 @@ export function GenericForm({formDef, formData, handleSubmit}) {
                         </Table.Row>
                       </Table.Header>
                       <Table.Body>
-                        {s.fields.map((f, i) => (
-                          <Table.Row key={f.name}>
-                            <Table.Cell width={4}>{f.title}</Table.Cell>
+                        {s.fields.filter(f =>  f.type !== "aggregate").map((f, i) => (
+                          <Table.Row key={f.guid}>
+                            <Table.Cell width={4}>{f.type === 'info' ? "" : f.title}</Table.Cell>
                             <Table.Cell width={8} textAlign="center">
                               {renderField(f, values, setFieldValue)}
                             </Table.Cell>

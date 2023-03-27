@@ -12,6 +12,9 @@ import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter } from '../lib/helpers';
 import "./ISO.css";
 
+
+// TODO Change Markdown to showdown https://codesandbox.io/s/react-lenv0h?file=/src/components/Editor.js:166-177
+
 export default function ISO() {
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
@@ -196,7 +199,7 @@ export default function ISO() {
                   color="grey"
                   onClick={() => setIsCompact(true)}
                 />
-                {isLoading ? <Loader active/> : <ReactMarkdown children={content} remarkPlugins={[remarkGfm]} />}
+                {isLoading ? <Loader active/> : <ReactMarkdown className="markdown" children={content} remarkPlugins={[remarkGfm]} />}
               </>
             )}
             <Button

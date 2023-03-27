@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Icon,
-  Button,
-  List,
-  Segment,
-  Card,
-  Divider,
-  Item,
-  Message,
+  Button, Icon, Message
 } from "semantic-ui-react";
 
-import { LinkContainer } from "react-router-bootstrap";
-import { onError } from "../lib/errorLib";
-import { Loader, Header, Table } from "semantic-ui-react";
-import { useParams } from "react-router-dom";
 import { parseISO } from "date-fns";
 import { NumericFormat } from "react-number-format";
+import { LinkContainer } from "react-router-bootstrap";
+import { useParams } from "react-router-dom";
+import { Header, Loader, Table } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
+import { onError } from "../lib/errorLib";
 
 export default function FormRegister() {
   const { templateId } = useParams();
@@ -101,6 +94,29 @@ export default function FormRegister() {
   function getOptionbyName(options, name) {
     return options.find((option) => option.key === name);
   }
+  function getAggregateFiledValue(data, field, fields) {
+    
+    const sum = fields
+      .filter(f => f.type == "weightedSelect")
+      .reduce((acc, currentField) => {
+        // get value of current field
+        const fieldValue = data.formValues[currentField.name];
+        const fieldWeigth = currentField.options.find(o => o.value == fieldValue).weight;
+        
+        return acc + parseInt(fieldValue) * parseInt(fieldWeigth);
+      }, 0);
+
+      let result = null;
+      field.options.forEach(option => {
+        
+        if (sum >= parseInt(option.valueFrom) && sum <= parseInt(option.valueTo) && !result) {
+          result = option;
+        }
+      });
+
+      
+      return result || {colour: "white", title: "-"};
+  }
   function getFiledValue(data, field) {
     
     const fieldValue = data.formValues[field.name];
@@ -136,7 +152,7 @@ export default function FormRegister() {
     
     return (
       <>
-      <Header>{formDef.title}</Header>
+        <Header>{formDef.title}</Header>
         {!hasEntries && (
           <Message
             header="No Record found for this form"
@@ -145,7 +161,7 @@ export default function FormRegister() {
           />
         )}
         {hasEntries && (
-          <Table compact celled >
+          <Table compact celled>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Edit</Table.HeaderCell>
@@ -171,11 +187,20 @@ export default function FormRegister() {
                     </LinkContainer>
                   </Table.Cell>
                   {formDef.sections.map((s) =>
-                    s.fields.map((f) => (
-                      <Table.Cell key={f.name}>
-                        {getFiledValue(d, f)}
-                      </Table.Cell>
-                    ))
+                    s.fields.map((f) => {
+                      if (f.type === "aggregate") {
+                          const {colour, title} = getAggregateFiledValue(d, f, s.fields);
+                          return (<Table.Cell key={f.name} style={{backgroundColor: colour}}>
+                            {title}
+                          </Table.Cell>
+                        );
+                      } else
+                        return (
+                          <Table.Cell key={f.name}>
+                            {getFiledValue(d, f)}
+                          </Table.Cell>
+                        );
+                    })
                   )}
                 </Table.Row>
               ))}
@@ -192,7 +217,6 @@ export default function FormRegister() {
             Create New Record
           </Button>
         </LinkContainer>
-
       </>
     );
   }

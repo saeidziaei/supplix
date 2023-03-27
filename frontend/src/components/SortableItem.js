@@ -1,7 +1,7 @@
-import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Item,   } from "semantic-ui-react";
+import React from "react";
+import { Button } from "semantic-ui-react";
 
 export function SortableItem(props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -9,23 +9,22 @@ export function SortableItem(props) {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition
   };
 
   return (
     <div ref={setNodeRef} style={style}>
-          <Button
-          
-            className="grabbable"
-            style={{ boxShadow: "none", opacity: "50%" }}
-            basic
-            icon="th"
-            size="tiny"
-            {...listeners}
-            {...attributes}
-          />
-          <div style={{float: "right"}}>{props.children}</div>
-        
+      
+        <Button
+          className="grabbable"
+          style={{ boxShadow: "none", opacity: "50%" }}
+          basic
+          icon="th"
+          size="tiny"
+          {...listeners}
+          {...attributes}
+        />
+        <div>{props.children}</div>
       
     </div>
   );
