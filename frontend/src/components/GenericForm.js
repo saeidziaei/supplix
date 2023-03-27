@@ -71,15 +71,15 @@ export function GenericForm({formDef, formData, handleSubmit}) {
           return (
             <Button.Group>
               {f.options.map((o) => (
-                <Button basic color="teal" key={o}>
-                  <Checkbox label={o} name={name + o} />
+                <Button basic color="teal" key={o.value}>
+                  <Checkbox label={o.value} name={name + o.value} />
                 </Button>
               ))}
             </Button.Group>
           );
   
         case "dropdown":
-          const options = f.options.map((o) => ({ value: o, text: o }));
+          const options = f.options.map((o) => ({ value: o.value, text: o.value }));
           return <Select size={size} options={options} name={name} id={id} />;
   
         case "competency":
