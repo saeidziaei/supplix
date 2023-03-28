@@ -97,19 +97,19 @@ export default function FormRegister() {
   function getAggregateFiledValue(data, field, fields) {
     
     const sum = fields
-      .filter(f => f.type == "weightedSelect")
+      .filter(f => f.type === "weightedSelect" || f.type === "weightedDropdown")
       .reduce((acc, currentField) => {
         // get value of current field
         const fieldValue = data.formValues[currentField.name];
-        const fieldWeigth = currentField.options.find(o => o.value == fieldValue).weight;
+        const fieldWeigth = currentField.options.find(o => o.value == fieldValue)?.weight ?? 0;
         
-        return acc + parseInt(fieldValue) * parseInt(fieldWeigth);
+        return acc + parseFloat(fieldValue) * parseFloat(fieldWeigth);
       }, 0);
 
       let result = null;
       field.options.forEach(option => {
         
-        if (sum >= parseInt(option.valueFrom) && sum <= parseInt(option.valueTo) && !result) {
+        if (sum >= parseFloat(option.valueFrom) && sum <= parseFloat(option.valueTo) && !result) {
           result = option;
         }
       });
@@ -165,7 +165,7 @@ export default function FormRegister() {
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Edit</Table.HeaderCell>
-                {formDef.sections.map((s) =>
+                {formDef.sections.filter(s => !s.isTable).map((s) =>
                   s.fields.filter(f => f.type !== "info").map((f) => (
                     <Table.HeaderCell key={f.name}>{f.name}</Table.HeaderCell>
                   ))
@@ -186,7 +186,7 @@ export default function FormRegister() {
                       />
                     </LinkContainer>
                   </Table.Cell>
-                  {formDef.sections.map((s) =>
+                  {formDef.sections.filter(s => !s.isTable).map((s) =>
                     s.fields.filter(f => f.type !== "info").map((f) => {
                       if (f.type === "aggregate") {
                           const {colour, title} = getAggregateFiledValue(d, f, s.fields);

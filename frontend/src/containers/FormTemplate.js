@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  Checkbox,
   Confirm,
-  Divider, Grid, Header,
+  Divider, Form, Grid, GridRow, Header,
   Icon,
   Input,
   Item, Loader,
@@ -192,32 +193,115 @@ export default function FormTemplate() {
         {sections.map((section, sectionIndex) => (
           <Segment key={sectionIndex}>
             <Item>
-              <Button
-                size="mini"
-                basic
-                onClick={() =>
-                  setRemoveSectionConfirm({
-                    open: true,
-                    sectionIndex,
-                  })
-                }
-              >
-                <Icon name="x" />
-                Remove Section
-              </Button>
-              <Input
-              fluid
-                label="Section"
-                type="text"
-                value={section.title}
-                onChange={(e) => {
-                  const newSections = [...sections];
-                  newSections[sectionIndex].title = e.target.value;
-                  setSections(newSections);
-                }}
-              />
+              <Grid>
+                <GridRow>
+                  <Grid.Column width={1} verticalAlign="middle">
+                    <Button
+                      size="mini"
+                      basic
+                      circular
+                      onClick={() =>
+                        setRemoveSectionConfirm({
+                          open: true,
+                          sectionIndex,
+                        })
+                      }
+                      style={{ float: "left" }}
+                      icon="x"
+                    ></Button>
+                  </Grid.Column>
+
+                  <Grid.Column width={10}>
+                    <Input
+                      fluid
+                      label="Section"
+                      type="text"
+                      value={section.title}
+                      onChange={(e) => {
+                        const newSections = [...sections];
+                        newSections[sectionIndex].title = e.target.value;
+                        setSections(newSections);
+                      }}
+                    />
+                  </Grid.Column>
+                  <Grid.Column width={4} verticalAlign="middle">
+                    <Checkbox
+                      toggle
+                      label="Table?"
+                      onChange={(e, data) => {
+                        const newSections = [...sections];
+                        newSections[sectionIndex].isTable = data.checked;
+                        newSections[sectionIndex].rows =
+                          newSections[sectionIndex].rows || [];
+                        setSections(newSections);
+                      }}
+                      checked={section.isTable}
+                    />
+                  </Grid.Column>
+                </GridRow>
+                {section.isTable && (
+                  <>
+                    <Grid.Row>
+                      <Grid.Column width={1}>Rows</Grid.Column>
+                      <Grid.Column width={13}>Text</Grid.Column>
+                    </Grid.Row>
+                    {section.rows.map((row, rowIndex) => (
+                      <Grid.Row key={rowIndex}>
+                        <Grid.Column width={1}>
+                          <Button
+                            icon="x"
+                            circular
+                            basic
+                            size="mini"
+                            onClick={() => {
+                              const newSections = [...sections];
+                              const newRows = newSections[
+                                sectionIndex
+                              ].rows.filter((_, index) => index !== rowIndex);
+                              newSections[sectionIndex].rows = newRows;
+                              setSections(newSections);
+                            }}
+                          ></Button>
+                        </Grid.Column>
+                        <Grid.Column width={13}>
+                          <Input
+                            type="text"
+                            size="mini"
+                            fluid
+                            width={8}
+                            value={row.value}
+                            onChange={(e) => {
+                              const newSections = [...sections];
+                              const newRows = newSections[sectionIndex].rows;
+                              newRows[rowIndex].value = e.target.value;
+                              newSections[sectionIndex].rows = newRows;
+                              setSections(newSections);
+                            }}
+                          />
+                        </Grid.Column>
+                      </Grid.Row>
+                    ))}
+                    <Grid.Row>
+                      <Grid.Column>
+                        <Button
+                          icon="plus"
+                          circular
+                          basic
+                          size="mini"
+                          color="black"
+                          onClick={() => {
+                            const newSections = [...sections];
+                            newSections[sectionIndex].rows.push({ value: "" });
+                            setSections(newSections);
+                          }}
+                        ></Button>
+                      </Grid.Column>
+                    </Grid.Row>
+                  </>
+                )}
+              </Grid>
             </Item>
-            <Divider hidden/>
+            <Divider hidden />
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -227,7 +311,7 @@ export default function FormTemplate() {
                 items={section.fields.map((f, i) => f.guid)}
                 strategy={verticalListSortingStrategy}
               >
-                <div class="Item.Group divided">
+                <>
                   <Confirm
                     size="mini"
                     header="This will delete the field."
@@ -243,7 +327,7 @@ export default function FormTemplate() {
                   />
                   {section.fields.map((field, fieldIndex) => (
                     <div key={field.guid}>
-                      <SortableItem id={field.guid} >
+                      <SortableItem id={field.guid}>
                         <FieldEditor
                           key={fieldIndex}
                           value={field}
@@ -269,15 +353,17 @@ export default function FormTemplate() {
                               name: `${field.name} copy`,
                               guid: uuidv4(),
                             };
-                            newSections[sectionIndex].fields.push(duplicatedField);
+                            newSections[sectionIndex].fields.push(
+                              duplicatedField
+                            );
                             setSections(newSections);
                           }}
                         />
-                        <Divider/>
+                        <Divider />
                       </SortableItem>
                     </div>
                   ))}
-                </div>
+                </>
               </SortableContext>
             </DndContext>
             <Button

@@ -79,6 +79,7 @@ export function GenericForm({formDef, formData, handleSubmit}) {
           );
   
         case "dropdown":
+        case "weightedDropdown":
           const options = f.options.map((o) => ({ value: o.value, text: o.value }));
           return <Select placeholder="Select" clearable size={size} options={options} name={name} id={id} />;
   
@@ -89,9 +90,20 @@ export function GenericForm({formDef, formData, handleSubmit}) {
           return <div>Unsupported Field</div>;
       }
     }
+    const tabularFieldName = (rowIndex, name) => `row${rowIndex}-${name}`;
+
     const defaultValues = {
       ...formDef.sections.reduce((acc, section) => {
-        return acc.concat(section.fields);
+        return acc.concat(
+          section.isTable // explode the fields. Repeat the fields for every row
+            ? section.rows.map((_, rowIndex) =>
+                section.fields.map((f) => ({
+                  ...f,
+                  name: tabularFieldName(rowIndex, f.name),
+                }))
+              )
+            : section.fields
+        );
       }, []).reduce((acc, field) => {
           if (field.type == "checkbox") { // each checkbox is a quesiton!
             field.options.map((o) => {
@@ -122,39 +134,7 @@ export function GenericForm({formDef, formData, handleSubmit}) {
         {({ isSubmitting, values, setFieldValue }) => (
           <Form size="small">
             {formDef.sections.map((s) => (
-              <Segment basic vertical key={s.title} size="tiny">
-                <Grid>
-                  <Grid.Column width={14}>
-                    <Table celled compact stackable>
-                      <Table.Header>
-                        <Table.Row>
-                          <Table.HeaderCell colSpan="5">
-                            {s.title}
-                          </Table.HeaderCell>
-                        </Table.Row>
-                      </Table.Header>
-                      <Table.Body>
-                        {s.fields.filter(f =>  f.type !== "aggregate").map((f, i) => (
-                          <Table.Row key={f.guid}>
-                            <Table.Cell width={4}>{f.type === 'info' ? "" : f.title}</Table.Cell>
-                            <Table.Cell width={8} textAlign="center">
-                              {renderField(f, values, setFieldValue)}
-                            </Table.Cell>
-                          </Table.Row>
-                        ))}
-  
-                      </Table.Body>
-                    </Table>
-                  </Grid.Column>
-                  <Grid.Column
-                    width={2}
-                    verticalAlign="middle"
-                    textAlign="center"
-                  >
-                    Owner
-                  </Grid.Column>
-                </Grid>
-              </Segment>
+              s.isTable ? renderSectionTabular(s, values, setFieldValue) : renderSection(s, values, setFieldValue)
             ))}
             {handleSubmit && <LoaderButton
               type="submit"
@@ -168,5 +148,68 @@ export function GenericForm({formDef, formData, handleSubmit}) {
     </Segment>;
      
   
+
+  function renderSectionTabular(s, values, setFieldValue) {
+    const fields = s.fields.filter(f => f.type !== "aggregate");
+    return (
+      <Segment basic vertical key={s.title} size="tiny">
+        <Table celled compact stackable>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Items</Table.HeaderCell>
+              {fields.map((f, i) => (
+                <Table.HeaderCell key={i}>{f.name}</Table.HeaderCell>
+              ))}
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {s.rows.map((row, rowIndex) => (
+              <Table.Row key={rowIndex}>
+                <Table.Cell>{row.value}</Table.Cell>
+                {fields.map((f, i) => (
+                  <Table.Cell key={i}> {renderField({...f, name: tabularFieldName(rowIndex, f.name)} , values, setFieldValue)}</Table.Cell>
+                ))}
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      </Segment>
+    );
+  }
+  function renderSection(s, values, setFieldValue) {
+    return <Segment basic vertical key={s.title} size="tiny">
+      <Grid>
+        <Grid.Column width={14}>
+          <Table celled compact stackable>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell colSpan="5">
+                  {s.title}
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {s.fields.filter(f => f.type !== "aggregate").map((f, i) => (
+                <Table.Row key={f.guid}>
+                  <Table.Cell width={4}>{f.type === 'info' ? "" : f.title}</Table.Cell>
+                  <Table.Cell width={8} textAlign="center">
+                    {renderField(f, values, setFieldValue)}
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+
+            </Table.Body>
+          </Table>
+        </Grid.Column>
+        <Grid.Column
+          width={2}
+          verticalAlign="middle"
+          textAlign="center"
+        >
+          Owner
+        </Grid.Column>
+      </Grid>
+    </Segment>;
+  }
   }
   

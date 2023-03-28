@@ -26,7 +26,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   }
   const addOption = () => {
     const newOption =
-      field.type == "weightedSelect" ? { value: 0, weight: 0 } : 
+      (field.type == "weightedSelect" || field.type == "weightedDropdown") ? { value: 0, weight: 0 } : 
       field.type == "aggregate" ? { valueFrom: 0, valueTo: 0, title: "OUTCOME", colour:"#4266a1" } : 
       { value: "" };
     const newOptions = [...field.options, newOption];
@@ -46,97 +46,6 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
 
     onChange(updatedField);
   };
-  function renderFieldOptions2() {
-    return (
-      <Form.Group>
-        <Table basic="very" compact size="small">
-          <Table.Header>
-            <Table.Row>
-              <Table.Cell positive>Optoins</Table.Cell>
-              {field.type !== "aggregate" && (
-                <Table.HeaderCell>Value</Table.HeaderCell>
-              )}
-              {field.type === "weightedSelect" && (
-                <Table.HeaderCell>Weight</Table.HeaderCell>
-              )}
-              {field.type === "aggregate" && (
-                <>
-                  <Table.HeaderCell>From</Table.HeaderCell>
-                  <Table.HeaderCell>To</Table.HeaderCell>
-                  <Table.HeaderCell>Title</Table.HeaderCell>
-                  <Table.HeaderCell>Colour</Table.HeaderCell>
-                </>
-              )}
-            </Table.Row>
-          </Table.Header>
-
-          <Table.Body>
-            {field.options.map((option, optionIndex) => (
-              <Table.Row key={optionIndex} style={{backgroundColor: `${option.colour}`}}>
-                <Table.Cell>
-                  <Button
-                    icon="x"
-                    circular
-                    basic
-                    size="mini"
-                    onClick={() => removeOption(optionIndex)}
-                  ></Button>
-                </Table.Cell>
-                {field.type !== "aggregate" && (
-                  <Table.Cell>
-                    <Form.Input
-                      key={`option-value-${optionIndex}`}
-                      type={field.type == "weightedSelect" ? "number" : "text"}
-                      size="tiny"
-                      value={option.value}
-                      onChange={(e) =>
-                        handleOptionChange(optionIndex, "value", e.target.value)
-                      }
-                    />
-                  </Table.Cell>
-                )}
-                {field.type === "weightedSelect" && (
-                  <Table.Cell>
-                    <Form.Input
-                      key={`option-weight-${optionIndex}`}
-                      type="number"
-                      size="mini"
-                      value={option.weight}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          optionIndex,
-                          "weight",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Table.Cell>
-                )}
-                {field.type === "aggregate" && <>
-                <Table.Cell ><Form.Input compact  key={`option-valueFrom-${optionIndex}`} type="number" size="tiny" value={option.valueFrom} onChange={(e) => handleOptionChange( optionIndex, "valueFrom", e.target.value )}/></Table.Cell>
-                <Table.Cell ><Form.Input compact key={`option-valueTo-${optionIndex}`} type="number" size="tiny" value={option.valueTo} onChange={(e) => handleOptionChange( optionIndex, "valueFrom", e.target.value )}/></Table.Cell>
-                <Table.Cell><Form.Input  key={`option-title-${optionIndex}`} type="text" size="tiny" value={option.title} onChange={(e) => handleOptionChange( optionIndex, "title", e.target.value )}/></Table.Cell>
-                <Table.Cell><Form.Input  key={`option-colour-${optionIndex}`} type="text" size="tiny" value={option.colour} onChange={(e) => handleOptionChange( optionIndex, "colour", e.target.value )}/></Table.Cell>
-                </>}
-              </Table.Row>
-            ))}
-            <Table.Row>
-              <Table.Cell>
-                <Button
-                  icon="plus"
-                  circular
-                  basic
-                  size="mini"
-                  color="black"
-                  onClick={() => addOption()}
-                ></Button>
-              </Table.Cell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-      </Form.Group>
-    );
-  }
   function renderFieldOptions() {
     return (
         <Grid>
@@ -145,7 +54,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
               {field.type !== "aggregate" && (
                 <Grid.Column width={3}>Value</Grid.Column>
               )}
-              {field.type === "weightedSelect" && (
+              {(field.type === "weightedSelect" || field.type === "weightedDropdown") && (
                 <Grid.Column width={3}>Weight</Grid.Column>
               )}
               {field.type === "aggregate" && (
@@ -173,8 +82,8 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
                   <Grid.Column width={3}>
                     <Form.Input
                       key={`option-value-${optionIndex}`}
-                      type={field.type == "weightedSelect" ? "number" : "text"}
-                      size="tiny"
+                      type={(field.type === "weightedSelect" || field.type === "weightedDropdown") ? "number" : "text"}
+                      size="mini"
                       value={option.value}
                       onChange={(e) =>
                         handleOptionChange(optionIndex, "value", e.target.value)
@@ -182,12 +91,12 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
                     />
                   </Grid.Column>
                 )}
-                {field.type === "weightedSelect" && (
+                {(field.type === "weightedSelect" || field.type === "weightedDropdown") && (
                   <Grid.Column width={3}>
                     <Form.Input
                       key={`option-weight-${optionIndex}`}
                       type="number"
-                      size="tiny"
+                      size="mini"
                       value={option.weight}
                       onChange={(e) =>
                         handleOptionChange(
@@ -200,10 +109,10 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
                   </Grid.Column>
                 )}
                 {field.type === "aggregate" && <>
-                <Grid.Column width={3} ><Form.Input compact  key={`option-valueFrom-${optionIndex}`} type="number" size="tiny" value={option.valueFrom} onChange={(e) => handleOptionChange( optionIndex, "valueFrom", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3} ><Form.Input compact key={`option-valueTo-${optionIndex}`} type="number" size="tiny" value={option.valueTo} onChange={(e) => handleOptionChange( optionIndex, "valueTo", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3}><Form.Input  key={`option-title-${optionIndex}`} type="text" size="tiny" value={option.title} onChange={(e) => handleOptionChange( optionIndex, "title", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3}><Form.Input  key={`option-colour-${optionIndex}`} type="text" size="tiny" value={option.colour} onChange={(e) => handleOptionChange( optionIndex, "colour", e.target.value )}/></Grid.Column>
+                <Grid.Column width={3} ><Form.Input   key={`option-valueFrom-${optionIndex}`} type="number" size="mini" value={option.valueFrom} onChange={(e) => handleOptionChange( optionIndex, "valueFrom", e.target.value )}/></Grid.Column>
+                <Grid.Column width={3} ><Form.Input  key={`option-valueTo-${optionIndex}`} type="number" size="mini" value={option.valueTo} onChange={(e) => handleOptionChange( optionIndex, "valueTo", e.target.value )}/></Grid.Column>
+                <Grid.Column width={3}><Form.Input  key={`option-title-${optionIndex}`} type="text" size="mini" value={option.title} onChange={(e) => handleOptionChange( optionIndex, "title", e.target.value )}/></Grid.Column>
+                <Grid.Column width={3}><Form.Input  key={`option-colour-${optionIndex}`} type="text" size="mini" value={option.colour} onChange={(e) => handleOptionChange( optionIndex, "colour", e.target.value )}/></Grid.Column>
                 </>}
               </Grid.Row>
             ))}
@@ -298,6 +207,7 @@ export const fieldTypes = [
   { text: "Select", value: "select", hasOptions: true },
   { text: "Select (Weighted)", value: "weightedSelect", hasOptions: true },
   { text: "Dropdown", value: "dropdown", hasOptions: true },
+  { text: "Dropdown (Weighted)", value: "weightedDropdown", hasOptions: true },
   { text: "Competency", value: "competency" },
   { text: "Aggregate", value: "aggregate", hasOptions: true },
 ];
