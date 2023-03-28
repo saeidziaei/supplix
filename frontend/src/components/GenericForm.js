@@ -43,8 +43,8 @@ export function GenericForm({formDef, formData, handleSubmit}) {
             // incompatible data had been saved, just ignore it 
           }
           if (selected == "Invalid Date")
-            selected = new Date();
-          return <DatePicker size={size} name={name} id={id} selected={selected} dateFormat="dd-MMM-yy" onChange={date => setFieldValue(name, date.toISOString())}/>;
+            selected = ""; // new Date();
+          return <DatePicker placeholderText="Select" isClearable size={size} name={name} id={id} selected={selected} dateFormat="dd-MMM-yy" onChange={date => setFieldValue(name, date ? date.toISOString() : "")}/>;
   
         case "email":
           return (
@@ -80,7 +80,7 @@ export function GenericForm({formDef, formData, handleSubmit}) {
   
         case "dropdown":
           const options = f.options.map((o) => ({ value: o.value, text: o.value }));
-          return <Select size={size} options={options} name={name} id={id} />;
+          return <Select placeholder="Select" clearable size={size} options={options} name={name} id={id} />;
   
         case "competency":
           return <Competency name={name} />;// todo: this is not consistent with  Formik model (use values[] and setFieldValue)

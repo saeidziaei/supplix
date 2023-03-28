@@ -166,7 +166,7 @@ export default function FormRegister() {
               <Table.Row>
                 <Table.HeaderCell>Edit</Table.HeaderCell>
                 {formDef.sections.map((s) =>
-                  s.fields.map((f) => (
+                  s.fields.filter(f => f.type !== "info").map((f) => (
                     <Table.HeaderCell key={f.name}>{f.name}</Table.HeaderCell>
                   ))
                 )}
@@ -187,7 +187,7 @@ export default function FormRegister() {
                     </LinkContainer>
                   </Table.Cell>
                   {formDef.sections.map((s) =>
-                    s.fields.map((f) => {
+                    s.fields.filter(f => f.type !== "info").map((f) => {
                       if (f.type === "aggregate") {
                           const {colour, title} = getAggregateFiledValue(d, f, s.fields);
                           return (<Table.Cell key={f.name} style={{backgroundColor: colour}}>
