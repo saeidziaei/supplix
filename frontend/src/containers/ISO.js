@@ -1,32 +1,35 @@
 // TODO !!! dompurify - sanitize html input
 import pluralize from "pluralize";
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Breadcrumb, Button, Divider, Form, Header, Icon, Input, Item, Label, Loader, Popup, TextArea } from "semantic-ui-react";
-import { v4 as uuidv4 } from 'uuid';
-import DisplayText from '../components/DisplayText';
-import { makeApiCall } from '../lib/apiLib';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Breadcrumb,
+  Button,
+  Divider,
+  Form,
+  Header,
+  Icon,
+  Input,
+  Item,
+  Label,
+  Loader,
+  Popup,
+  TextArea,
+} from "semantic-ui-react";
+import { v4 as uuidv4 } from "uuid";
+import DisplayText from "../components/DisplayText";
+import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import { capitalizeFirstLetter } from '../lib/helpers';
-import ReactMde from "react-mde";
-import Showdown from "showdown";
+import { capitalizeFirstLetter } from "../lib/helpers";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import "./ISO.css";
-
-
 
 export default function ISO() {
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
-  
-  const nav = useNavigate();
-  const converter = new Showdown.Converter({
-    tables: true,
-    simplifiedAutoLink: true,
-    strikethrough: true,
-    tasklists: true
-  });
 
   // const location = useLocation();
   // const pathInURL = new URLSearchParams(location.search).get('path');
@@ -36,10 +39,8 @@ export default function ISO() {
   }, [path]);
 
   useEffect(() => {
-    if (savedTree != tree)
-      handleSubmit(tree);
+    if (savedTree != tree) handleSubmit(tree);
   }, [tree]);
-
 
   const EditNode = ({ initialValues, onSave, onCancel }) => {
     const [values, setValues] = useState(initialValues || {});
@@ -54,7 +55,7 @@ export default function ISO() {
     return (
       <Form>
         <Input
-        labelPosition="left"
+          labelPosition="left"
           fluid
           type="text"
           value={values.title}
@@ -62,7 +63,6 @@ export default function ISO() {
         >
           <Label basic>Title</Label>
           <input />
-          
         </Input>
         <Divider hidden />
         <Input
@@ -80,19 +80,15 @@ export default function ISO() {
 
         <Divider hidden />
         <Header as="h4">Content</Header>
-   
-        <ReactMde
-                    className="markdown"
-                    value={values.content}
-                    onChange={(m) => setValues({ ...values, content: m })}
-                    selectedTab={selectedTab}
-                    onTabChange={setSelectedTab}
-                    generateMarkdownPreview={(markdown) =>
-                      Promise.resolve(converter.makeHtml(markdown))
-                    }
-                    minEditorHeight={40}
-                    heightUnits="vh"
-                  />
+        <CKEditor
+          editor={ClassicEditor}
+          data={values.content}
+          onChange={(event, editor) => {
+            const data = editor.getData();
+            setValues({ ...values, content: data });
+          }}
+        />
+
         <Button
           circular
           size="small"
@@ -110,26 +106,42 @@ export default function ISO() {
     );
   };
 
-  const Node = ({ values,  onEdit, onPathChange, onAddChild, onDelete, onMoveChildUp, onMoveChildDown }) => {
+  const Node = ({
+    values,
+    onEdit,
+    onPathChange,
+    onAddChild,
+    onDelete,
+    onMoveChildUp,
+    onMoveChildDown,
+  }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
     const [content, setContent] = useState(values.content);
-    
-
-
 
     useEffect(() => {
-      async function prepContent(text)  {
-        const tokenRegex = /!\[embedded\]\(\/doc\/([a-f\d-]+)\)/g; // matches ![embedded](/doc/{docId})
-        let match = tokenRegex.exec(text);
+      async function prepContent(text) {
+        const libraryRegex = /!\[library\]\(\/doc\/([a-f\d-]+)\)/g; // matches ![library](/doc/{docId})
+        let match = libraryRegex.exec(text);
         while (match) {
-          
           const docId = match[1];
 
           const { fileURL, note } = await makeApiCall("GET", `/docs/${docId}`);
-          const replacement = `![${note}](${fileURL} "${note}")`;
+          // const replacement = `![${note}](${fileURL} "${note}")`;
+          const replacement = `<img alt="${note}" src="${fileURL}"/>`;
           text = text.replace(match[0], replacement);
-          match = tokenRegex.exec(text);
+          match = libraryRegex.exec(text);
+        }
+
+        const urlRegex = /\!\[external\]\((https?:\/\/[^\)]+)\)/g; // matches ![external](URL)
+        match = urlRegex.exec(text);
+        while (match) {
+          const url = match[1];
+          
+          const replacement = `<img alt="external image" src="${url}"/>`;
+          text = text.replace(match[0], replacement);
+
+          match = urlRegex.exec(text);
         }
 
         return text;
@@ -139,14 +151,13 @@ export default function ISO() {
           const preppedContent = await prepContent(content);
 
           setContent(preppedContent);
-
         } catch (e) {
           onError(e);
         }
 
         setIsLoading(false);
       }
-  
+
       onLoad();
     }, [content]);
 
@@ -155,30 +166,28 @@ export default function ISO() {
       setIsEditing(false);
     };
 
-
-
-    
     const title = values.title;
     const children = values.children || [];
     const type = values.type;
-    const parentPath = getParentPath(path); 
+    const parentPath = getParentPath(path);
 
     const canBeDeleted = children.length == 0;
 
-    const groupedChildren = children.length == 0 ? [] : 
-        children.reduce((result, child) => {
+    const groupedChildren =
+      children.length == 0
+        ? []
+        : children.reduce((result, child) => {
             const group = result.find((group) => group[0].type === child.type);
-        
-            if (group) {
-            group.push(child);
-            } else {
-            result.push([child]);
-            }
-        
-            return result;
-      }, []);
 
-    
+            if (group) {
+              group.push(child);
+            } else {
+              result.push([child]);
+            }
+
+            return result;
+          }, []);
+
     return (
       <>
         {isEditing ? (
@@ -215,8 +224,11 @@ export default function ISO() {
                 {isLoading ? (
                   <Loader active />
                 ) : (
-                  <div className="markdown" dangerouslySetInnerHTML={{ __html: converter.makeHtml(content) }} />
-                  )}
+                  <div
+                    className="markdown"
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                )}
               </>
             )}
             <Button
@@ -347,81 +359,92 @@ export default function ISO() {
     );
   };
   function getParentPath(path) {
-    return path.substring(0, path.lastIndexOf('/'));
+    return path.substring(0, path.lastIndexOf("/"));
   }
   function getNodeByPath(tree, path) {
-    const pathArray = path.split('/').splice(1);
+    const pathArray = path.split("/").splice(1);
     let currentNode = tree;
     for (const guid of pathArray) {
-      const nextNode = currentNode.children.find(child => child.guid === guid);
-  
+      const nextNode = currentNode.children.find(
+        (child) => child.guid === guid
+      );
+
       if (!nextNode) return null;
-  
+
       currentNode = nextNode;
     }
-  
+
     return currentNode;
   }
 
   function renderBreadcrumb(tree, path) {
-    const pathArray = path.split('/').splice(1);
+    const pathArray = path.split("/").splice(1);
     let currentNode = tree;
     let subPath = "";
-    let crumbs = [{label:"Home", path: subPath}];
+    let crumbs = [{ label: "Home", path: subPath }];
     for (const guid of pathArray) {
-      const nextNode = currentNode.children.find(child => child.guid === guid);
+      const nextNode = currentNode.children.find(
+        (child) => child.guid === guid
+      );
       subPath += "/" + nextNode.guid;
-      crumbs.push({label: nextNode.title, path: subPath})
+      crumbs.push({ label: nextNode.title, path: subPath });
       if (!nextNode) return null;
-  
+
       currentNode = nextNode;
     }
-    
-    return (<>
-    <Breadcrumb size='tiny'>
-      {crumbs.slice(0, -1).map((crumb, index) => <span key={index}>
-        <Breadcrumb.Section link onClick={() => setPath(crumb.path)}>{crumb.label}</Breadcrumb.Section>
-        <Breadcrumb.Divider icon='right chevron' />
-      </span>)
-      }
-    <Breadcrumb.Section active>{crumbs[crumbs.length - 1].label}</Breadcrumb.Section>
 
-    </Breadcrumb>
-    <Divider hidden /></>
+    return (
+      <>
+        <Breadcrumb size="tiny">
+          {crumbs.slice(0, -1).map((crumb, index) => (
+            <span key={index}>
+              <Breadcrumb.Section link onClick={() => setPath(crumb.path)}>
+                {crumb.label}
+              </Breadcrumb.Section>
+              <Breadcrumb.Divider icon="right chevron" />
+            </span>
+          ))}
+          <Breadcrumb.Section active>
+            {crumbs[crumbs.length - 1].label}
+          </Breadcrumb.Section>
+        </Breadcrumb>
+        <Divider hidden />
+      </>
     );
-  
   }
   function deleteNodeByPath(tree, path) {
     // find the parent and delete this child
     const parentPath = getParentPath(path);
     const guidToDelete = path.substring(path.lastIndexOf("/") + 1);
-    
-    const pathArray = parentPath.split('/').splice(1);
+
+    const pathArray = parentPath.split("/").splice(1);
     const updatedTree = JSON.parse(JSON.stringify(tree));
 
     let currentNode = updatedTree;
     for (const guid of pathArray) {
-      
-      const nextNode = currentNode.children.find(child => child.guid === guid);
-  
+      const nextNode = currentNode.children.find(
+        (child) => child.guid === guid
+      );
+
       if (!nextNode) return null; // error , node not found
-        
+
       currentNode = nextNode;
     }
-    
-    currentNode.children = currentNode.children.filter(child => child.guid !== guidToDelete);
+
+    currentNode.children = currentNode.children.filter(
+      (child) => child.guid !== guidToDelete
+    );
 
     setPath(parentPath);
-    setTree(updatedTree);    
+    setTree(updatedTree);
   }
   function addNodeToPath(tree, path, newDataNode) {
     const updatedTree = JSON.parse(JSON.stringify(tree));
     const currentNode = getNodeByPath(updatedTree, path);
 
-    if (!currentNode.children)
-      currentNode.children = [];
+    if (!currentNode.children) currentNode.children = [];
     currentNode.children.push(newDataNode);
-    
+
     setTree(updatedTree);
   }
   function setNodeByPath(tree, path, newDataNode) {
@@ -438,11 +461,11 @@ export default function ISO() {
     let array = currentNode.children;
     for (let i = 0; i < array.length; i++) {
       if (array[i].guid === childGuid) {
-        if (direction === 'up' && i > 0) {
+        if (direction === "up" && i > 0) {
           // Swap the current object with the one above it
           [array[i], array[i - 1]] = [array[i - 1], array[i]];
           break;
-        } else if (direction === 'down' && i < array.length - 1) {
+        } else if (direction === "down" && i < array.length - 1) {
           // Swap the current object with the one below it
           [array[i], array[i + 1]] = [array[i + 1], array[i]];
           break;
@@ -453,15 +476,14 @@ export default function ISO() {
     setTree(updatedTree);
   }
 
-
   const currentDataNode = getNodeByPath(tree, path);
 
- 
   useEffect(() => {
     async function loadProcess() {
-      return await makeApiCall("GET", `/isos/top-level` // returns one item (top level))
+      return await makeApiCall(
+        "GET",
+        `/isos/top-level` // returns one item (top level))
       );
- 
     }
 
     async function onLoad() {
@@ -469,14 +491,12 @@ export default function ISO() {
         const item = await loadProcess();
 
         setTree(item.tree);
-
       } catch (e) {
         onError(e);
       }
 
       setIsLoading(false);
     }
-
 
     onLoad();
   }, []);
@@ -494,17 +514,11 @@ export default function ISO() {
     }
   }
 
-
   async function updateProcess(tree) {
-    return await makeApiCall(
-      "PUT",
-      `/isos/top-level`,
-      {
-        tree: tree,
-      }
-    );
+    return await makeApiCall("PUT", `/isos/top-level`, {
+      tree: tree,
+    });
   }
-
 
   if (isLoading) return <Loader active />;
 
@@ -512,16 +526,21 @@ export default function ISO() {
 
   return (
     <>
-    { renderBreadcrumb(tree, path) }
-    <Node
-      values={currentDataNode}
-      onEdit={(newDataNode) => setNodeByPath(tree, path, newDataNode) }
-      onAddChild={(newDataNode) => {addNodeToPath(tree, path, newDataNode);  setPath(path + "/" + newDataNode.guid)} }
-      onDelete={(p) => deleteNodeByPath(tree, p) }
-      onPathChange={(p) => setPath(p)}
-      onMoveChildDown={(childGuid) => moveChild(tree, path, childGuid, 'down') }
-      onMoveChildUp={(childGuid) => moveChild(tree, path, childGuid, 'up') }
-    />
+      {renderBreadcrumb(tree, path)}
+      <Node
+        values={currentDataNode}
+        onEdit={(newDataNode) => setNodeByPath(tree, path, newDataNode)}
+        onAddChild={(newDataNode) => {
+          addNodeToPath(tree, path, newDataNode);
+          setPath(path + "/" + newDataNode.guid);
+        }}
+        onDelete={(p) => deleteNodeByPath(tree, p)}
+        onPathChange={(p) => setPath(p)}
+        onMoveChildDown={(childGuid) =>
+          moveChild(tree, path, childGuid, "down")
+        }
+        onMoveChildUp={(childGuid) => moveChild(tree, path, childGuid, "up")}
+      />
     </>
   );
 }

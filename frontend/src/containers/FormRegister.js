@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Button, Icon, Message
 } from "semantic-ui-react";
-
 import { parseISO } from "date-fns";
 import { NumericFormat } from "react-number-format";
 import { LinkContainer } from "react-router-bootstrap";
@@ -115,7 +114,7 @@ export default function FormRegister() {
       });
 
       
-      return result || {colour: "white", title: "-"};
+      return result || {color: "white", title: "-"};
   }
   function getFiledValue(data, field) {
     
@@ -189,8 +188,8 @@ export default function FormRegister() {
                   {formDef.sections.filter(s => !s.isTable).map((s) =>
                     s.fields.filter(f => f.type !== "info").map((f) => {
                       if (f.type === "aggregate") {
-                          const {colour, title} = getAggregateFiledValue(d, f, s.fields);
-                          return (<Table.Cell key={f.name} style={{backgroundColor: colour}}>
+                          const {color, title} = getAggregateFiledValue(d, f, s.fields);
+                          return (<Table.Cell key={f.name} style={{backgroundColor: color}}>
                             {title}
                           </Table.Cell>
                         );

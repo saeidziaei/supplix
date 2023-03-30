@@ -1,10 +1,11 @@
 // Import React dependencies.
-import React from "react";
-import { Header, Icon, Input, Label, Segment } from "semantic-ui-react";
+import React, { useState } from "react";
+import { Header, Icon, Input, Segment, TextArea } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
 import "./Home.css";
 
 export default function Home() {
+  const [content, setContent] = useState('');
 
   return (
     <div className="Home">

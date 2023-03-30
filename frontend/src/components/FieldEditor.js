@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Button, Dropdown, Form, Grid, Table } from "semantic-ui-react";
+import { BlockPicker } from "react-color";
+
 
 export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) {
   const [field, setField] = useState(value);
+  const [colorPickerVisible, setColorPickerVisible] = useState({})
 
   function handleFieldChange(element, value) {
     const updatedField = { ...field, [element]: value };
@@ -15,6 +18,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
     const updatedField = { ...field, options: newOptions };
     setField(updatedField);
     onChange(updatedField);
+   
   }
   function getFieldTypeText(value) {
     const fieldType = fieldTypes.find((fieldType) => fieldType.value === value);
@@ -27,7 +31,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   const addOption = () => {
     const newOption =
       (field.type == "weightedSelect" || field.type == "weightedDropdown") ? { value: 0, weight: 0 } : 
-      field.type == "aggregate" ? { valueFrom: 0, valueTo: 0, title: "OUTCOME", colour:"#4266a1" } : 
+      field.type == "aggregate" ? { valueFrom: 0, valueTo: 0, title: "OUTCOME", color:"#4266a1" } : 
       { value: "" };
     const newOptions = [...field.options, newOption];
     const updatedField = { ...field, options: newOptions };
@@ -48,87 +52,157 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   };
   function renderFieldOptions() {
     return (
-        <Grid>
-            <Grid.Row>
-              <Grid.Column width={2}>Optoins</Grid.Column>
-              {field.type !== "aggregate" && (
-                <Grid.Column width={3}>Value</Grid.Column>
-              )}
-              {(field.type === "weightedSelect" || field.type === "weightedDropdown") && (
-                <Grid.Column width={3}>Weight</Grid.Column>
-              )}
-              {field.type === "aggregate" && (
-                <>
-                  <Grid.Column width={3}>From</Grid.Column>
-                  <Grid.Column width={3}>To</Grid.Column>
-                  <Grid.Column width={3}>Title</Grid.Column>
-                  <Grid.Column width={3}>Colour</Grid.Column>
-                </>
-              )}
-            </Grid.Row>
+      <Grid>
+        <Grid.Row>
+          <Grid.Column width={2}>Optoins</Grid.Column>
+          {field.type !== "aggregate" && (
+            <Grid.Column width={3}>Value</Grid.Column>
+          )}
+          {(field.type === "weightedSelect" ||
+            field.type === "weightedDropdown") && (
+            <Grid.Column width={3}>Weight</Grid.Column>
+          )}
+          {field.type === "aggregate" && (
+            <>
+              <Grid.Column width={3}>From</Grid.Column>
+              <Grid.Column width={3}>To</Grid.Column>
+              <Grid.Column width={3}>Title</Grid.Column>
+              <Grid.Column width={3}>Color</Grid.Column>
+            </>
+          )}
+        </Grid.Row>
 
-            {field.options.map((option, optionIndex) => (
-              <Grid.Row key={optionIndex} style={{backgroundColor: `${option.colour}`}}>
-                <Grid.Column width={2}>
-                  <Button
-                    icon="x"
-                    circular
-                    basic
-                    size="mini"
-                    onClick={() => removeOption(optionIndex)}
-                  ></Button>
-                </Grid.Column>
-                {field.type !== "aggregate" && (
-                  <Grid.Column width={3}>
-                    <Form.Input
-                      key={`option-value-${optionIndex}`}
-                      type={(field.type === "weightedSelect" || field.type === "weightedDropdown") ? "number" : "text"}
-                      size="mini"
-                      value={option.value}
-                      onChange={(e) =>
-                        handleOptionChange(optionIndex, "value", e.target.value)
-                      }
-                    />
-                  </Grid.Column>
-                )}
-                {(field.type === "weightedSelect" || field.type === "weightedDropdown") && (
-                  <Grid.Column width={3}>
-                    <Form.Input
-                      key={`option-weight-${optionIndex}`}
-                      type="number"
-                      size="mini"
-                      value={option.weight}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          optionIndex,
-                          "weight",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Grid.Column>
-                )}
-                {field.type === "aggregate" && <>
-                <Grid.Column width={3} ><Form.Input   key={`option-valueFrom-${optionIndex}`} type="number" size="mini" value={option.valueFrom} onChange={(e) => handleOptionChange( optionIndex, "valueFrom", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3} ><Form.Input  key={`option-valueTo-${optionIndex}`} type="number" size="mini" value={option.valueTo} onChange={(e) => handleOptionChange( optionIndex, "valueTo", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3}><Form.Input  key={`option-title-${optionIndex}`} type="text" size="mini" value={option.title} onChange={(e) => handleOptionChange( optionIndex, "title", e.target.value )}/></Grid.Column>
-                <Grid.Column width={3}><Form.Input  key={`option-colour-${optionIndex}`} type="text" size="mini" value={option.colour} onChange={(e) => handleOptionChange( optionIndex, "colour", e.target.value )}/></Grid.Column>
-                </>}
-              </Grid.Row>
-            ))}
-            <Grid.Row>
-              <Grid.Column>
-                <Button
-                  icon="plus"
-                  circular
-                  basic
+        {field.options.map((option, optionIndex) => (
+          <Grid.Row
+            key={optionIndex}
+            style={{ backgroundColor: `${option.color}` }}
+          >
+            <Grid.Column width={2}>
+              <Button
+                icon="x"
+                circular
+                basic
+                size="mini"
+                onClick={() => removeOption(optionIndex)}
+              ></Button>
+            </Grid.Column>
+            {field.type !== "aggregate" && (
+              <Grid.Column width={3}>
+                <Form.Input
+                  key={`option-value-${optionIndex}`}
+                  type={
+                    field.type === "weightedSelect" ||
+                    field.type === "weightedDropdown"
+                      ? "number"
+                      : "text"
+                  }
                   size="mini"
-                  color="black"
-                  onClick={() => addOption()}
-                ></Button>
+                  value={option.value}
+                  onChange={(e) =>
+                    handleOptionChange(optionIndex, "value", e.target.value)
+                  }
+                />
               </Grid.Column>
-            </Grid.Row>
-        </Grid>
+            )}
+            {(field.type === "weightedSelect" ||
+              field.type === "weightedDropdown") && (
+              <Grid.Column width={3}>
+                <Form.Input
+                  key={`option-weight-${optionIndex}`}
+                  type="number"
+                  size="mini"
+                  value={option.weight}
+                  onChange={(e) =>
+                    handleOptionChange(optionIndex, "weight", e.target.value)
+                  }
+                />
+              </Grid.Column>
+            )}
+            {field.type === "aggregate" && (
+              <>
+                <Grid.Column width={3}>
+                  <Form.Input
+                    key={`option-valueFrom-${optionIndex}`}
+                    type="number"
+                    size="mini"
+                    value={option.valueFrom}
+                    onChange={(e) =>
+                      handleOptionChange(
+                        optionIndex,
+                        "valueFrom",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Grid.Column>
+                <Grid.Column width={3}>
+                  <Form.Input
+                    key={`option-valueTo-${optionIndex}`}
+                    type="number"
+                    size="mini"
+                    value={option.valueTo}
+                    onChange={(e) =>
+                      handleOptionChange(optionIndex, "valueTo", e.target.value)
+                    }
+                  />
+                </Grid.Column>
+                <Grid.Column width={3}>
+                  <Form.Input
+                    key={`option-title-${optionIndex}`}
+                    type="text"
+                    size="mini"
+                    value={option.title}
+                    onChange={(e) =>
+                      handleOptionChange(optionIndex, "title", e.target.value)
+                    }
+                  />
+                </Grid.Column>
+
+                <Grid.Column width={3}>
+                  {colorPickerVisible[`${optionIndex}`] && 
+                    <BlockPicker
+                      key={`option-color-${optionIndex}`}
+                      size="mini"
+                      color={option.color}
+                      onChange={(c) => {
+                        handleOptionChange(optionIndex, "color", c.hex);
+                        let newObject = {...colorPickerVisible};
+                        newObject[`${optionIndex}`] = false;
+                        setColorPickerVisible(newObject);
+                      }}
+                    />
+                  }
+                  {!colorPickerVisible[`${optionIndex}`] && (
+                    <Button
+                      size="tiny"
+                      basic
+                      onClick={() => {
+                        let newObject = {...colorPickerVisible};
+                        newObject[`${optionIndex}`] = true;
+                        setColorPickerVisible(newObject);
+                      }}
+                    >
+                      Pick Color
+                    </Button>
+                  )}
+                </Grid.Column>
+              </>
+            )}
+          </Grid.Row>
+        ))}
+        <Grid.Row>
+          <Grid.Column>
+            <Button
+              icon="plus"
+              circular
+              basic
+              size="mini"
+              color="black"
+              onClick={() => addOption()}
+            ></Button>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     );
   }
   return (
