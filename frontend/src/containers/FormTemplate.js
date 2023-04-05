@@ -191,7 +191,7 @@ export default function FormTemplate() {
           }}
         />
         {sections.map((section, sectionIndex) => (
-          <Segment key={sectionIndex}>
+          <Segment key={`section-${sectionIndex}`}>
             <Item>
               <Grid>
                 <GridRow>
@@ -210,8 +210,7 @@ export default function FormTemplate() {
                       icon="x"
                     ></Button>
                   </Grid.Column>
-
-                  <Grid.Column width={10}>
+                  <Grid.Column width={12} verticalAlign="middle">
                     <Input
                       fluid
                       label="Section"
@@ -224,7 +223,8 @@ export default function FormTemplate() {
                       }}
                     />
                   </Grid.Column>
-                  <Grid.Column width={4} verticalAlign="middle">
+                  <Grid.Column width={3} textAlign="left" verticalAlign="middle">
+                    
                     <Checkbox
                       toggle
                       label="Table?"
@@ -237,8 +237,10 @@ export default function FormTemplate() {
                       }}
                       checked={section.isTable}
                     />
-                  </Grid.Column>
+                  
+                </Grid.Column>
                 </GridRow>
+       
                 {section.isTable && (
                   <>
                     <Grid.Row>
@@ -281,7 +283,7 @@ export default function FormTemplate() {
                         </Grid.Column>
                       </Grid.Row>
                     ))}
-                    <Grid.Row>
+                    <Grid.Row key="row4">
                       <Grid.Column>
                         <Button
                           icon="plus"
@@ -302,79 +304,80 @@ export default function FormTemplate() {
               </Grid>
             </Item>
             <Divider hidden />
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
-            >
-              <SortableContext
-                items={section.fields.map((f, i) => f.guid)}
-                strategy={verticalListSortingStrategy}
-              >
-                <>
-                  <Confirm
-                    size="mini"
-                    header="This will delete the field."
-                    open={removeFieldConfirm.open}
-                    onCancel={() => setRemoveFieldConfirm({ open: false })}
-                    onConfirm={() => {
-                      removeField(
-                        removeFieldConfirm.sectionIndex,
-                        removeFieldConfirm.fieldIndex
-                      );
-                      setRemoveFieldConfirm({ open: false });
-                    }}
-                  />
-                  {section.fields.map((field, fieldIndex) => (
-                    <div key={field.guid}>
-                      <SortableItem id={field.guid}>
-                        <FieldEditor
-                          key={fieldIndex}
-                          value={field}
-                          onDelete={() =>
-                            setRemoveFieldConfirm({
-                              open: true,
-                              sectionIndex,
-                              fieldIndex,
-                            })
-                          }
-                          onChange={(value) => {
-                            const newSections = [...sections];
-                            newSections[sectionIndex].fields[fieldIndex] =
-                              value;
-                            setSections(newSections);
-                          }}
-                          onDuplicate={() => {
-                            const newSections = [...sections];
 
-                            const duplicatedField = {
-                              ...field,
-                              title: `${field.title} copy`,
-                              name: `${field.name} copy`,
-                              guid: uuidv4(),
-                            };
-                            newSections[sectionIndex].fields.push(
-                              duplicatedField
-                            );
-                            setSections(newSections);
-                          }}
-                        />
-                        <Divider />
-                      </SortableItem>
-                    </div>
-                  ))}
-                </>
-              </SortableContext>
-            </DndContext>
-            <Button
-              size="mini"
-              basic
-              color="grey"
-              onClick={() => addField(sectionIndex)}
-            >
-              <Icon name="plus" />
-              Add Field
-            </Button>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
+                >
+                  <SortableContext
+                    items={section.fields.map((f, i) => f.guid )}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <>
+                      <Confirm
+                        size="mini"
+                        header="This will delete the field."
+                        open={removeFieldConfirm.open}
+                        onCancel={() => setRemoveFieldConfirm({ open: false })}
+                        onConfirm={() => {
+                          removeField(
+                            removeFieldConfirm.sectionIndex,
+                            removeFieldConfirm.fieldIndex
+                          );
+                          setRemoveFieldConfirm({ open: false });
+                        }}
+                      />
+                      {section.fields.map((field, fieldIndex) => (
+                        <div key={field.guid}>
+                          <SortableItem id={field.guid}>
+                            <FieldEditor
+                              key={fieldIndex}
+                              value={field}
+                              onDelete={() =>
+                                setRemoveFieldConfirm({
+                                  open: true,
+                                  sectionIndex,
+                                  fieldIndex,
+                                })
+                              }
+                              onChange={(value) => {
+                                const newSections = [...sections];
+                                newSections[sectionIndex].fields[fieldIndex] =
+                                  value;
+                                setSections(newSections);
+                              }}
+                              onDuplicate={() => {
+                                const newSections = [...sections];
+
+                                const duplicatedField = {
+                                  ...field,
+                                  title: `${field.title} copy`,
+                                  name: `${field.name} copy`,
+                                  guid: uuidv4(),
+                                };
+                                newSections[sectionIndex].fields.push(
+                                  duplicatedField
+                                );
+                                setSections(newSections);
+                              }}
+                            />
+                            <Divider />
+                          </SortableItem>
+                        </div>
+                      ))}
+                    </>
+                  </SortableContext>
+                </DndContext>
+                <Button
+                  size="mini"
+                  basic
+                  color="grey"
+                  onClick={() => addField(sectionIndex)}
+                >
+                  <Icon name="plus" />
+                  Add Field
+                </Button>
           </Segment>
         ))}
         <Button basic onClick={addSection}>

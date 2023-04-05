@@ -1,24 +1,55 @@
-import handler from "../../util/handler";
+import handler, { getUser } from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
+  const username = event.requestContext.authorizer.jwt.claims.sub;
+  const user = await getUser(username);
+
   const data = JSON.parse(event.body);
+
+  let updateExpression = `SET 
+    formValues = :formValues,
+    updatedBy= :updatedBy,
+    updatedByUser= :updatedByUser,
+    updatedAt= :updatedAt`;
+
+  let expressionAttributeValues = {
+    ":formValues": data.formValues,
+    ":updatedBy": username,
+    ":updatedByUser": user,
+    ":updatedAt": Date.now(),
+  };
+
+  if (data.isRevision === true) {
+    const getCurrentRecordParams = {
+      TableName: process.env.FORM_TABLE,
+      Key: {
+        tenant: tenant,
+        formId: event.pathParameters.formId,
+      },
+    };
+    const currentRecord = await dynamoDb.get(getCurrentRecordParams);
+
+    updateExpression += `, history = list_append(if_not_exists(history, :empty_list), :history)`;
+    expressionAttributeValues = {
+      ...expressionAttributeValues,
+      ":empty_list": [],
+      ":history": [currentRecord.Item],
+    };
+  }
+
   const params = {
     TableName: process.env.FORM_TABLE,
-
     Key: {
-      tenant: tenant, 
-      formId: event.pathParameters.formId, 
+      tenant: tenant,
+      formId: event.pathParameters.formId,
     },
-    UpdateExpression: "SET formValues = :formValues",
-    ExpressionAttributeValues: {
-      ":formValues": data.formValues,
-    },
-    // 'ReturnValues' specifies if and how to return the item's attributes,
-    // where ALL_NEW returns all attributes of the item after the update; you
-    // can inspect 'result' below to see how it works with different settings
+    UpdateExpression: updateExpression,
+    ExpressionAttributeValues: expressionAttributeValues,
     ReturnValues: "ALL_NEW",
   };
+
   await dynamoDb.update(params);
   return { status: true };
 });
+

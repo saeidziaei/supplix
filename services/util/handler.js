@@ -1,3 +1,5 @@
+import AWS from "aws-sdk";
+
 export default function handler(lambda) {
   return async function (event, context) {
     let body, statusCode;
@@ -45,5 +47,35 @@ function getTenantFromRequest(event) {
   return claims['custom:tenant'];
 }
 
+
+export async function getUser(username) {
+  
+  const userPoolId = process.env.USER_POOL_ID;
+  const client = new AWS.CognitoIdentityServiceProvider();
+
+  const params = {
+    UserPoolId: userPoolId,
+    Username: username,
+  };
+
+  const result = await client.adminGetUser(params).promise();
+
+  return {
+    firstName: getAttribute(result, "given_name") || "",
+    lastName: getAttribute(result, "family_name") || "",
+  }
+}
+
+
+function getAttribute(user, attributeName) {
+  const attribute = user.UserAttributes.find(
+    (attr) => attr.Name === attributeName
+  );
+  if (attribute) {
+    return attribute.Value;
+  } else {
+    return undefined;
+  }
+}
 
 

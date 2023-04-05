@@ -90,6 +90,14 @@ export function AuthAndApiStack({ stack, app }) {
       `arn:aws:cognito-idp:${app.region}:${app.account}:userpool/${auth.userPoolId}`,
     ],
   });
+
+    const cognitoReadonlyAccessPolicy = new iam.PolicyStatement({
+    actions: ["cognito-idp:Describe*", "cognito-idp:AdminGetUser"],
+    effect: iam.Effect.ALLOW,
+    resources: [
+      `arn:aws:cognito-idp:${app.region}:${app.account}:userpool/${auth.userPoolId}`,
+    ],
+  });
   // Create the API
   const api = new Api(stack, "Api", {
     cors: true,
@@ -102,6 +110,7 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
     },
+    customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
     defaults: {
       authorizer: "jwt",
       function: {
@@ -161,12 +170,20 @@ export function AuthAndApiStack({ stack, app }) {
       "POST  /forms": {
         function: {
           handler: "services/functions/form/create.main",
+          permissions: [cognitoReadonlyAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+          },
           bind: [formTable],
         },
       },
       "PUT   /forms/{formId}": {
         function: {
           handler: "services/functions/form/update.main",
+          permissions: [cognitoReadonlyAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+          },
           bind: [formTable],
         },
       },
@@ -402,7 +419,7 @@ export function AuthAndApiStack({ stack, app }) {
     UserPoolId: auth.userPoolId,
     IdentityPoolId: auth.cognitoIdentityPoolId,
     UserPoolClientId: auth.userPoolClientId,
-    ApiEndpoint: api.url,
+    ApiEndpoint: api.customDomainUrl || api.url,
   });
   // Return the auth resource
   return {

@@ -208,6 +208,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   return (
     <>
       <Form size="tiny">
+        
         <Button
           size="mini"
           basic
@@ -275,6 +276,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
 
 export const fieldTypes = [
   { text: "Text", value: "text" },
+  { text: "Wysiwyg", value: "wysiwyg" },
   { text: "Info", value: "info" },
   { text: "Number", value: "number" },
   { text: "Date", value: "date" },

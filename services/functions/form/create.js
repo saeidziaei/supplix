@@ -1,8 +1,10 @@
 import * as uuid from "uuid";
-import handler from "../../util/handler";
+import handler, { getUser } from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
+  const username = event.requestContext.authorizer.jwt.claims.sub;
+  const user = await getUser(username);
 
   const data = JSON.parse(event.body);
   const params = {
@@ -12,7 +14,8 @@ export const main = handler(async (event, tenant) => {
       formId: uuid.v1(), // A unique uuid
       templateId: data.templateId,
       formValues: data.formValues,
-      createdBy: event.requestContext.authorizer.jwt.claims.sub,
+      createdBy: username,
+      createdByUser: user,
       createdAt: Date.now(), // Current Unix timestamp
     },
   };

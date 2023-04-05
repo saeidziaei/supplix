@@ -1,7 +1,8 @@
 // TODO !!! dompurify - sanitize html input
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
   Button,
@@ -13,16 +14,13 @@ import {
   Item,
   Label,
   Loader,
-  Popup,
-  TextArea,
+  Popup
 } from "semantic-ui-react";
 import { v4 as uuidv4 } from "uuid";
 import DisplayText from "../components/DisplayText";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter } from "../lib/helpers";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import "./ISO.css";
 
 export default function ISO() {
@@ -121,7 +119,7 @@ export default function ISO() {
 
     useEffect(() => {
       async function prepContent(text) {
-        const libraryRegex = /!\[library\]\(\/doc\/([a-f\d-]+)\)/g; // matches ![library](/doc/{docId})
+        const libraryRegex = /!\[library\]\(([a-f\d-]+)\)/g; // matches ![library](/doc/{docId})
         let match = libraryRegex.exec(text);
         while (match) {
           const docId = match[1];

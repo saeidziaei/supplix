@@ -10,15 +10,20 @@ import { Header, Loader, Table } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 
-export default function FormRegister() {
+export default function FormRegister({formDefInput, formsInput, isHistory}) {
   const { templateId } = useParams();
-  const [formDef, setFormDef] = useState(null);
-  const [forms, setForms] = useState(null);
+  const [formDef, setFormDef] = useState(formDefInput);
+  const [forms, setForms] = useState(formsInput);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  
   useEffect(() => {
     async function onLoad() {
+      if (formDef) {// all data have been passed from another component, we are just checking formDef
+        setIsLoading(false);
+        return; 
+      }
       setIsLoading(true);
       try {
           // todo: how do we avoid two roundtrips?
@@ -140,12 +145,22 @@ export default function FormRegister() {
 
       case "number":
         return <NumericFormat displayType={'text'} thousandSeparator={true} value={fieldValue} />;
+      
+      case "wysiwyg":
+        return <div dangerouslySetInnerHTML={{ __html: fieldValue }}/>;
 
       default:
         return fieldValue;
     }
   }
-
+  function renderActionInfo(ts, user) {
+    const date = new Date(ts);
+    
+    return <>
+    {`${user.firstName} ${user.lastName}`}
+    <p>{date.toLocaleString()}</p>
+    </>
+  }
   function renderRegister() {
     const hasEntries = forms && forms.length > 0;
     
@@ -163,28 +178,20 @@ export default function FormRegister() {
           <Table compact celled>
             <Table.Header>
               <Table.Row>
-                <Table.HeaderCell>Edit</Table.HeaderCell>
                 {formDef.sections.filter(s => !s.isTable).map((s) =>
                   s.fields.filter(f => f.type !== "info").map((f) => (
                     <Table.HeaderCell key={f.name}>{f.name}</Table.HeaderCell>
                   ))
                 )}
+                <Table.HeaderCell width={1}>Create</Table.HeaderCell>
+                <Table.HeaderCell width={1}>Update</Table.HeaderCell>
+                {!isHistory && <Table.HeaderCell width={1} textAlign="center">Action</Table.HeaderCell> }
               </Table.Row>
             </Table.Header>
 
             <Table.Body>
               {forms.map((d) => (
                 <Table.Row key={d.formId}>
-                  <Table.Cell>
-                    <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
-                      <Button
-                        circular
-                        size="mini"
-                        basic
-                        icon="pencil alternate"
-                      />
-                    </LinkContainer>
-                  </Table.Cell>
                   {formDef.sections.filter(s => !s.isTable).map((s) =>
                     s.fields.filter(f => f.type !== "info").map((f) => {
                       if (f.type === "aggregate") {
@@ -201,6 +208,20 @@ export default function FormRegister() {
                         );
                     })
                   )}
+                <Table.Cell width={1}>{renderActionInfo(d.createdAt, d.createdByUser)}</Table.Cell>
+                <Table.Cell width={1}>{renderActionInfo(d.updatedAt, d.updatedByUser)}</Table.Cell>
+
+                  {!isHistory &&
+                  <Table.Cell textAlign="center">
+                    <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
+                      <Button
+                        circular
+                        size="mini"
+                        basic
+                        icon="eye"
+                      />
+                    </LinkContainer>
+                  </Table.Cell> }                 
                 </Table.Row>
               ))}
             </Table.Body>

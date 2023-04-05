@@ -9,6 +9,20 @@ export function FrontendStack({ stack, app }) {
   const { bucket } = use(StorageStack);
   // Define our React app
   const site = new StaticSite(stack, "ReactSite", {
+    customDomain:
+      app.stage === "prod"
+        ? {
+            domainName: `${process.env.DOMAIN}`,
+            domainAlias: `www.${process.env.DOMAIN}`,
+          }
+        : 
+        app.stage === "stg"
+        ? {
+          domainName: `stg.${process.env.DOMAIN}`,
+        }
+        : 
+        undefined,
+
     path: "frontend",
     buildCommand: "npm run build", // or "yarn build"
     buildOutput: "build",
@@ -24,6 +38,6 @@ export function FrontendStack({ stack, app }) {
   });
   // Show the url in the output
   stack.addOutputs({
-    SiteUrl: site.url || "http://localhost:3000",
+    SiteUrl: site.customDomainUrl || site.url || "http://localhost:3000",
   });
 }
