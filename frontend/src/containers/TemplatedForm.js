@@ -150,20 +150,22 @@ export default function TemplatedForm() {
           </Button>
         </div>
       )}
-      <Message icon>
-        <Icon name="info" />
-        <Message.Content>
-          <p>
-            <strong>Revision</strong> archives the current version and creates a
-            new editable record initially with the same information as the
-            current record.
-          </p>
-          <p>
-            <strong>Edit</strong> is similar but it does not keep history. Most
-            of the times it is better to use <strong>Revision</strong>
-          </p>
-        </Message.Content>
-      </Message>
+      {formId && (
+        <Message icon>
+          <Icon name="info" />
+          <Message.Content>
+            <p>
+              <strong>Revision</strong> archives the current version and creates
+              a new editable record initially with the same information as the
+              current record.
+            </p>
+            <p>
+              <strong>Edit</strong> is similar but it does not keep history.
+              Most of the times it is better to use <strong>Revision</strong>
+            </p>
+          </Message.Content>
+        </Message>
+      )}
       <Accordion>
         <Accordion.Title
           active={activeAccordionIndex === 0}
@@ -174,8 +176,11 @@ export default function TemplatedForm() {
           <a href="#">History</a>
         </Accordion.Title>
         <Accordion.Content active={activeAccordionIndex === 0}>
-        <FormRegister formDefInput={template.templateDefinition} formsInput={formHistory} isHistory={true} />
-
+          <FormRegister
+            formDefInput={template.templateDefinition}
+            formsInput={formHistory}
+            isHistory={true}
+          />
         </Accordion.Content>
       </Accordion>
     </>

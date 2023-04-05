@@ -157,8 +157,8 @@ export default function FormRegister({formDefInput, formsInput, isHistory}) {
     const date = new Date(ts);
     
     return <>
-    {`${user.firstName} ${user.lastName}`}
-    <p>{date.toLocaleString()}</p>
+    {user ? `${user.firstName} ${user.lastName}` : "-"}
+    <p>{ts ? date.toLocaleString() : ""}</p>
     </>
   }
   function renderRegister() {
@@ -166,11 +166,11 @@ export default function FormRegister({formDefInput, formsInput, isHistory}) {
     
     return (
       <>
-        <Header>{formDef.title}</Header>
+        {!isHistory && <Header>{formDef.title}</Header>}
         {!hasEntries && (
           <Message
-            header="No Record found for this form"
-            content="Start by creating your first record!"
+            header={isHistory ? "No old versions of this record exist" : "No Record found for this form"}
+            content={isHistory ? "" : "Start by creating your first record!"}
             icon="exclamation"
           />
         )}
@@ -178,65 +178,91 @@ export default function FormRegister({formDefInput, formsInput, isHistory}) {
           <Table compact celled>
             <Table.Header>
               <Table.Row>
-                {formDef.sections.filter(s => !s.isTable).map((s) =>
-                  s.fields.filter(f => f.type !== "info").map((f) => (
-                    <Table.HeaderCell key={f.name}>{f.name}</Table.HeaderCell>
-                  ))
-                )}
+                {formDef.sections
+                  .filter((s) => !s.isTable)
+                  .map((s) =>
+                    s.fields
+                      .filter((f) => f.type !== "info")
+                      .map((f) => (
+                        <Table.HeaderCell key={f.name}>
+                          {f.name}
+                        </Table.HeaderCell>
+                      ))
+                  )}
                 <Table.HeaderCell width={1}>Create</Table.HeaderCell>
                 <Table.HeaderCell width={1}>Update</Table.HeaderCell>
-                {!isHistory && <Table.HeaderCell width={1} textAlign="center">Action</Table.HeaderCell> }
+                {!isHistory && (
+                  <Table.HeaderCell width={1} textAlign="center">
+                    Action
+                  </Table.HeaderCell>
+                )}
               </Table.Row>
             </Table.Header>
 
             <Table.Body>
               {forms.map((d) => (
                 <Table.Row key={d.formId}>
-                  {formDef.sections.filter(s => !s.isTable).map((s) =>
-                    s.fields.filter(f => f.type !== "info").map((f) => {
-                      if (f.type === "aggregate") {
-                          const {color, title} = getAggregateFiledValue(d, f, s.fields);
-                          return (<Table.Cell key={f.name} style={{backgroundColor: color}}>
-                            {title}
-                          </Table.Cell>
-                        );
-                      } else
-                        return (
-                          <Table.Cell key={f.name}>
-                            {getFiledValue(d, f)}
-                          </Table.Cell>
-                        );
-                    })
-                  )}
-                <Table.Cell width={1}>{renderActionInfo(d.createdAt, d.createdByUser)}</Table.Cell>
-                <Table.Cell width={1}>{renderActionInfo(d.updatedAt, d.updatedByUser)}</Table.Cell>
+                  {formDef.sections
+                    .filter((s) => !s.isTable)
+                    .map((s) =>
+                      s.fields
+                        .filter((f) => f.type !== "info")
+                        .map((f) => {
+                          if (f.type === "aggregate") {
+                            const { color, title } = getAggregateFiledValue(
+                              d,
+                              f,
+                              s.fields
+                            );
+                            return (
+                              <Table.Cell
+                                key={f.name}
+                                style={{ backgroundColor: color }}
+                              >
+                                {title}
+                              </Table.Cell>
+                            );
+                          } else
+                            return (
+                              <Table.Cell key={f.name}>
+                                {getFiledValue(d, f)}
+                              </Table.Cell>
+                            );
+                        })
+                    )}
+                  <Table.Cell width={1}>
+                    {renderActionInfo(d.createdAt, d.createdByUser)}
+                  </Table.Cell>
+                  <Table.Cell width={1}>
+                    {renderActionInfo(d.updatedAt, d.updatedByUser)}
+                  </Table.Cell>
 
-                  {!isHistory &&
-                  <Table.Cell textAlign="center">
-                    <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
-                      <Button
-                        circular
-                        size="mini"
-                        basic
-                        icon="eye"
-                      />
-                    </LinkContainer>
-                  </Table.Cell> }                 
+                  {!isHistory && (
+                    <Table.Cell textAlign="center">
+                      <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
+                        <Button circular size="mini" basic icon="eye" />
+                      </LinkContainer>
+                    </Table.Cell>
+                  )}
                 </Table.Row>
               ))}
             </Table.Body>
           </Table>
         )}
-        <LinkContainer to={`/registers`}>
-          <Button basic secondary>
-            Back
-          </Button>
-        </LinkContainer>
-        <LinkContainer to={`/form/${templateId}`}>
-          <Button basic primary>
-            Create New Record
-          </Button>
-        </LinkContainer>
+        {!isHistory && (
+          <>
+            <LinkContainer to={`/registers`}>
+              <Button basic secondary>
+                Back
+              </Button>
+            </LinkContainer>
+            <LinkContainer to={`/form/${templateId}`}>
+              <Button basic primary>
+                Create New Record
+              </Button>
+            </LinkContainer>
+          </>
+        )}
       </>
     );
   }

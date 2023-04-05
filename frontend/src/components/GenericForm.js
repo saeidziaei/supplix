@@ -22,7 +22,7 @@ import FormHeader from "../components/FormHeader";
 
 export function GenericForm({ formDef, formData, handleSubmit, disabled, handleCancel }) {
   function renderField(f, values, setFieldValue) {
-    const size = "mini";
+    const size = "large";
     const name = f.name;
     const id = `input-${f.name}`;
     switch (f.type) {

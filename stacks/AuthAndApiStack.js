@@ -110,7 +110,8 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
     },
-    customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
+    // customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
+    customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : undefined,
     defaults: {
       authorizer: "jwt",
       function: {

@@ -15,11 +15,11 @@ export function FrontendStack({ stack, app }) {
             domainName: `${process.env.DOMAIN}`,
             domainAlias: `www.${process.env.DOMAIN}`,
           }
-        : 
-        app.stage === "stg"
-        ? {
-          domainName: `stg.${process.env.DOMAIN}`,
-        }
+        // : 
+        // app.stage === "stg"
+        // ? {
+        //   domainName: `stg.${process.env.DOMAIN}`,
+        // }
         : 
         undefined,
 
