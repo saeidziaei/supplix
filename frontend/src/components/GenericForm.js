@@ -22,7 +22,7 @@ import FormHeader from "../components/FormHeader";
 
 export function GenericForm({ formDef, formData, handleSubmit, disabled, handleCancel }) {
   function renderField(f, values, setFieldValue) {
-    const size = "large";
+    const size = "small";
     const name = f.name;
     const id = `input-${f.name}`;
     switch (f.type) {
@@ -188,7 +188,8 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
   return (
     <Segment>
       <FormHeader heading={formDef.title} />
-      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit} >
+
+      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => (
           <Form size="small">
             {formDef.sections.map((s) =>
@@ -205,7 +206,17 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
                 >
                   Submit
                 </Button>
-                <Button onClick={(e) => {e.preventDefault(); resetForm(); handleCancel();}}>Cancel</Button>
+                {handleCancel && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetForm();
+                      handleCancel();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </>
             )}
             {/* <Button secondary>Back</Button> */}

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Accordion,
-  Button,
-  Divider,
-  Header,
+  Button, Header,
   Icon,
   Loader,
   Message,
-  Segment,
+  Segment
 } from "semantic-ui-react";
 import { GenericForm } from "../components/GenericForm";
 import { makeApiCall } from "../lib/apiLib";
@@ -17,8 +15,8 @@ import FormRegister from "./FormRegister";
 
 export default function TemplatedForm() {
   const { formId, templateId } = useParams();
-  const [formData, setFormData] = useState(null);
-  const [formHistory, setFormHistory] = useState(null);
+  const [formRecord, setFormRecord] = useState(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isRevisioning, setIsRevisioning] = useState(false);
@@ -38,9 +36,8 @@ export default function TemplatedForm() {
       try {
         if (formId) {
           const item = await loadForm();
-
-          setFormData(item.formValues);
-          setFormHistory(item.history);
+          setFormRecord(item);
+          
           // the api populates template as well
           setTemplate(item.template);
         } else {
@@ -106,7 +103,11 @@ export default function TemplatedForm() {
 
     setActiveAccordionIndex(newIndex);
   }
-
+  const renderActionInfo = (ts, user) => {
+    const date = new Date(ts);
+    
+    return (ts ? date.toLocaleString() : "") + " by " + (user ? `${user.firstName} ${user.lastName}` : "");
+  }
   if (isLoading) return <Loader active />;
 
   if (!template || !template.templateDefinition) {
@@ -118,10 +119,11 @@ export default function TemplatedForm() {
   }
 
   // enable editing if
-  //    it is a new form (formId = undefined)
+  //    it is a new form (no formId)
   //    or it is being edited
   //    or it is being revisioned
-  const editable = !formId || isEditing || isRevisioning;
+  const isNew = !formId;
+  const editable = isNew || isEditing || isRevisioning;
   return (
     <>
       <Header as="h2">
@@ -135,11 +137,22 @@ export default function TemplatedForm() {
       </Header>
       <GenericForm
         formDef={template.templateDefinition}
-        formData={formData}
+        formData={formRecord ? formRecord.formValues : null}
         handleSubmit={handleSubmit}
-        handleCancel={cancelEdit}
+        handleCancel={isNew ? null : cancelEdit}
         disabled={!editable}
       />
+      {formRecord && (
+        <p>
+          Created{" "}
+          {renderActionInfo(formRecord.createdAt, formRecord.createdByUser)}{" "}
+          <br />{" "}
+          {formRecord.updatedAt
+            ? "Update " +
+              renderActionInfo(formRecord.createdAt, formRecord.createdByUser)
+            : ""}
+        </p>
+      )}
       {!editable && (
         <div>
           <Button primary onClick={() => handleEdit(true)}>
@@ -166,23 +179,25 @@ export default function TemplatedForm() {
           </Message.Content>
         </Message>
       )}
-      <Accordion>
-        <Accordion.Title
-          active={activeAccordionIndex === 0}
-          index={0}
-          onClick={handleAccordionClick}
-        >
-          <Icon name="dropdown" />
-          <a href="#">History</a>
-        </Accordion.Title>
-        <Accordion.Content active={activeAccordionIndex === 0}>
-          <FormRegister
-            formDefInput={template.templateDefinition}
-            formsInput={formHistory}
-            isHistory={true}
-          />
-        </Accordion.Content>
-      </Accordion>
+      {formRecord && formRecord.history && (
+        <Accordion>
+          <Accordion.Title
+            active={activeAccordionIndex === 0}
+            index={0}
+            onClick={handleAccordionClick}
+          >
+            <Icon name="dropdown" />
+            <a href="#">History</a>
+          </Accordion.Title>
+          <Accordion.Content active={activeAccordionIndex === 0}>
+            <FormRegister
+              formDefInput={template.templateDefinition}
+              formsInput={formRecord.history}
+              isHistory={true}
+            />
+          </Accordion.Content>
+        </Accordion>
+      )}
     </>
   );
 }
