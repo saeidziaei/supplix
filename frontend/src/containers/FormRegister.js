@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Divider, Icon, Label, Message, Popup } from "semantic-ui-react";
 import { parseISO } from "date-fns";
 import { NumericFormat } from "react-number-format";
@@ -12,8 +12,10 @@ import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
 import { ModuleRegistry } from "@ag-grid-community/core";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { CsvExportModule } from '@ag-grid-community/csv-export';
 
 export default function FormRegister({ formDefInput, formsInput, isHistory }) {
+  const gridRef = useRef();
   const { templateId } = useParams();
   const [formDef, setFormDef] = useState(formDefInput);
   const [forms, setForms] = useState(formsInput);
@@ -21,7 +23,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
 
-  ModuleRegistry.registerModules([ClientSideRowModelModule]);
+  ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
 
   useEffect(() => {
     async function onLoad() {
@@ -50,6 +52,14 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
     }
     onLoad();
   }, []);
+  const autoSizeAll = useCallback((skipHeader) => {
+    const allColumnIds = [];
+    gridRef.current.columnApi.getColumns().forEach((column) => {
+      allColumnIds.push(column.getId());
+    });
+    gridRef.current.columnApi.autoSizeColumns(allColumnIds, skipHeader);
+
+  }, []);
 
   async function loadTemplate(templateId) {
     return await makeApiCall("GET", `/templates/${templateId}`);
@@ -71,14 +81,24 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
             filter: true,
             sortable: true,
             autoHeight: true,
-            autoWidth: true,
-            valueGetter: formValueGetter,
+            // section and field are needed for aggregate
+            valueGetter: (params) =>
+              f.type === "aggregate"
+                ? aggregateFiledValueGetter(params, s, f)
+                : formValueGetter(params),
+            cellStyle: (params) =>
+              f.type === "aggregate"
+                ? { backgroundColor: params.value.color }
+                : null,
             cellRenderer: formValueRenderer(f.type),
           }))
       )
       .flat();
 
     return [
+      ...(isHistory
+        ? []
+        : [{ field: "action", width: 100, cellRenderer: actionRenderer }]),
       ...valueColumns,
       {
         field: "created",
@@ -94,9 +114,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         valueGetter: () => "update",
         cellRenderer: auditRenderer,
       },
-      ...(isHistory
-        ? []
-        : [{ field: "action", width: 100, cellRenderer: actionRenderer }]),
     ];
   };
 
@@ -143,7 +160,15 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
   function getOptionbyName(options, name) {
     return options.find((option) => option.key === name);
   }
-  function getAggregateFiledValue(data, field, fields) {
+  const formValueGetter = (params) => {
+    return params.data.formValues[params.colDef.field];
+  };
+
+  const aggregateFiledValueGetter = (params, section, field) =>  {
+    const data = params.data;
+    const fields = section.fields;
+    // TODO get field 
+    // TODO fiels is all the fields in the same section as field
     const sum = fields
       .filter(
         (f) => f.type === "weightedSelect" || f.type === "weightedDropdown"
@@ -165,12 +190,16 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         !result
       ) {
         result = option;
+        result["sum"] = sum;
       }
     });
 
     return result || { color: "white", title: "-" };
   }
 
+  const aggregationRenderer = (params) => {
+    return <span>{params.value.title}</span>
+  }
   const competencyRenderer = (params) => {
     const fieldValue = params.value;
     const r = getOptionbyName(requiredOptions, fieldValue.required);
@@ -218,7 +247,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
 
     return (
       <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
-        <a  size="mini" basic as="a" >Details</a>
+        <a  size="mini"  as="a" >Details</a>
       </LinkContainer>
     );
   };
@@ -231,11 +260,14 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         trigger={<span>{new Date(d.createdAt).toLocaleDateString()}</span>}
       />
     ) : (
+      d.updatedAt ? 
       <Popup
         content={renderActionInfo(d.updatedAt, d.updatedByUser)}
         header="Updated"
         trigger={<span>{new Date(d.updatedAt).toLocaleDateString()}</span>}
       />
+      :
+      <></>
     );
   };
 
@@ -249,6 +281,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         return numberRenderer;
       case "wysiwyg":
         return wysiwygRenderer;
+      case "aggregate":
+        return aggregationRenderer;
       default:
         return defaultRenderer;
     }
@@ -311,9 +345,9 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
     );
   }
 
-  const formValueGetter = (params) => {
-    return params.data.formValues[params.colDef.field];
-  };
+  const exportGridToCSV = useCallback(() => {
+    gridRef.current.api.exportDataAsCsv();
+  }, []);
 
   function renderRegister() {
     const hasEntries = forms && forms.length > 0;
@@ -332,7 +366,11 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
             icon="exclamation"
           />
         )}
+        
         {hasEntries && (
+          <>
+          <Button basic size="tiny" onClick={() => autoSizeAll(true)}>Auto size</Button>
+          <Button basic size="tiny" onClick={exportGridToCSV}><Icon name="file excel" color="green"/> Export to Excel</Button>
           <div
             className="ag-theme-alpine"
             style={{
@@ -341,13 +379,16 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
             }}
           >
             <AgGridReact
+              ref={gridRef}
               columnDefs={columnDefs}
               rowData={forms}
               rowHeight="25"
               animateRows={true}
             ></AgGridReact>
           </div>
+          </>
         )}
+
         <Divider hidden />
         {!isHistory && (
           <>
