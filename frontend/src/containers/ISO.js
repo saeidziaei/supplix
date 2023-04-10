@@ -3,6 +3,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Breadcrumb,
   Button,
@@ -27,6 +28,7 @@ export default function ISO() {
   const [tree, setTree] = useState(null);
   const [savedTree, setSavedTree] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
 
   // const location = useLocation();
@@ -234,7 +236,7 @@ export default function ISO() {
               basic
               size="small"
               icon="pencil"
-              color="blue"
+              color="black"
               onClick={() => setIsEditing(true)}
             />
             {path && (
@@ -261,7 +263,7 @@ export default function ISO() {
             {groupedChildren.length == 0 && (
               <Button
                 basic
-                color="green"
+                color="black"
                 size="tiny"
                 onClick={() => {
                   const newChild = {
@@ -279,7 +281,7 @@ export default function ISO() {
                 <div key={groupIndex}>
                   <Divider horizontal>
                     <Header as="h4">
-                      <Label tag color="teal">
+                      <Label tag color="grey">
                         {pluralize(capitalizeFirstLetter(group[0].type))}
                       </Label>
                     </Header>
@@ -326,7 +328,7 @@ export default function ISO() {
                     <Item>
                       <Button
                         basic
-                        color="green"
+                        color="black"
                         size="tiny"
                         onClick={() => {
                           const newChild = {
@@ -474,7 +476,6 @@ export default function ISO() {
     setTree(updatedTree);
   }
 
-  const currentDataNode = getNodeByPath(tree, path);
 
   useEffect(() => {
     async function loadProcess() {
@@ -489,6 +490,9 @@ export default function ISO() {
         const item = await loadProcess();
 
         setTree(item.tree);
+
+        const urlPath = searchParams.get("path");
+        setPath(urlPath || "");
       } catch (e) {
         onError(e);
       }
@@ -497,7 +501,7 @@ export default function ISO() {
     }
 
     onLoad();
-  }, []);
+    }, []);
 
   async function handleSubmit(data) {
     setIsLoading(true);
@@ -519,6 +523,8 @@ export default function ISO() {
   }
 
   if (isLoading) return <Loader active />;
+
+  const currentDataNode = getNodeByPath(tree, path);
 
   if (!currentDataNode) return <Header>Nothing to see here!</Header>;
 
