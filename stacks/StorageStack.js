@@ -26,6 +26,26 @@ export function StorageStack({ stack, app }) {
 
   });
 
+  const workspaceTable = new Table(stack, "Workspace", {
+    fields: {
+      tenant: "string",
+      workspaceId: "string",
+      name: "string",
+      // entities [] 
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "workspaceId" },
+    
+  });
+
+  const workspaceUserTable = new Table(stack, "WorkspaceUser", {
+    fields: {
+      tenant: "string",
+      workspaceId: "string",
+      userId: "string", 
+      role: "string", // owner or member
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "workspaceId" }, 
+  })
  
   const isoTable = new Table(stack , "Iso", {
     fields: {
@@ -65,6 +85,8 @@ export function StorageStack({ stack, app }) {
   // Return the bucket and table resources
   return {
     tenantTable,
+    workspaceTable,
+    workspaceUserTable,
     isoTable,
     formTable,
     templateTable,

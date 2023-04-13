@@ -145,17 +145,7 @@ export default function User() {
                   value={values.email}
                   onChange={handleChange}
                 />
-                {/* <Form.Input
-                  fluid
-                  iconPosition="left"
-                  icon="phone"
-                  name="phone"
-                  autoComplete="off"
-                  placeholder="Phone"
-                  value={values.phone}
-                  onChange={handleChange}
-                />
-                <p>Include country code, e.g. +61412345678</p> */}
+
                 {!username && (
                   <Form.Input
                     fluid

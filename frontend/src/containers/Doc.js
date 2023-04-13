@@ -9,12 +9,14 @@ import { Form, Header, Input, Label, Loader, Segment, Grid, Message, Icon, Butto
 import { Formik } from "formik";
 import placeholderImage from './fileplaceholder.jpg'
 import { LinkContainer } from "react-router-bootstrap";
+import { useAppContext } from "../lib/contextLib";
 
 
 export default function Doc() {
   const file = useRef(null);
+  const { currentWorkspace, setCurrentWorkspace } = useAppContext();
 
-  const { docId } = useParams();
+  const { workspaceId, docId } = useParams();
   const [doc, setDoc] = useState(null); // Original before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +35,6 @@ export default function Doc() {
         if (docId) {
           const item = await loadDoc();
 
-          console.log(item);
           setDoc(item);
         }
       } catch (e) {
@@ -42,9 +43,11 @@ export default function Doc() {
 
       setIsLoading(false);
     }
-
+    
     onLoad();
   }, []);
+
+
 
   function handleFileChange(event) {
     file.current = event.target.files[0];
@@ -69,7 +72,6 @@ export default function Doc() {
         fileName: fileName,
         contentType: file.current.type,
       });
-      console.log(signedUrl);
 
       const reader = new FileReader();
       reader.addEventListener("load", async (event) => {

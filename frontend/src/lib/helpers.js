@@ -8,3 +8,32 @@ export const substituteParams = (text, params) => {
 export const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export const normaliseCognitoUsers = (cUsers) => {
+  if (!cUsers || cUsers.length === 0) return null;
+
+  return cUsers.map(cu => ({
+    Username: cu.Username,
+    isAdmin: cu.isAdmin,
+    isTopLevelAdmin: cu.isTopLevelAdmin,
+    Enabled: cu.Enabled,
+    UserStatus: cu.UserStatus,
+    given_name: getAttribute(cu, "given_name"),
+    family_name: getAttribute(cu, "family_name"),
+    email: getAttribute(cu, "email"),
+    email_verified: getAttribute(cu, "email_verified"),
+    phone_number: getAttribute(cu, "phone_number"),
+
+  }));
+}
+
+function getAttribute(user, attributeName) {
+  const attribute = user.Attributes.find(
+    (attr) => attr.Name === attributeName
+  );
+  if (attribute) {
+    return attribute.Value;
+  } else {
+    return "";
+  }
+}

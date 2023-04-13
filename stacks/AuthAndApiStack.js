@@ -15,6 +15,8 @@ export function AuthAndApiStack({ stack, app }) {
     tenantTable,
     isoTable,
     docTable,
+    workspaceTable,
+    workspaceUserTable,
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -111,7 +113,8 @@ export function AuthAndApiStack({ stack, app }) {
       },
     },
     // customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
-    customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : undefined,
+    customDomain:
+      app.stage === "prod" ? `api.${process.env.DOMAIN}` : undefined,
     defaults: {
       authorizer: "jwt",
       function: {
@@ -121,11 +124,66 @@ export function AuthAndApiStack({ stack, app }) {
           TENANT_TABLE: tenantTable.tableName,
           ISO_TABLE: isoTable.tableName,
           DOC_TABLE: docTable.tableName,
+          WORKSPACE_TABLE: workspaceTable.tableName,
+          WORKSPACEUSER_TABLE: workspaceUserTable.tableName,
           BUCKET: bucket.bucketName,
         },
+        permissions: [workspaceUserTable],
       },
     },
     routes: {
+      "GET   /workspaces": {
+        function: {
+          handler: "services/functions/workspace/list.main",
+          bind: [workspaceTable],
+        },
+      },
+      "GET   /workspaces/{workspaceId}": {
+        function: {
+          handler: "services/functions/workspace/get.main",
+          bind: [workspaceTable],
+        },
+      },
+      "POST   /workspaces": {
+        function: {
+          handler: "services/functions/workspace/create.main",
+          bind: [workspaceTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
+      "PUT   /workspaces/{workspaceId}": {
+        function: {
+          handler: "services/functions/workspace/update.main",
+          bind: [workspaceTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
+      "DELETE   /workspaces/{workspaceId}": {
+        function: {
+          handler: "services/functions/workspace/delete.main",
+          bind: [workspaceTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
+      "GET   /workspaces/{workspaceId}/members": {
+        function: {
+          handler: "services/functions/workspacemember/list.main",
+          bind: [workspaceUserTable],
+        },
+      },
+      "POST   /workspaces/{workspaceId}/members": {
+        function: {
+          handler: "services/functions/workspacemember/create.main",
+          bind: [workspaceUserTable],
+        },
+      },
+
       "POST /docs/upload-url": {
         function: {
           handler: "services/functions/doc/getUrlForPut.main",
@@ -155,20 +213,18 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-      
-
-      "GET   /forms": {
+      "GET   /workspaces/{workspaceId}/forms": {
         function: {
           handler: "services/functions/form/list.main",
         },
       },
-      "GET   /forms/{formId}": {
+      "GET   /workspaces/{workspaceId}/forms/{formId}": {
         function: {
           handler: "services/functions/form/get.main",
           bind: [templateTable, formTable],
         },
       },
-      "POST  /forms": {
+      "POST  /workspaces/{workspaceId}/forms": {
         function: {
           handler: "services/functions/form/create.main",
           permissions: [cognitoReadonlyAccessPolicy],
@@ -178,7 +234,7 @@ export function AuthAndApiStack({ stack, app }) {
           bind: [formTable],
         },
       },
-      "PUT   /forms/{formId}": {
+      "PUT   /workspaces/{workspaceId}/forms/{formId}": {
         function: {
           handler: "services/functions/form/update.main",
           permissions: [cognitoReadonlyAccessPolicy],
@@ -235,14 +291,13 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-
       "GET   /tenants": {
         function: {
           handler: "services/functions/tenant/list.main",
           bind: [tenantTable],
           environment: {
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "GET   /tenants/{tenantId}": {
@@ -250,8 +305,8 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/tenant/get.main",
           bind: [tenantTable],
           environment: {
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "POST   /tenants": {
@@ -259,8 +314,8 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/tenant/create.main",
           bind: [tenantTable],
           environment: {
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "PUT   /tenants/{tenantId}": {
@@ -268,8 +323,8 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/tenant/update.main",
           bind: [tenantTable],
           environment: {
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "DELETE   /tenants/{tenantId}": {
@@ -277,15 +332,17 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/tenant/delete.main",
           bind: [tenantTable],
           environment: {
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
-      
+
       "GET   /mytenant": {
         function: {
           handler: "services/functions/tenant/getmytenant.main",
           bind: [tenantTable],
+          environment: {
+          },
         },
       },
       "GET /users": {
@@ -294,7 +351,8 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: ADMIN_GROUP
+            // workspace owners can see the list of users to add/remove them to/from workspace 
+            // so ALLOWED_GROUPS is not set
           },
         },
       },
@@ -304,8 +362,8 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "GET /users/{username}": {
@@ -314,7 +372,7 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: ADMIN_GROUP
+            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -324,8 +382,8 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "POST /users": {
@@ -334,7 +392,7 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: ADMIN_GROUP
+            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -344,8 +402,8 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
       "PUT /users/{username}": {
@@ -354,7 +412,7 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: ADMIN_GROUP
+            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -364,13 +422,11 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP
-          }
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
         },
       },
-     
-
-     },
+    },
   });
 
 

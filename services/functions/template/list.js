@@ -23,14 +23,15 @@ export const main = handler(async (event, tenant) => {
 async function getFormCount(tenant, templateId) {
   const params = {
     TableName: process.env.FORM_TABLE,
-    FilterExpression: "tenant = :tenant and templateId = :templateId",
+    KeyConditionExpression: "tenant = :tenant",
+    FilterExpression: "templateId = :templateId",
     ExpressionAttributeValues: {
       ":tenant": tenant,
       ":templateId": templateId,
     },
   };
 
-  // TODO - can this be changed to query?
-  const result = await dynamoDb.scan(params);
+  // TODO Consider a secondary index on templateId
+  const result = await dynamoDb.query(params);
   return result.Count;
 }

@@ -6,10 +6,14 @@ import { makeApiCall } from "../lib/apiLib";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
 import FormHeader from "../components/FormHeader";
+import { useParams } from "react-router-dom";
+import { useAppContext } from "../lib/contextLib";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
-  
+  const { currentWorkspace, setCurrentWorkspace } = useAppContext();
+  const { workspaceId } = useParams();
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +28,11 @@ export default function Docs() {
       setIsLoading(false);
     }
 
+    if (workspaceId != currentWorkspace) {
+      // URL overrides app context
+      setCurrentWorkspace(workspaceId);
+    }
+
     onLoad();
   }, []);
 
@@ -31,22 +40,29 @@ export default function Docs() {
     return await makeApiCall("GET", `/docs`);
   }
 
-  const groupedChildren = !docs || docs.length == 0 ? [] : 
-  docs.reduce((result, child) => {
-      const group = result.find((group) => group[0].category === child.category);
-  
-      if (group) {
-      group.push(child);
-      } else {
-      result.push([child]);
-      }
-  
-      return result;
-}, []);
+
 
   
   function renderDocs() {
+    const groupedChildren =
+      !docs || docs.length == 0
+        ? []
+        : docs.reduce((result, child) => {
+            const group = result.find(
+              (group) => group[0].category === child.category
+            );
+
+            if (group) {
+              group.push(child);
+            } else {
+              result.push([child]);
+            }
+
+            return result;
+          }, []);
+
     return (<>
+    <FormHeader heading={`Workspace - ${currentWorkspace}`} />
     <FormHeader heading="Library" />
     {
       (!docs || docs.length == 0) && (

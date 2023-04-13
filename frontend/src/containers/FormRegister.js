@@ -324,7 +324,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         return fieldValue;
     }
   }
-  const firstLetter = (word) => (word ? word.charAt(0) : 0);
+  const firstLetter = (word) => (word ? word.charAt(0) : "-");
   function renderUserInitial(user) {
     if (user)
       return (

@@ -6,7 +6,10 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
+  Card,
+  Dropdown,
   Grid,
+  Header,
   Icon,
   Image, List,
   Loader, Menu, PlaceholderImage, Segment,
@@ -27,7 +30,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [tenant, setTenant] = useState(null);
-  const [templates, setTemplates] = useState(null);
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
 
   const nav = useNavigate();
 
@@ -78,15 +81,11 @@ function App() {
       return tenant;
     }
 
-    async function loadTemplates() {
-      return await makeApiCall("GET", `/templates`);
-    }
     async function onLoad() {
       try {
-        const [templates, tenant] = await Promise.all([loadTemplates(), loadMyTenant()]);
+        const tenant = await loadMyTenant();
 
         setTenant(tenant);
-        setTemplates(templates)
       } catch (e) {
         alert(e);
       }
@@ -109,31 +108,46 @@ function App() {
     return (
       !isAuthenticating && (
         <>
-          <List divided horizontal>
-            <List.Item>
-              {tenant ? (
-                <Image
-                  size="medium"
-                  rounded
-                  alt="logo"
-                  src={logoURL}
-                  onError={(e) => {
-                    e.target.src = placeholderImage;
-                  }}
-                />
-              ) : (
-                <PlaceholderImage />
-              )}
-            </List.Item>
-            <List.Item>
-              <Button
-                color="black"
-                icon="bars"
-                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-              ></Button>
-            </List.Item>
-          </List>
-
+          <Grid doubling stackable style={{ marginBottom: "-3rem" }}>
+            <Grid.Row verticalAlign="middle">
+              <Grid.Column width="6">
+                <List divided horizontal>
+                  <List.Item>
+                    {tenant ? (
+                      <Image
+                        size="medium"
+                        rounded
+                        alt="logo"
+                        src={logoURL}
+                        onError={(e) => {
+                          e.target.src = placeholderImage;
+                        }}
+                      />
+                    ) : (
+                      <PlaceholderImage />
+                    )}
+                  </List.Item>
+                  <List.Item>
+                    <Button
+                      color="black"
+                      icon="bars"
+                      onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                    ></Button>
+                  </List.Item>
+                </List>
+              </Grid.Column>
+              <Grid.Column width={4}>
+ 
+                <Menu vertical >
+                  <Dropdown item text={currentWorkspace || "Workspace not selected"}>
+                    <Dropdown.Menu>
+                      {['Project Evolve', 'NSW Schools', 'Primavera Revamp'].map((p, index) => (<Dropdown.Item key={index} onClick={() => setCurrentWorkspace(p)}>{p}</Dropdown.Item>))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Menu>
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
           <Grid columns={1}>
             <Grid.Column>
               <Sidebar.Pushable as={Segment}>
@@ -186,17 +200,17 @@ function App() {
                           </LinkContainer> */}
                         </Menu.Menu>
                       </Menu.Item>
-                      {(isAdmin || isTopLevelAdmin) &&
-                      <LinkContainer to="/templates">
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="clipboard list" />
-                            Forms
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
-                    }
-                    
+                      {(isAdmin || isTopLevelAdmin) && (
+                        <LinkContainer to="/templates">
+                          <Nav.Link as={Menu.Item}>
+                            <span>
+                              <Icon name="clipboard list" />
+                              Forms
+                            </span>
+                          </Nav.Link>
+                        </LinkContainer>
+                      )}
+
                       <LinkContainer to="/registers">
                         <Nav.Link as={Menu.Item}>
                           <span>
@@ -205,36 +219,39 @@ function App() {
                           </span>
                         </Nav.Link>
                       </LinkContainer>
-                      <LinkContainer to="/docs">
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="book" />
-                            Library
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
-                      {(isTopLevelAdmin) &&
-                      <LinkContainer to="/tenants" >
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="building" color="red"/>
-                            Tenants
-                          </span>
-                          <Icon name="hand paper" color="red"/>
-                        </Nav.Link>
-                      </LinkContainer>
-                    }
-                      {(isAdmin || isTopLevelAdmin) &&
-                      <LinkContainer to="/users" >
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="users" color="red"/>
-                            Users
-                          </span>
-                          
-                        </Nav.Link>
-                      </LinkContainer>
-                    }
+                      {currentWorkspace && (
+                        <LinkContainer
+                          to={`/workspace/${currentWorkspace}/docs`}
+                        >
+                          <Nav.Link as={Menu.Item}>
+                            <span>
+                              <Icon name="book" />
+                              Library
+                            </span>
+                          </Nav.Link>
+                        </LinkContainer>
+                      )}
+                      {isTopLevelAdmin && (
+                        <LinkContainer to="/tenants">
+                          <Nav.Link as={Menu.Item}>
+                            <span>
+                              <Icon name="building" color="red" />
+                              Tenants
+                            </span>
+                            <Icon name="hand paper" color="red" />
+                          </Nav.Link>
+                        </LinkContainer>
+                      )}
+                      {(isAdmin || isTopLevelAdmin) && (
+                        <LinkContainer to="/users">
+                          <Nav.Link as={Menu.Item}>
+                            <span>
+                              <Icon name="users" color="red" />
+                              Users
+                            </span>
+                          </Nav.Link>
+                        </LinkContainer>
+                      )}
                       <LinkContainer to="/logout">
                         <Nav.Link as={Menu.Item} onClick={handleLogout}>
                           <span>
@@ -280,10 +297,15 @@ function App() {
                       value={{
                         isAuthenticated,
                         userHasAuthenticated,
-                        currentUserRoles
+                        currentUserRoles,
+                        currentWorkspace,
+                        setCurrentWorkspace,
                       }}
                     >
-                      <Routes tenant={tenant} currentUserRoles={currentUserRoles} />
+                      <Routes
+                        tenant={tenant}
+                        currentUserRoles={currentUserRoles}
+                      />
                       {/* <Routes /> */}
                     </AppContext.Provider>
                   </Segment>

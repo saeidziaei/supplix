@@ -19,6 +19,9 @@ import ResetPassword from "./containers/ResetPassword";
 import Tenant from "./containers/Tenant";
 import Tenants from "./containers/Tenants";
 import User from "./containers/User";
+import Workspace from "./containers/Workspace";
+import WorkspaceTeam from "./containers/WorkspaceTeam";
+import Workspaces from "./containers/Workspaces";
 
 
 export default function Links(tenant) {
@@ -31,8 +34,8 @@ export default function Links(tenant) {
       <Route path="/login" element={ <UnauthenticatedRoute><Login /></UnauthenticatedRoute>} />
       <Route path="/login/reset" element={<UnauthenticatedRoute><ResetPassword /></UnauthenticatedRoute>} />
       
-      <Route path="/doc/:docId?" element={<AuthenticatedRoute><Doc /></AuthenticatedRoute>} />
-      <Route path="/docs" element={<AuthenticatedRoute><Docs /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/doc/:docId?" element={<AuthenticatedRoute><Doc /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/docs" element={<AuthenticatedRoute><Docs /></AuthenticatedRoute>} />
 
       <Route path="/users" element={<AuthenticatedRoute><Users /></AuthenticatedRoute>} /> 
       <Route path="/tenants/:tenantId/users" element={<AuthenticatedRoute><Users /></AuthenticatedRoute>} />
@@ -48,6 +51,10 @@ export default function Links(tenant) {
 
       <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
       <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />
+
+      <Route path="/workspace/:workspaceId?" element={<AuthenticatedRoute><Workspace /></AuthenticatedRoute>} />
+      <Route path="/workspaces" element={<AuthenticatedRoute><Workspaces /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/team" element={<AuthenticatedRoute><WorkspaceTeam/></AuthenticatedRoute>} />
 
       <Route path="*" element={<NotFound />} />
       

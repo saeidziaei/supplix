@@ -8,6 +8,8 @@ import { Button, Header, Icon, Image, Item, Label, Loader, Message, Table } from
 import placeholderImage from './fileplaceholder.jpg'
 import { parseISO } from "date-fns";
 import FormHeader from "../components/FormHeader";
+import { normaliseCognitoUsers } from "../lib/helpers";
+
 
 export default function Users() {
   const { tenantId } = useParams(null);
@@ -21,7 +23,7 @@ export default function Users() {
       try {
         const [users, tenant] = await Promise.all([loadUsers(), loadTenant()]);
 
-        setUsers(users);
+        setUsers(normaliseCognitoUsers(users));
         setTenant(tenant);
       } catch (e) {
         onError(e);
@@ -53,16 +55,7 @@ export default function Users() {
       return await makeApiCall("GET", `/users`); // ADMIN
     }
   }
-  function getAttribute(user, attributeName) {
-    const attribute = user.Attributes.find(
-      (attr) => attr.Name === attributeName
-    );
-    if (attribute) {
-      return attribute.Value;
-    } else {
-      return "";
-    }
-  }
+
   function renderUsers() {
     return (
       <>
@@ -132,31 +125,24 @@ export default function Users() {
                       )}
 
                       <Header.Content>
-                        {`${getAttribute(u, "given_name")} ${getAttribute(
-                          u,
-                          "family_name"
-                        )}`}
+                        {`${u.given_name} ${u.family_name}`}
                         <Header.Subheader></Header.Subheader>
                       </Header.Content>
                     </Header>
                   </Table.Cell>
-                  <Table.Cell>{getAttribute(u, "email")}</Table.Cell>
+                  <Table.Cell>{u.email}</Table.Cell>
                   <Table.Cell textAlign="center">
                     <Icon
                       size="large"
-                      color={
-                        getAttribute(u, "email_verified") == "true"
-                          ? "green"
-                          : "black"
-                      }
+                      color={u.email_verified == "true" ? "green" : "black"}
                       name={
-                        getAttribute(u, "email_verified") == "true"
+                        u.email_verified == "true"
                           ? "check circle outline"
                           : "x"
                       }
                     />
                   </Table.Cell>
-                  <Table.Cell>{getAttribute(u, "phone_number")}</Table.Cell>
+                  <Table.Cell>{u.phone_number}</Table.Cell>
                   <Table.Cell>
                     <Label basic color={u.Enabled ? "green" : "grey"}>
                       {u.Enabled ? "Yes" : "No"}

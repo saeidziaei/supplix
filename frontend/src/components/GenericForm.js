@@ -247,10 +247,9 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
           <Table.Body>
             {s.rows.map((row, rowIndex) => (
               <Table.Row key={rowIndex}>
-                <Table.Cell>{row.value}</Table.Cell>
+                <Table.Cell style={{backgroundColor: "#eee"}}>{row.value}</Table.Cell>
                 {fields.map((f, i) => (
                   <Table.Cell key={i}>
-                    {" "}
                     {renderField(
                       { ...f, name: tabularFieldName(rowIndex, f.name) },
                       values,
@@ -281,7 +280,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
                   .filter((f) => f.type !== "aggregate")
                   .map((f, i) => (
                     <Table.Row key={f.guid}>
-                      <Table.Cell width={4}>
+                      <Table.Cell width={4} style={{backgroundColor: "#eee"}}>
                         {f.type === "info" ? "" : f.title}
                       </Table.Cell>
                       <Table.Cell width={8} textAlign="center">

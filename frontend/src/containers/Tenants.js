@@ -43,21 +43,18 @@ export default function Tenants() {
         <FormHeader heading="Tenants" />
         {(!tenants || tenants.length == 0) && (
           <Message
-            header="No tenats found"
+            header="No tenants found"
             content="Start by creating your first tenant!"
             icon="exclamation"
           />
         )}
         {tenants && tenants.length > 0 && (
-          <Segment>
-            <Header as="h2">Tenants</Header>
-            <Divider />
-            <Table basic>
+            <Table basic columns="5">
               <Table.Body>
                 {tenants.map((t) => {
                   return (
                     <Table.Row key={t.tenantId}>
-                      <Table.Cell>
+                      <Table.Cell >
                         <Icon.Group size="large">
                           <Icon
                             size="big"
@@ -67,24 +64,23 @@ export default function Tenants() {
                           <Icon size="small" name="users" color="black" />
                         </Icon.Group>
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell >
                         <strong>{t.tenantName}</strong>
                       </Table.Cell>
-                      <Table.Cell>{t.contactPerson}</Table.Cell>
+                      <Table.Cell >{t.contactPerson}</Table.Cell>
                       <Table.Cell>
                         <Link to={`/tenants/${t.tenantId}/users`}>
-                          Manage users
+                          Manage Users
                         </Link>
                       </Table.Cell>
-                      <Table.Cell>
-                        <Link to={`/tenant/${t.tenantId}`}>Edit details</Link>
+                      <Table.Cell >
+                        <Link to={`/tenant/${t.tenantId}`}>Edit Details</Link>
                       </Table.Cell>
                     </Table.Row>
                   );
                 })}
               </Table.Body>
             </Table>
-          </Segment>
         )}
         <LinkContainer to={`/tenant`}>
           <Button basic primary>
