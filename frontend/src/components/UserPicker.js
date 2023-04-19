@@ -1,6 +1,7 @@
 import React from "react";
 import { Dropdown } from "semantic-ui-react";
 import User from "./User";
+import { getUserById } from "../lib/helpers";
 
 export default function UserPicker({ users, value, onChange, disabled = false }) {
 
@@ -8,18 +9,23 @@ export default function UserPicker({ users, value, onChange, disabled = false })
     return {
       key: u.Username,
       value: u.Username,
-      content: (<User user={u}/>)
+      content: (<User user={u}/>),
+      text: u.Username,
     };
   });
 
+  const handleChange = (e, {value}) => {
+    onChange(value);
+  } 
+  const selected = value ? getUserById(users, value) :  null;
   return (
     <Dropdown
       disabled={disabled}
-      selection
       fluid
       value={value}
+      trigger={selected ? <User user={selected} /> : <span>Select User</span>}
       options={options}
-      onChange={(e, {value}) => onChange(value)}
+      onChange={handleChange}
       placeholder="Choose a user to add to the team"
     />
   );

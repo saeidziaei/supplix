@@ -11,7 +11,7 @@ export default function handler(lambda) {
     try {
       tenant = getTenantFromRequest(event);
       workspaceId = getWorkspaceFromRequest(event);
-      const workspaceUser = workspaceId ? getWorkspaceUser(tenant, workspaceId) : null;
+      const workspaceUser = workspaceId ? getWorkspaceUser(tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub) : null;
 
       if (workspaceId && !workspaceUser) { // workspace is in the url path but the association for this user doesn't exist
         body = {error: 'Unauthorised. User not in workspace. Contact your administrator please.'};
@@ -21,8 +21,7 @@ export default function handler(lambda) {
         const allowedGroups = process.env.ALLOWED_GROUPS
           ? process.env.ALLOWED_GROUPS.split(",")
           : [];
-        const userGroups =
-          event.requestContext.authorizer.jwt.claims["cognito:groups"] || [];
+        const userGroups = getUserGroups(event);
 
         if (
           allowedGroups.length === 0 ||
@@ -58,12 +57,12 @@ export default function handler(lambda) {
 }
 
 
-async function getWorkspaceUser(tenant, workspaceId) {
+async function getWorkspaceUser(tenant, workspaceId, userId) {
   const params = {
     TableName: process.env.WORKSPACEUSER_TABLE,
     Key: {
-      tenant: tenant, 
-      workspaceId: workspaceId, 
+      tenant_workspaceId: `${tenant}_${workspaceId}`, 
+      userId: userId,
     },
   };
 
@@ -84,6 +83,9 @@ function getTenantFromRequest(event) {
   return claims['custom:tenant'];
 }
 
+export function getUserGroups(event) {
+  return event.requestContext.authorizer.jwt.claims["cognito:groups"] || [];
+}
 
 export async function getUser(username) {
   

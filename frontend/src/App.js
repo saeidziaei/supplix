@@ -31,9 +31,11 @@ function App() {
   const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [tenant, setTenant] = useState(null);
   const [currentWorkspace, setCurrentWorkspace] = useState(null);
+  const [workspaces, setWorkspaces] = useState(null);
 
   const nav = useNavigate();
 
+  
   async function handleLogout() {
     await Auth.signOut();
 
@@ -81,11 +83,19 @@ function App() {
       return tenant;
     }
 
+    async function loadMyWorkspaces() {
+      if (!isAuthenticated)
+        return;
+        
+      return await makeApiCall("GET", `/myworkspaces`);
+    }
+
     async function onLoad() {
       try {
-        const tenant = await loadMyTenant();
+        const [workspaces, tenant] = await Promise.all([loadMyWorkspaces(), loadMyTenant()]);
 
         setTenant(tenant);
+        setWorkspaces(workspaces);
       } catch (e) {
         alert(e);
       }
@@ -97,6 +107,16 @@ function App() {
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
+  async function loadAppWorkspace(workspaceId) {
+    if (currentWorkspace && currentWorkspace.workspaceId === workspaceId) {
+      // no need to re-load
+      return currentWorkspace;
+    }
+
+    const ws = await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    setCurrentWorkspace(ws);
+    return ws;
+  }
 
   function renderApp() {
     const isAdmin = currentUserRoles.includes('admins');
@@ -137,12 +157,23 @@ function App() {
                 </List>
               </Grid.Column>
               <Grid.Column width={4}>
- 
-                <Menu vertical >
-                  <Dropdown item text={currentWorkspace || "Workspace not selected"}>
-                    <Dropdown.Menu>
-                      {['Project Evolve', 'NSW Schools', 'Primavera Revamp'].map((p, index) => (<Dropdown.Item key={index} onClick={() => setCurrentWorkspace(p)}>{p}</Dropdown.Item>))}
-                    </Dropdown.Menu>
+                <Menu vertical>
+                  <Dropdown
+                    item
+                    text={currentWorkspace ? currentWorkspace.workspaceName : "Workspace not selected"}
+                  >
+                    {workspaces && (
+                      <Dropdown.Menu>
+                        {workspaces.map((w, index) => (
+                          <Dropdown.Item
+                            key={index}
+                            onClick={() => setCurrentWorkspace(w)}
+                          >
+                            {w.workspaceName}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    )}
                   </Dropdown>
                 </Menu>
               </Grid.Column>
@@ -299,7 +330,7 @@ function App() {
                         userHasAuthenticated,
                         currentUserRoles,
                         currentWorkspace,
-                        setCurrentWorkspace,
+                        loadAppWorkspace,
                       }}
                     >
                       <Routes

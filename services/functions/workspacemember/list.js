@@ -2,12 +2,13 @@ import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
+  const workspaceId = event.pathParameters.workspaceId;
+
   const params = {
     TableName: process.env.WORKSPACEUSER_TABLE,
-    KeyConditionExpression: "tenant = :tenant AND workspaceId = :workspaceId",
+    KeyConditionExpression: "tenant_workspaceId = :tenant_workspaceId",
     ExpressionAttributeValues: {
-      ":tenant": tenant,
-      ":workspaceId": event.pathParameters.workspaceId
+      ":tenant_workspaceId": `${tenant}_${workspaceId}`,
     },
   };
   const result = await dynamoDb.query(params);

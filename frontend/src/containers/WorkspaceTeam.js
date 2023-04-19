@@ -4,7 +4,8 @@ import { Button, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Table }
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import { normaliseCognitoUsers } from "../lib/helpers";
+import { normaliseCognitoUsers, getUserById } from "../lib/helpers";
+import { useAppContext } from "../lib/contextLib";
 
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
@@ -13,16 +14,12 @@ export default function WorkspaceTeam(props) {
   const [newMember, setNewMember] = useState(null);
   const [newMemberRole, setNewMemberRole] = useState("Member");
   const [users, setUsers] = useState([]);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isInAddMode, setIsInAddMode] = useState(false);
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   let { state } = useLocation();
-
-  const [randomUsers] = useState(generateRandomUsers(20));
-
-
-
-
+  const { loadAppWorkspace } = useAppContext();
+  
   function validateForm() {
     return true; // file.current
   }
@@ -30,18 +27,126 @@ export default function WorkspaceTeam(props) {
   useEffect(() => {
     async function loadWorkspace() {
       // if workspace has been passed in state use it otherwise it is a direct URL to members page and therefore workspace needs to be loaded from the backend
-      return state ?? await makeApiCall("GET", `/workspaces/${workspaceId}`);
+      // but it needs to be loaded in the app context because it is used by everyone not just this page.
+      return state ?? await loadAppWorkspace(workspaceId); 
     }
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
     async function loadUsers() {
-      return await makeApiCall("GET", `/users`); // ADMIN
+      // return await makeApiCall("GET", `/users`); // ADMIN
+
+      return [
+        {
+          "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971fe",
+          "Attributes": [
+              {
+                  "Name": "sub",
+                  "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971fe"
+              },
+              {
+                  "Name": "email_verified",
+                  "Value": "true"
+              },
+              {
+                  "Name": "custom:tenant",
+                  "Value": "isocloud"
+              },
+              {
+                  "Name": "given_name",
+                  "Value": "FirstSam"
+              },
+              {
+                  "Name": "family_name",
+                  "Value": "King"
+              },
+              {
+                  "Name": "email",
+                  "Value": "sziaei+utt@gmail.com"
+              }
+          ],
+          "UserCreateDate": "2023-03-24T06:40:46.630Z",
+          "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
+          "Enabled": true,
+          "UserStatus": "CONFIRMED",
+          "isAdmin": false,
+          "isTopLevelAdmin": true
+      },
+      {
+        "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971f2",
+        "Attributes": [
+            {
+                "Name": "sub",
+                "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971f2"
+            },
+            {
+                "Name": "email_verified",
+                "Value": "true"
+            },
+            {
+                "Name": "custom:tenant",
+                "Value": "isocloud"
+            },
+            {
+                "Name": "given_name",
+                "Value": "SecondSam"
+            },
+            {
+                "Name": "family_name",
+                "Value": "King"
+            },
+            {
+                "Name": "email",
+                "Value": "sziaei+utt@gmail.com"
+            }
+        ],
+        "UserCreateDate": "2023-03-24T06:40:46.630Z",
+        "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
+        "Enabled": true,
+        "UserStatus": "CONFIRMED",
+        "isAdmin": false,
+        "isTopLevelAdmin": true
+    },{
+      "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971f3",
+      "Attributes": [
+          {
+              "Name": "sub",
+              "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971f3"
+          },
+          {
+              "Name": "email_verified",
+              "Value": "true"
+          },
+          {
+              "Name": "custom:tenant",
+              "Value": "isocloud"
+          },
+          {
+              "Name": "given_name",
+              "Value": "ThirdSam"
+          },
+          {
+              "Name": "family_name",
+              "Value": "King"
+          },
+          {
+              "Name": "email",
+              "Value": "sziaei+utt@gmail.com"
+          }
+      ],
+      "UserCreateDate": "2023-03-24T06:40:46.630Z",
+      "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
+      "Enabled": true,
+      "UserStatus": "CONFIRMED",
+      "isAdmin": false,
+      "isTopLevelAdmin": true
+  }
+       
+      ];
     }
     async function onLoad() {
       try {
         const [workspace, members, users] = await Promise.all([loadWorkspace(), loadWorkspaceMembers(), loadUsers()]);
-        
         setWorkspace(workspace);
         setMembers(members);
         setUsers(normaliseCognitoUsers(users));
@@ -56,10 +161,6 @@ export default function WorkspaceTeam(props) {
   }, []);
 
 
-  const getUserById = (id) => {
-    let user = users.find(u => u.userId === id);
-    return user || {given_name: '', family_name: ''};
-  }
   async function addMember() {
     try {
       setIsLoading(true);
@@ -76,7 +177,7 @@ export default function WorkspaceTeam(props) {
     }
     finally {
       setIsLoading(false);
-      setIsAdding(false);
+      setIsInAddMode(false);
     }
   }
   async function deleteMember(userId) {
@@ -84,31 +185,10 @@ export default function WorkspaceTeam(props) {
   }
 
 
-  // const nonMembers = () => users.filter(
-  //   (user) => !members.some((member) => member.userId === user.userId)
-  // );
-  function generateRandomUsers(numUsers) {
-    const users = [];
-    for (let i = 1; i <= numUsers; i++) {
-      const user = {
-        Username: i,
-        given_name: generateRandomName(),
-        family_name: generateRandomName(),
-      };
-      users.push(user);
-    }
-    return users;
-  }
+  const nonMembers = () => users.filter(
+    (user) => !members.some((member) => member.userId === user.Username)
+  );
   
-  function generateRandomName() {
-    const names = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Luke", "Mia", "Nate", "Olivia", "Peter", "Quinn", "Rose", "Seth", "Tina", "Uma", "Violet", "Wyatt", "Xander", "Yvonne", "Zane"];
-    const randomIndex = Math.floor(Math.random() * names.length);
-    return names[randomIndex];
-  }
-  
-  
-  const nonMembers = () => randomUsers;
-
   function renderMembers() {
 
     if (!workspace)
@@ -128,7 +208,7 @@ export default function WorkspaceTeam(props) {
               <Icon name="list alternate outline" />
               <Icon corner name="clock outline" />
             </Icon.Group>
-            {`Workspace : ${workspace.name}`}
+            {`Workspace : ${workspace.workspaceName}`}
           </Header>
           {(!members || members.length == 0) && (
             <Message
@@ -144,17 +224,13 @@ export default function WorkspaceTeam(props) {
                   return (
                     <Table.Row key={m.userId}>
                       <Table.Cell>
-                        <Icon.Group size="large">
-                          <Icon
-                            size="big"
-                            name="circle outline"
-                            color="yellow"
-                          />
-                          <Icon size="small" name="users" color="black" />
-                        </Icon.Group>
+                        <Icon name={m.role === "Owner" ? "chess king" : "user"} size={m.role === "Owner" ? "large" : ""} color={m.role === "Owner" ? "green" : "grey"} />
                       </Table.Cell>
+
                       <Table.Cell>
-                        <strong>{getUserById(m.userId)}</strong>
+                        <strong>
+                          {getUserById(users, m.userId).given_name}
+                        </strong>
                       </Table.Cell>
                       <Table.Cell>{m.role}</Table.Cell>
                       <Table.Cell>
@@ -168,14 +244,15 @@ export default function WorkspaceTeam(props) {
               </Table.Body>
             </Table>
           )}
-          {!isAdding ? (
-            <Button basic onClick={() => setIsAdding(true)}>
+          {!isInAddMode ? (
+            <Button basic onClick={() => setIsInAddMode(true)}>
               Add Team Member
             </Button>
           ) : (
             <>
               <UserPicker
                 users={nonMembers()}
+                value={newMember}
                 onChange={(userId) => setNewMember(userId)}
               />
               <Dropdown
@@ -194,7 +271,7 @@ export default function WorkspaceTeam(props) {
               <Button basic onClick={addMember}>
                 Add
               </Button>
-              <Button basic onClick={() => setIsAdding(false)}>
+              <Button basic onClick={() => setIsInAddMode(false)}>
                 Cancel
               </Button>
             </>

@@ -26,6 +26,11 @@ export const normaliseCognitoUsers = (cUsers) => {
 
   }));
 }
+export const getUserById = (users, id) => {
+  let user = users.find(u => u.Username === id);
+  return user || {given_name: '', family_name: ''};
+}
+
 
 function getAttribute(user, attributeName) {
   const attribute = user.Attributes.find(

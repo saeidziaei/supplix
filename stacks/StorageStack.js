@@ -41,10 +41,11 @@ export function StorageStack({ stack, app }) {
     fields: {
       tenant: "string",
       workspaceId: "string",
+      tenant_workspaceId: "string",
       userId: "string", 
       role: "string", // owner or member
     },
-    primaryIndex: { partitionKey: "tenant", sortKey: "workspaceId" }, 
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "userId" }, 
   })
  
   const isoTable = new Table(stack , "Iso", {
@@ -55,12 +56,14 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "tenant", sortKey: "isoId" }, 
   });
 
-  const formTable = new Table(stack , "Form", { 
+  const formTable = new Table(stack, "Form", {
     fields: {
       tenant: "string",
-      formId: "string", 
+      workspaceId: "string",
+      tenant_workspaceId: "string",
+      formId: "string",
     },
-    primaryIndex: { partitionKey: "tenant", sortKey: "formId" },
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "formId" },
   });
 
   const templateTable = new Table(stack , "Template", {
@@ -75,9 +78,11 @@ export function StorageStack({ stack, app }) {
   const docTable = new Table(stack , "Doc", {
     fields: {
       tenant: "string",
+      workspaceId: "string",
+      tenant_workspaceId: "string",
       docId: "string", 
     },
-    primaryIndex: { partitionKey: "tenant", sortKey: "docId" },
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "docId" },
   });
 
 
