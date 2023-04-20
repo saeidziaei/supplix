@@ -1,21 +1,19 @@
+import axios from "axios";
+import { Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { onError } from "../lib/errorLib";
+import { LinkContainer } from "react-router-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
-import axios from "axios";
-import { Form, Header, Input, Label, Loader, Segment, Grid, Message, Icon, Button, Image, Card } from "semantic-ui-react";
-import { Formik } from "formik";
-import placeholderImage from './fileplaceholder.jpg'
-import { LinkContainer } from "react-router-bootstrap";
 import { useAppContext } from "../lib/contextLib";
-import FormHeader from "../components/FormHeader";
+import { onError } from "../lib/errorLib";
+import placeholderImage from './fileplaceholder.jpg';
 
 
 export default function Doc() {
   const { workspaceId, docId } = useParams();
-  const { currentWorkspace, loadAppWorkspace } = useAppContext();
+  const { loadAppWorkspace } = useAppContext();
   const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
   const nav = useNavigate();
@@ -200,10 +198,6 @@ export default function Doc() {
 
   if (isLoading) return <Loader active />;
 
-  return (
-    <>
-      <FormHeader heading={`Workspace - ${currentWorkspace.workspaceName}`} />
-      {doc ? renderDoc() : rednerUploadForm()}
-    </>
-  );
+  if (doc) return renderDoc();
+  else return rednerUploadForm();
 }

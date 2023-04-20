@@ -11,7 +11,7 @@ import { useAppContext } from "../lib/contextLib";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
-  const { currentWorkspace, loadAppWorkspace } = useAppContext();
+  const { loadAppWorkspace } = useAppContext();
   const { workspaceId } = useParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +59,6 @@ export default function Docs() {
 
     return (<>
     <FormHeader heading="Library" />
-    <FormHeader heading={`Workspace - ${currentWorkspace.workspaceName}`} />
     {
       (!docs || docs.length == 0) && (
         <Message

@@ -9,10 +9,14 @@ import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
+import { useParams } from "react-router-dom";
+import { useAppContext } from "../lib/contextLib";
 
-export default function FormRegister() {
+export default function FormRegisters() {
   const [templates, setTemplates] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { workspaceId } = useParams();
+  const { loadAppWorkspace } = useAppContext();
 
   useEffect(() => {
     async function onLoad() {
@@ -20,8 +24,9 @@ export default function FormRegister() {
       setIsLoading(true);
       try {
           const templates = await loadTemplates();
-
           setTemplates(templates);
+
+          loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
       }
@@ -32,7 +37,7 @@ export default function FormRegister() {
   }, []);
 
   async function loadTemplates() {
-    return await makeApiCall("GET", `/templates`);
+    return await makeApiCall("GET", `/workspaces/${workspaceId}/templates`);
   }
 
 
@@ -61,7 +66,7 @@ export default function FormRegister() {
                     verticalAlign="middle"
                   />
                   <List.Content>
-                    <LinkContainer to={`/register/${t.templateId}`}>
+                    <LinkContainer to={`/workspace/${workspaceId}/register/${t.templateId}`}>
                       <List.Header as="a">{def.title}</List.Header>
                     </LinkContainer>
                     <List.Description>{`${t.formCount} ${pluralize("record", t.formCount)}`}</List.Description>

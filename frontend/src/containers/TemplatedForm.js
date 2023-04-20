@@ -12,9 +12,10 @@ import { GenericForm } from "../components/GenericForm";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
+import { useAppContext } from "../lib/contextLib";
 
 export default function TemplatedForm() {
-  const { formId, templateId } = useParams();
+  const { workspaceId, formId, templateId } = useParams();
   const [formRecord, setFormRecord] = useState(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -23,10 +24,11 @@ export default function TemplatedForm() {
   const [template, setTemplate] = useState(null);
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
   const nav = useNavigate();
+  const { loadAppWorkspace } = useAppContext();
 
   useEffect(() => {
     async function loadForm() {
-      return await makeApiCall("GET", `/forms/${formId}`);
+      return await makeApiCall("GET", `/workspaces/${workspaceId}/forms/${formId}`);
     }
 
     async function loadTemplate() {
@@ -46,6 +48,7 @@ export default function TemplatedForm() {
 
           setTemplate(item);
         }
+        loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
       }
@@ -64,7 +67,7 @@ export default function TemplatedForm() {
       } else {
         await createForm(values);
       }
-      nav(`/register/${templateId}`); // todo navigate to form register page ??
+      nav(`/workspace/${workspaceId}/register/${templateId}`); // todo navigate to form register page ??
     } catch (e) {
       onError(e);
     } finally {
@@ -72,14 +75,14 @@ export default function TemplatedForm() {
     }
   }
   async function createForm(values) {
-    return await makeApiCall("POST", `/forms`, {
+    return await makeApiCall("POST", `/workspaces/${workspaceId}/forms`, {
       templateId: template.templateId,
       formValues: values,
     });
   }
 
   async function updateForm(values) {
-    return await makeApiCall("PUT", `/forms/${formId}`, {
+    return await makeApiCall("PUT", `/workspaces/${workspaceId}/forms/${formId}`, {
       formValues: values,
       isRevision: isRevisioning
     });

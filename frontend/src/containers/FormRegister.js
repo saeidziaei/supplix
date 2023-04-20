@@ -13,28 +13,31 @@ import "@ag-grid-community/styles/ag-theme-alpine.css";
 import { ModuleRegistry } from "@ag-grid-community/core";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import { CsvExportModule } from '@ag-grid-community/csv-export';
+import { useAppContext } from "../lib/contextLib";
 
 export default function FormRegister({ formDefInput, formsInput, isHistory }) {
   const gridRef = useRef();
-  const { templateId } = useParams();
+  const { workspaceId, templateId } = useParams();
   const [formDef, setFormDef] = useState(formDefInput);
   const [forms, setForms] = useState(formsInput);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
+  const { loadAppWorkspace } = useAppContext();
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
 
   useEffect(() => {
     async function onLoad() {
-      if (formDef) {
-        // all data have been passed from another component, we are just checking formDef
-        setColumnDefs(getColumnDefs(formDef));
-        setIsLoading(false);
-        return;
-      }
-      setIsLoading(true);
       try {
+        if (formDef) {
+          // all data have been passed from another component, we are just checking formDef
+          setColumnDefs(getColumnDefs(formDef));
+          setIsLoading(false);
+          return;
+        }
+        setIsLoading(true);
+        
         // todo: how do we avoid two roundtrips?
         const template = await loadTemplate(templateId);
         setFormDef(template.templateDefinition);
@@ -43,6 +46,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         setForms(forms);
 
         setColumnDefs(getColumnDefs(template.templateDefinition));
+
+        loadAppWorkspace(workspaceId);
       } catch (e) {
         setHasError(true);
         onError(e);
@@ -65,7 +70,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
     return await makeApiCall("GET", `/templates/${templateId}`);
   }
   async function loadTemplateForms(templateId) {
-    return await makeApiCall("GET", `/templates/${templateId}/forms`);
+    return await makeApiCall("GET", `/workspaces/${workspaceId}/templates/${templateId}/forms`);
   }
 
   const getColumnDefs = (def) => {
@@ -246,7 +251,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
     const d = params.data;
 
     return (
-      <LinkContainer to={`/form/${d.templateId}/${d.formId}`}>
+      <LinkContainer to={`/workspace/${workspaceId}/form/${d.templateId}/${d.formId}`}>
         <a  size="mini"  as="a" >Details</a>
       </LinkContainer>
     );
@@ -392,12 +397,12 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         <Divider hidden />
         {!isHistory && (
           <>
-            <LinkContainer to={`/registers`}>
+            <LinkContainer to={`/workspace/${workspaceId}/registers`}>
               <Button basic secondary>
                 Back
               </Button>
             </LinkContainer>
-            <LinkContainer to={`/form/${templateId}`}>
+            <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
               <Button basic primary>
                 Create New Record
               </Button>

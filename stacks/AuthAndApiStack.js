@@ -257,7 +257,9 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-      "GET   /templates": {
+      // templates are not workspace aware but forms are. 
+      // This endpoint returns form count for the templates so it needs to be workspace aware.
+      "GET   /workspaces/{workspaceId}/templates": { 
         function: {
           handler: "services/functions/template/list.main",
           bind: [templateTable, formTable],
@@ -281,7 +283,7 @@ export function AuthAndApiStack({ stack, app }) {
           bind: [templateTable],
         },
       },
-      "GET   /templates/{templateId}/forms": {
+      "GET   /workspaces/{workspaceId}/templates/{templateId}/forms": {
         function: {
           handler: "services/functions/template/listForms.main",
           bind: [formTable],

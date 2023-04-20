@@ -121,12 +121,14 @@ export default function ISO() {
 
     useEffect(() => {
       async function prepContent(text) {
-        const libraryRegex = /!\[library\]\(([a-f\d-]+)\)/g; // matches ![library](/doc/{docId})
+        const libraryRegex = /!\[library\]\(\/workspace\/([a-f\d-]+)\/doc\/([a-f\d-]+)\)/g;
+
         let match = libraryRegex.exec(text);
         while (match) {
-          const docId = match[1];
+          const workspaceId = match[1];
+          const docId = match[2];
 
-          const { fileURL, note } = await makeApiCall("GET", `/docs/${docId}`);
+          const { fileURL, note } = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
           // const replacement = `![${note}](${fileURL} "${note}")`;
           const replacement = `<img alt="${note}" src="${fileURL}"/>`;
           text = text.replace(match[0], replacement);

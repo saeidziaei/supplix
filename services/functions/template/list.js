@@ -26,7 +26,7 @@ async function getFormCount(tenant, workspaceId, templateId) {
     KeyConditionExpression: "tenant_workspaceId = :tenant_workspaceId",
     FilterExpression: "templateId = :templateId",
     ExpressionAttributeValues: {
-      ":tenant_workspaceId": `${tenant}_${workspaceUser.workspaceId}`,
+      ":tenant_workspaceId": `${tenant}_${workspaceId}`,
       ":templateId": templateId,
     },
   };

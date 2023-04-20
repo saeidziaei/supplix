@@ -9,17 +9,20 @@ import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
+import { useParams } from "react-router-dom";
+import { useAppContext } from "../lib/contextLib";
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { currentWorkspace } = useAppContext();
 
   useEffect(() => {
     async function onLoad() {
       try {
         const templates = await loadTemplates();
-
         setTemplates(templates);
+
       } catch (e) {
         onError(e);
       }
@@ -31,7 +34,7 @@ export default function FormTemplates() {
   }, []);
 
   async function loadTemplates() {
-    return await makeApiCall("GET", `/templates`);
+    return await makeApiCall("GET", `/workspaces/${currentWorkspace.workspaceId}/templates`);
   }
 
   function renderTemplate(t) {

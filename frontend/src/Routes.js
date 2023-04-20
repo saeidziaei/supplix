@@ -48,7 +48,6 @@ export default function Links(tenant) {
       <Route path="/workspace/:workspaceId/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
 
 
-
       <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
       <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />
 
