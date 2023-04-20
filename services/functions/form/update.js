@@ -1,7 +1,7 @@
 import handler, { getUser } from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
-export const main = handler(async (event, tenant) => {
+export const main = handler(async (event, tenant, workspaceUser) => {
   const username = event.requestContext.authorizer.jwt.claims.sub;
   const user = await getUser(username);
 
@@ -24,7 +24,7 @@ export const main = handler(async (event, tenant) => {
     const getCurrentRecordParams = {
       TableName: process.env.FORM_TABLE,
       Key: {
-        tenant: tenant,
+        tenant_workspaceId: `${tenant}_${workspaceUser.workspaceId}`,
         formId: event.pathParameters.formId,
       },
     };
@@ -41,7 +41,7 @@ export const main = handler(async (event, tenant) => {
   const params = {
     TableName: process.env.FORM_TABLE,
     Key: {
-      tenant: tenant,
+      tenant_workspaceId: `${tenant}_${workspaceUser.workspaceId}`,
       formId: event.pathParameters.formId,
     },
     UpdateExpression: updateExpression,

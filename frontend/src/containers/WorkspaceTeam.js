@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Table } from "semantic-ui-react";
+import { Button, Dimmer, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Segment, Table } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
@@ -10,6 +10,8 @@ import { useAppContext } from "../lib/contextLib";
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState(null);
+  let { state } = useLocation();
+  const { loadAppWorkspace } = useAppContext();
   const [members, setMembers] = useState([]);
   const [newMember, setNewMember] = useState(null);
   const [newMemberRole, setNewMemberRole] = useState("Member");
@@ -17,8 +19,6 @@ export default function WorkspaceTeam(props) {
   const [isInAddMode, setIsInAddMode] = useState(false);
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  let { state } = useLocation();
-  const { loadAppWorkspace } = useAppContext();
   
   function validateForm() {
     return true; // file.current
@@ -168,20 +168,25 @@ export default function WorkspaceTeam(props) {
         userId: newMember,
         role: newMemberRole,
       };
-      console.log("member", member);
       await makeApiCall("POST", `/workspaces/${workspaceId}/members`, member);
-      members.push(member);
+      setMembers([...members, member]);
     } catch (e) {
       onError(e);
-      
-    }
-    finally {
+    } finally {
       setIsLoading(false);
       setIsInAddMode(false);
     }
   }
   async function deleteMember(userId) {
-    return await makeApiCall("DELETE", `/workspaces/${workspaceId}/members/${userId}`);
+    try {
+      setIsLoading(true);
+      await makeApiCall("DELETE", `/workspaces/${workspaceId}/members/${userId}`);
+      setMembers(members.filter(member => member.userId !== userId)); 
+    } catch (e) {
+      onError(e);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
 
@@ -224,9 +229,11 @@ export default function WorkspaceTeam(props) {
                   return (
                     <Table.Row key={m.userId}>
                       <Table.Cell>
-                        <Icon name={m.role === "Owner" ? "chess king" : "user"} size={m.role === "Owner" ? "large" : ""} color={m.role === "Owner" ? "green" : "grey"} />
+                        <Icon
+                          name={m.role === "Owner" ? "chess king" : "user"}
+                          color={m.role === "Owner" ? "green" : "grey"}
+                        />
                       </Table.Cell>
-
                       <Table.Cell>
                         <strong>
                           {getUserById(users, m.userId).given_name}
@@ -245,16 +252,18 @@ export default function WorkspaceTeam(props) {
             </Table>
           )}
           {!isInAddMode ? (
-            <Button basic onClick={() => setIsInAddMode(true)}>
+            nonMembers().length > 0 ?
+            (<Button basic onClick={() => setIsInAddMode(true)}>
               Add Team Member
-            </Button>
+            </Button>) : <Header as="h4">All users have already been added to this workspace</Header>
           ) : (
-            <>
+            <Segment>
               <UserPicker
                 users={nonMembers()}
                 value={newMember}
                 onChange={(userId) => setNewMember(userId)}
               />
+              <Divider hidden />
               <Dropdown
                 fluid
                 selection
@@ -274,14 +283,19 @@ export default function WorkspaceTeam(props) {
               <Button basic onClick={() => setIsInAddMode(false)}>
                 Cancel
               </Button>
-            </>
+            </Segment>
           )}
         </Grid.Column>
       </Grid>
     );
   }
 
-  if (isLoading) return <Loader active />;
+  // if (isLoading) return <Loader active />;
 
-  return renderMembers();
+  return (
+    <Dimmer.Dimmable as={Segment} blurring dimmed={isLoading}>
+      <Dimmer active={isLoading} />
+      {renderMembers()}
+    </Dimmer.Dimmable>
+  );
 }

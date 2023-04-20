@@ -11,7 +11,7 @@ import { useAppContext } from "../lib/contextLib";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
-  const { currentWorkspace, setCurrentWorkspace } = useAppContext();
+  const { currentWorkspace, loadAppWorkspace } = useAppContext();
   const { workspaceId } = useParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +21,7 @@ export default function Docs() {
       try {
         const items = await loadDocs();
         setDocs(items);
+        loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
       }
@@ -28,16 +29,11 @@ export default function Docs() {
       setIsLoading(false);
     }
 
-    if (workspaceId != currentWorkspace) {
-      // URL overrides app context
-      setCurrentWorkspace(workspaceId);
-    }
-
     onLoad();
   }, []);
 
   async function loadDocs() {
-    return await makeApiCall("GET", `/docs`);
+    return await makeApiCall("GET", `/workspaces/${workspaceId}/docs`);
   }
 
 
@@ -62,8 +58,8 @@ export default function Docs() {
           }, []);
 
     return (<>
-    <FormHeader heading={`Workspace - ${currentWorkspace}`} />
     <FormHeader heading="Library" />
+    <FormHeader heading={`Workspace - ${currentWorkspace.workspaceName}`} />
     {
       (!docs || docs.length == 0) && (
         <Message
@@ -98,7 +94,7 @@ export default function Docs() {
                             verticalAlign="middle"
                           />
                           <List.Content>
-                            <LinkContainer to={`/doc/${d.docId}`}>
+                            <LinkContainer to={`/workspace/${workspaceId}/doc/${d.docId}`}>
                               <List.Header as="a">{d.fileName}</List.Header>
                             </LinkContainer>
 
@@ -114,7 +110,7 @@ export default function Docs() {
       )
     }
     <Divider hidden/>
-    <LinkContainer to={`/doc`}>
+    <LinkContainer to={`/workspace/${workspaceId}/doc`}>
       <Button basic primary>New</Button>
     </LinkContainer>
     </>);

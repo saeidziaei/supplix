@@ -43,9 +43,9 @@ export default function Links(tenant) {
       <Route path="/tenants/:tenantId/user/:username?" element={<AuthenticatedRoute><User /></AuthenticatedRoute>} />
       <Route path="/templates" element={<AuthenticatedRoute><FormTemplates /></AuthenticatedRoute>} />
       <Route path="/template/:templateId?" element={<AuthenticatedRoute><FormTemplate /></AuthenticatedRoute>} />
-      <Route path="/registers" element={<AuthenticatedRoute><FormRegisters /></AuthenticatedRoute>} />
-      <Route path="/register/:templateId" element={<AuthenticatedRoute><FormRegister /></AuthenticatedRoute>} />
-      <Route path="/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/registers" element={<AuthenticatedRoute><FormRegisters /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/register/:templateId" element={<AuthenticatedRoute><FormRegister /></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
 
 
 

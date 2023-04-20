@@ -2,12 +2,12 @@ import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 import s3 from "../../util/s3";
 
-export const main = handler(async (event, tenant) => {
+export const main = handler(async (event, tenant, workspaceUser) => {
 
   const params = {
     TableName: process.env.DOC_TABLE,
     Key: {
-      tenant: tenant,
+      tenant_workspaceId: `${tenant}_${workspaceUser.workspaceId}`, // pk
       docId: event.pathParameters.docId
     },
   };

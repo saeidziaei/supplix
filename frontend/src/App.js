@@ -160,7 +160,11 @@ function App() {
                 <Menu vertical>
                   <Dropdown
                     item
-                    text={currentWorkspace ? currentWorkspace.workspaceName : "Workspace not selected"}
+                    text={
+                      currentWorkspace
+                        ? currentWorkspace.workspaceName
+                        : "Workspace not selected"
+                    }
                   >
                     {workspaces && (
                       <Dropdown.Menu>
@@ -241,26 +245,28 @@ function App() {
                           </Nav.Link>
                         </LinkContainer>
                       )}
-
-                      <LinkContainer to="/registers">
-                        <Nav.Link as={Menu.Item}>
-                          <span>
-                            <Icon name="folder open outline" />
-                            Register
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
                       {currentWorkspace && (
-                        <LinkContainer
-                          to={`/workspace/${currentWorkspace}/docs`}
-                        >
-                          <Nav.Link as={Menu.Item}>
-                            <span>
-                              <Icon name="book" />
-                              Library
-                            </span>
-                          </Nav.Link>
-                        </LinkContainer>
+                        <>
+                          <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/registers`}>
+                            <Nav.Link as={Menu.Item}>
+                              <span>
+                                <Icon name="folder open outline" />
+                                Register
+                              </span>
+                            </Nav.Link>
+                          </LinkContainer>
+
+                          <LinkContainer
+                            to={`/workspace/${currentWorkspace.workspaceId}/docs`}
+                          >
+                            <Nav.Link as={Menu.Item}>
+                              <span>
+                                <Icon name="book" />
+                                Library
+                              </span>
+                            </Nav.Link>
+                          </LinkContainer>
+                        </>
                       )}
                       {isTopLevelAdmin && (
                         <LinkContainer to="/tenants">

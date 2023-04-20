@@ -26,7 +26,6 @@ export default function UserPicker({ users, value, onChange, disabled = false })
       trigger={selected ? <User user={selected} /> : <span>Select User</span>}
       options={options}
       onChange={handleChange}
-      placeholder="Choose a user to add to the team"
     />
   );
 }

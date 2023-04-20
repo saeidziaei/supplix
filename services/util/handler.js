@@ -11,7 +11,7 @@ export default function handler(lambda) {
     try {
       tenant = getTenantFromRequest(event);
       workspaceId = getWorkspaceFromRequest(event);
-      const workspaceUser = workspaceId ? getWorkspaceUser(tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub) : null;
+      const workspaceUser = workspaceId ? await getWorkspaceUser(tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub) : null;
 
       if (workspaceId && !workspaceUser) { // workspace is in the url path but the association for this user doesn't exist
         body = {error: 'Unauthorised. User not in workspace. Contact your administrator please.'};

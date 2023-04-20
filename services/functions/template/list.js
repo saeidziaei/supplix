@@ -1,6 +1,6 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
-export const main = handler(async (event, tenant) => {
+export const main = handler(async (event, tenant, workspaceUser) => {
   const params = {
     TableName: process.env.TEMPLATE_TABLE,
     KeyConditionExpression: "tenant = :tenant",
@@ -12,7 +12,7 @@ export const main = handler(async (event, tenant) => {
 
   const templates = result.Items;
   const promises = templates.map(async (template) => {
-    const formCount = await getFormCount(template.tenant, template.templateId);
+    const formCount = await getFormCount(tenant, workspaceUser.workspaceId, template.templateId);
     template.formCount = formCount;
     return template;
   });
@@ -20,13 +20,13 @@ export const main = handler(async (event, tenant) => {
   return Promise.all(promises);
 });
 
-async function getFormCount(tenant, templateId) {
+async function getFormCount(tenant, workspaceId, templateId) {
   const params = {
     TableName: process.env.FORM_TABLE,
-    KeyConditionExpression: "tenant = :tenant",
+    KeyConditionExpression: "tenant_workspaceId = :tenant_workspaceId",
     FilterExpression: "templateId = :templateId",
     ExpressionAttributeValues: {
-      ":tenant": tenant,
+      ":tenant_workspaceId": `${tenant}_${workspaceUser.workspaceId}`,
       ":templateId": templateId,
     },
   };

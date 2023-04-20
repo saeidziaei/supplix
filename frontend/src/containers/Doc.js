@@ -10,13 +10,13 @@ import { Formik } from "formik";
 import placeholderImage from './fileplaceholder.jpg'
 import { LinkContainer } from "react-router-bootstrap";
 import { useAppContext } from "../lib/contextLib";
+import FormHeader from "../components/FormHeader";
 
 
 export default function Doc() {
-  const file = useRef(null);
-  const { currentWorkspace, setCurrentWorkspace } = useAppContext();
-
   const { workspaceId, docId } = useParams();
+  const { currentWorkspace, loadAppWorkspace } = useAppContext();
+  const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -27,15 +27,18 @@ export default function Doc() {
 
   useEffect(() => {
     async function loadDoc() {
-      return await makeApiCall("GET", `/docs/${docId}`);
+      return await makeApiCall(
+        "GET",
+        `/workspaces/${workspaceId}/docs/${docId}`
+      );
     }
 
     async function onLoad() {
       try {
         if (docId) {
           const item = await loadDoc();
-
           setDoc(item);
+          loadAppWorkspace(workspaceId);
         }
       } catch (e) {
         onError(e);
@@ -43,11 +46,9 @@ export default function Doc() {
 
       setIsLoading(false);
     }
-    
+
     onLoad();
   }, []);
-
-
 
   function handleFileChange(event) {
     file.current = event.target.files[0];
@@ -90,7 +91,7 @@ export default function Doc() {
           category: values.category,
           note: values.note,
         });
-        nav("/docs");
+        nav(`/workspace/${workspaceId}/docs`);
 
         setSubmitting(false);
       });
@@ -103,7 +104,7 @@ export default function Doc() {
   }
 
   async function createDoc(item) {
-    return await makeApiCall("POST", "/docs", item);
+    return await makeApiCall("POST", `/workspaces/${workspaceId}/docs`, item);
   }
   function rednerUploadForm() {
     return (
@@ -113,8 +114,8 @@ export default function Doc() {
         verticalAlign="middle"
       >
         <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" color="teal" textAlign="center">
-            <Icon name="box" color="teal" /> Upload to library
+          <Header as="h2" color="black" textAlign="center">
+            <Icon name="box" color="grey" /> Upload to library
           </Header>
           <Formik
             initialValues={{ category: "", note: "" }}
@@ -151,11 +152,12 @@ export default function Doc() {
                     value={values.note}
                     onChange={handleChange}
                   />
-                  <LinkContainer to={`/docs`}><Button>Back</Button></LinkContainer> 
-                  <Button primary type="submit" disabled={isSubmitting}>
+                  <LinkContainer to={`/workspace/${workspaceId}/docs`}>
+                    <Button basic>Back</Button>
+                  </LinkContainer>
+                  <Button basic primary type="submit" disabled={isSubmitting}>
                     Submit
                   </Button>
-                  
                 </Segment>
               </Form>
             )}
@@ -168,29 +170,28 @@ export default function Doc() {
   function renderDoc() {
     return (
       <>
-        <Grid 
+        <Grid
           textAlign="center"
           style={{ height: "100vh" }}
           verticalAlign="middle"
         >
-          <Grid.Column width="8" >
-              
-
-              <Image
-                src={doc.fileURL}
-                wrapped
-                alt={doc.fileName}
-                onError={(e) => {
-                  e.target.src = placeholderImage;
-                }}
-              />
-              <Header>{doc.note}</Header>
-              <Label>{doc.category}</Label>
-              <p><br/>
-              <a href={doc.fileURL} download={doc.fileName}>Download {doc.fileName}</a>
-              
-              </p>
-              
+          <Grid.Column width="8">
+            <Image
+              src={doc.fileURL}
+              wrapped
+              alt={doc.fileName}
+              onError={(e) => {
+                e.target.src = placeholderImage;
+              }}
+            />
+            <Header>{doc.note}</Header>
+            <Label>{doc.category}</Label>
+            <p>
+              <br />
+              <a href={doc.fileURL} download={doc.fileName}>
+                Download {doc.fileName}
+              </a>
+            </p>
           </Grid.Column>
         </Grid>
       </>
@@ -199,6 +200,10 @@ export default function Doc() {
 
   if (isLoading) return <Loader active />;
 
-  if (doc) return renderDoc();
-  else return rednerUploadForm();
+  return (
+    <>
+      <FormHeader heading={`Workspace - ${currentWorkspace.workspaceName}`} />
+      {doc ? renderDoc() : rednerUploadForm()}
+    </>
+  );
 }

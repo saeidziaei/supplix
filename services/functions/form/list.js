@@ -3,10 +3,9 @@ import dynamoDb from "../../util/dynamodb";
 export const main = handler(async (event, tenant, workspaceUser) => {
 const params = {
   TableName: process.env.FORM_TABLE,
-  KeyConditionExpression: "tenant = :tenant AND begins_with(workspaceId_formId, :workspaceId)",
+  KeyConditionExpression: "tenant_workspaceId = :tenant_workspaceId",
   ExpressionAttributeValues: {
-    ":tenant": tenant,
-    ":workspaceId": workspaceUser.workspaceId,
+    ":tenant_workspaceId": `${tenant}_${workspaceUser.workspaceId}`, // pk
   },
 };
 const result = await dynamoDb.query(params);

@@ -171,15 +171,27 @@ export function AuthAndApiStack({ stack, app }) {
           },
         },
       },
+      "GET   /myworkspaces": {
+        function: {
+          handler: "services/functions/workspacemember/getmyworkspaces.main",
+          bind: [workspaceTable],
+        },
+      },
       "GET   /workspaces/{workspaceId}/members": {
         function: {
           handler: "services/functions/workspacemember/list.main",
           bind: [workspaceUserTable],
         },
       },
-      "POST   /workspaces/{workspaceId}/members": {
+      "POST  /workspaces/{workspaceId}/members": {
         function: {
           handler: "services/functions/workspacemember/create.main",
+          bind: [workspaceUserTable],
+        },
+      },
+      "DELETE /workspaces/{workspaceId}/members/{userId}": {
+        function: {
+          handler: "services/functions/workspacemember/delete.main",
           bind: [workspaceUserTable],
         },
       },
@@ -189,25 +201,25 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/doc/getUrlForPut.main",
         },
       },
-      "GET /docs": {
+      "GET /workspaces/{workspaceId}/docs": {
         function: {
           handler: "services/functions/doc/list.main",
           bind: [docTable],
         },
       },
-      "GET /docs/{docId}": {
+      "GET /workspaces/{workspaceId}/docs/{docId}": {
         function: {
           handler: "services/functions/doc/get.main",
           bind: [docTable],
         },
       },
-      "POST /docs": {
+      "POST /workspaces/{workspaceId}/docs": {
         function: {
           handler: "services/functions/doc/create.main",
           bind: [docTable],
         },
       },
-      "DELETE /docs/{docId}": {
+      "DELETE /workspaces/{workspaceId}/docs/{docId}": {
         function: {
           handler: "services/functions/doc/delete.main",
         },
@@ -444,7 +456,7 @@ export function AuthAndApiStack({ stack, app }) {
     //   ],
     // }),
   ]);
-  api.attachPermissionsToRoute("GET /docs/{docId}", ["s3"]);
+  api.attachPermissionsToRoute("GET /workspaces/{workspaceId}/docs/{docId}", ["s3"]);
 
 
   auth.attachPermissionsForAuthUsers(auth, [
