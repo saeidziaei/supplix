@@ -1,32 +1,35 @@
 import AWS from "aws-sdk";
 import dynamodb from "./dynamodb";
+import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "./constants";
 
 export default function handler(lambda) {
   return async function (event, context) {
-    let body, statusCode, tenant, workspaceId;
+    let body, statusCode;
 
     // Start debugger
     // debug.init(event);
 
     try {
-      tenant = getTenantFromRequest(event);
-      workspaceId = getWorkspaceFromRequest(event);
-      const workspaceUser = workspaceId ? await getWorkspaceUser(tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub) : null;
+      const tenant = getTenantFromRequest(event);
+      const workspaceId = getWorkspaceFromRequest(event);
+      const allowedGroups = getAllowedGroups();
+      const userGroups = getUserGroups(event);
+      const isAdmin = userGroups.includes(TOP_LEVEL_ADMIN_GROUP) || userGroups.includes(ADMIN_GROUP);
+      let workspaceUser = workspaceId
+        ? await getWorkspaceUser(isAdmin,
+            tenant,
+            workspaceId,
+            event.requestContext.authorizer.jwt.claims.sub
+          )
+        : null;
+      
 
-      if (workspaceId && !workspaceUser) { // workspace is in the url path but the association for this user doesn't exist
+      if (workspaceId && !workspaceUser) { // workspace is in the url path but the user is not in the team 
         body = {error: 'Unauthorised. User not in workspace. Contact your administrator please.'};
         statusCode = 403;
       }
       else {
-        const allowedGroups = process.env.ALLOWED_GROUPS
-          ? process.env.ALLOWED_GROUPS.split(",")
-          : [];
-        const userGroups = getUserGroups(event);
-
-        if (
-          allowedGroups.length === 0 ||
-          allowedGroups.some((group) => userGroups.includes(group))
-        ) {
+        if (allowedGroups.length === 0 || allowedGroups.some((group) => userGroups.includes(group))) {
           body = await lambda(event, tenant, workspaceUser, context);
           statusCode = 200;
         } else {
@@ -57,7 +60,11 @@ export default function handler(lambda) {
 }
 
 
-async function getWorkspaceUser(tenant, workspaceId, userId) {
+function getAllowedGroups() {
+  return process.env.ALLOWED_GROUPS ? process.env.ALLOWED_GROUPS.split(",") : [];
+}
+
+async function getWorkspaceUser(isAdmin, tenant, workspaceId, userId) {
   const params = {
     TableName: process.env.WORKSPACEUSER_TABLE,
     Key: {
@@ -68,7 +75,13 @@ async function getWorkspaceUser(tenant, workspaceId, userId) {
 
   const result = await dynamodb.get(params);
   if (!result.Item) {
-    return null
+    if (isAdmin) // admin can access any workspace
+      return {
+        workspaceId,
+        userId,
+        role: "Owner",
+      };
+    else return null;
   }
   return result.Item;
 

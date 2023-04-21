@@ -153,6 +153,12 @@ function App() {
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
                     ></Button>
+                    <Button
+                      color="grey"
+                      icon="refresh"
+                      onClick={() => {window.location.reload();}}
+                    ></Button>
+
                   </List.Item>
                 </List>
               </Grid.Column>
@@ -172,7 +178,7 @@ function App() {
                           <Dropdown.Item
                             key={index}
                             onClick={() => setCurrentWorkspace(w)}
-                          >
+                          ><Icon name={w.role === "Owner" ? "chess king" : "user"} />
                             {w.workspaceName}
                           </Dropdown.Item>
                         ))}

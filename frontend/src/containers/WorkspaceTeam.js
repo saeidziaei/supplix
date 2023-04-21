@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Dimmer, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Segment, Table } from "semantic-ui-react";
+import { Button, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Segment, Table } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
-import { onError } from "../lib/errorLib";
-import { normaliseCognitoUsers, getUserById } from "../lib/helpers";
 import { useAppContext } from "../lib/contextLib";
+import { onError } from "../lib/errorLib";
+import { getUserById, normaliseCognitoUsers } from "../lib/helpers";
 
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
@@ -34,115 +34,7 @@ export default function WorkspaceTeam(props) {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
     async function loadUsers() {
-      // return await makeApiCall("GET", `/users`); // ADMIN
-
-      return [
-        {
-          "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971fe",
-          "Attributes": [
-              {
-                  "Name": "sub",
-                  "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971fe"
-              },
-              {
-                  "Name": "email_verified",
-                  "Value": "true"
-              },
-              {
-                  "Name": "custom:tenant",
-                  "Value": "isocloud"
-              },
-              {
-                  "Name": "given_name",
-                  "Value": "FirstSam"
-              },
-              {
-                  "Name": "family_name",
-                  "Value": "King"
-              },
-              {
-                  "Name": "email",
-                  "Value": "sziaei+utt@gmail.com"
-              }
-          ],
-          "UserCreateDate": "2023-03-24T06:40:46.630Z",
-          "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
-          "Enabled": true,
-          "UserStatus": "CONFIRMED",
-          "isAdmin": false,
-          "isTopLevelAdmin": true
-      },
-      {
-        "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971f2",
-        "Attributes": [
-            {
-                "Name": "sub",
-                "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971f2"
-            },
-            {
-                "Name": "email_verified",
-                "Value": "true"
-            },
-            {
-                "Name": "custom:tenant",
-                "Value": "isocloud"
-            },
-            {
-                "Name": "given_name",
-                "Value": "SecondSam"
-            },
-            {
-                "Name": "family_name",
-                "Value": "King"
-            },
-            {
-                "Name": "email",
-                "Value": "sziaei+utt@gmail.com"
-            }
-        ],
-        "UserCreateDate": "2023-03-24T06:40:46.630Z",
-        "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
-        "Enabled": true,
-        "UserStatus": "CONFIRMED",
-        "isAdmin": false,
-        "isTopLevelAdmin": true
-    },{
-      "Username": "983e8a6f-a5b3-418e-b2e2-cce42bd971f3",
-      "Attributes": [
-          {
-              "Name": "sub",
-              "Value": "983e8a6f-a5b3-418e-b2e2-cce42bd971f3"
-          },
-          {
-              "Name": "email_verified",
-              "Value": "true"
-          },
-          {
-              "Name": "custom:tenant",
-              "Value": "isocloud"
-          },
-          {
-              "Name": "given_name",
-              "Value": "ThirdSam"
-          },
-          {
-              "Name": "family_name",
-              "Value": "King"
-          },
-          {
-              "Name": "email",
-              "Value": "sziaei+utt@gmail.com"
-          }
-      ],
-      "UserCreateDate": "2023-03-24T06:40:46.630Z",
-      "UserLastModifiedDate": "2023-04-05T05:24:21.802Z",
-      "Enabled": true,
-      "UserStatus": "CONFIRMED",
-      "isAdmin": false,
-      "isTopLevelAdmin": true
-  }
-       
-      ];
+      return await makeApiCall("GET", `/users`); // ADMIN
     }
     async function onLoad() {
       try {
@@ -231,7 +123,7 @@ export default function WorkspaceTeam(props) {
                       <Table.Cell>
                         <Icon
                           name={m.role === "Owner" ? "chess king" : "user"}
-                          color={m.role === "Owner" ? "green" : "grey"}
+                          color={m.role === "Owner" ? "black" : "grey"}
                         />
                       </Table.Cell>
                       <Table.Cell>
@@ -277,7 +169,7 @@ export default function WorkspaceTeam(props) {
                 }))}
               />
               <Divider hidden />
-              <Button basic onClick={addMember}>
+              <Button basic onClick={addMember} disabled={!(newMember && newMemberRole)}>
                 Add
               </Button>
               <Button basic onClick={() => setIsInAddMode(false)}>
@@ -290,12 +182,7 @@ export default function WorkspaceTeam(props) {
     );
   }
 
-  // if (isLoading) return <Loader active />;
+  if (isLoading) return <Loader active />;
 
-  return (
-    <Dimmer.Dimmable as={Segment} blurring dimmed={isLoading}>
-      <Dimmer active={isLoading} />
-      {renderMembers()}
-    </Dimmer.Dimmable>
-  );
+  return renderMembers();
 }

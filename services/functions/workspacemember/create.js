@@ -5,11 +5,11 @@ import handler, { getUserGroups } from "../../util/handler";
 export const main = handler(async (event, tenant, workspaceUser) => {
 
   const userGroups = getUserGroups(event);
-  if (workspaceUser.role !== "Owner" && !(
-    userGroups.includes(TOP_LEVEL_ADMIN_GROUP) ||
-    userGroups.includes(ADMIN_GROUP) 
-    )) {
+  if (workspaceUser.role !== "Owner") {
     throw new Error("User is not the owner of this workspace.");
+  }
+  if (workspaceUser.userId === data.userId) {
+    throw new Error("You cannot add yourself to the team.");
   }
 
   const data = JSON.parse(event.body);

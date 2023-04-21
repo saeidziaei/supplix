@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
   Button, Card,
-  Divider, Icon, Message
+  Divider,
+  Message
 } from "semantic-ui-react";
 
 import { LinkContainer } from "react-router-bootstrap";
 import { Loader } from "semantic-ui-react";
-import { makeApiCall } from "../lib/apiLib";
-import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
-import { useParams } from "react-router-dom";
+import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
+import { onError } from "../lib/errorLib";
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { currentWorkspace } = useAppContext();
 
   useEffect(() => {
     async function onLoad() {
@@ -34,7 +33,7 @@ export default function FormTemplates() {
   }, []);
 
   async function loadTemplates() {
-    return await makeApiCall("GET", `/workspaces/${currentWorkspace.workspaceId}/templates`);
+    return await makeApiCall("GET", `/templates`);
   }
 
   function renderTemplate(t) {
