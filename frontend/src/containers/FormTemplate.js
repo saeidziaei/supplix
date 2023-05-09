@@ -210,7 +210,7 @@ export default function FormTemplate() {
                       icon="x"
                     ></Button>
                   </Grid.Column>
-                  <Grid.Column width={12} verticalAlign="middle">
+                  <Grid.Column width={10} verticalAlign="middle">
                     <Input
                       fluid
                       label="Section"

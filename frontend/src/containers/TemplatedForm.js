@@ -152,7 +152,7 @@ export default function TemplatedForm() {
           <br />{" "}
           {formRecord.updatedAt
             ? "Update " +
-              renderActionInfo(formRecord.createdAt, formRecord.createdByUser)
+              renderActionInfo(formRecord.updatedAt, formRecord.updatedByUser)
             : ""}
         </p>
       )}

@@ -1,7 +1,10 @@
 import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
 import {
-  List, Message
+  Button,
+  Grid,
+  Icon,
+  List, Message, Segment
 } from "semantic-ui-react";
 
 import { LinkContainer } from "react-router-bootstrap";
@@ -53,29 +56,42 @@ export default function FormRegisters() {
             icon="exclamation"
           />
         )}
+        <Grid>
+          <Grid.Column width={10}>        <Segment>
         <List divided relaxed>
           {templates &&
             templates.map((t) => {
               const def = t.templateDefinition;
               return (
                 <List.Item key={t.templateId}>
-                  <List.Icon
-                    name="folder open outline"
-                    color="blue"
-                    size="large"
-                    verticalAlign="middle"
-                  />
+                  <List.Content floated="right">
+                    <LinkContainer
+                      to={`/workspace/${workspaceId}/form/${t.templateId}`}
+                    >
+                      <Button basic primary size="small" ><Icon name="pencil"/>
+                        New Record
+                      </Button>
+                    </LinkContainer>
+                  </List.Content>
                   <List.Content>
-                    <LinkContainer to={`/workspace/${workspaceId}/register/${t.templateId}`}>
+                    <LinkContainer
+                      to={`/workspace/${workspaceId}/register/${t.templateId}`}
+                    >
                       <List.Header as="a">{def.title}</List.Header>
                     </LinkContainer>
-                    <List.Description>{`${t.formCount} ${pluralize("record", t.formCount)}`}</List.Description>
+                    <List.Description>{`${t.formCount} ${pluralize(
+                      "record",
+                      t.formCount
+                    )}`}</List.Description>
                   </List.Content>
                 </List.Item>
               );
             })}
           
         </List>
+        </Segment></Grid.Column>
+        </Grid>
+
       </>
     );
   }

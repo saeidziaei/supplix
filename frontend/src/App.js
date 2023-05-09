@@ -199,9 +199,10 @@ function App() {
                   vertical
                   onHide={() => setIsSidebarVisible(false)}
                   animation="push"
+                  size="small"
                 >
                   <LinkContainer to="/">
-                    <Nav.Link as={Menu.Item}>
+                    <Nav.Link as={Menu.Item} >
                       <span>
                         <Icon name="home" />
                         Home
@@ -242,6 +243,7 @@ function App() {
                         </Menu.Menu>
                       </Menu.Item>
                       {(isAdmin || isTopLevelAdmin) && (
+                        <>
                         <LinkContainer to="/templates">
                           <Nav.Link as={Menu.Item}>
                             <span>
@@ -250,6 +252,15 @@ function App() {
                             </span>
                           </Nav.Link>
                         </LinkContainer>
+                        <LinkContainer to="/workspaces">
+                          <Nav.Link as={Menu.Item}>
+                            <span>
+                              <Icon name="laptop" />
+                              Workspaces
+                            </span>
+                          </Nav.Link>
+                        </LinkContainer>
+                        </>
                       )}
                       {currentWorkspace && (
                         <>
@@ -289,8 +300,8 @@ function App() {
                         <LinkContainer to="/users">
                           <Nav.Link as={Menu.Item}>
                             <span>
-                              <Icon name="users" color="red" />
-                              Users
+                              <Icon name="users"  />
+                              Employees
                             </span>
                           </Nav.Link>
                         </LinkContainer>

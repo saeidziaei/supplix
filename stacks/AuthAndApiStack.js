@@ -10,10 +10,10 @@ import { StringAttribute } from "aws-cdk-lib/aws-cognito";
 export function AuthAndApiStack({ stack, app }) {
   const {
     bucket,
-    formTable,
     templateTable,
     tenantTable,
     isoTable,
+    formTable,
     docTable,
     workspaceTable,
     workspaceUserTable,
@@ -119,10 +119,10 @@ export function AuthAndApiStack({ stack, app }) {
       authorizer: "jwt",
       function: {
         environment: {
-          FORM_TABLE: formTable.tableName,
           TEMPLATE_TABLE: templateTable.tableName,
           TENANT_TABLE: tenantTable.tableName,
           ISO_TABLE: isoTable.tableName,
+          FORM_TABLE: formTable.tableName,
           DOC_TABLE: docTable.tableName,
           WORKSPACE_TABLE: workspaceTable.tableName,
           WORKSPACEUSER_TABLE: workspaceUserTable.tableName,

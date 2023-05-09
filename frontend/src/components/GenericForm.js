@@ -28,9 +28,10 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
     switch (f.type) {
       case "info":
         return (
-          <Header as="h4" color="grey">
-            {f.title}
-          </Header>
+          <div
+            className="markdown"
+            dangerouslySetInnerHTML={{ __html: f.title }}
+          />
         );
       case "number":
         return (
@@ -44,7 +45,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
         );
 
       case "text":
-        return <Input disabled={disabled} size={size} name={name} id={id} value={values[name]} />;
+        return disabled ? <div style={{width: "100%", textAlign: "left"}}>{values[name]}</div> : <Input size={size} name={name} id={id} value={values[name]} style={{color: "black!important"}} />;
 
       case "wysiwyg":
         return (
@@ -200,7 +201,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
             {!disabled && handleSubmit && (
               <>
                 <Button
-                  positive
+                  primary
                   type="submit"
                   className="ms-auto hide-in-print"
                 >
@@ -268,7 +269,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
     return (
       <Segment basic vertical key={s.title} size="tiny">
         <Grid>
-          <Grid.Column width={14}>
+          <Grid.Column width={16}>
             <Table celled compact stackable>
               <Table.Header>
                 <Table.Row>
@@ -280,8 +281,8 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
                   .filter((f) => f.type !== "aggregate")
                   .map((f, i) => (
                     <Table.Row key={f.guid}>
-                      <Table.Cell width={4} style={{backgroundColor: "#eee"}}>
-                        {f.type === "info" ? "" : f.title}
+                      <Table.Cell width={4} style={{backgroundColor: "#eee", color: "#5e5e5e"}}>
+                        {f.type === "info" ? "" : f.name}
                       </Table.Cell>
                       <Table.Cell width={8} textAlign="center">
                         {renderField(f, values, setFieldValue)}
@@ -291,9 +292,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
               </Table.Body>
             </Table>
           </Grid.Column>
-          <Grid.Column width={2} verticalAlign="middle" textAlign="center">
-            Owner
-          </Grid.Column>
+
         </Grid>
       </Segment>
     );

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button, Dropdown, Form, Grid, Table } from "semantic-ui-react";
 import { BlockPicker } from "react-color";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 
 
 export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) {
@@ -208,7 +210,6 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   return (
     <>
       <Form size="tiny">
-        
         <Button
           size="mini"
           basic
@@ -217,7 +218,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
           circular
           onClick={() => onDelete()}
         ></Button>
-      <Button
+        <Button
           size="mini"
           basic
           icon="copy"
@@ -225,22 +226,8 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
           circular
           onClick={() => onDuplicate()}
         ></Button>
-        <Form.Group>
-          <Form.Input
-            width={4}
-            label="Field name"
-            type="text"
-            value={field.name}
-            onChange={(e) => handleFieldChange("name", e.target.value)}
-          />
-          <Form.Input
-            width={8}
-            label="Question"
-            type="text"
-            value={field.title}
-            onChange={(e) => handleFieldChange("title", e.target.value)}
-          />
-          <Form.Dropdown
+        <Form.Group inline>
+        <Form.Dropdown
             label="Type"
             value={field.type}
             text={getFieldTypeText(field.type)}
@@ -267,6 +254,34 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
               ))}
             </Dropdown.Menu>
           </Form.Dropdown>
+
+          {field.type != "info" && (
+            <Form.Input
+              width={8}
+              label="Prompt"
+              type="text"
+              value={field.name}
+              onChange={(e) => handleFieldChange("name", e.target.value)}
+            />
+          )}
+          {field.type == "info" && (
+            <div style={{width: "70%"}}>
+            <CKEditor
+              editor={ClassicEditor}
+              data={field.title}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                handleFieldChange("title", data)
+              }}
+            /></div>
+          )}
+          {/* <Form.Input
+            width={8}
+            label="Question"
+            type="text"
+            value={field.title}
+            onChange={(e) => handleFieldChange("title", e.target.value)}
+          /> */}
         </Form.Group>
         {getFieldTypeHasOptions(field.type) && renderFieldOptions()}
       </Form>

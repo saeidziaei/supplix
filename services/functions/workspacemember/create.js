@@ -3,7 +3,7 @@ import dynamoDb from "../../util/dynamodb";
 import handler, { getUserGroups } from "../../util/handler";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
-
+  const data = JSON.parse(event.body);
   const userGroups = getUserGroups(event);
   if (workspaceUser.role !== "Owner") {
     throw new Error("User is not the owner of this workspace.");
@@ -12,7 +12,6 @@ export const main = handler(async (event, tenant, workspaceUser) => {
     throw new Error("You cannot add yourself to the team.");
   }
 
-  const data = JSON.parse(event.body);
   const workspaceId = event.pathParameters.workspaceId;
   const params = {
     TableName: process.env.WORKSPACEUSER_TABLE,

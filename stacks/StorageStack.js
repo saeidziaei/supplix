@@ -90,12 +90,12 @@ export function StorageStack({ stack, app }) {
   // Return the bucket and table resources
   return {
     tenantTable,
+    isoTable,
+    templateTable,
+    formTable,
+    docTable,
     workspaceTable,
     workspaceUserTable,
-    isoTable,
-    formTable,
-    templateTable,
-    docTable,
     bucket,
   };
 }
