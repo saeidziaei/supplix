@@ -62,16 +62,24 @@ export default function TemplatedForm() {
   async function handleSubmit(values) {
     setIsLoading(true);
     try {
+      let newFormId;
       if (formId) {
         await updateForm(values);
+        // update the formRecord state with the new form data
+        const updatedForm = { ...formRecord, formValues: values };
+        setFormRecord(updatedForm);
       } else {
-        await createForm(values);
+        const ret = await createForm(values);
+        setFormRecord(ret);
+        newFormId = ret.formId;
       }
-      nav(`/workspace/${workspaceId}/register/${templateId}`); // todo navigate to form register page ??
+
+      nav(`/workspace/${workspaceId}/form/${templateId}/${formId||newFormId}`); 
     } catch (e) {
       onError(e);
     } finally {
       setIsLoading(false);
+      setIsEditing(false);
     }
   }
   async function createForm(values) {
@@ -146,12 +154,12 @@ export default function TemplatedForm() {
         disabled={!editable}
       />
       {formRecord && (
-        <p>
+        <p style={{color: "#bbb"}}>
           Created{" "}
           {renderActionInfo(formRecord.createdAt, formRecord.createdByUser)}{" "}
           <br />{" "}
           {formRecord.updatedAt
-            ? "Update " +
+            ? "Last Edited " +
               renderActionInfo(formRecord.updatedAt, formRecord.updatedByUser)
             : ""}
         </p>

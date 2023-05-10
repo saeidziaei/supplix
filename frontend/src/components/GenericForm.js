@@ -2,36 +2,48 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
 import { Formik } from "formik";
-import {
-  Checkbox,
-  Form,
-  Input,
-  Select
-} from "formik-semantic-ui-react";
+import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
 import {
   Button,
   Grid,
-  Header, Segment,
-  Table
+  Header,
+  Icon,
+  Popup,
+  Segment,
+  Table,
 } from "semantic-ui-react";
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 
-export function GenericForm({ formDef, formData, handleSubmit, disabled, handleCancel }) {
+export function GenericForm({
+  formDef,
+  formData,
+  handleSubmit,
+  disabled,
+  handleCancel,
+}) {
   function renderField(f, values, setFieldValue) {
-    const size = "small";
+    const size = "mini";
     const name = f.name;
     const id = `input-${f.name}`;
     switch (f.type) {
       case "info":
         return (
-          <div
-            className="markdown"
-            dangerouslySetInnerHTML={{ __html: f.title }}
-          />
+          <div style={{ textAlign: "left" }}>
+            <Popup
+              trigger={<Icon name="question" color="blue" circular />}
+              position="bottom center"
+            >
+              <div
+                style={{ textAlign: "left", width: "100%" }}
+                className="markdown"
+                dangerouslySetInnerHTML={{ __html: f.title }}
+              />
+            </Popup>
+          </div>
         );
       case "number":
         return (
@@ -45,7 +57,17 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
         );
 
       case "text":
-        return disabled ? <div style={{width: "100%", textAlign: "left"}}>{values[name]}</div> : <Input size={size} name={name} id={id} value={values[name]} style={{color: "black!important"}} />;
+        return disabled ? (
+          <div style={{ width: "100%", textAlign: "left" }}>{values[name]}</div>
+        ) : (
+          <Input
+            size={size}
+            name={name}
+            id={id}
+            value={values[name]}
+            style={{ color: "black!important" }}
+          />
+        );
 
       case "wysiwyg":
         return (
@@ -70,7 +92,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
         if (selected == "Invalid Date") selected = ""; // new Date();
         return (
           <DatePicker
-          disabled={disabled}
+            disabled={disabled}
             placeholderText="Select"
             isClearable={!disabled}
             size={size}
@@ -86,31 +108,85 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
 
       case "email":
         return (
-          <Input disabled={disabled} size={size} name={name} id={id} icon="at" fluid errorPrompt />
+          <Input
+            disabled={disabled}
+            size={size}
+            name={name}
+            id={id}
+            icon="at"
+            fluid
+            errorPrompt
+          />
         );
 
+      case "multi":
       case "select":
       case "weightedSelect":
+        let newValues = values[name];
+        if (!Array.isArray(newValues)) {
+          // check to see newValues is actually an array as the type might have changed.
+          newValues = []; 
+        }
+
         return (
-          <Button.Group size={size}>
-            {f.options.map((o, optionIndex) => (
-              <Button
-              disabled={disabled}
-                key={optionIndex}
-                positive={o.value == values[name]}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (o.value == values[name])
-                    // if already selected, clear
-                    setFieldValue(name, "");
-                  else setFieldValue(name, o.value);
-                }}
-              >
-                {o.value}
-              </Button>
-            ))}
-          </Button.Group>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+            {f.options.map((o, i) => {
+              const selected = newValues.includes(o.value);
+              return (
+                <Button
+                  key={i}
+                  basic={f.type == "multi"}
+                  disabled={disabled}
+                  color={selected ? "blue" : "grey"}
+                  size={size}
+                  style={{ marginBottom: "2px" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    if (selected) {
+                      newValues = newValues.filter((item) => item !== o.value);
+                    } else {
+                      if (!Array.isArray(newValues)) newValues = [];
+
+                      if (f.type !== "multi") newValues = [];// for single value, empty the answers. For multi keep the existing ones and add the new one
+
+                      newValues.push(o.value);
+                    }
+
+                    setFieldValue(name, newValues);
+                  }}
+                >
+                   {f.type == "multi" && <Icon name={selected ? "check" : ""} color="blue" /> }
+                  {o.value}
+                </Button>
+              );
+            })}
+           
+          </div>
         );
+
+      // case "select":
+      // case "weightedSelect":
+      //   return (
+      //     <Button.Group size={size}>
+      //       {f.options.map((o, optionIndex) => (
+      //         <Button
+      //           disabled={disabled}
+      //           key={optionIndex}
+      //           primary={o.value == values[name]}
+      //           onClick={(e) => {
+      //             e.preventDefault();
+      //             if (o.value == values[name])
+      //               // if already selected, clear
+      //               setFieldValue(name, "");
+      //             else setFieldValue(name, o.value);
+      //           }}
+      //         >
+      //           {o.value}
+      //         </Button>
+      //       ))}
+      //     </Button.Group>
+      //   );
 
       case "checkbox":
         return (
@@ -131,7 +207,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
         }));
         return (
           <Select
-          disabled={disabled}
+            disabled={disabled}
             placeholder="Select"
             clearable
             size={size}
@@ -200,11 +276,7 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
             )}
             {!disabled && handleSubmit && (
               <>
-                <Button
-                  primary
-                  type="submit"
-                  className="ms-auto hide-in-print"
-                >
+                <Button primary type="submit" className="ms-auto hide-in-print">
                   Submit
                 </Button>
                 {handleCancel && (
@@ -248,7 +320,9 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
           <Table.Body>
             {s.rows.map((row, rowIndex) => (
               <Table.Row key={rowIndex}>
-                <Table.Cell style={{backgroundColor: "#eee"}}>{row.value}</Table.Cell>
+                <Table.Cell style={{ backgroundColor: "#eee" }}>
+                  {row.value}
+                </Table.Cell>
                 {fields.map((f, i) => (
                   <Table.Cell key={i}>
                     {renderField(
@@ -281,10 +355,13 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
                   .filter((f) => f.type !== "aggregate")
                   .map((f, i) => (
                     <Table.Row key={f.guid}>
-                      <Table.Cell width={4} style={{backgroundColor: "#eee", color: "#5e5e5e"}}>
+                      <Table.Cell
+                        width={4}
+                        style={{ backgroundColor: "#eee", color: "#5e5e5e" }}
+                      >
                         {f.type === "info" ? "" : f.name}
                       </Table.Cell>
-                      <Table.Cell width={8} textAlign="center">
+                      <Table.Cell width={8} textAlign="left">
                         {renderField(f, values, setFieldValue)}
                       </Table.Cell>
                     </Table.Row>
@@ -292,7 +369,6 @@ export function GenericForm({ formDef, formData, handleSubmit, disabled, handleC
               </Table.Body>
             </Table>
           </Grid.Column>
-
         </Grid>
       </Segment>
     );

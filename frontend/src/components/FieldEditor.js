@@ -295,6 +295,7 @@ export const fieldTypes = [
   { text: "Info", value: "info" },
   { text: "Number", value: "number" },
   { text: "Date", value: "date" },
+  { text: "Multi", value: "multi", hasOptions: true },
   { text: "Select", value: "select", hasOptions: true },
   { text: "Select (Weighted)", value: "weightedSelect", hasOptions: true },
   { text: "Dropdown", value: "dropdown", hasOptions: true },

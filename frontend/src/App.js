@@ -130,12 +130,12 @@ function App() {
         <>
           <Grid doubling stackable style={{ marginBottom: "-3rem" }}>
             <Grid.Row verticalAlign="middle">
-              <Grid.Column width="6">
+              <Grid.Column width="4">
                 <List divided horizontal>
                   <List.Item>
                     {tenant ? (
                       <Image
-                        size="medium"
+                        size="small"
                         rounded
                         alt="logo"
                         src={logoURL}
@@ -149,11 +149,13 @@ function App() {
                   </List.Item>
                   <List.Item>
                     <Button
+                    size="mini"
                       color="black"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
                     ></Button>
                     <Button
+                    size="mini"
                       color="grey"
                       icon="refresh"
                       onClick={() => {window.location.reload();}}
@@ -177,7 +179,11 @@ function App() {
                         {workspaces.map((w, index) => (
                           <Dropdown.Item
                             key={index}
-                            onClick={() => setCurrentWorkspace(w)}
+                            onClick={() => {
+                              setCurrentWorkspace(w);
+                              nav(`/workspace/${w.workspaceId}/registers`);
+                              window.location.reload();
+                            }}
                           ><Icon name={w.role === "Owner" ? "chess king" : "user"} />
                             {w.workspaceName}
                           </Dropdown.Item>

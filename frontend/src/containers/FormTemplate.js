@@ -398,15 +398,15 @@ export default function FormTemplate() {
 
   return (
     <Grid stackable>
-      <Grid.Column width={8}>
+      <Grid.Column width={6}>
         <Header as="h1" color="blue">
           Editor
         </Header>
         {renderEditor()}
       </Grid.Column>
-      <Grid.Column width={8}>
+      <Grid.Column width={10}>
         <Header as="h1" color="teal">
-          Preivew
+          Preview
         </Header>
         <GenericForm formDef={{ title, sections }} />
       </Grid.Column>
