@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Accordion,
-  Button, Header,
+  Button,
+  Header,
   Icon,
   Loader,
   Message,
@@ -10,15 +13,15 @@ import {
 } from "semantic-ui-react";
 import { GenericForm } from "../components/GenericForm";
 import { makeApiCall } from "../lib/apiLib";
+import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
-import { useAppContext } from "../lib/contextLib";
 
 export default function TemplatedForm() {
   const { workspaceId, formId, templateId } = useParams();
   const [formRecord, setFormRecord] = useState(null);
-  
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isRevisioning, setIsRevisioning] = useState(false);
   const [template, setTemplate] = useState(null);
@@ -40,8 +43,10 @@ export default function TemplatedForm() {
           const item = await loadForm();
           setFormRecord(item);
           
+          console.log(item.formValues.attachments);
           // the api populates template as well
           setTemplate(item.template);
+
         } else {
           // new form - just load the template
           const item = await loadTemplate();
@@ -59,9 +64,77 @@ export default function TemplatedForm() {
     onLoad();
   }, []);
 
+  async function uploadFile(file) {
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const signedUrl = await makeApiCall("POST", `/docs/upload-url`, {
+      fileName: fileName,
+      folder: "forms",
+      contentType: file.type,
+    });
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", async (event) => {
+        const fileContent = event.target.result;
+
+        // Upload the file to S3 using Axios
+        await axios.put(signedUrl, fileContent, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        resolve(fileName);
+      });
+
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  async function updateAttachments(values) {
+    setIsUploading(true);
+    values.attachments = values.attachments.filter(a => a.file || a.fileName); // the user added attachment line but didn't pick a file. Don't remove the existing attachments
+
+    // Add new attachments
+    if (values.attachments && values.attachments.length > 0) {
+      const promises = values.attachments.map(async (attachment, i) => {
+        if (!attachment.file) return; // this would be an existing attachment. No file picker is shown for existing attachments
+
+        const fileName = await uploadFile(attachment.file);
+        values.attachments[i].fileName = fileName;
+        delete values.attachments[i].file; // remove the file property as it is not needed to be stored in db
+      });
+
+      await Promise.all(promises);
+    }
+
+    // Remove unwanted attachments server-side
+    if (formRecord && formRecord.formValues && formRecord.formValues.attachments) {
+      // find the existing attachments that haven't been deleted
+      const existingFileNames = values && values.attachments ?
+         values.attachments.map(a => a.fileName)
+         :
+         [""];
+      
+      const deletedAttachments = formRecord.formValues.attachments.filter(a => !existingFileNames.includes(a.fileName));
+      
+      if (deletedAttachments.length > 0) {
+        if (!values) {
+          values = {};
+        }
+        values.deletedAttachments = deletedAttachments;
+      }
+    }
+
+    setIsUploading(false);
+  }
   async function handleSubmit(values) {
+    
+
     setIsLoading(true);
     try {
+      updateAttachments(values);
+
       let newFormId;
       if (formId) {
         await updateForm(values);
@@ -69,6 +142,8 @@ export default function TemplatedForm() {
         const updatedForm = { ...formRecord, formValues: values };
         setFormRecord(updatedForm);
       } else {
+        
+
         const ret = await createForm(values);
         setFormRecord(ret);
         newFormId = ret.formId;
@@ -80,6 +155,7 @@ export default function TemplatedForm() {
     } finally {
       setIsLoading(false);
       setIsEditing(false);
+      setIsUploading(false);
     }
   }
   async function createForm(values) {
@@ -108,6 +184,7 @@ export default function TemplatedForm() {
     setIsRevisioning(false);
   }
 
+
   const handleAccordionClick = (e, titleProps) => {
     const { index } = titleProps;
     const newIndex = activeAccordionIndex === index ? -1 : index
@@ -119,6 +196,9 @@ export default function TemplatedForm() {
     
     return (ts ? date.toLocaleString() : "") + " by " + (user ? `${user.firstName} ${user.lastName}` : "");
   }
+
+  if (isUploading) return <Loader active>Uploading attachments</Loader>;
+
   if (isLoading) return <Loader active />;
 
   if (!template || !template.templateDefinition) {
@@ -146,15 +226,17 @@ export default function TemplatedForm() {
           ? "Revision"
           : ""}
       </Header>
-      <GenericForm
-        formDef={template.templateDefinition}
-        formData={formRecord ? formRecord.formValues : null}
-        handleSubmit={handleSubmit}
-        handleCancel={isNew ? null : cancelEdit}
-        disabled={!editable}
-      />
+
+          <GenericForm
+            formDef={template.templateDefinition}
+            formData={formRecord ? formRecord.formValues : null}
+            handleSubmit={handleSubmit}
+            handleCancel={isNew ? null : cancelEdit}
+            disabled={!editable}
+          />
+        
       {formRecord && (
-        <p style={{color: "#bbb"}}>
+        <p style={{ color: "#bbb" }}>
           Created{" "}
           {renderActionInfo(formRecord.createdAt, formRecord.createdByUser)}{" "}
           <br />{" "}
@@ -166,10 +248,10 @@ export default function TemplatedForm() {
       )}
       {!editable && (
         <div>
-          <Button primary onClick={() => handleEdit(true)}>
+          <Button primary size="mini" onClick={() => handleEdit(true)}>
             Revision
           </Button>
-          <Button secondary onClick={() => handleEdit(false)}>
+          <Button secondary size="mini" onClick={() => handleEdit(false)}>
             Edit
           </Button>
         </div>
@@ -190,6 +272,18 @@ export default function TemplatedForm() {
           </Message.Content>
         </Message>
       )}
+      <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
+        <Button basic primary size="mini">
+          <Icon name="pencil" />
+          New Record
+        </Button>
+      </LinkContainer>
+      <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
+        <Button basic size="mini">
+          All Records...
+        </Button>
+      </LinkContainer>
+
       {formRecord && formRecord.history && (
         <Accordion>
           <Accordion.Title

@@ -118,6 +118,7 @@ export default function WorkspaceTeam(props) {
             <Table basic columns="5">
               <Table.Body>
                 {members.map((m) => {
+                  const userMember = getUserById(users, m.userId);
                   return (
                     <Table.Row key={m.userId}>
                       <Table.Cell>
@@ -128,7 +129,12 @@ export default function WorkspaceTeam(props) {
                       </Table.Cell>
                       <Table.Cell>
                         <strong>
-                          {getUserById(users, m.userId).given_name}
+                          {userMember.given_name}
+                        </strong>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <strong>
+                          {userMember.family_name}
                         </strong>
                       </Table.Cell>
                       <Table.Cell>{m.role}</Table.Cell>

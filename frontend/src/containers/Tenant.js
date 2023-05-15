@@ -7,7 +7,7 @@ import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { s3Get, s3Remove, s3Upload } from "../lib/awsLib";
 import { onError } from "../lib/errorLib";
-import placeholderImage from './fileplaceholder.jpg';
+import placeholderImage from '../fileplaceholder.jpg';
 
 export default function Tenant() {
   const file = useRef(null);

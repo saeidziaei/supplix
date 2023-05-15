@@ -1,5 +1,6 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
+import s3 from "../../util/s3";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const params = {
@@ -21,6 +22,21 @@ export const main = handler(async (event, tenant, workspaceUser) => {
     throw new Error("Template used for this form not found.");
   }
 
+
+  if (form.formValues && form.formValues.attachments && form.formValues.attachments.length > 0) {
+    const promises = form.formValues.attachments.map(async (attachment) => {
+      const s3params = {
+        Bucket: process.env.BUCKET,
+        Key: `private/${tenant}/${attachment.fileName}`,
+        Expires: 5 * 60, // 5 minutes
+      };
+      const fileURL = await s3.getSignedUrlForGet(s3params);
+      attachment.fileURL = fileURL;
+      return attachment;
+    });
+    
+    form.formValues.attachments = await Promise.all(promises);
+  }
 
   return form;
 });

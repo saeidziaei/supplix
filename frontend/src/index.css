@@ -1,0 +1,5 @@
+body, .ui.list .list>.item .header, .ui.list>.item .header, .ui.header, .ui.menu,
+.ui.card>.content>.header, .ui.cards>.card>.content>.header {
+    font-family: "Quicksand",sans-serif !important;
+  }
+  

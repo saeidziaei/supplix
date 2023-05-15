@@ -8,9 +8,10 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   if (workspaceUser.role !== "Owner") {
     throw new Error("User is not the owner of this workspace.");
   }
-  if (workspaceUser.userId === data.userId) {
-    throw new Error("You cannot add yourself to the team.");
-  }
+  // TODO do we need this check?
+  // if (workspaceUser.userId === data.userId) {
+  //   throw new Error("You cannot add yourself to the team.");
+  // }
 
   const workspaceId = event.pathParameters.workspaceId;
   const params = {

@@ -8,7 +8,7 @@ import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
-import placeholderImage from './fileplaceholder.jpg';
+import placeholderImage from '../fileplaceholder.jpg';
 
 
 export default function Doc() {
@@ -64,18 +64,19 @@ export default function Doc() {
     setIsLoading(true);
 
     try {
+      const folder = "docs";
       // other validatoins ... TODO
       const fileName = file.current.name;
 
       const signedUrl = await makeApiCall("POST", `/docs/upload-url`, {
         fileName: fileName,
+        folder: folder,
         contentType: file.current.type,
       });
 
       const reader = new FileReader();
       reader.addEventListener("load", async (event) => {
         const fileContent = event.target.result;
-        console.log(fileContent, file.current.type);
 
         // Upload the file to S3 using Axios
         await axios.put(signedUrl, fileContent, {
@@ -85,7 +86,7 @@ export default function Doc() {
         });
 
         await createDoc({
-          fileName: fileName,
+          fileName: `${folder}/${fileName}`,
           category: values.category,
           note: values.note,
         });

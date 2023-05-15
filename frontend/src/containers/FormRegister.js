@@ -398,13 +398,13 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         {!isHistory && (
           <>
             <LinkContainer to={`/workspace/${workspaceId}/registers`}>
-              <Button basic secondary>
+              <Button basic secondary size="mini">
                 Back
               </Button>
             </LinkContainer>
             <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
-              <Button basic primary>
-                Create New Record
+              <Button basic primary size="mini"><Icon name="pencil"/>
+                New Record
               </Button>
             </LinkContainer>
           </>

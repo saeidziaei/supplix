@@ -5,7 +5,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useParams } from "react-router-dom";
 import { s3Get } from "../lib/awsLib";
 import { Button, Header, Icon, Image, Item, Label, Loader, Message, Table } from "semantic-ui-react";
-import placeholderImage from './fileplaceholder.jpg'
+import placeholderImage from '../fileplaceholder.jpg'
 import { parseISO } from "date-fns";
 import FormHeader from "../components/FormHeader";
 import { normaliseCognitoUsers } from "../lib/helpers";

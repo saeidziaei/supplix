@@ -65,20 +65,19 @@ export default function FormRegisters() {
               return (
                 <List.Item key={t.templateId}>
                   <List.Content floated="right">
-                    <LinkContainer
-                      to={`/workspace/${workspaceId}/form/${t.templateId}`}
-                    >
-                      <Button basic primary size="small" ><Icon name="pencil"/>
+                    <LinkContainer to={`/workspace/${workspaceId}/form/${t.templateId}`}>
+                      <Button basic primary size="mini" ><Icon name="pencil"/>
                         New Record
+                      </Button>
+                    </LinkContainer>
+                    <LinkContainer to={`/workspace/${workspaceId}/register/${t.templateId}`}>
+                      <Button basic size="mini" >
+                        All Records...
                       </Button>
                     </LinkContainer>
                   </List.Content>
                   <List.Content>
-                    <LinkContainer
-                      to={`/workspace/${workspaceId}/register/${t.templateId}`}
-                    >
-                      <List.Header as="a">{def.title}</List.Header>
-                    </LinkContainer>
+                      <List.Header >{def.title}</List.Header>
                     <List.Description>{`${t.formCount} ${pluralize(
                       "record",
                       t.formCount

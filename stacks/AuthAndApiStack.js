@@ -230,7 +230,7 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/form/list.main",
         },
       },
-      "GET   /workspaces/{workspaceId}/forms/{formId}": {
+      "GET /workspaces/{workspaceId}/forms/{formId}": {
         function: {
           handler: "services/functions/form/get.main",
           bind: [templateTable, formTable],
@@ -246,7 +246,7 @@ export function AuthAndApiStack({ stack, app }) {
           bind: [formTable],
         },
       },
-      "PUT   /workspaces/{workspaceId}/forms/{formId}": {
+      "PUT /workspaces/{workspaceId}/forms/{formId}": {
         function: {
           handler: "services/functions/form/update.main",
           permissions: [cognitoReadonlyAccessPolicy],
@@ -465,6 +465,8 @@ export function AuthAndApiStack({ stack, app }) {
     // }),
   ]);
   api.attachPermissionsToRoute("GET /workspaces/{workspaceId}/docs/{docId}", ["s3"]);
+  api.attachPermissionsToRoute("GET /workspaces/{workspaceId}/forms/{formId}", ["s3"]);
+  api.attachPermissionsToRoute("PUT /workspaces/{workspaceId}/forms/{formId}", ["s3"]);
 
 
   auth.attachPermissionsForAuthUsers(auth, [

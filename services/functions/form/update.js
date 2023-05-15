@@ -1,11 +1,19 @@
 import handler, { getUser } from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
+import s3 from "../../util/s3";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const username = event.requestContext.authorizer.jwt.claims.sub;
   const user = await getUser(username);
 
   const data = JSON.parse(event.body);
+
+  if (data.formValues && data.formValues.deletedAttachments) {
+    for (const attachment of data.formValues.deletedAttachments) {
+      await removeS3Object(tenant, attachment.fileName);
+    }
+    delete data.formValues.deletedAttachments;
+  }
 
   let updateExpression = `SET 
     formValues = :formValues,
@@ -52,4 +60,13 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   await dynamoDb.update(params);
   return { status: true };
 });
+
+async function removeS3Object(tenant, fileName) {
+  const params = {
+    Bucket: process.env.BUCKET,
+    Key: `private/${tenant}/${fileName}`,
+  };
+
+  await s3.deleteObject(params);
+}
 

@@ -16,7 +16,7 @@ import {
   Sidebar
 } from "semantic-ui-react";
 import "./App.css";
-import placeholderImage from "./containers/fileplaceholder.jpg";
+import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";

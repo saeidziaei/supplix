@@ -1,22 +1,25 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
-import { Formik } from "formik";
+import { Field, FieldArray, Formik } from "formik";
 import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
 import {
   Button,
+  Divider,
   Grid,
   Header,
   Icon,
+  Image,
   Popup,
   Segment,
-  Table,
+  Table
 } from "semantic-ui-react";
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
+import placeholderImage from '../fileplaceholder.jpg';
 
 export function GenericForm({
   formDef,
@@ -25,6 +28,7 @@ export function GenericForm({
   disabled,
   handleCancel,
 }) {
+
   function renderField(f, values, setFieldValue) {
     const size = "mini";
     const name = f.name;
@@ -33,12 +37,12 @@ export function GenericForm({
       case "info":
         return (
           <div style={{ textAlign: "left" }}>
-            <Popup
+            <Popup hoverable flowing
               trigger={<Icon name="question" color="blue" circular />}
               position="bottom center"
             >
               <div
-                style={{ textAlign: "left", width: "100%" }}
+                style={{ textAlign: "left" }}
                 className="markdown"
                 dangerouslySetInnerHTML={{ __html: f.title }}
               />
@@ -129,15 +133,15 @@ export function GenericForm({
         }
 
         return (
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+          <div key={f.name} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
             {f.options.map((o, i) => {
               const selected = newValues.includes(o.value);
               return (
                 <Button
                   key={i}
-                  basic={f.type == "multi"}
+                  basic={f.type == "multi" || !selected}
                   disabled={disabled}
-                  color={selected ? "blue" : "grey"}
+                  color={selected ? "blue" : ""}
                   size={size}
                   style={{ marginBottom: "2px" }}
                   onClick={(e) => {
@@ -165,29 +169,6 @@ export function GenericForm({
           </div>
         );
 
-      // case "select":
-      // case "weightedSelect":
-      //   return (
-      //     <Button.Group size={size}>
-      //       {f.options.map((o, optionIndex) => (
-      //         <Button
-      //           disabled={disabled}
-      //           key={optionIndex}
-      //           primary={o.value == values[name]}
-      //           onClick={(e) => {
-      //             e.preventDefault();
-      //             if (o.value == values[name])
-      //               // if already selected, clear
-      //               setFieldValue(name, "");
-      //             else setFieldValue(name, o.value);
-      //           }}
-      //         >
-      //           {o.value}
-      //         </Button>
-      //       ))}
-      //     </Button.Group>
-      //   );
-
       case "checkbox":
         return (
           <Button.Group>
@@ -208,6 +189,7 @@ export function GenericForm({
         return (
           <Select
             disabled={disabled}
+            compact
             placeholder="Select"
             clearable
             size={size}
@@ -259,11 +241,13 @@ export function GenericForm({
           acc[field.name] = "";
         }
         return acc;
-      }, {}),
+      }, {
+        attachments: []
+      }),
   };
 
   return (
-    <Segment>
+    <Segment style={{ overflowX: "auto" }}>
       <FormHeader heading={formDef.title} />
 
       <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
@@ -274,13 +258,92 @@ export function GenericForm({
                 ? renderSectionTabular(s, values, setFieldValue)
                 : renderSection(s, values, setFieldValue)
             )}
+
+            <div>
+              <Icon name="attach" />
+              Attachments
+            </div>
+            <FieldArray name="attachments">
+              {({ insert, remove, push }) => (
+                <Grid>
+                  {values.attachments &&
+                    values.attachments.length > 0 &&
+                    values.attachments.map((attachment, index) => (
+                      <Grid.Row key={index} verticalAlign="middle">
+                        <Grid.Column width={1}>
+                          <Button
+                            circular
+                            size="mini"
+                            icon="x"
+                            basic
+                            disabled={disabled}
+                            onClick={() => remove(index)}
+                          />
+                        </Grid.Column>
+                        <Grid.Column width={5}>
+                          {!disabled && !attachment.fileURL && (
+                            <input
+                              id="file"
+                              name={`attachments.${index}.file`}
+                              type="file"
+                              onChange={(event) => {
+                                setFieldValue(
+                                  `attachments.${index}.file`,
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                            />
+                          )}
+                          {attachment.fileURL && (
+                            <Image
+                              src={attachment.fileURL}
+                              wrapped
+                              alt={attachment.fileName}
+                              onError={(e) => {
+                                e.target.src = placeholderImage;
+                              }}
+                            />
+                          )}
+                        </Grid.Column>
+                        <Grid.Column width={10}>
+                          {disabled ? <span>{attachment.fileNote}</span> :
+                          <Field
+                            name={`attachments.${index}.fileNote`} 
+                            placeholder="File Note"
+                            type="text"
+                          />}
+                        </Grid.Column>
+                      </Grid.Row>
+                    ))}
+                  <Grid.Row>
+                    <Grid.Column>
+                      <Button
+                        type="button"
+                        basic
+                        disabled={ disabled ||
+                          (values.attachments && values.attachments.length > 4)
+                        }
+                        circular
+                        icon="plus"
+                        size="mini"
+                        onClick={() => push({ file: "", fileNote: "" })}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+              )}
+            </FieldArray>
+
+            <Divider hidden />
+
             {!disabled && handleSubmit && (
-              <>
-                <Button primary type="submit" className="ms-auto hide-in-print">
+              <div>
+                <Button primary type="submit" size="mini" floated="right">
                   Submit
                 </Button>
                 {handleCancel && (
                   <Button
+                    size="mini"
                     onClick={(e) => {
                       e.preventDefault();
                       resetForm();
@@ -290,7 +353,7 @@ export function GenericForm({
                     Cancel
                   </Button>
                 )}
-              </>
+              </div>
             )}
             {/* <Button secondary>Back</Button> */}
           </Form>
@@ -303,12 +366,9 @@ export function GenericForm({
     const fields = s.fields.filter((f) => f.type !== "aggregate");
     return (
       <Segment basic vertical key={s.title} size="tiny">
+      
+        <Header as="h3">{s.title}</Header>
         <Table celled compact stackable>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell colSpan="5">{s.title}</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Items</Table.HeaderCell>
@@ -336,7 +396,7 @@ export function GenericForm({
             ))}
           </Table.Body>
         </Table>
-      </Segment>
+       </Segment>
     );
   }
   function renderSection(s, values, setFieldValue) {
@@ -356,12 +416,12 @@ export function GenericForm({
                   .map((f, i) => (
                     <Table.Row key={f.guid}>
                       <Table.Cell
-                        width={4}
+                        width={2}
                         style={{ backgroundColor: "#eee", color: "#5e5e5e" }}
                       >
                         {f.type === "info" ? "" : f.name}
                       </Table.Cell>
-                      <Table.Cell width={8} textAlign="left">
+                      <Table.Cell width={10} textAlign="left">
                         {renderField(f, values, setFieldValue)}
                       </Table.Cell>
                     </Table.Row>
