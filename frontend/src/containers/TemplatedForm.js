@@ -43,7 +43,6 @@ export default function TemplatedForm() {
           const item = await loadForm();
           setFormRecord(item);
           
-          console.log(item.formValues.attachments);
           // the api populates template as well
           setTemplate(item.template);
 
@@ -65,17 +64,18 @@ export default function TemplatedForm() {
   }, []);
 
   async function uploadFile(file) {
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const signedUrl = await makeApiCall("POST", `/docs/upload-url`, {
-      fileName: fileName,
-      folder: "forms",
-      contentType: file.type,
-    });
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.addEventListener("load", async (event) => {
+        const fileName = `${Date.now()}-${file.name}`;
+
+        const signedUrl = await makeApiCall("POST", `/docs/upload-url`, {
+          fileName: fileName,
+          folder: "forms",
+          contentType: file.type,
+        });
+
         const fileContent = event.target.result;
 
         // Upload the file to S3 using Axios
@@ -85,7 +85,7 @@ export default function TemplatedForm() {
           },
         });
 
-        resolve(fileName);
+        resolve(`forms/${fileName}`);
       });
 
       reader.readAsArrayBuffer(file);
@@ -106,6 +106,7 @@ export default function TemplatedForm() {
       });
 
       await Promise.all(promises);
+
     }
 
     // Remove unwanted attachments server-side
@@ -127,13 +128,13 @@ export default function TemplatedForm() {
     }
 
     setIsUploading(false);
+
   }
   async function handleSubmit(values) {
-    
-
+ 
     setIsLoading(true);
     try {
-      updateAttachments(values);
+      await updateAttachments(values);
 
       let newFormId;
       if (formId) {
@@ -143,13 +144,13 @@ export default function TemplatedForm() {
         setFormRecord(updatedForm);
       } else {
         
-
         const ret = await createForm(values);
         setFormRecord(ret);
         newFormId = ret.formId;
       }
 
       nav(`/workspace/${workspaceId}/form/${templateId}/${formId||newFormId}`); 
+      window.location.reload();
     } catch (e) {
       onError(e);
     } finally {
@@ -227,14 +228,14 @@ export default function TemplatedForm() {
           : ""}
       </Header>
 
-          <GenericForm
-            formDef={template.templateDefinition}
-            formData={formRecord ? formRecord.formValues : null}
-            handleSubmit={handleSubmit}
-            handleCancel={isNew ? null : cancelEdit}
-            disabled={!editable}
-          />
-        
+      <GenericForm
+        formDef={template.templateDefinition}
+        formData={formRecord ? formRecord.formValues : null}
+        handleSubmit={handleSubmit}
+        handleCancel={isNew ? null : cancelEdit}
+        disabled={!editable}
+      />
+
       {formRecord && (
         <p style={{ color: "#bbb" }}>
           Created{" "}
@@ -272,12 +273,21 @@ export default function TemplatedForm() {
           </Message.Content>
         </Message>
       )}
-      <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
-        <Button basic primary size="mini">
-          <Icon name="pencil" />
-          New Record
-        </Button>
-      </LinkContainer>
+
+      <Button
+        basic
+        primary
+        size="mini"
+        onClick={() => {
+          setFormRecord(null);
+          nav(`/workspace/${workspaceId}/form/${templateId}`);
+          window.location.reload();
+        }}
+      >
+        <Icon name="pencil" />
+        New Record
+      </Button>
+
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
         <Button basic size="mini">
           All Records...

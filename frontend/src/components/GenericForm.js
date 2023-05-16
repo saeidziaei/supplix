@@ -20,6 +20,7 @@ import {
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
+import { LinkContainer } from "react-router-bootstrap";
 
 export function GenericForm({
   formDef,
@@ -295,6 +296,7 @@ export function GenericForm({
                             />
                           )}
                           {attachment.fileURL && (
+                            <a href={attachment.fileURL} target="_blank">
                             <Image
                               src={attachment.fileURL}
                               wrapped
@@ -302,7 +304,7 @@ export function GenericForm({
                               onError={(e) => {
                                 e.target.src = placeholderImage;
                               }}
-                            />
+                            /></a>
                           )}
                         </Grid.Column>
                         <Grid.Column width={10}>
@@ -321,7 +323,7 @@ export function GenericForm({
                         type="button"
                         basic
                         disabled={ disabled ||
-                          (values.attachments && values.attachments.length > 4)
+                          (values.attachments && values.attachments.length > 5)
                         }
                         circular
                         icon="plus"
