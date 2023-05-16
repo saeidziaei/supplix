@@ -284,7 +284,7 @@ export default function ISO() {
                   <Divider horizontal>
                     <Header as="h4">
                       <Label tag color="grey">
-                        {pluralize(capitalizeFirstLetter(group[0].type))}
+                        {pluralize(capitalizeFirstLetter(group[0].type || ""))}
                       </Label>
                     </Header>
                   </Divider>

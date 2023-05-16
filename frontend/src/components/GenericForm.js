@@ -249,7 +249,7 @@ export function GenericForm({
 
   return (
     <Segment style={{ overflowX: "auto" }}>
-      <FormHeader heading={formDef.title} />
+      <FormHeader heading={formDef.title} subheading={formDef.category} />
 
       <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => (

@@ -78,7 +78,7 @@ export default function Docs() {
               <div key={groupIndex}>
                 <Divider horizontal>
                   <Header as="h4">
-                    {pluralize(capitalizeFirstLetter(group[0].category))}
+                    {pluralize(capitalizeFirstLetter(group[0].category || ""))}
                   </Header>
                 </Divider>
                 <List divided relaxed>

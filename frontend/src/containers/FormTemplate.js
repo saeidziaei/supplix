@@ -37,6 +37,7 @@ export default function FormTemplate() {
   const nav = useNavigate();
 
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function FormTemplate() {
           const item = await loadTemplate();
           const formDef = item.templateDefinition;
           setTitle(formDef.title);
+          setCategory(formDef.category);
           setSections(formDef.sections)
         } 
 
@@ -70,9 +72,9 @@ export default function FormTemplate() {
     setIsLoading(true);
     try {
       if (templateId) {
-        await updateTemplate({title, sections});
+        await updateTemplate({title, category, sections});
       } else {
-        await createTemplate({title, sections});
+        await createTemplate({title, category, sections});
       }
       nav(`/templates`);
     } catch (e) {
@@ -122,6 +124,7 @@ export default function FormTemplate() {
       {
         name: "",
         title: "",
+        category: "",
         fields: [],
       },
     ]);
@@ -175,10 +178,19 @@ export default function FormTemplate() {
         <Input
           fluid
           label="Form Title"
-          size="large"
+          size="small"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+        />
+        <Divider hidden />
+        <Input
+          fluid
+          label="Category"
+          size="small"
+          type="text"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
         />
         <Confirm
           size="mini"
@@ -215,6 +227,7 @@ export default function FormTemplate() {
                       fluid
                       label="Section"
                       type="text"
+                      size="small"
                       value={section.title}
                       onChange={(e) => {
                         const newSections = [...sections];
@@ -400,7 +413,7 @@ export default function FormTemplate() {
     <Grid stackable>
       <Grid.Column width={6}>
         <Header as="h1" color="blue">
-          Editor
+          Designer
         </Header>
         {renderEditor()}
       </Grid.Column>
@@ -408,7 +421,7 @@ export default function FormTemplate() {
         <Header as="h1" color="teal">
           Preview
         </Header>
-        <GenericForm formDef={{ title, sections }} />
+        <GenericForm formDef={{ title, category, sections }} />
       </Grid.Column>
     </Grid>
   );
