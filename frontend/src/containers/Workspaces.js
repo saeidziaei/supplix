@@ -5,9 +5,11 @@ import { Link } from "react-router-dom";
 import {
   Button,
   Divider,
+  Grid,
   Header, Icon, List,
   Loader,
   Message,
+  Segment,
   Table
 } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
@@ -70,55 +72,60 @@ export default function Workspaces() {
           />
         )}
         {workspaces && workspaces.length > 0 && (
-          <>
-            {groupedChildren &&
-              groupedChildren.map((group, groupIndex) => (
-                <div key={groupIndex}>
-                  <Divider horizontal>
-                    <Header as="h4">
-                      {pluralize(capitalizeFirstLetter(group[0].category || ""))}
-                    </Header>
-                  </Divider>
-                  <Table basic columns="5">
-                    <Table.Body>
-                      {group &&
-                        group.map((d) => {
-                          return (
-                            <Table.Row key={d.workspaceId}>
-                              <Table.Cell>
-                                <Icon.Group size="large">
-                                  <Icon name="list alternate outline" />
-                                  <Icon corner name="clock outline" />
-                                </Icon.Group>
-                              </Table.Cell>
-                              <Table.Cell>
-                                <strong>{d.workspaceName}</strong>
-                              </Table.Cell>
-                              <Table.Cell>{d.note}</Table.Cell>
+          <Grid>
+            <Grid.Column width={10}>
+              <Segment>
+                {groupedChildren &&
+                  groupedChildren.map((group, groupIndex) => (
+                    <div key={groupIndex}>
+                      <Divider horizontal>
+                        <Header as="h4">
+                          {pluralize(
+                            capitalizeFirstLetter(group[0].category || "")
+                          )}
+                        </Header>
+                      </Divider>
 
-                              <Table.Cell>
-                                <Link to={`/workspace/${d.workspaceId}`}>
-                                  Edit Details
-                                </Link>
-                              </Table.Cell>
-                              <Table.Cell>
-                                <Link to={`/workspace/${d.workspaceId}/team`} state={d}>
-                                  Manage Team
-                                </Link>
-                              </Table.Cell>
-                            </Table.Row>
-                          );
-                        })}
-                    </Table.Body>
-                  </Table>
-                </div>
-              ))}
-          </>
+                      <List divided relaxed>
+                        {group &&
+                          group.map((d) => {
+                            return (
+                              <List.Item key={d.workspaceId}>
+                                <List.Content floated="right">
+                                  <LinkContainer
+                                    to={`/workspace/${d.workspaceId}`}
+                                  >
+                                    <Button basic primary size="mini">
+                                      <Icon name="pencil" />
+                                      Edit Details
+                                    </Button>
+                                  </LinkContainer>
+                                  <LinkContainer
+                                    to={`/workspace/${d.workspaceId}/team`}
+                                  >
+                                    <Button basic size="mini">
+                                      Manage Team
+                                    </Button>
+                                  </LinkContainer>
+                                </List.Content>
+                                <List.Content>
+                                  <List.Header>{d.workspaceName}</List.Header>
+                                  <List.Description>{d.note}</List.Description>
+                                </List.Content>
+                              </List.Item>
+                            );
+                          })}
+                      </List>
+                    </div>
+                  ))}
+              </Segment>
+            </Grid.Column>
+          </Grid>
         )}
         <Divider hidden />
         <LinkContainer to={`/workspace`}>
-          <Button basic primary>
-            New
+          <Button basic primary size="small">
+            New Workspace
           </Button>
         </LinkContainer>
       </>

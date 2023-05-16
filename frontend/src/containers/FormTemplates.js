@@ -55,7 +55,7 @@ export default function FormTemplates() {
           </LinkContainer>
         </List.Content>
         <List.Content>
-          <List.Header as="a">{t.templateDefinition.title}</List.Header>
+          <List.Header>{t.templateDefinition.title}</List.Header>
           <List.Description>{fieldCount} fields</List.Description>
         </List.Content>
       </List.Item>
