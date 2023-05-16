@@ -46,7 +46,7 @@ export default function FormRegisters() {
 
   function renderCategories() {
     if (templates && templates.length) {
-      let categories = ['ALL'].concat(templates.map(t => t.templateDefinition.category));
+      let categories = ['ALL'].concat([...new Set(templates.map(t => t.templateDefinition.category))]);
       
       return (
         <List horizontal size="large">

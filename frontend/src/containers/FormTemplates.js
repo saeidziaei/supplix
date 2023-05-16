@@ -70,7 +70,7 @@ export default function FormTemplates() {
     ? []
     : templates.reduce((result, child) => {
         const group = result.find(
-          (group) => group[0].category === child.templateDefinition.category
+          (group) => group[0].templateDefinition.category === child.templateDefinition.category
         );
 
         if (group) {
@@ -97,7 +97,7 @@ export default function FormTemplates() {
               <div key={groupIndex}>
                 <Divider horizontal>
                   <Header as="h4">
-                    {group[0].templateDefinition.category}
+                    {group[0].templateDefinition.category || "-"}
                   </Header>
                 </Divider>
                 <List divided relaxed>
