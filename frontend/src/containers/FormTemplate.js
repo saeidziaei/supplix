@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  ButtonGroup,
   Checkbox,
   Confirm,
-  Divider, Form, Grid, GridRow, Header,
+  Divider, Dropdown, Form, Grid, GridColumn, GridRow, Header,
   Icon,
   Input,
   Item, Loader,
@@ -171,6 +172,11 @@ export default function FormTemplate() {
     }
 
   }
+  function setSectionColumn(sectionIndex, sectionColumns) {
+    const newSections = [...sections];
+    newSections[sectionIndex].sectionColumns = sectionColumns;
+    setSections(newSections);
+  }
 
   function renderEditor() {
     return (
@@ -250,10 +256,21 @@ export default function FormTemplate() {
                       }}
                       checked={section.isTable}
                     />
-                  
+
                 </Grid.Column>
                 </GridRow>
-       
+                {!section.isTable && 
+                <Grid.Row >
+                  <GridColumn width={1} ></GridColumn>
+                  <GridColumn width={10} >
+                  <Button.Group size="mini" >
+                    <Button color={section.sectionColumns == 1 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 1)}>Single Column</Button>
+                    <Button color={section.sectionColumns == 2 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 2)}>Two Columns</Button>
+                    <Button color={section.sectionColumns == 3 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 3)}>Three Columns</Button>
+                  </Button.Group>
+                  </GridColumn>
+                </Grid.Row>
+                } 
                 {section.isTable && (
                   <>
                     <Grid.Row>
@@ -411,13 +428,13 @@ export default function FormTemplate() {
 
   return (
     <Grid stackable>
-      <Grid.Column width={6}>
+      <Grid.Column width={7}>
         <Header as="h1" color="blue">
           Designer
         </Header>
         {renderEditor()}
       </Grid.Column>
-      <Grid.Column width={10}>
+      <Grid.Column width={9}>
         <Header as="h1" color="teal">
           Preview
         </Header>

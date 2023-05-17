@@ -70,8 +70,8 @@ export default function FormRegisters() {
           />
         )}
         {renderCategories()}
-        <Grid>
-          <Grid.Column width={10}>
+        <Grid columns={2} doubling>
+          <Grid.Column >
             <Segment>
               <List divided relaxed>
                 {templates &&
@@ -96,6 +96,7 @@ export default function FormRegisters() {
                             </Button>
                           </LinkContainer>
                         </List.Content>
+                        <List.Icon name='database' size='large' verticalAlign='middle' color="grey" />
                         <List.Content>
                           <List.Header>{def.title}</List.Header>
                           <List.Description>{`${t.formCount} ${pluralize(

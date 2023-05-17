@@ -13,6 +13,7 @@ import {
   Header,
   Icon,
   Image,
+  Menu,
   Popup,
   Segment,
   Table
@@ -250,7 +251,6 @@ export function GenericForm({
   return (
     <Segment style={{ overflowX: "auto" }}>
       <FormHeader heading={formDef.title} subheading={formDef.category} />
-
       <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => (
           <Form size="small">
@@ -402,35 +402,48 @@ export function GenericForm({
     );
   }
   function renderSection(s, values, setFieldValue) {
+    const sectionColumns = s.sectionColumns || 1;
+    const gridColumns = Array.from({ length: sectionColumns }, (_, index) => index + 1);
+    const sectonFields = s.fields.filter((f) => f.type !== "aggregate");
+    const fieldsPerColumn = Math.ceil(sectonFields.length / sectionColumns); // Calculate fields per column
+
     return (
       <Segment basic vertical key={s.title} size="tiny">
-        <Grid>
-          <Grid.Column width={16}>
-            <Table celled compact stackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell colSpan="5">{s.title}</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {s.fields
-                  .filter((f) => f.type !== "aggregate")
+        {s.title && (
+          <Menu size="large" tabular>
+            <Menu.Item active>{s.title}</Menu.Item>
+          </Menu>
+        )}
+        <Grid divided columns={sectionColumns} doubling>
+          {gridColumns.map((column) => (
+            <Grid.Column>
+              <Grid stackable>
+                {sectonFields
+                  .slice(
+                    (column - 1) * fieldsPerColumn,
+                    column * fieldsPerColumn
+                  ) // Extract fields for current column
+
                   .map((f, i) => (
-                    <Table.Row key={f.guid}>
-                      <Table.Cell
-                        width={2}
-                        style={{ backgroundColor: "#eee", color: "#5e5e5e" }}
+                    <Grid.Row
+                      stretched
+                      key={f.guid}
+                      style={{ paddingTop: "0.1rem", paddingButtom: "0.1rem" }}
+                    >
+                      <Grid.Column
+                        width={4}
+                        style={{ color: "#5e5e5e", backgroundColor: "#eee" }}
                       >
-                        {f.type === "info" ? "" : f.name}
-                      </Table.Cell>
-                      <Table.Cell width={10} textAlign="left">
+                        {f.type === "info" ? "Info" : f.name}
+                      </Grid.Column>
+                      <Grid.Column width={12} textAlign="left">
                         {renderField(f, values, setFieldValue)}
-                      </Table.Cell>
-                    </Table.Row>
+                      </Grid.Column>
+                    </Grid.Row>
                   ))}
-              </Table.Body>
-            </Table>
-          </Grid.Column>
+              </Grid>
+            </Grid.Column>
+          ))}
         </Grid>
       </Segment>
     );

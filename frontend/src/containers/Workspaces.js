@@ -72,17 +72,15 @@ export default function Workspaces() {
           />
         )}
         {workspaces && workspaces.length > 0 && (
-          <Grid>
-            <Grid.Column width={10}>
+          <Grid columns={2} doubling>
+            <Grid.Column >
               <Segment>
                 {groupedChildren &&
                   groupedChildren.map((group, groupIndex) => (
                     <div key={groupIndex}>
                       <Divider horizontal>
                         <Header as="h4">
-                          {pluralize(
-                            capitalizeFirstLetter(group[0].category || "")
-                          )}
+                          {group[0].category || ""}
                         </Header>
                       </Divider>
 
@@ -108,10 +106,13 @@ export default function Workspaces() {
                                     </Button>
                                   </LinkContainer>
                                 </List.Content>
+                                <List.Icon name='building' size='large' verticalAlign='middle' color="grey" />
                                 <List.Content>
                                   <List.Header>{d.workspaceName}</List.Header>
                                   <List.Description>{d.note}</List.Description>
                                 </List.Content>
+                                
+
                               </List.Item>
                             );
                           })}

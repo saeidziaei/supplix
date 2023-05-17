@@ -54,6 +54,7 @@ export default function FormTemplates() {
             </Button>
           </LinkContainer>
         </List.Content>
+        <List.Icon name='file alternate' size='large' verticalAlign='middle' color="grey" />
         <List.Content>
           <List.Header>{t.templateDefinition.title}</List.Header>
           <List.Description>{fieldCount} fields</List.Description>
@@ -88,8 +89,8 @@ export default function FormTemplates() {
 { templates && templates.length > 0 && (
         <>
           <Divider />
-          <Grid>
-          <Grid.Column width={10}>
+          <Grid columns={2} doubling>
+          <Grid.Column >
             <Segment>
 
           {groupedChildren &&
