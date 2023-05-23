@@ -14,6 +14,7 @@ import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
 import { useParams } from "react-router-dom";
 import { useAppContext } from "../lib/contextLib";
+import "./FormRegisters.css";
 
 export default function FormRegisters() {
   const [templates, setTemplates] = useState(null);
@@ -50,8 +51,8 @@ export default function FormRegisters() {
       
       return (
         <List horizontal size="large">
-          {categories.map((category) => (
-            <List.Item as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
+          {categories.map((category, index) => (
+            <List.Item key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
           ))}
         </List>
       );
@@ -96,7 +97,7 @@ export default function FormRegisters() {
                             </Button>
                           </LinkContainer>
                         </List.Content>
-                        <List.Icon name='database' size='large' verticalAlign='middle' color="grey" />
+                        <List.Icon name='database' size='large' verticalAlign='middle' className="custom-blue-icon" />
                         <List.Content>
                           <List.Header>{def.title}</List.Header>
                           <List.Description>{`${t.formCount} ${pluralize(

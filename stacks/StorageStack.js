@@ -2,6 +2,7 @@ import { Bucket, Table } from "sst/constructs";
 import * as cdk from 'aws-cdk-lib';
 import * as cr from 'aws-cdk-lib/custom-resources';
 
+
 export function StorageStack({ stack, app }) {
   // Create an S3 bucket
 
@@ -31,12 +32,19 @@ export function StorageStack({ stack, app }) {
       tenant: "string",
       workspaceId: "string",
       name: "string",
-      // entities [] 
     },
     primaryIndex: { partitionKey: "tenant", sortKey: "workspaceId" },
-    
+  });
+ 
+  const deletedArchiveTable = new Table(stack, "DeletedArchive", {
+    fields: {
+      tenant: "string",
+      deletedAt: "number",
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "deletedAt" },
   });
 
+   
   const workspaceUserTable = new Table(stack, "WorkspaceUser", {
     fields: {
       tenant: "string",
@@ -86,9 +94,8 @@ export function StorageStack({ stack, app }) {
   });
 
 
-
-  // Return the bucket and table resources
-  return {
+  
+  return { 
     tenantTable,
     isoTable,
     templateTable,
@@ -96,6 +103,7 @@ export function StorageStack({ stack, app }) {
     docTable,
     workspaceTable,
     workspaceUserTable,
+    deletedArchiveTable,
     bucket,
   };
 }

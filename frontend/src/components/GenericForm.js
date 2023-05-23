@@ -416,7 +416,7 @@ export function GenericForm({
         )}
         <Grid divided columns={sectionColumns} doubling>
           {gridColumns.map((column) => (
-            <Grid.Column>
+            <Grid.Column key={column}>
               <Grid stackable>
                 {sectonFields
                   .slice(
@@ -430,9 +430,9 @@ export function GenericForm({
                       key={f.guid}
                       style={{ paddingTop: "0.1rem", paddingButtom: "0.1rem" }}
                     >
-                      <Grid.Column
+                      <Grid.Column 
                         width={4}
-                        style={{ color: "#5e5e5e", backgroundColor: "#eee" }}
+                        style={{ color: "black", backgroundColor: "#eee" }}
                       >
                         {f.type === "info" ? "Info" : f.name}
                       </Grid.Column>

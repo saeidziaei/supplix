@@ -8,6 +8,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { s3Get, s3Remove, s3Upload } from "../lib/awsLib";
 import { onError } from "../lib/errorLib";
 import placeholderImage from '../fileplaceholder.jpg';
+import "./Tenants.css"
 
 export default function Tenant() {
   const file = useRef(null);
@@ -108,7 +109,11 @@ export default function Tenant() {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="blue" textAlign="center">
-            <Icon name="building" color="blue" /> Tenant
+          <Icon.Group size="large" className="custom-blue-icon">
+                          <Icon name="building" />
+                          <Icon  name="users"  corner="bottom right" />
+                        </Icon.Group>
+Tenant
           </Header>
           <Formik
             initialValues={{ ...tenant }}

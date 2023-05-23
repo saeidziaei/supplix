@@ -12,6 +12,7 @@ import {
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
+import "./Tenants.css"
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);
@@ -55,13 +56,9 @@ export default function Tenants() {
                   return (
                     <Table.Row key={t.tenantId}>
                       <Table.Cell >
-                        <Icon.Group size="large">
-                          <Icon
-                            size="big"
-                            name="circle outline"
-                            color="yellow"
-                          />
-                          <Icon size="small" name="users" color="black" />
+                        <Icon.Group size="huge" className="custom-blue-icon">
+                          <Icon name="building" />
+                          <Icon  name="users"  corner="bottom right" />
                         </Icon.Group>
                       </Table.Cell>
                       <Table.Cell >

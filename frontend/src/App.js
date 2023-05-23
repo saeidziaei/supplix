@@ -168,6 +168,7 @@ function App() {
                 <Menu vertical>
                   <Dropdown
                     item
+                    fluid
                     text={
                       currentWorkspace
                         ? currentWorkspace.workspaceName

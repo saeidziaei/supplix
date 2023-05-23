@@ -14,6 +14,7 @@ import {
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
+import "./FormTemplates.css";
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
@@ -54,7 +55,7 @@ export default function FormTemplates() {
             </Button>
           </LinkContainer>
         </List.Content>
-        <List.Icon name='file alternate' size='large' verticalAlign='middle' color="grey" />
+        <List.Icon name='file alternate' size='large' verticalAlign='middle' className="custom-green-icon" />
         <List.Content>
           <List.Header>{t.templateDefinition.title}</List.Header>
           <List.Description>{fieldCount} fields</List.Description>

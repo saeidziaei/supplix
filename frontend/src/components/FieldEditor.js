@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Dropdown, Form, Grid, Table } from "semantic-ui-react";
+import { Button, Dropdown, Form, Grid, Input, Item, List, Table } from "semantic-ui-react";
 import { BlockPicker } from "react-color";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -54,8 +54,8 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
   };
   function renderFieldOptions() {
     return (
-      <Grid>
-        <Grid.Row>
+      <Grid  >
+        <Grid.Row >
           <Grid.Column width={2}>Optoins</Grid.Column>
           {field.type !== "aggregate" && (
             <Grid.Column width={3}>Value</Grid.Column>
@@ -73,10 +73,14 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
             </>
           )}
         </Grid.Row>
+       
 
         {field.options.map((option, optionIndex) => (
-          <Grid.Row
+          
+
+          <Grid.Row verticalAlign="middle"
             key={optionIndex}
+            className="no-padding"
             style={{ backgroundColor: `${option.color}` }}
           >
             <Grid.Column width={2}>
@@ -184,13 +188,14 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
                         setColorPickerVisible(newObject);
                       }}
                     >
-                      Pick Color
+                      Color
                     </Button>
                   )}
                 </Grid.Column>
               </>
             )}
           </Grid.Row>
+          
         ))}
         <Grid.Row>
           <Grid.Column>

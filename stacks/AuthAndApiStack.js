@@ -17,6 +17,7 @@ export function AuthAndApiStack({ stack, app }) {
     docTable,
     workspaceTable,
     workspaceUserTable,
+    deletedArchiveTable,
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -126,6 +127,7 @@ export function AuthAndApiStack({ stack, app }) {
           DOC_TABLE: docTable.tableName,
           WORKSPACE_TABLE: workspaceTable.tableName,
           WORKSPACEUSER_TABLE: workspaceUserTable.tableName,
+          DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
           BUCKET: bucket.bucketName,
         },
         permissions: [workspaceUserTable],
@@ -165,7 +167,7 @@ export function AuthAndApiStack({ stack, app }) {
       "DELETE   /workspaces/{workspaceId}": {
         function: {
           handler: "services/functions/workspace/delete.main",
-          bind: [workspaceTable],
+          bind: [workspaceTable, deletedArchiveTable],
           environment: {
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
@@ -222,6 +224,7 @@ export function AuthAndApiStack({ stack, app }) {
       "DELETE /workspaces/{workspaceId}/docs/{docId}": {
         function: {
           handler: "services/functions/doc/delete.main",
+          bind: [docTable],
         },
       },
 
@@ -256,16 +259,25 @@ export function AuthAndApiStack({ stack, app }) {
           bind: [formTable],
         },
       },
+      "DELETE /workspaces/{workspaceId}/forms/{formId}": {
+        function: {
+          handler: "services/functions/form/delete.main",
+          bind: [formTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
 
-      "GET   /templates": { 
+      "GET   /templates": {
         function: {
           handler: "services/functions/template/list.main",
           bind: [templateTable],
         },
       },
-      // templates are not workspace aware but forms are. 
+      // templates are not workspace aware but forms are.
       // This endpoint returns form count for the templates so it needs to be workspace aware.
-      "GET   /workspaces/{workspaceId}/templates": { 
+      "GET   /workspaces/{workspaceId}/templates": {
         function: {
           handler: "services/functions/template/listWithFormCount.main",
           bind: [templateTable, formTable],
@@ -361,8 +373,7 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "services/functions/tenant/getmytenant.main",
           bind: [tenantTable],
-          environment: {
-          },
+          environment: {},
         },
       },
       "GET /users": {
@@ -371,7 +382,7 @@ export function AuthAndApiStack({ stack, app }) {
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
-            // workspace owners can see the list of users to add/remove them to/from workspace 
+            // workspace owners can see the list of users to add/remove them to/from workspace
             // so ALLOWED_GROUPS is not set
           },
         },
@@ -486,7 +497,8 @@ export function AuthAndApiStack({ stack, app }) {
   
  
  
- 
+  
+  
 
   
 

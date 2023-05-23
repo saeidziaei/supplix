@@ -15,7 +15,7 @@ import {
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import { capitalizeFirstLetter } from "../lib/helpers";
+import "./Workspaces.css";
 
 export default function Workspaces() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -106,7 +106,7 @@ export default function Workspaces() {
                                     </Button>
                                   </LinkContainer>
                                 </List.Content>
-                                <List.Icon name='building' size='large' verticalAlign='middle' color="grey" />
+                                <List.Icon name='laptop' size='large' verticalAlign='middle' className="custom-orange-icon" />
                                 <List.Content>
                                   <List.Header>{d.workspaceName}</List.Header>
                                   <List.Description>{d.note}</List.Description>

@@ -199,9 +199,7 @@ console.log(values, codeSent, confirmed);
                     )
                   : renderSuccessMessage()}
 
-                <Button color="olive" type="submit">
-                  Submit
-                </Button>
+
               </Segment>
             </Form>
           )}

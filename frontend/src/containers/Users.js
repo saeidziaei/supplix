@@ -59,7 +59,7 @@ export default function Users() {
   function renderUsers() {
     return (
       <>
-        <FormHeader heading="Users" />
+        <FormHeader heading="Employees" />
         {!users && (
           <Message
             header="No user found"
@@ -89,11 +89,11 @@ export default function Users() {
           <Table basic="very" celled collapsing>
             <Table.Header>
               <Table.Row>
-                <Table.HeaderCell>Action</Table.HeaderCell>
-                <Table.HeaderCell>User</Table.HeaderCell>
+                <Table.HeaderCell></Table.HeaderCell>
+                <Table.HeaderCell>Name</Table.HeaderCell>
                 <Table.HeaderCell>Email</Table.HeaderCell>
                 <Table.HeaderCell>Email Verified</Table.HeaderCell>
-                <Table.HeaderCell>Phone</Table.HeaderCell>
+                {/* <Table.HeaderCell>Phone</Table.HeaderCell> */}
                 <Table.HeaderCell>Enabled</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
               </Table.Row>
@@ -110,30 +110,28 @@ export default function Users() {
                           : `/user/${u.Username}`
                       }
                     >
-                      <Button basic>Edit</Button>
+                      <Button basic size="tiny">Edit</Button>
                     </LinkContainer>
                   </Table.Cell>
                   <Table.Cell>
-                    <Header as="h4" image>
+                    
                       {u.isAdmin || u.isTopLevelAdmin ? (
-                        <Icon.Group size="big">
-                          <Icon name="user circle" color="black" />
-                          <Icon corner name="plus" color="red" />
+                        <Icon.Group color="grey">
+                          <Icon name="user circle"  />
+                          <Icon corner name="plus" />
                         </Icon.Group>
                       ) : (
-                        <Icon name="user circle" size="mini" />
+                        <Icon name="user circle"  />
                       )}
 
-                      <Header.Content>
+                      
                         {`${u.given_name} ${u.family_name}`}
-                        <Header.Subheader></Header.Subheader>
-                      </Header.Content>
-                    </Header>
+                        
                   </Table.Cell>
                   <Table.Cell>{u.email}</Table.Cell>
                   <Table.Cell textAlign="center">
                     <Icon
-                      size="large"
+                      
                       color={u.email_verified == "true" ? "green" : "black"}
                       name={
                         u.email_verified == "true"
@@ -141,12 +139,19 @@ export default function Users() {
                           : "x"
                       }
                     />
-                  </Table.Cell>
-                  <Table.Cell>{u.phone_number}</Table.Cell>
-                  <Table.Cell>
-                    <Label basic color={u.Enabled ? "green" : "grey"}>
-                      {u.Enabled ? "Yes" : "No"}
-                    </Label>
+                  </Table.Cell >
+                  {/* <Table.Cell>{u.phone_number}</Table.Cell> */}
+                  <Table.Cell textAlign="center">
+                  <Icon
+                      
+                      color={u.Enabled ? "green" : "black"}
+                      name={
+                        u.Enabled 
+                          ? "check circle outline"
+                          : "x"
+                      }
+                    />
+                    
                   </Table.Cell>
                   <Table.Cell>{u.UserStatus}</Table.Cell>
                 </Table.Row>

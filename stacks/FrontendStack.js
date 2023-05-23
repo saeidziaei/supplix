@@ -1,6 +1,5 @@
 import { StaticSite, use } from "sst/constructs";
-// import { ApiStack } from "./ApiStack";
-// import { AuthStack } from "./AuthStack";
+
 import { AuthAndApiStack } from "./AuthAndApiStack";
 import { StorageStack } from "./StorageStack";
 

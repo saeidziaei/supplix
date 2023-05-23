@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
-  ButtonGroup,
   Checkbox,
   Confirm,
-  Divider, Dropdown, Form, Grid, GridColumn, GridRow, Header,
+  Divider,
+  Grid,
+  GridRow, Header,
   Icon,
   Input,
   Item, Loader,
@@ -126,6 +127,7 @@ export default function FormTemplate() {
         name: "",
         title: "",
         category: "",
+        sectionColumns: 1,
         fields: [],
       },
     ]);
@@ -135,6 +137,30 @@ export default function FormTemplate() {
     const newSections = [...sections];
     newSections.splice(index, 1);
     setSections(newSections);
+  };
+
+  const moveSection = (currentIndex, newIndex) => {
+    const sectionsCopy = [...sections];
+    
+    // Remove the section from the current index
+    const [removedSection] = sectionsCopy.splice(currentIndex, 1);
+    
+    // Insert the removed section at the new index
+    sectionsCopy.splice(newIndex, 0, removedSection);
+    
+    setSections(sectionsCopy);
+  };
+
+  const moveSectionUp = (index) => {
+    if (index > 0) {
+      moveSection(index, index - 1);
+    }
+  };
+  
+  const moveSectionDown = (index) => {
+    if (index < sections.length - 1) {
+      moveSection(index, index + 1);
+    }
   };
 
   const addField = (sectionIndex) => {
@@ -261,14 +287,18 @@ export default function FormTemplate() {
                 </GridRow>
                 {!section.isTable && 
                 <Grid.Row >
-                  <GridColumn width={1} ></GridColumn>
-                  <GridColumn width={10} >
+                  <Grid.Column width={1} ></Grid.Column>
+                  <Grid.Column width={10} >
                   <Button.Group size="mini" >
                     <Button color={section.sectionColumns == 1 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 1)}>Single Column</Button>
                     <Button color={section.sectionColumns == 2 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 2)}>Two Columns</Button>
                     <Button color={section.sectionColumns == 3 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 3)}>Three Columns</Button>
                   </Button.Group>
-                  </GridColumn>
+                  </Grid.Column>
+                  <Grid.Column width={5} textAlign="right">
+                  {sectionIndex > 0 && <Button size="mini" basic circular onClick={() =>moveSectionUp(sectionIndex)} icon="chevron up"></Button>}
+                  {sectionIndex < sections.length - 1 && <Button size="mini" basic circular onClick={() =>moveSectionDown(sectionIndex)} icon="chevron down"></Button>}
+                  </Grid.Column>
                 </Grid.Row>
                 } 
                 {section.isTable && (
