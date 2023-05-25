@@ -53,7 +53,9 @@ export const main = handler(async (event, tenant) => {
   };
   if (data.isAdmin) {
     await client.adminAddUserToGroup(groupParams).promise();
-  } 
+  } else {
+    await client.adminRemoveUserFromGroup(groupParams).promise();
+  }
   
   return result;
 });

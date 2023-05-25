@@ -516,5 +516,6 @@ export function AuthAndApiStack({ stack, app }) {
   return {
     auth,
     api,
+    cognitoAccessPolicy
   };
 }
