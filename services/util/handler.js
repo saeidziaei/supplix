@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import dynamodb from "./dynamodb";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "./constants";
 
@@ -103,14 +103,14 @@ export function getUserGroups(event) {
 export async function getUser(username) {
   
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new AWS.CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider();
 
   const params = {
     UserPoolId: userPoolId,
     Username: username,
   };
 
-  const result = await client.adminGetUser(params).promise();
+  const result = await client.adminGetUser(params);
 
   return {
     firstName: getAttribute(result, "given_name") || "",
