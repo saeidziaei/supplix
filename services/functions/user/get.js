@@ -1,5 +1,5 @@
 import handler from "../../util/handler";
-import AWS from "aws-sdk";
+import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 
 export const main = handler(async (event, tenant) => {
@@ -12,14 +12,14 @@ export const main = handler(async (event, tenant) => {
 
   const username = event.pathParameters.username;
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new AWS.CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider();
 
   const params = {
     UserPoolId: userPoolId,
     Username: username,
   };
 
-  const result = await client.adminGetUser(params).promise();
+  const result = await client.adminGetUser(params);
 
   // Check that the user belongs to the correct tenant
   if (getUserTenant(result) !== tenantId) {
@@ -32,7 +32,7 @@ export const main = handler(async (event, tenant) => {
     Username: username,
   };
 
-  const groups = await client.adminListGroupsForUser(groupsParams).promise();
+  const groups = await client.adminListGroupsForUser(groupsParams);
   result.isAdmin = groups.Groups.some((group) => group.GroupName === ADMIN_GROUP);
   result.isTopLevelAdmin = groups.Groups.some((group) => group.GroupName === TOP_LEVEL_ADMIN_GROUP);
 

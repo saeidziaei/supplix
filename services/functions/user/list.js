@@ -1,5 +1,5 @@
 import handler from "../../util/handler";
-import AWS from "aws-sdk";
+import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 
 export const main = handler(async (event, tenant) => {
@@ -9,9 +9,9 @@ export const main = handler(async (event, tenant) => {
   const tenantId = event.pathParameters && event.pathParameters.tenantId ? event.pathParameters.tenantId : tenant;
 
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new AWS.CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider();
 
-  const result = await client.listUsers({ UserPoolId: userPoolId, }).promise();
+  const result = await client.listUsers({ UserPoolId: userPoolId, });
 
   let ret = result.Users;
 
@@ -20,7 +20,7 @@ export const main = handler(async (event, tenant) => {
 
     for (let i = 0; i < ret.length; i++) {
       const user = ret[i];
-      const groupsResult = await client.adminListGroupsForUser({ UserPoolId: userPoolId, Username: user.Username }).promise();
+      const groupsResult = await client.adminListGroupsForUser({ UserPoolId: userPoolId, Username: user.Username });
       ret[i].isAdmin = groupsResult.Groups.some(group => group.GroupName === ADMIN_GROUP);
       ret[i].isTopLevelAdmin = groupsResult.Groups.some(group => group.GroupName === TOP_LEVEL_ADMIN_GROUP);
     }

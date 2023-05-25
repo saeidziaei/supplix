@@ -1,5 +1,5 @@
 import handler from "../../util/handler";
-import AWS from "aws-sdk";
+import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import * as uuid from "uuid";
 
 export const main = handler(async (event, tenant) => {
@@ -10,7 +10,7 @@ export const main = handler(async (event, tenant) => {
   const tenantId = event.pathParameters && event.pathParameters.tenantId ? event.pathParameters.tenantId : tenant;
 
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new AWS.CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider();
 
   const params = {
     UserPoolId: userPoolId,
@@ -43,7 +43,7 @@ export const main = handler(async (event, tenant) => {
     ]
   };
 
-  const result = await client.adminCreateUser(params).promise();
+  const result = await client.adminCreateUser(params);
 
   // Add user to or remove from "admins" group depending on the value of data.isAdmin
   const groupParams = {
@@ -52,9 +52,9 @@ export const main = handler(async (event, tenant) => {
     Username: data.email
   };
   if (data.isAdmin) {
-    await client.adminAddUserToGroup(groupParams).promise();
+    await client.adminAddUserToGroup(groupParams);
   } else {
-    await client.adminRemoveUserFromGroup(groupParams).promise();
+    await client.adminRemoveUserFromGroup(groupParams);
   }
   
   return result;

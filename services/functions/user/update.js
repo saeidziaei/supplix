@@ -1,5 +1,5 @@
 import handler from "../../util/handler";
-import AWS from "aws-sdk";
+import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 
 export const main = handler(async (event, tenant) => {
   const data = JSON.parse(event.body);
@@ -8,14 +8,14 @@ export const main = handler(async (event, tenant) => {
   const tenantId = event.pathParameters && event.pathParameters.tenantId ? event.pathParameters.tenantId : tenant;
 
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new AWS.CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider();
 
   const params = {
     UserPoolId: userPoolId,
     Username: data.username,
   };
 
-  const user = await client.adminGetUser(params).promise();
+  const user = await client.adminGetUser(params);
   const userAttributes = user.UserAttributes;
 
   // Check if the tenantId matches the custom attribute "tenant" of the user
@@ -49,7 +49,7 @@ export const main = handler(async (event, tenant) => {
     ]
   };
 
-  const result = await client.adminUpdateUserAttributes(updateParams).promise();
+  const result = await client.adminUpdateUserAttributes(updateParams);
   
   // Add user to or remove from "admins" group depending on the value of data.isAdmin
   const groupParams = {
@@ -58,9 +58,9 @@ export const main = handler(async (event, tenant) => {
     Username: data.email
   };
   if (data.isAdmin) {
-    await client.adminAddUserToGroup(groupParams).promise();
+    await client.adminAddUserToGroup(groupParams);
   } else {
-    await client.adminRemoveUserFromGroup(groupParams).promise();
+    await client.adminRemoveUserFromGroup(groupParams);
   }
 
   return result;
