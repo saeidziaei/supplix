@@ -63,7 +63,7 @@ export default function Users() {
     init(params) {
       this.eGui = document.createElement('div');
       this.eGui.classList.add('portrait');
-      this.eGui.innerHTML = `<img src="${params.data.photoURL ?? './placeholderUserImage.png'}">`;
+      this.eGui.innerHTML = `<img src="${params.data.photoURL ?? '/placeholderUserImage.png'}">`;
     }
   
     getGui() {
@@ -78,8 +78,8 @@ export default function Users() {
   const columnDefs = [
     { field: 'Photo', headerName: 'Photo', width: '80', cellRenderer: PhotoRenderer},
     { field: 'Name', headerName: 'Name', resizable: true, sortable: true, cellRenderer: NameRenderer, valueGetter: (params) => {return params.data.given_name + " " + params.data.family_name}  },
-    { field: 'email', headerName: 'Email', resizable: true, sortable: true, cellRenderer: EmailRenderer  },
     { field: 'employeeNumber', resizable: true, sortable: true },
+    { field: 'email', headerName: 'Email', resizable: true, sortable: true, cellRenderer: EmailRenderer  },
   ];
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);

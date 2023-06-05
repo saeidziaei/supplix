@@ -9,7 +9,7 @@ import { onError } from "../lib/errorLib";
 import "./Login.css";
 
 export default function Login() {
-  const { userHasAuthenticated } = useAppContext();
+  const { setAuthenticatedUser } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [newPasswordRequired, setNewPasswordRequired] = useState(false);
@@ -39,6 +39,8 @@ export default function Login() {
       } else {
         ret = await Auth.signIn(values.email, values.password);
 
+        console.log("login", ret);
+
         if (ret.challengeName === "NEW_PASSWORD_REQUIRED") {
           setUser(ret);
           setNewPasswordRequired(true);
@@ -46,7 +48,7 @@ export default function Login() {
           return;
         }
       }
-      userHasAuthenticated(true);
+      setAuthenticatedUser(ret.signInUserSession.idToken.payload);
       
     } catch (e) {
       console.log(e);

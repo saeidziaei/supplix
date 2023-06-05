@@ -17,7 +17,7 @@ export default function Signup() {
   });
   const nav = useNavigate();
   const [newUser, setNewUser] = useState(null);
-  const { userHasAuthenticated } = useAppContext();
+  const { setAuthenticatedUser } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   function validateForm() {
     return (
@@ -53,8 +53,10 @@ export default function Signup() {
     setIsLoading(true);
     try {
       await Auth.confirmSignUp(fields.email, fields.confirmationCode);
-      await Auth.signIn(fields.email, fields.password);
-      userHasAuthenticated(true);
+      const ret = await Auth.signIn(fields.email, fields.password);
+
+      // TODO test
+      setAuthenticatedUser(ret.signInUserSession.idToken.payload);
       nav("/");
     } catch (e) {
       onError(e);

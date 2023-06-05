@@ -20,17 +20,19 @@ import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
+import User from "./components/User";
+
 
 export default App;
 
 function App() {
-  const [isAuthenticated, userHasAuthenticated] = useState(false);
+  const [authenticatedUser, setAuthenticatedUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentUserRoles, setCurrentUserRoles] = useState([]);
+  
   const [tenant, setTenant] = useState(null);
   const [currentWorkspace, setCurrentWorkspace] = useState(null);
   const [workspaces, setWorkspaces] = useState(null);
+  const [employee, setEmployee] = useState(null);
 
   const nav = useNavigate();
 
@@ -38,7 +40,7 @@ function App() {
   async function handleLogout() {
     await Auth.signOut();
 
-    userHasAuthenticated(false);
+    setAuthenticatedUser(null);
     nav("/login");
   }
   useEffect(() => {
@@ -48,12 +50,8 @@ function App() {
         console.log("app load");
         const session = await Auth.currentSession();
 
-        const decodedJwt = jwt_decode(session.getAccessToken().getJwtToken());
-        setCurrentUserRoles(decodedJwt["cognito:groups"] || [])
+        setAuthenticatedUser(session.idToken.payload);
 
-        setCurrentUser(jwt_decode(session.getIdToken().getJwtToken()).email);
-
-        userHasAuthenticated(true);
       } catch (e) {
        
         if (e !== "No current user") {
@@ -71,7 +69,7 @@ function App() {
 
   useEffect(() => {
     async function loadMyTenant() {
-      if (!isAuthenticated)
+      if (!authenticatedUser)
         return;
         
       const tenant = await makeApiCall("GET", `/mytenant`);
@@ -82,8 +80,35 @@ function App() {
       return tenant;
     }
 
+    async function loadMyEmployee() {
+      function getAttribute(user, attributeName) {
+        const attribute = user.UserAttributes.find(
+          (attr) => attr.Name === attributeName
+        );
+        if (attribute) {
+          return attribute.Value;
+        } else {
+          return undefined;
+        }
+      }
+
+      if (!authenticatedUser)
+        return;
+      
+      const item = await makeApiCall("GET", `/users/${authenticatedUser.sub}`);
+
+      return {
+        given_name: getAttribute(item, "given_name") || "",
+        family_name: getAttribute(item, "family_name") || "",
+        phone: getAttribute(item, "phone_number") || "",
+        email: getAttribute(item, "email") || "",
+        ...item
+      }
+    }
+
+
     async function loadMyWorkspaces() {
-      if (!isAuthenticated)
+      if (!authenticatedUser)
         return;
         
       return await makeApiCall("GET", `/myworkspaces`);
@@ -91,10 +116,11 @@ function App() {
 
     async function onLoad() {
       try {
-        const [workspaces, tenant] = await Promise.all([loadMyWorkspaces(), loadMyTenant()]);
+        const [workspaces, tenant, employee] = await Promise.all([loadMyWorkspaces(), loadMyTenant(), loadMyEmployee()]);
 
         setTenant(tenant);
         setWorkspaces(workspaces);
+        setEmployee(employee);
       } catch (e) {
         alert(e);
       }
@@ -102,7 +128,7 @@ function App() {
     
 
     onLoad();
-  }, [isAuthenticated]);
+  }, [authenticatedUser]);
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
@@ -119,6 +145,7 @@ function App() {
 
   function renderApp() {
     console.log("API Gateway URL", config.apiGateway.URL);
+    const currentUserRoles = authenticatedUser ? authenticatedUser["cognito:groups"] || [] : [];
     const isAdmin = currentUserRoles.includes('admins');
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
 
@@ -130,7 +157,7 @@ function App() {
         <>
           <Grid doubling stackable style={{ marginBottom: "-3rem" }}>
             <Grid.Row verticalAlign="middle">
-              <Grid.Column width="4">
+              <Grid.Column width="7">
                 <List divided horizontal>
                   <List.Item>
                     {tenant ? (
@@ -160,11 +187,11 @@ function App() {
                       icon="refresh"
                       onClick={() => {window.location.reload();}}
                     ></Button>
-
+{employee && <User user={employee}  /> }
                   </List.Item>
                 </List>
               </Grid.Column>
-              <Grid.Column width={4}>
+              <Grid.Column width={5}>
                 <Menu vertical>
                   <Dropdown
                     item
@@ -172,7 +199,7 @@ function App() {
                     text={
                       currentWorkspace
                         ? currentWorkspace.workspaceName
-                        : "Workspace not selected"
+                        : "(Workspace)"
                     }
                   >
                     {workspaces && (
@@ -194,6 +221,7 @@ function App() {
                   </Dropdown>
                 </Menu>
               </Grid.Column>
+   
             </Grid.Row>
           </Grid>
           <Grid columns={1}>
@@ -226,7 +254,7 @@ function App() {
                     Notifications
                   </Menu.Item> */}
 
-                  {isAuthenticated ? (
+                  {authenticatedUser ? (
                     <>
                       <Menu.Item>
                         <Menu.Header color="white">ISOs</Menu.Header>
@@ -347,7 +375,7 @@ function App() {
                       {tenant ? tenant.tenantName : ""}
                       <br />
                       <br />
-                      {currentUser}
+                      {employee ? employee.given_name : ""}
                     </p>
                   </Menu.Item>
                 </Sidebar>
@@ -356,8 +384,8 @@ function App() {
                   <Segment basic style={{ minHeight: "100vh" }}>
                     <AppContext.Provider
                       value={{
-                        isAuthenticated,
-                        userHasAuthenticated,
+                        authenticatedUser,
+                        setAuthenticatedUser,
                         currentUserRoles,
                         currentWorkspace,
                         loadAppWorkspace,

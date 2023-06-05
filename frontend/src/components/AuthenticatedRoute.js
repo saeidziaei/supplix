@@ -4,9 +4,9 @@ import { useAppContext } from "../lib/contextLib";
 
 export default function AuthenticatedRoute({ children }) {
   const { pathname, search } = useLocation();
-  const { isAuthenticated } = useAppContext();
+  const { authenticatedUser } = useAppContext();
 
-  if (!isAuthenticated) {
+  if (!authenticatedUser) {
     alert(`/login?redirect=${pathname}${search}`);
 
     return <Navigate to={`/login?redirect=${pathname}${search}`} />;

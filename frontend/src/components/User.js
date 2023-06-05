@@ -1,4 +1,6 @@
+import { Image, Label } from "semantic-ui-react";
 import "./User.css";
+import { capitalizeFirstLetter } from "../lib/helpers";
 
 export default function User({ user, compact = false }) {
     const firstLetter = (word) => (word ? word.charAt(0) : "-");
@@ -31,15 +33,19 @@ export default function User({ user, compact = false }) {
     }
   
     return (
-      <>
-        <div
-          className="round-label"
-          style={{ backgroundColor: getColor(initial), color: "white" }}
-        >
-          {initial}
-        </div>
-        {!compact && <span>{`   ${user.given_name} ${user.family_name}`}</span>}
-      </>
+      <Label basic>
+        {user.photoURL ? (
+          <Image rounded src={user.photoURL} avatar />
+        ) : (
+          <div
+            className="round-label"
+            style={{ backgroundColor: getColor(initial), color: "white" }}
+          >
+            {initial}
+          </div>
+        )}
+        {!compact && <span>{`${capitalizeFirstLetter(user.given_name)} ${capitalizeFirstLetter(user.family_name)}`}</span>}
+      </Label>
     );
 
 }

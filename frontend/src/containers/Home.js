@@ -41,10 +41,7 @@ export default function Home() {
             marginTop: "1.5em",
           }}
         />
-        <Button primary size="huge">
-          Get Started
-          <Icon name="right arrow" />
-        </Button>
+       
       </Container>
       <Segment style={{ padding: "8em 0em" }} vertical>
         <Container text inverted>
