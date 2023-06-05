@@ -1,6 +1,7 @@
 import handler from "../../util/handler";
 import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import * as uuid from "uuid";
+import dynamodb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
   const data = JSON.parse(event.body);
@@ -26,11 +27,6 @@ export const main = handler(async (event, tenant) => {
         Name: "family_name",
         Value: data.lastName // Last name of the new user
       },
-      // {
-      //   Name: "phone_number",
-      //   Value: data.phone // Last name of the new user
-      // },
-      // {Name: "phone_number_verified", Value: "true" },
       {
         Name: "email",
         Value: data.email // Email address of the new user
@@ -53,9 +49,22 @@ export const main = handler(async (event, tenant) => {
   };
   if (data.isAdmin) {
     await client.adminAddUserToGroup(groupParams);
-  } else {
-    await client.adminRemoveUserFromGroup(groupParams);
   }
   
+  // Save other attributes in DB
+  const insertParams = {
+    TableName: process.env.USER_TABLE,
+    Item: {
+      tenant: tenantId,
+      Username: result.User.Username,
+      photo: data.photo,
+      employeeNumber: data.employeeNumber,
+      createdBy: event.requestContext.authorizer.jwt.claims.sub,
+      createdAt: Date.now(), // Current Unix timestamp
+    },
+  };
+
+  await dynamodb.put(insertParams); 
+
   return result;
 });

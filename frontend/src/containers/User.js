@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { onError } from "../lib/errorLib";
-import { makeApiCall } from "../lib/apiLib";
-import { Form, Header, Loader, Segment, Grid, Icon, Button, Checkbox, Label } from "semantic-ui-react";
+import axios from "axios";
 import { Field, Formik } from "formik";
-
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Checkbox, Divider, Form, Grid, Header, Icon, Image, Loader, Segment } from "semantic-ui-react";
+import config from "../config";
+import { makeApiCall } from "../lib/apiLib";
+import { onError } from "../lib/errorLib";
+import placeholderUserImage from '../placeholderUserImage.png';
 
 
 export default function User() {
   const { username, tenantId } = useParams();
   const [user, setUser] = useState({ firstName: "", lastName: "", email: "", phone: "", password:"", isAdmin: false }); 
   const [isLoading, setIsLoading] = useState(true);
+  const [changePhoto, setChangePhoto] = useState(false);
   const nav = useNavigate();
+  const file = useRef(null);
+  function handleFileChange(event) {
+    file.current = event.target.files[0];
+  }
+
 
   function getAttribute(user, attributeName) {
     const attribute = user.UserAttributes.find(
@@ -34,15 +42,15 @@ export default function User() {
       try {
         if (username) {
           const item = await loadUser();
-          console.log(item);
           
           setUser({
             firstName: getAttribute(item, "given_name") || "",
             lastName: getAttribute(item, "family_name") || "",
             phone: getAttribute(item, "phone_number") || "",
             email: getAttribute(item, "email") || "",
-            isAdmin: item.isAdmin,
-            username: username
+            ...item
+            // isAdmin: item.isAdmin,
+            // username: username
           });
         }
       } catch (e) {
@@ -60,24 +68,68 @@ export default function User() {
   }
 
   async function handleSubmit(values) {
+    if (changePhoto && file.current && file.current.size > config.MAX_ATTACHMENT_SIZE) {
+      alert(
+        `Please pick a file smaller than ${
+          config.MAX_ATTACHMENT_SIZE / 1000000
+        } MB.`
+      );
+      return;
+    }    
     setIsLoading(true);
     try {
-      if (username) {
-        await updateUser(values);
-        window.location.reload();
-      } else {
-        await createUser(values);
-        if (tenantId) nav(`/tenants/${tenantId}/users`);
-        else nav("/users");
-      }
+      if (!changePhoto)
+        return await handleSave(values);
+
+      const folder = "employees";
+      const fileName = `${Date.now()}-${file.current.name}`;
+
+      const signedUrl = await makeApiCall("POST", `/docs/upload-url`, {
+        fileName: fileName,
+        folder: folder,
+        contentType: file.current.type,
+      });
+
+      const reader = new FileReader();
+      reader.addEventListener("load", async (event) => {
+        const fileContent = event.target.result;
+
+        // Upload the file to S3 using Axios
+        await axios.put(signedUrl, fileContent, {
+          headers: {
+            "Content-Type": file.current.type,
+          },
+        });
+
+        values.photo = `${folder}/${fileName}`;
+        values.oldPhoto = user ? user.photo : "";
+
+        await handleSave(values);
+
+      });
+
+      reader.readAsArrayBuffer(file.current);
+
     } catch (e) {
       onError(e);
       setIsLoading(false);
     }
   }
 
+  async function handleSave(values) {
+    if (username) {
+      await updateUser(values);
+      window.location.reload();
+    } else {
+      await createUser(values);
+      if (tenantId)
+        nav(`/tenants/${tenantId}/users`);
+      else
+        nav("/users");
+    }
+  }
+
   async function createUser(values) {
-    console.debug("create user for tenant: ", tenantId);
     if (tenantId)
       return await makeApiCall("POST", `/tenants/${tenantId}/users`, values);
     else return await makeApiCall("POST", `/users`, values);
@@ -95,12 +147,11 @@ export default function User() {
 
   if (isLoading) return <Loader active />;
 
+  console.log(user);
+
   return (
     <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
       <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h2" color="olive" textAlign="center">
-          <Icon name="user outline" color="olive" /> User
-        </Header>
         <Formik
           initialValues={{ ...user }}
           validate={validateForm}
@@ -116,7 +167,24 @@ export default function User() {
             /* and other goodies */
           }) => (
             <Form onSubmit={handleSubmit} autoComplete="off">
+              <Header as="h2" textAlign="left">
+                <Icon name="user outline" />
+                {`${values.firstName} ${values.lastName}`}
+              </Header>
               <Segment>
+                {!tenantId &&  // do not upload photo for another tenant's employees as they get uploaded to current tenant folder
+                  <>
+                   {changePhoto && (<><Form.Input onChange={handleFileChange} type="file" /> <Button size="mini" basic onClick={() => setChangePhoto(false)}><Icon name="undo"/></Button></>)}
+                   {!changePhoto && (<>
+                    <Image style={{ width: "200px", height: "200px", marginRight: "10px" }}  rounded src={values.photoURL || placeholderUserImage} wrapped alt={values.photo} onError={(e) => {
+                        e.target.src = placeholderUserImage;
+                      }}
+                    />
+                    <Button size="mini" basic onClick={() => setChangePhoto(true)}>Change Photo</Button>
+                  </>)}
+                  </>
+                }
+                <Divider hidden />
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -134,6 +202,15 @@ export default function User() {
                   placeholder="Last Name"
                   value={values.lastName}
                   onChange={handleChange}
+                />{" "}
+                <Form.Input
+                  fluid
+                  iconPosition="left"
+                  icon="hashtag"
+                  name="employeeNumber"
+                  placeholder="EmployeeNumber"
+                  value={values.employeeNumber}
+                  onChange={handleChange}
                 />
                 <Form.Input
                   fluid
@@ -145,7 +222,6 @@ export default function User() {
                   value={values.email}
                   onChange={handleChange}
                 />
-
                 {!username && (
                   <Form.Input
                     fluid
@@ -158,23 +234,21 @@ export default function User() {
                     onChange={handleChange}
                   />
                 )}
-
-                    <Field
-                      name="isAdmin"
-                      render={({ field }) => (
-                        <Checkbox
-                          toggle
-                          label="Is Admin?"
-                          checked={field.value}
-                          onChange={(e, { checked }) =>
-                            field.onChange({
-                              target: { name: "isAdmin", value: checked },
-                            })
-                          }
-                        />
-                      )}
+                <Field
+                  name="isAdmin"
+                  render={({ field }) => (
+                    <Checkbox
+                      toggle
+                      label="Is Admin?"
+                      checked={field.value}
+                      onChange={(e, { checked }) =>
+                        field.onChange({
+                          target: { name: "isAdmin", value: checked },
+                        })
+                      }
                     />
-
+                  )}
+                />
                 <br />
                 <br />
                 {values.isAdmin && (
@@ -183,10 +257,9 @@ export default function User() {
                     can add or remove users, change templates and ISO content.
                   </p>
                 )}
-
                 <br />
                 <br />
-                <Button color="olive" type="submit" disabled={isSubmitting}>
+                <Button basic type="submit" disabled={isSubmitting}>
                   Submit
                 </Button>
               </Segment>
@@ -197,3 +270,15 @@ export default function User() {
     </Grid>
   );
 }
+
+
+{/* <Grid stackable>
+<Grid.Row>
+  <Grid.Column width={5}>
+    <Image src='https://react.semantic-ui.com/images/wireframe/image.png' />
+  </Grid.Column>
+  <Grid.Column width={11}>
+    <Image src='https://react.semantic-ui.com/images/wireframe/centered-paragraph.png' />
+  </Grid.Column>
+</Grid.Row>
+</Grid> */}

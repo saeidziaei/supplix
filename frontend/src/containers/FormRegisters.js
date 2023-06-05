@@ -85,8 +85,8 @@ export default function FormRegisters() {
                             to={`/workspace/${workspaceId}/form/${t.templateId}`}
                           >
                             <Button basic primary size="mini">
-                              <Icon name="pencil" />
-                              New Record
+                              <Icon name="add" />
+                              Record
                             </Button>
                           </LinkContainer>
                           <LinkContainer

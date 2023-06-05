@@ -6,21 +6,20 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Card,
   Dropdown,
   Grid,
-  Header,
   Icon,
   Image, List,
   Loader, Menu, PlaceholderImage, Segment,
   Sidebar
 } from "semantic-ui-react";
 import "./App.css";
+import Routes from "./Routes";
+import config from "./config";
 import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
-import Routes from "./Routes";
 
 export default App;
 
@@ -119,6 +118,7 @@ function App() {
   }
 
   function renderApp() {
+    console.log("API Gateway URL", config.apiGateway.URL);
     const isAdmin = currentUserRoles.includes('admins');
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
 

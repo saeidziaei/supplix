@@ -23,7 +23,7 @@ export const normaliseCognitoUsers = (cUsers) => {
     email: getAttribute(cu, "email"),
     email_verified: getAttribute(cu, "email_verified"),
     phone_number: getAttribute(cu, "phone_number"),
-
+    ...cu
   }));
 }
 export const getUserById = (users, id) => {

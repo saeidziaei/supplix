@@ -1,6 +1,8 @@
 {
   "version": "0.2.0",
   "configurations": [
+
+
     {
       "name": "Frontend",
       "port": 3000,
@@ -15,9 +17,10 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/sst",
-      "runtimeArgs": ["start", "--increase-timeout"],
+      "runtimeArgs": ["dev", "--increase-timeout"],
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": false,
       "env": {}
     }
   ]

@@ -51,7 +51,7 @@ export default function FormTemplates() {
           <LinkContainer to={`/template/${t.templateId}`}>
             <Button basic primary size="mini">
               <Icon name="pencil" />
-              Change Form Design
+              Design
             </Button>
           </LinkContainer>
         </List.Content>

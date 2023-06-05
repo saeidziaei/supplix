@@ -12,6 +12,7 @@ export function AuthAndApiStack({ stack, app }) {
     bucket,
     templateTable,
     tenantTable,
+    userTable,
     isoTable,
     formTable,
     docTable,
@@ -71,19 +72,7 @@ export function AuthAndApiStack({ stack, app }) {
     ],
 
   });
-  // setTimeout(() => {
-  // const adminGroupMembership = new cognito.CfnUserPoolUserToGroupAttachment(
-  //   stack,
-  //   "AdminUserToTopLevelAdmins",
-  //   {
-  //     groupName: topLevelAdminsGroup.groupName,
-  //     username: adminUser.username,
-  //     userPoolId: auth.userPoolId,
-  //     dependsOn: [adminUser, topLevelAdminsGroup]
-  //   }
-    
-  // );
-  // },  5000); // wait for 5 second before adding the user to the group
+
 
 
   const cognitoAccessPolicy = new iam.PolicyStatement({
@@ -122,6 +111,7 @@ export function AuthAndApiStack({ stack, app }) {
         environment: {
           TEMPLATE_TABLE: templateTable.tableName,
           TENANT_TABLE: tenantTable.tableName,
+          USER_TABLE: userTable.tableName,
           ISO_TABLE: isoTable.tableName,
           FORM_TABLE: formTable.tableName,
           DOC_TABLE: docTable.tableName,
@@ -379,6 +369,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /users": {
         function: {
           handler: "services/functions/user/list.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -390,6 +381,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /tenants/{tenantId}/users": {
         function: {
           handler: "services/functions/user/list.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -400,6 +392,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /users/{username}": {
         function: {
           handler: "services/functions/user/get.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -410,6 +403,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /tenants/{tenantId}/users/{username}": {
         function: {
           handler: "services/functions/user/get.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -420,6 +414,7 @@ export function AuthAndApiStack({ stack, app }) {
       "POST /users": {
         function: {
           handler: "services/functions/user/create.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -430,6 +425,7 @@ export function AuthAndApiStack({ stack, app }) {
       "POST /tenants/{tenantId}/users": {
         function: {
           handler: "services/functions/user/create.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -440,6 +436,7 @@ export function AuthAndApiStack({ stack, app }) {
       "PUT /users/{username}": {
         function: {
           handler: "services/functions/user/update.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -450,6 +447,7 @@ export function AuthAndApiStack({ stack, app }) {
       "PUT /tenants/{tenantId}/users/{username}": {
         function: {
           handler: "services/functions/user/update.main",
+          bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {
             USER_POOL_ID: auth.userPoolId,
@@ -478,8 +476,11 @@ export function AuthAndApiStack({ stack, app }) {
   api.attachPermissionsToRoute("GET /workspaces/{workspaceId}/docs/{docId}", ["s3"]);
   api.attachPermissionsToRoute("GET /workspaces/{workspaceId}/forms/{formId}", ["s3"]);
   api.attachPermissionsToRoute("PUT /workspaces/{workspaceId}/forms/{formId}", ["s3"]);
-
-
+  api.attachPermissionsToRoute("GET /users/{username}", ["s3"]);
+  api.attachPermissionsToRoute("GET /users", ["s3"]);
+  api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", ["s3"]);
+  
+  
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API
     api,

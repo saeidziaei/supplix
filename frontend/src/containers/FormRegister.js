@@ -1,19 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Divider, Icon, Label, Message, Popup } from "semantic-ui-react";
-import { parseISO } from "date-fns";
-import { NumericFormat } from "react-number-format";
-import { LinkContainer } from "react-router-bootstrap";
-import { useParams } from "react-router-dom";
-import { Header, Loader, Table } from "semantic-ui-react";
-import { makeApiCall } from "../lib/apiLib";
-import { onError } from "../lib/errorLib";
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { ModuleRegistry } from "@ag-grid-community/core";
+import { CsvExportModule } from '@ag-grid-community/csv-export';
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
-import { ModuleRegistry } from "@ag-grid-community/core";
-import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
-import { CsvExportModule } from '@ag-grid-community/csv-export';
+import { parseISO } from "date-fns";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { NumericFormat } from "react-number-format";
+import { LinkContainer } from "react-router-bootstrap";
+import { useParams } from "react-router-dom";
+import { Button, Divider, Header, Icon, Label, Loader, Message, Popup } from "semantic-ui-react";
+import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
+import { onError } from "../lib/errorLib";
 
 export default function FormRegister({ formDefInput, formsInput, isHistory }) {
   const gridRef = useRef();

@@ -1,3 +1,4 @@
+import dynamodb from "../../util/dynamodb";
 import handler from "../../util/handler";
 import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 
@@ -12,7 +13,7 @@ export const main = handler(async (event, tenant) => {
 
   const params = {
     UserPoolId: userPoolId,
-    Username: data.username,
+    Username: data.Username,
   };
 
   const user = await client.adminGetUser(params);
@@ -26,7 +27,7 @@ export const main = handler(async (event, tenant) => {
 
   const updateParams = {
     UserPoolId: userPoolId,
-    Username: data.username, // the username of the user to update
+    Username: data.Username, // the username of the user to update
     UserAttributes: [
       {
         Name: "given_name",
@@ -36,11 +37,6 @@ export const main = handler(async (event, tenant) => {
         Name: "family_name",
         Value: data.lastName // Last name of the user to update
       },
-      // {
-      //   Name: "phone_number",
-      //   Value: data.phone // Last name of the new user
-      // },
-      // {Name: "phone_number_verified", Value: "true" },
       {
         Name: "email",
         Value: data.email // Email address of the user to update
@@ -62,6 +58,38 @@ export const main = handler(async (event, tenant) => {
   } else {
     await client.adminRemoveUserFromGroup(groupParams);
   }
+
+
+  
+  
+
+  let updateExpression = "SET employeeNumber= :employeeNumber, updatedByUser= :updatedByUser, updatedAt= :updatedAt";
+  let expressionAttributes = {
+    ":employeeNumber": data.employeeNumber,
+    ":updatedByUser": event.requestContext.authorizer.jwt.claims.sub,
+    ":updatedAt": Date.now(),
+  };
+
+  if (data.photo) {
+    updateExpression += ", photo = :photo";
+    expressionAttributes[":photo"] = data.photo;
+  }
+  // TODO delete oldPhoto from s3
+
+
+  const dbParams = {
+    TableName: process.env.USER_TABLE,
+    
+    Key: {
+      tenant: tenantId,
+      Username: data.Username,
+    },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeValues: expressionAttributes,
+    
+    ReturnValues: "ALL_NEW",
+  };
+  await dynamodb.update(dbParams);
 
   return result;
 });

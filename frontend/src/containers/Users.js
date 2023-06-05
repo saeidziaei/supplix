@@ -1,22 +1,88 @@
-import React, { useState, useEffect } from "react";
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { ModuleRegistry } from "@ag-grid-community/core";
+import { AgGridReact } from "@ag-grid-community/react";
+import "@ag-grid-community/styles/ag-grid.css";
+import "@ag-grid-community/styles/ag-theme-alpine.css";
+import React, { useEffect, useRef, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
-import { onError } from "../lib/errorLib";
-import { makeApiCall } from "../lib/apiLib";
-import { useParams } from "react-router-dom";
-import { s3Get } from "../lib/awsLib";
-import { Button, Header, Icon, Image, Item, Label, Loader, Message, Table } from "semantic-ui-react";
-import placeholderImage from '../fileplaceholder.jpg'
-import { parseISO } from "date-fns";
+import { Link, useParams } from "react-router-dom";
+import { Button, Divider, Grid, Icon, Image, List, Loader, Message, Segment } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
-import { normaliseCognitoUsers } from "../lib/helpers";
-
+import placeholderImage from '../fileplaceholder.jpg';
+import { makeApiCall } from "../lib/apiLib";
+import { s3Get } from "../lib/awsLib";
+import { onError } from "../lib/errorLib";
+import { capitalizeFirstLetter, normaliseCognitoUsers } from "../lib/helpers";
+import "./Users.css";
 
 export default function Users() {
+  const gridRef = useRef();
   const { tenantId } = useParams(null);
   const [users, setUsers] = useState([]);
   const [tenant, setTenant] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  class NameRenderer {
+    init(params) {
+      const user = params.data;      
+      this.eGui = document.createElement('div');
+      this.eGui.classList.add('custom-element');
+      this.eGui.innerHTML = `
+          <a href="${
+            tenantId
+              ? `/tenants/${tenantId}/user/${user.Username}`
+              : `/user/${user.Username}`
+          }" target="_blank">${capitalizeFirstLetter(user.given_name)} ${capitalizeFirstLetter(user.family_name)}</a>
+      `;
+    }
+  
+    getGui() {
+      return this.eGui;
+    }
+  
+    refresh(params) {
+      return false;
+    }
+  }
+  class EmailRenderer {
+    init(params) {
+      this.eGui = document.createElement('div');
+      this.eGui.classList.add('custom-element');
+      this.eGui.innerHTML = `<a href="mailto:${params.data.email}">${params.data.email}</a>`;
+    }
+  
+    getGui() {
+      return this.eGui;
+    }
+  
+    refresh(params) {
+      return false;
+    }
+  }  
+  class PhotoRenderer {
+    init(params) {
+      this.eGui = document.createElement('div');
+      this.eGui.classList.add('portrait');
+      this.eGui.innerHTML = `<img src="${params.data.photoURL ?? './placeholderUserImage.png'}">`;
+    }
+  
+    getGui() {
+      return this.eGui;
+    }
+  
+    refresh(params) {
+      return false;
+    }
+  }
+
+  const columnDefs = [
+    { field: 'Photo', headerName: 'Photo', width: '80', cellRenderer: PhotoRenderer},
+    { field: 'Name', headerName: 'Name', resizable: true, sortable: true, cellRenderer: NameRenderer, valueGetter: (params) => {return params.data.given_name + " " + params.data.family_name}  },
+    { field: 'email', headerName: 'Email', resizable: true, sortable: true, cellRenderer: EmailRenderer  },
+    { field: 'employeeNumber', resizable: true, sortable: true },
+  ];
+
+  ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
   useEffect(() => {
     async function onLoad() {
@@ -24,6 +90,7 @@ export default function Users() {
         const [users, tenant] = await Promise.all([loadUsers(), loadTenant()]);
 
         setUsers(normaliseCognitoUsers(users));
+        
         setTenant(tenant);
       } catch (e) {
         onError(e);
@@ -86,86 +153,33 @@ export default function Users() {
           />
         )}
         {users && (
-          <Table basic="very" celled collapsing>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell></Table.HeaderCell>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Email</Table.HeaderCell>
-                <Table.HeaderCell>Email Verified</Table.HeaderCell>
-                {/* <Table.HeaderCell>Phone</Table.HeaderCell> */}
-                <Table.HeaderCell>Enabled</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {users.map((u) => (
-                <Table.Row key={u.Username}>
-                  <Table.Cell>
-                    <LinkContainer
-                      key={u.Username}
-                      to={
-                        tenantId
-                          ? `/tenants/${tenantId}/user/${u.Username}`
-                          : `/user/${u.Username}`
-                      }
-                    >
-                      <Button basic size="tiny">Edit</Button>
-                    </LinkContainer>
-                  </Table.Cell>
-                  <Table.Cell>
-                    
-                      {u.isAdmin || u.isTopLevelAdmin ? (
-                        <Icon.Group color="grey">
-                          <Icon name="user circle"  />
-                          <Icon corner name="plus" />
-                        </Icon.Group>
-                      ) : (
-                        <Icon name="user circle"  />
-                      )}
-
-                      
-                        {`${u.given_name} ${u.family_name}`}
-                        
-                  </Table.Cell>
-                  <Table.Cell>{u.email}</Table.Cell>
-                  <Table.Cell textAlign="center">
-                    <Icon
-                      
-                      color={u.email_verified == "true" ? "green" : "black"}
-                      name={
-                        u.email_verified == "true"
-                          ? "check circle outline"
-                          : "x"
-                      }
-                    />
-                  </Table.Cell >
-                  {/* <Table.Cell>{u.phone_number}</Table.Cell> */}
-                  <Table.Cell textAlign="center">
-                  <Icon
-                      
-                      color={u.Enabled ? "green" : "black"}
-                      name={
-                        u.Enabled 
-                          ? "check circle outline"
-                          : "x"
-                      }
-                    />
-                    
-                  </Table.Cell>
-                  <Table.Cell>{u.UserStatus}</Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
+          <div
+            className="ag-theme-alpine"
+            style={{
+              height: "500px",
+              width: "100%",
+            }}
+          >
+            <AgGridReact
+              ref={gridRef}
+              columnDefs={columnDefs}
+              rowData={users}
+              rowHeight="40"
+              animateRows={true}
+            ></AgGridReact>
+          </div>
         )}
+        <Divider hidden />
         {tenantId ? (
           <LinkContainer to={`/tenants/${tenantId}/user`}>
-            <Button primary>Create new tenant user</Button>
+            <Button basic color="blue" >Create new tenant employee</Button>
           </LinkContainer>
         ) : (
           <LinkContainer to={`/user`}>
-            <Button primary>Create new user</Button>
+            <Button size="tiny" basic color="blue">
+              <Icon name="plus" />
+              New Employee
+            </Button>
           </LinkContainer>
         )}
       </>

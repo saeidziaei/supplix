@@ -13,8 +13,8 @@ export const main = handler(async (event) => {
     tenantName = :tenantName, 
       contactPerson= :contactPerson,
       contactEmail= :contactEmail,
-      contactPhone= :contactPhone,
-      notes= :notes,
+      contactNumber= :contactNumber,
+      note= :note,
       logo= :logo`,
     ExpressionAttributeValues: {
       ":tenantName": data.tenantName,

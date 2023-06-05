@@ -26,7 +26,16 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "tenantId" },
 
   });
+  
+  const userTable = new Table(stack, "User", {
+    fields: {
+      tenant: "string",
+      Username: "string",
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "Username" },
 
+  });
+  
   const workspaceTable = new Table(stack, "Workspace", {
     fields: {
       tenant: "string",
@@ -97,6 +106,7 @@ export function StorageStack({ stack, app }) {
   
   return { 
     tenantTable,
+    userTable,
     isoTable,
     templateTable,
     formTable,
