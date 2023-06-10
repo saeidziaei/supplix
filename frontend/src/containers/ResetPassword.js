@@ -39,7 +39,6 @@ export default function ResetPassword() {
 
   async function handleSubmit(values) {
     setIsLoading(true);
-console.log(values, codeSent, confirmed);
     try {
       if (!codeSent) {
         await Auth.forgotPassword(values.email);

@@ -33,9 +33,9 @@ export default function User({ user, compact = false }) {
     }
   
     return (
-      <Label basic>
+      <Label basic style={{minWidth: "250px"}}>
         {user.photoURL ? (
-          <Image rounded src={user.photoURL} avatar />
+          <Image  src={user.photoURL} avatar />
         ) : (
           <div
             className="round-label"

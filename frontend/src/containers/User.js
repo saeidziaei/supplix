@@ -147,7 +147,6 @@ export default function User() {
 
   if (isLoading) return <Loader active />;
 
-  console.log(user);
 
   return (
     <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">

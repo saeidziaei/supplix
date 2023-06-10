@@ -72,6 +72,7 @@ export default function FormRegisters() {
         )}
         {renderCategories()}
         <Grid columns={2} doubling>
+          <Grid.Row>
           <Grid.Column >
             <Segment>
               <List divided relaxed>
@@ -111,6 +112,12 @@ export default function FormRegisters() {
               </List>
             </Segment>
           </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <Button size="tiny" basic><Icon name="plus"/>Register</Button>
+            </Grid.Column>
+          </Grid.Row>
         </Grid>
       </>
     );

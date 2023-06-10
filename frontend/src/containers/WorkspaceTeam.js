@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Divider, Dropdown, Grid, Header, Icon, Loader, Message, Segment, Table } from "semantic-ui-react";
+import { Button, Divider, Dropdown, Grid, Header, Icon, Image, Loader, Message, Segment, Table } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
@@ -128,6 +128,9 @@ export default function WorkspaceTeam(props) {
                         />
                       </Table.Cell>
                       <Table.Cell>
+                        {userMember.photoURL && <Image src={userMember.photoURL} avatar/> }
+                      </Table.Cell>
+                      <Table.Cell>
                         <strong>
                           {userMember.given_name}
                         </strong>
@@ -139,9 +142,7 @@ export default function WorkspaceTeam(props) {
                       </Table.Cell>
                       <Table.Cell>{m.role}</Table.Cell>
                       <Table.Cell>
-                        <Button onClick={() => deleteMember(m.userId)}>
-                          Remove
-                        </Button>
+                        <Button size="tiny" basic onClick={() => deleteMember(m.userId)} icon="x" circular />
                       </Table.Cell>
                     </Table.Row>
                   );

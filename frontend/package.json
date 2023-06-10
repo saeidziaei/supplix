@@ -21,7 +21,6 @@
     "formik": "^2.2.9",
     "formik-semantic-ui-react": "^2.0.0",
     "fs": "^0.0.1-security",
-    "json-rules-engine": "^6.1.2",
     "jwt-decode": "^3.1.2",
     "pluralize": "^8.0.0",
     "react": "^18.2.0",

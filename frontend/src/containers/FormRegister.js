@@ -3,7 +3,7 @@ import { ModuleRegistry } from "@ag-grid-community/core";
 import { CsvExportModule } from '@ag-grid-community/csv-export';
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
-import "@ag-grid-community/styles/ag-theme-alpine.css";
+import "@ag-grid-community/styles/ag-theme-balham.css";
 import { parseISO } from "date-fns";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
@@ -14,7 +14,12 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 
-export default function FormRegister({ formDefInput, formsInput, isHistory }) {
+
+import { registerAllModules } from 'handsontable/registry';
+import "./FormRegisters.css";
+
+
+export default function FormRegister({ formDefInput, formsInput, isHistory, isPreview }) {
   const gridRef = useRef();
   const { workspaceId, templateId } = useParams();
   const [formDef, setFormDef] = useState(formDefInput);
@@ -24,17 +29,33 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
   const [columnDefs, setColumnDefs] = useState(null);
   const { loadAppWorkspace } = useAppContext();
 
+
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
+  registerAllModules();
+
+  useEffect(() => {
+    setFormDef(formDefInput);
+    if (formDefInput) {
+      // all data have been passed from another component, we are just checking formDef
+      setColumnDefs(getColumnDefs(formDefInput));
+      return;
+    }
+
+  }, [formDefInput]);
 
   useEffect(() => {
     async function onLoad() {
       try {
+        setIsLoading(false);
         if (formDef) {
           // all data have been passed from another component, we are just checking formDef
           setColumnDefs(getColumnDefs(formDef));
-          setIsLoading(false);
           return;
         }
+        if (isPreview) {
+          return;
+        }
+
         setIsLoading(true);
         
         // todo: how do we avoid two roundtrips?
@@ -72,19 +93,19 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
     return await makeApiCall("GET", `/workspaces/${workspaceId}/templates/${templateId}/forms`);
   }
 
+
+
   const getColumnDefs = (def) => {
     if (!def) return [];
-    const valueColumns = def.sections
+    const formColumns = def.sections
       .filter((s) => !s.isTable)
-      .map((s) =>
-        s.fields
+      .map((s) => ({
+        headerName: s.title,
+        children: s.fields
           .filter((f) => f.type !== "info")
           .map((f) => ({
             field: f.name,
-            resizable: true,
-            filter: true,
-            sortable: true,
-            autoHeight: true,
+            cellClass: "ag-cell-bordered ag-cell-readonly",
             // section and field are needed for aggregate
             valueGetter: (params) =>
               f.type === "aggregate"
@@ -95,29 +116,43 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
                 ? { backgroundColor: params.value.color }
                 : null,
             cellRenderer: formValueRenderer(f.type),
-          }))
-      )
+          })),
+      }))
       .flat();
 
+    const registerColumns = !def.registerFields
+      ? []
+      : [{
+          headerName: "Register",
+          children: def.registerFields.map((f) => ({
+            field: f.name,
+            editable: true,
+            singleClickEdit: true,
+          })),
+        }];
+    const auditColums = [{headerName: "Audit", children: [{
+      field: "created",
+      sortable: true,
+      width: 80,
+      valueGetter: () => "create",
+      cellRenderer: auditRenderer,
+      cellClass: "ag-cell-bordered ag-cell-readonly"
+    },
+    {
+      field: "updated",
+      sortable: true,
+      width: 80,
+      valueGetter: () => "update",
+      cellRenderer: auditRenderer,
+      cellClass: "ag-cell-bordered ag-cell-readonly"
+    },]}];
     return [
       ...(isHistory
         ? []
-        : [{ field: "action", width: 100, cellRenderer: actionRenderer }]),
-      ...valueColumns,
-      {
-        field: "created",
-        sortable: true,
-        width: 120,
-        valueGetter: () => "create",
-        cellRenderer: auditRenderer,
-      },
-      {
-        field: "updated",
-        sortable: true,
-        width: 150,
-        valueGetter: () => "update",
-        cellRenderer: auditRenderer,
-      },
+        : [{ field: "", width: 100, cellRenderer: actionRenderer, cellClass: "ag-cell-bordered ag-cell-readonly", }]),
+      ...formColumns,
+      ...registerColumns,
+      ...auditColums
     ];
   };
 
@@ -291,53 +326,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
         return defaultRenderer;
     }
   };
-  function getFiledValue(data, field) {
-    const fieldValue = data.formValues[field.name];
 
-    if (!fieldValue) return ""; // TODO should it be missing or N/A or somethign like that?
-    switch (field.type) {
-      case "competency":
-        const r = getOptionbyName(requiredOptions, fieldValue.required);
-        const c = getOptionbyName(competencyOptions, fieldValue.competency);
-
-        return (
-          <>
-            {r && <Icon name={r.icon} color={r.color} size="large" />}
-
-            {r && c && r.key != "notApplicable" && (
-              <Icon name={c.icon} color={c.color} size="large" />
-            )}
-          </>
-        );
-      case "date":
-        return parseISO(fieldValue).toDateString();
-
-      case "number":
-        return (
-          <NumericFormat
-            displayType={"text"}
-            thousandSeparator={true}
-            value={fieldValue}
-          />
-        );
-
-      case "wysiwyg":
-        return <div dangerouslySetInnerHTML={{ __html: fieldValue }} />;
-
-      default:
-        return fieldValue;
-    }
-  }
-  const firstLetter = (word) => (word ? word.charAt(0) : "-");
-  function renderUserInitial(user) {
-    if (user)
-      return (
-        <Label circular color="grey">{`${firstLetter(
-          user.firstName
-        )}${firstLetter(user.lastName)}`}</Label>
-      );
-    else return <Label>-</Label>;
-  }
   function renderActionInfo(ts, user) {
     const date = new Date(ts);
 
@@ -358,8 +347,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
 
     return (
       <>
-        {!isHistory && <Header>{formDef.title}</Header>}
-        {!hasEntries && (
+        {!isHistory && <Header>{formDef?.title}</Header>}
+        {!isPreview && !hasEntries && (
           <Message
             header={
               isHistory
@@ -370,31 +359,43 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
             icon="exclamation"
           />
         )}
-        
-        {hasEntries && (
+        {!isPreview && (
           <>
-          <Button basic size="tiny" onClick={() => autoSizeAll(true)}>Auto size</Button>
-          <Button basic size="tiny" onClick={exportGridToCSV}><Icon name="file excel" color="green"/> Export to Excel</Button>
-          <div
-            className="ag-theme-alpine"
-            style={{
-              height: "500px",
-              width: "100%",
-            }}
-          >
-            <AgGridReact
-              ref={gridRef}
-              columnDefs={columnDefs}
-              rowData={forms}
-              rowHeight="25"
-              animateRows={true}
-            ></AgGridReact>
-          </div>
+            <Button basic size="tiny" onClick={() => autoSizeAll(true)}>
+              Auto Size
+            </Button>
+            <Button basic size="tiny" onClick={exportGridToCSV}>
+              <Icon name="file excel" color="green" /> Export to Excel
+            </Button>
           </>
         )}
+        <div
+          className="ag-theme-balham"
+          style={{
+            height: `${isPreview ? "200px" : "500px"}`,
+            width: "100%",
+            overflowX: "auto",
+          }}
+        >
+          <AgGridReact
+            ref={gridRef}
+            columnDefs={columnDefs}
+            rowData={forms}
+            rowHeight="25"
+            animateRows={true}
+            defaultColDef={{
+              cellClass: "ag-cell-bordered",
+              resizable: true,
+              width: 100,
+              filter: true,
+              sortable: true,
+              autoHeight: true,
+            }}
+          ></AgGridReact>
+        </div>
 
         <Divider hidden />
-        {!isHistory && (
+        {!isHistory && !isPreview && (
           <>
             <LinkContainer to={`/workspace/${workspaceId}/registers`}>
               <Button basic secondary size="mini">
@@ -402,7 +403,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory }) {
               </Button>
             </LinkContainer>
             <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
-              <Button basic primary size="mini"><Icon name="pencil"/>
+              <Button basic primary size="mini">
+                <Icon name="pencil" />
                 New Record
               </Button>
             </LinkContainer>

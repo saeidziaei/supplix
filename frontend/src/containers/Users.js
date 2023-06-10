@@ -154,7 +154,7 @@ export default function Users() {
         )}
         {users && (
           <div
-            className="ag-theme-alpine"
+            className="ag-theme-balham"
             style={{
               height: "500px",
               width: "100%",
@@ -164,7 +164,7 @@ export default function Users() {
               ref={gridRef}
               columnDefs={columnDefs}
               rowData={users}
-              rowHeight="40"
+              rowHeight="30"
               animateRows={true}
             ></AgGridReact>
           </div>

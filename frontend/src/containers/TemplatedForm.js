@@ -17,6 +17,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 
+// This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
   const { workspaceId, formId, templateId } = useParams();
   const [formRecord, setFormRecord] = useState(null);

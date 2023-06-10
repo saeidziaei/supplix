@@ -5,7 +5,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 
 
-export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) {
+export default function FieldEditor({ value, onChange, onDelete, onDuplicate, isRegisterField }) {
   const [field, setField] = useState(value);
   const [colorPickerVisible, setColorPickerVisible] = useState({})
 
@@ -232,53 +232,55 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate }) 
           onClick={() => onDuplicate()}
         ></Button>
         <Form.Group inline>
-        <Form.Dropdown
-            label="Type"
-            value={field.type}
-            text={getFieldTypeText(field.type)}
-          >
-            <Dropdown.Menu>
-              {fieldTypes.map((ft) => (
-                <Dropdown.Item
-                  key={ft.value}
-                  text={ft.text}
-                  onClick={() => {
-                    const newType = ft.value;
-                    let updatedField = { ...field, type: newType };
+          {!isRegisterField && (
+            <Form.Dropdown
+              label="Type"
+              value={field.type}
+              text={getFieldTypeText(field.type)}
+            >
+              <Dropdown.Menu>
+                {fieldTypes.map((ft) => (
+                  <Dropdown.Item
+                    key={ft.value}
+                    text={ft.text}
+                    onClick={() => {
+                      const newType = ft.value;
+                      let updatedField = { ...field, type: newType };
 
-                    if (ft.hasOptions) {
-                      updatedField = {
-                        ...updatedField,
-                        options: field.options || [],
-                      };
-                    }
-                    setField(updatedField);
-                    onChange(updatedField);
-                  }}
-                />
-              ))}
-            </Dropdown.Menu>
-          </Form.Dropdown>
-
+                      if (ft.hasOptions) {
+                        updatedField = {
+                          ...updatedField,
+                          options: field.options || [],
+                        };
+                      }
+                      setField(updatedField);
+                      onChange(updatedField);
+                    }}
+                  />
+                ))}
+              </Dropdown.Menu>
+            </Form.Dropdown>
+          )}
           {field.type != "info" && (
             <Form.Input
               width={8}
-              label="Prompt"
+              label={isRegisterField ? "Header" : "Prompt"}
               type="text"
               value={field.name}
               onChange={(e) => handleFieldChange("name", e.target.value)}
             />
           )}
           {field.type == "info" && (
-            <div style={{width: "70%"}}>
-            <CKEditor
-              editor={ClassicEditor}
-              data={field.title}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                handleFieldChange("title", data)
-              }}
-            /></div>
+            <div style={{ width: "70%" }}>
+              <CKEditor
+                editor={ClassicEditor}
+                data={field.title}
+                onChange={(event, editor) => {
+                  const data = editor.getData();
+                  handleFieldChange("title", data);
+                }}
+              />
+            </div>
           )}
           {/* <Form.Input
             width={8}

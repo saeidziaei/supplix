@@ -39,8 +39,6 @@ export default function Login() {
       } else {
         ret = await Auth.signIn(values.email, values.password);
 
-        console.log("login", ret);
-
         if (ret.challengeName === "NEW_PASSWORD_REQUIRED") {
           setUser(ret);
           setNewPasswordRequired(true);

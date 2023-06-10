@@ -9,6 +9,7 @@ import {
   Icon,
   Input,
   Item, Loader,
+  Menu,
   Segment
 } from "semantic-ui-react";
 
@@ -32,6 +33,7 @@ import { SortableItem } from "../components/SortableItem";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import "./FormTemplate.css";
+import FormRegister from "./FormRegister";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
@@ -41,6 +43,10 @@ export default function FormTemplate() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [sections, setSections] = useState([]);
+  const [registerFields, setRegisterFields] = useState([]);
+  const [activeDesigner, setActiveDesigner] = useState("form designer");
+
+  const handleMenuClick = (e, { name }) => setActiveDesigner(name);
 
   useEffect(() => {
     async function loadTemplate() {
@@ -57,7 +63,8 @@ export default function FormTemplate() {
           const formDef = item.templateDefinition;
           setTitle(formDef.title);
           setCategory(formDef.category);
-          setSections(formDef.sections)
+          setSections(formDef.sections);
+          setRegisterFields(formDef.registerFields || []);
         } 
 
       } catch (e) {
@@ -74,9 +81,9 @@ export default function FormTemplate() {
     setIsLoading(true);
     try {
       if (templateId) {
-        await updateTemplate({title, category, sections});
+        await updateTemplate({title, category, sections, registerFields});
       } else {
-        await createTemplate({title, category, sections});
+        await createTemplate({title, category, sections, registerFields});
       }
       nav(`/templates`);
     } catch (e) {
@@ -105,6 +112,10 @@ export default function FormTemplate() {
   const [removeFieldConfirm, setRemoveFieldConfirm] = useState({
     open: false,
     sectionIndex: 0,
+    fieldIndex: 0,
+  });
+  const [removeRFieldConfirm, setRemoveRFieldConfirm] = useState({
+    open: false,
     fieldIndex: 0,
   });
   const [removeSectionConfirm, setRemoveSectionConfirm] = useState({
@@ -176,12 +187,27 @@ export default function FormTemplate() {
     });
     setSections(newSections);
   };
+  const addRField = () => {
+    let newFields = [...registerFields];
+    const fieldName = `field${newFields.length + 1}`;
+    newFields.push({
+      name: fieldName,
+      guid: uuidv4()
+    });
+    setRegisterFields(newFields);
+  };
 
   const removeField = (sectionIndex, fieldIndex) => {
     const newSections = [...sections];
     newSections[sectionIndex].fields.splice(fieldIndex, 1);
     setSections(newSections);
   };
+  const removeRField = (fieldIndex) => {
+    let newFields = [...registerFields];
+    newFields.splice(fieldIndex, 1);
+    setRegisterFields(newFields);
+  };
+
   function handleDragEnd(sectionIndex, event) {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -196,15 +222,102 @@ export default function FormTemplate() {
       );
       setSections(newSections);
     }
+  }  
+  function handleRDragEnd(event) {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      let newFields = [...registerFields];
+      const guids = newFields.map(f => f.guid); 
+      const oldIndex = guids.indexOf(active.id);
+      const newIndex = guids.indexOf(over.id);
 
+      newFields = arrayMove(newFields, oldIndex, newIndex);
+      setRegisterFields(newFields);
+    }
   }
   function setSectionColumn(sectionIndex, sectionColumns) {
     const newSections = [...sections];
     newSections[sectionIndex].sectionColumns = sectionColumns;
     setSections(newSections);
   }
+  function rednerRegisterDesigner() {
+    return (
+      <>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => handleRDragEnd(e)}
+        >
+          <SortableContext
+            items={registerFields.map((f, i) => f.guid)}
+            strategy={verticalListSortingStrategy}
+          >
+            <>
+              <Confirm
+                size="mini"
+                header="This will delete the field."
+                open={removeRFieldConfirm.open}
+                onCancel={() => setRemoveRFieldConfirm({ open: false })}
+                onConfirm={() => {
+                  removeRField(
+                    removeRFieldConfirm.fieldIndex
+                  );
+                  setRemoveRFieldConfirm({ open: false });
+                }}
+              />
+              {registerFields.map((field, fieldIndex) => (
+                <div key={field.guid}>
+                  <SortableItem id={field.guid}>
+                    <FieldEditor
+                      key={fieldIndex}
+                      value={field}
+                      isRegisterField={true}
+                      onDelete={() =>
+                        setRemoveRFieldConfirm({
+                          open: true,
+                          fieldIndex,
+                        })
+                      }
+                      onChange={(value) => {
+                        let newFields = [...registerFields];
+                        newFields[fieldIndex] = value;
+                        setRegisterFields(newFields);
+                      }}
+                      onDuplicate={() => {
+                        let newFields = [...registerFields];
 
-  function renderEditor() {
+                        const duplicatedField = {
+                          ...field,
+                          title: `${field.title} copy`,
+                          name: `${field.name} copy`,
+                          guid: uuidv4(),
+                        };
+                        newFields.push(duplicatedField);
+                        setRegisterFields(newFields);
+                      }}
+                    />
+                    <Divider />
+                  </SortableItem>
+                </div>
+              ))}
+            </>
+          </SortableContext>
+        </DndContext>
+        <Button
+          size="mini"
+          basic
+          color="grey"
+          onClick={() => addRField()}
+        >
+          <Icon name="plus" />
+          Field
+        </Button>
+      </>
+    );
+
+  }
+
+  function renderFormDesigner() {
     return (
       <>
         <Input
@@ -432,43 +545,67 @@ export default function FormTemplate() {
                 <Button
                   size="mini"
                   basic
-                  color="grey"
+                  
                   onClick={() => addField(sectionIndex)}
                 >
                   <Icon name="plus" />
-                  Add Field
+                  Field
                 </Button>
           </Segment>
         ))}
-        <Button basic onClick={addSection}>
+        <Button size="mini" basic  onClick={addSection}>
           <Icon name="plus" />
-          Add Section
+          Section
         </Button>
         <Divider />
-        <Button primary onClick={handleSubmit}>
-          <Icon name="save" />
-          Save
-        </Button>
       </>
     );
 
   }
+
+  
 
   if (isLoading) return <Loader active />;
 
   return (
     <Grid stackable>
       <Grid.Column width={7}>
-        <Header as="h1" color="blue">
-          Designer
-        </Header>
-        {renderEditor()}
+      <Menu tabular attached='top' >
+        <Menu.Item
+          name='form designer'
+          active={activeDesigner === 'form designer'}
+          onClick={handleMenuClick}
+        />
+        <Menu.Item
+          name='register designer'
+          active={activeDesigner === 'register designer'}
+          onClick={handleMenuClick}
+        />
+      </Menu>
+       <Segment attached="bottom">{activeDesigner == 'form designer' ? renderFormDesigner() : rednerRegisterDesigner()}
+       
+       </Segment>
+       <Button basic color="blue" onClick={handleSubmit}>
+          <Icon name="save" />
+          Save
+        </Button>
+
       </Grid.Column>
       <Grid.Column width={9}>
-        <Header as="h1" color="teal">
-          Preview
+        <Header as="h3" color="teal">
+          Form Preview
         </Header>
         <GenericForm formDef={{ title, category, sections }} />
+        <Divider />
+        <Header as="h3" color="teal">
+          Register Preview
+        </Header>
+
+        <FormRegister
+          formDefInput={{ title, category, sections, registerFields }}
+          formsInput={[]}
+          isPreview={true}
+        />
       </Grid.Column>
     </Grid>
   );
