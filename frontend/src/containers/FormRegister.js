@@ -13,9 +13,9 @@ import { Button, Divider, Header, Icon, Label, Loader, Message, Popup } from "se
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
+import { cloneDeep } from 'lodash'; // Import the cloneDeep function from the lodash library
 
 
-import { registerAllModules } from 'handsontable/registry';
 import "./FormRegisters.css";
 
 
@@ -24,15 +24,17 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const { workspaceId, templateId } = useParams();
   const [formDef, setFormDef] = useState(formDefInput);
   const [forms, setForms] = useState(formsInput);
+  const [originalForms, setOriginalForms] = useState(formsInput);
   const [isLoading, setIsLoading] = useState(true);
+  const [savingStatus, setSavingStatus] = useState({isSaving: false});
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
   const { loadAppWorkspace } = useAppContext();
+  const [hasChanges, setHasChanges] = useState(false);
 
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
-  registerAllModules();
-
+  
   useEffect(() => {
     setFormDef(formDefInput);
     if (formDefInput) {
@@ -64,6 +66,9 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
 
         const forms = await loadTemplateForms(templateId);
         setForms(forms);
+        const formsCopy = cloneDeep(forms);
+
+        setOriginalForms(formsCopy);
 
         setColumnDefs(getColumnDefs(template.templateDefinition));
 
@@ -77,6 +82,13 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     }
     onLoad();
   }, []);
+
+  
+const handleCellValueChanged = useCallback(() => {
+  setHasChanges(true);
+}, []);
+
+
   const autoSizeAll = useCallback((skipHeader) => {
     const allColumnIds = [];
     gridRef.current.columnApi.getColumns().forEach((column) => {
@@ -94,6 +106,63 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }
 
 
+  
+  const handleSave = async () => {
+    async function processChangedForms() {
+      try {
+        for (let index = 0; index < changedForms.length; index++) {
+          const form = changedForms[index];
+          setSavingStatus({ current: index + 1 });
+          await updateForm(form.formId, form.formValues);
+        }
+        console.log('All forms have been updated successfully.');
+      } catch (error) {
+        console.error('Error updating forms:', error);
+        onError(error);
+      }
+    }
+    function objectsAreEqual(obj1, obj2) {
+      if (!obj1) {
+        return !obj2;
+      }
+      const keys1 = Object.keys(obj1);
+      const keys2 = Object.keys(obj2);
+
+      if (keys1.length !== keys2.length) {
+        return false;
+      }
+
+      for (let key of keys1) {
+        if (obj1[key] !== obj2[key]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    const changedForms = forms.filter((form) => {
+      // Find the corresponding original form based on formId
+      const originalForm = originalForms.find(
+        (originalForm) => originalForm.formId === form.formId
+      );
+
+      return !objectsAreEqual(originalForm.formValues.register, form.formValues.register);
+    });
+
+    console.log(changedForms);
+    setSavingStatus({isSaving: true, current: 0, total: changedForms.length});
+    processChangedForms(changedForms);
+    setSavingStatus({isSaving: false});
+
+    setHasChanges(false);
+  };
+
+  async function updateForm(formId, values) {
+    return await makeApiCall("PUT", `/workspaces/${workspaceId}/forms/${formId}`, {
+      formValues: values,
+      isRevision: false // or should it be true?
+    });
+  }
 
   const getColumnDefs = (def) => {
     if (!def) return [];
@@ -126,8 +195,11 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
           headerName: "Register",
           children: def.registerFields.map((f) => ({
             field: f.name,
-            editable: true,
+            editable: !isHistory,
             singleClickEdit: true,
+            onCellValueChanged: handleCellValueChanged,
+            valueGetter: registerValueGetter,
+            valueSetter: registerValueSetter,
           })),
         }];
     const auditColums = [{headerName: "Audit", children: [{
@@ -201,6 +273,15 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }
   const formValueGetter = (params) => {
     return params.data.formValues[params.colDef.field];
+  };
+
+  const registerValueGetter = (params) => {
+    return params.data.formValues.register ? params.data.formValues.register[params.colDef.field] : undefined;
+  };
+  const registerValueSetter = (params) => {
+    params.data.formValues.register = params.data.formValues.register || {};
+    params.data.formValues.register[params.colDef.field] = params.newValue;
+    return true;
   };
 
   const aggregateFiledValueGetter = (params, section, field) =>  {
@@ -344,7 +425,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
 
   function renderRegister() {
     const hasEntries = forms && forms.length > 0;
-
     return (
       <>
         {!isHistory && <Header>{formDef?.title}</Header>}
@@ -383,6 +463,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
             rowData={forms}
             rowHeight="25"
             animateRows={true}
+            stopEditingWhenCellsLoseFocus={true}
             defaultColDef={{
               cellClass: "ag-cell-bordered",
               resizable: true,
@@ -404,10 +485,11 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
             </LinkContainer>
             <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
               <Button basic primary size="mini">
-                <Icon name="pencil" />
-                New Record
+                <Icon name="plus" />
+                Record
               </Button>
             </LinkContainer>
+            {hasChanges && <Button basic color="blue" floated="right" onClick={handleSave} ><Icon name="save"/>Save</Button>}
           </>
         )}
       </>
@@ -415,6 +497,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }
 
   if (isLoading) return <Loader active />;
+  if (savingStatus.isSaving) return <Loader active>{`Savign ${savingStatus.current} of ${savingStatus.total}`}</Loader>;
   if (hasError) return <Message>:/</Message>;
   return renderRegister();
 }

@@ -1,18 +1,12 @@
 // Import React dependencies.
 import React from "react";
+import {
+  Container,
+  Header,
+  Segment
+} from 'semantic-ui-react';
 import FormHeader from "../components/FormHeader";
 import "./Home.css";
-import {
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Header,
-  Icon,
-  Image,
-  List,
-  Segment,
-} from 'semantic-ui-react'
 
 export default function Home() {
 

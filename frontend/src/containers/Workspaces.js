@@ -1,7 +1,5 @@
-import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
-import { Link } from "react-router-dom";
 import {
   Button,
   Divider,
@@ -9,8 +7,7 @@ import {
   Header, Icon, List,
   Loader,
   Message,
-  Segment,
-  Table
+  Segment
 } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";

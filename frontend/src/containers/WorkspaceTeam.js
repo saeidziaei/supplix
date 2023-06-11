@@ -17,7 +17,6 @@ export default function WorkspaceTeam(props) {
   const [newMemberRole, setNewMemberRole] = useState("Member");
   const [users, setUsers] = useState([]);
   const [isInAddMode, setIsInAddMode] = useState(false);
-  const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   
   function validateForm() {
