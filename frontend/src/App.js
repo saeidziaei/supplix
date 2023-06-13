@@ -150,7 +150,7 @@ function App() {
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
 
     const logoURL =
-      tenant && tenant.logoURL ? tenant.logoURL : "/iso_cloud.png";
+      tenant && tenant.logoURL ? tenant.logoURL : "/iso_cloud_logo_v1.png";
     
     return (
       !isAuthenticating && (
@@ -364,7 +364,7 @@ function App() {
                   )}
 
                   <Menu.Item>
-                    <img alt="logo" src="/iso_cloud.png" />
+                    <img alt="logo" src="/iso_cloud_logo_v1.png" />
                   </Menu.Item>
 
                   <Menu.Item color="blue">

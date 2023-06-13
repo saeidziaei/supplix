@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { onError } from "../lib/errorLib";
-import { Button, Divider, Header, Label, List, Loader, Message, Segment } from "semantic-ui-react";
+import { Button, Divider, Header, Icon, Label, List, Loader, Message, Segment } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import  pluralize from "pluralize";
 import { capitalizeFirstLetter } from '../lib/helpers';
@@ -20,7 +20,12 @@ export default function Docs() {
     async function onLoad() {
       try {
         const items = await loadDocs();
-        setDocs(items);
+        const modifiedItems = items.map((item) => {
+          const fileNameWithoutFolder = item.fileName?.replace(/^docs\//, "");
+          return { ...item, fileNameWithoutFolder };
+        });
+        
+        setDocs(modifiedItems);
         loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
@@ -94,7 +99,7 @@ export default function Docs() {
                           />
                           <List.Content>
                             <LinkContainer to={`/workspace/${workspaceId}/doc/${d.docId}`}>
-                              <List.Header as="a">{d.fileName}</List.Header>
+                              <List.Header as="a">{d.fileNameWithoutFolder}</List.Header>
                             </LinkContainer>
 
                             {d.note}
@@ -110,7 +115,7 @@ export default function Docs() {
     }
     <Divider hidden/>
     <LinkContainer to={`/workspace/${workspaceId}/doc`}>
-      <Button basic primary>New</Button>
+      <Button size="mini"  basic primary><Icon name="plus"/>New</Button>
     </LinkContainer>
     </>);
   }

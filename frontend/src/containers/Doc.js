@@ -3,13 +3,19 @@ import { Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
+import { Button, Confirm, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import placeholderImage from '../fileplaceholder.jpg';
+import { Document, Page } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
 
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
+).toString();
 
 export default function Doc() {
   const { workspaceId, docId } = useParams();
@@ -18,6 +24,32 @@ export default function Doc() {
   const [doc, setDoc] = useState(null); // Original before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const { currentUserRoles } = useAppContext();
+
+
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1); //setting 1 to show fisrt page
+
+  
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
+    setPageNumber(1);
+  }
+
+  function changePage(offset) {
+    setPageNumber(prevPageNumber => prevPageNumber + offset);
+  }
+
+  function previousPage() {
+    changePage(-1);
+  }
+
+  function nextPage() {
+    changePage(1);
+  }
+
+
 
   function validateForm() {
     return true; // file.current
@@ -50,6 +82,9 @@ export default function Doc() {
 
   function handleFileChange(event) {
     file.current = event.target.files[0];
+  }
+  async function deleteDoc() {
+    return await makeApiCall("DELETE", `/workspaces/${workspaceId}/docs/${docId}`);
   }
 
   async function handleSubmit(values, { setSubmitting }) {
@@ -167,14 +202,49 @@ export default function Doc() {
   }
 
   function renderDoc() {
+    const isAdmin = currentUserRoles.includes("admins");
     return (
-      <>
-        <Grid
-          textAlign="center"
-          style={{ height: "100vh" }}
-          verticalAlign="middle"
-        >
-          <Grid.Column width="8">
+      <Grid
+        textAlign="center"
+        style={{ height: "100vh" }}
+        verticalAlign="middle"
+      >
+        <Grid.Column width="8">
+          {doc.fileName.endsWith(".pdf") ? (
+            <>
+              <div
+                style={{ width: "650px", height: "700px", overflow: "auto" }}
+              >
+                <Document
+                  file={doc.fileURL}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                >
+                  <Page pageNumber={pageNumber} />
+                </Document>
+              </div>
+              <div>
+                <p>
+                  Page {pageNumber || (numPages ? 1 : "--")} of{" "}
+                  {numPages || "--"}
+                </p>
+                <Button
+                  basic size="mini"
+                  disabled={pageNumber <= 1}
+                  onClick={previousPage}
+                >
+                  <Icon name="chevron left"/>
+                  
+                </Button>
+                <Button
+                  basic size="mini"
+                  disabled={pageNumber >= numPages}
+                  onClick={nextPage}
+                ><Icon name="chevron right"/>
+                  
+                </Button>
+              </div>
+            </>
+          ) : (
             <Image
               src={doc.fileURL}
               wrapped
@@ -183,17 +253,40 @@ export default function Doc() {
                 e.target.src = placeholderImage;
               }}
             />
-            <Header>{doc.note}</Header>
-            <Label>{doc.category}</Label>
-            <p>
-              <br />
-              <a href={doc.fileURL} download={doc.fileName}>
-                Download {doc.fileName}
-              </a>
-            </p>
-          </Grid.Column>
-        </Grid>
-      </>
+          )}
+          <Header>{doc.note}</Header>
+          <Label>{doc.category}</Label>
+          <p>
+            <br />
+            <a href={doc.fileURL} download={doc.fileName}>
+              Download {doc.fileName}
+            </a>
+          </p>
+
+          <Divider />
+          <Confirm
+            size="mini"
+            header="This will delete this library item."
+            open={deleteConfirmOpen}
+            onCancel={() => setDeleteConfirmOpen(false)}
+            onConfirm={async () => {
+              setIsLoading(true);
+              await deleteDoc();
+              nav(`/workspace/${workspaceId}/docs`);
+            }}
+          />
+          {isAdmin && docId && (
+            <Button
+              size="mini"
+              color="red"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Icon name="remove circle" />
+              Delete
+            </Button>
+          )}
+        </Grid.Column>
+      </Grid>
     );
   }
 
