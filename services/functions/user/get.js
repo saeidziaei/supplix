@@ -62,7 +62,7 @@ export const main = handler(async (event, tenant) => {
   const s3params = {
     Bucket: process.env.BUCKET,
     Key: `private/${tenantId}/${dbUser.photo}`,
-    Expires: 5 * 60, // 5 minutes
+    Expires: 15 * 60, // 15 minutes
   };
 
   return {

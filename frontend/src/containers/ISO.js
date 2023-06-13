@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   Breadcrumb,
   Button,
+  Confirm,
   Divider,
   Form,
   Header,
@@ -83,7 +84,7 @@ export default function ISO() {
         <CKEditor
           editor={ClassicEditor}
           data={values.content}
-          onChange={(event, editor) => {
+          onBlur={(event, editor) => {
             const data = editor.getData();
             setValues({ ...values, content: data });
           }}
@@ -118,7 +119,8 @@ export default function ISO() {
     const [isEditing, setIsEditing] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
     const [content, setContent] = useState(values.content);
-
+    const [deleteConfirm, setDeleteConfirm] = useState({open: false});
+  
     useEffect(() => {
       async function prepContent(text) {
         const libraryRegex = /!\[library\]\(\/workspace\/([a-f\d-]+)\/doc\/([a-f\d-]+)\)/g;
@@ -128,11 +130,16 @@ export default function ISO() {
           const workspaceId = match[1];
           const docId = match[2];
 
-          const { fileURL, note } = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
-          // const replacement = `![${note}](${fileURL} "${note}")`;
-          const replacement = `<img alt="${note}" src="${fileURL}"/>`;
+          let replacement = '';
+          try {
+            const { fileURL, note } = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
+            replacement = `<img alt="${note}" src="${fileURL}"/>`;
+          } catch (e) {
+            replacement = "library item not found";
+          }
           text = text.replace(match[0], replacement);
           match = libraryRegex.exec(text);
+
         }
 
         const urlRegex = /\!\[external\]\((https?:\/\/[^\)]+)\)/g; // matches ![external](URL)
@@ -242,6 +249,17 @@ export default function ISO() {
               onClick={() => setIsEditing(true)}
             />
             {path && (
+              <>
+               <Confirm
+                        size="mini"
+                        header="This will delete the node."
+                        open={deleteConfirm.open}
+                        onCancel={() => setDeleteConfirm({ open: false })}
+                        onConfirm={() => {
+                          if (canBeDeleted) onDelete(path);
+                          setDeleteConfirm({ open: false });
+                        }}
+                      />
               <Popup
                 content={
                   canBeDeleted
@@ -256,17 +274,18 @@ export default function ISO() {
                     icon="x"
                     color={canBeDeleted ? "red" : "grey"}
                     onClick={() => {
-                      if (canBeDeleted) onDelete(path);
+                      setDeleteConfirm({ open: true });
                     }}
                   />
                 }
               />
+              </>
             )}
             {groupedChildren.length == 0 && (
               <Button
                 basic
                 color="black"
-                size="tiny"
+                size="mini"
                 onClick={() => {
                   const newChild = {
                     type: "child",
@@ -288,10 +307,11 @@ export default function ISO() {
                       </Label>
                     </Header>
                   </Divider>
-                  <Item.Group divided>
+                  <Item.Group >
                     {group.map((child, index) => (
-                      <Item key={index}>
+                      <Item key={index} className="iso-item">
                         <Item.Content>
+                        
                           <Button
                             circular
                             basic
@@ -301,9 +321,8 @@ export default function ISO() {
                               onPathChange(path + "/" + child.guid)
                             }
                           />
-                          <Item.Header>
-                            <DisplayText text={child.title} />
-                          </Item.Header>
+                          <Item.Header> <DisplayText text={child.title} /></Item.Header>
+                          
                           {index > 0 && (
                             <Button
                               size="mini"

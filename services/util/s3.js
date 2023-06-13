@@ -9,3 +9,4 @@ export default {
   getSignedUrlForPut: (params) => s3.getSignedUrlPromise("putObject", params),
   getSignedUrlForGet: (params) => s3.getSignedUrlPromise("getObject", params),
 };
+

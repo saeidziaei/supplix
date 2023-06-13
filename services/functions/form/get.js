@@ -28,7 +28,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       const s3params = {
         Bucket: process.env.BUCKET,
         Key: `private/${tenant}/${attachment.fileName}`,
-        Expires: 5 * 60, // 5 minutes
+        Expires: 15 * 60, // 15 minutes
       };
       const fileURL = await s3.getSignedUrlForGet(s3params);
       attachment.fileURL = fileURL;
