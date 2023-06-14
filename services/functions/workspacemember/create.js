@@ -1,10 +1,10 @@
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 import dynamoDb from "../../util/dynamodb";
-import handler, { getUserGroups } from "../../util/handler";
+import handler from "../../util/handler";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const data = JSON.parse(event.body);
-  const userGroups = getUserGroups(event);
+  
   if (workspaceUser.role !== "Owner") {
     throw new Error("User is not the owner of this workspace.");
   }
