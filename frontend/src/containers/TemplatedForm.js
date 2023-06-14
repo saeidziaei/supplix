@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   Accordion,
   Button,
+  Confirm,
   Header,
   Icon,
   Loader,
@@ -27,8 +28,9 @@ export default function TemplatedForm() {
   const [isRevisioning, setIsRevisioning] = useState(false);
   const [template, setTemplate] = useState(null);
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const nav = useNavigate();
-  const { loadAppWorkspace } = useAppContext();
+  const { loadAppWorkspace, currentWorkspace } = useAppContext();
 
   useEffect(() => {
     async function loadForm() {
@@ -62,7 +64,7 @@ export default function TemplatedForm() {
     }
 
     onLoad();
-  }, []);
+  }, [formId]);
 
   async function uploadFile(file) {
 
@@ -151,7 +153,7 @@ export default function TemplatedForm() {
       }
 
       nav(`/workspace/${workspaceId}/form/${templateId}/${formId||newFormId}`); 
-      window.location.reload();
+      // window.location.reload();
     } catch (e) {
       onError(e);
     } finally {
@@ -172,6 +174,9 @@ export default function TemplatedForm() {
       formValues: values,
       isRevision: isRevisioning
     });
+  }
+  async function deleteForm() {
+    return await makeApiCall("DELETE", `/workspaces/${workspaceId}/forms/${formId}`);
   }
 
   function handleEdit(revision) {
@@ -256,6 +261,29 @@ export default function TemplatedForm() {
           <Button secondary size="mini" onClick={() => handleEdit(false)}>
             Edit
           </Button>
+
+          <Confirm
+            size="mini"
+            header="This will delete the record."
+            open={deleteConfirmOpen}
+            onCancel={() => setDeleteConfirmOpen(false)}
+            onConfirm={async () => {
+              setIsLoading(true);
+              await deleteForm();
+              nav(`/workspace/${workspaceId}/register/${templateId}`);
+            }}
+          />
+          {formId && currentWorkspace.role === "Owner" && (
+            <Button
+            floated="right"
+              size="mini"
+              color="red"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Icon name="remove circle" />
+              Delete Record
+            </Button>
+          )}
         </div>
       )}
       {formId && (
@@ -282,11 +310,10 @@ export default function TemplatedForm() {
         onClick={() => {
           setFormRecord(null);
           nav(`/workspace/${workspaceId}/form/${templateId}`);
-          window.location.reload();
         }}
       >
-        <Icon name="pencil" />
-        New Record
+        <Icon name="plus" />
+        Record
       </Button>
 
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>

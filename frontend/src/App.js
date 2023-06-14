@@ -1,5 +1,4 @@
 import { Auth } from "aws-amplify";
-import jwt_decode from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
@@ -15,12 +14,11 @@ import {
 } from "semantic-ui-react";
 import "./App.css";
 import Routes from "./Routes";
-import config from "./config";
+import User from "./components/User";
 import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
-import User from "./components/User";
 
 
 export default App;
@@ -47,7 +45,6 @@ function App() {
 
     async function onLoad() {
       try {
-        console.log("app load");
         const session = await Auth.currentSession();
 
         setAuthenticatedUser(session.idToken.payload);
@@ -138,13 +135,14 @@ function App() {
       return currentWorkspace;
     }
 
-    const ws = await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    // const ws = await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    const ws = workspaces.find(w => w.workspaceId === workspaceId);
     setCurrentWorkspace(ws);
     return ws;
   }
 
   function renderApp() {
-    console.log("API Gateway URL", config.apiGateway.URL);
+    
     const currentUserRoles = authenticatedUser ? authenticatedUser["cognito:groups"] || [] : [];
     const isAdmin = currentUserRoles.includes('admins');
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
@@ -210,7 +208,6 @@ function App() {
                             onClick={() => {
                               setCurrentWorkspace(w);
                               nav(`/workspace/${w.workspaceId}/registers`);
-                              window.location.reload();
                             }}
                           ><Icon name={w.role === "Owner" ? "chess king" : "user"} />
                             {w.workspaceName}

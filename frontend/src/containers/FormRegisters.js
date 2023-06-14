@@ -39,7 +39,7 @@ export default function FormRegisters() {
       setIsLoading(false);
     }
     onLoad();
-  }, []);
+  }, [workspaceId]);
 
   async function loadTemplates() {
     return await makeApiCall("GET", `/workspaces/${workspaceId}/templates`);

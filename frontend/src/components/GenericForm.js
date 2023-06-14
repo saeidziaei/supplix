@@ -6,6 +6,7 @@ import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
+import TextareaAutosize from 'react-textarea-autosize';
 import {
   Button,
   Divider,
@@ -21,7 +22,6 @@ import {
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
-import { LinkContainer } from "react-router-bootstrap";
 
 export function GenericForm({
   formDef,
@@ -63,15 +63,16 @@ export function GenericForm({
         );
 
       case "text":
-        return disabled ? (
-          <div style={{ width: "100%", textAlign: "left" }}>{values[name]}</div>
-        ) : (
-          <Input
+        return (
+          <TextareaAutosize
+            disabled={disabled}
+            rows={1}
             size={size}
             name={name}
             id={id}
             value={values[name]}
             style={{ color: "black!important" }}
+            onChange={(ev) => setFieldValue(name, ev.target.value)}
           />
         );
 
