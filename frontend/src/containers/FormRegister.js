@@ -287,19 +287,20 @@ const handleCellValueChanged = useCallback(() => {
   const aggregateFiledValueGetter = (params, section, field) =>  {
     const data = params.data;
     const fields = section.fields;
-    // TODO get field 
-    // TODO fiels is all the fields in the same section as field
+
     const sum = fields
       .filter(
-        (f) => f.type === "weightedSelect" || f.type === "weightedDropdown"
+        (f) => ["number", "select", "dropdown"].includes(f.type) 
       )
       .reduce((acc, currentField) => {
         // get value of current field
         const fieldValue = data.formValues[currentField.name];
-        const fieldWeigth =
-          currentField.options.find((o) => o.value == fieldValue)?.weight ?? 0;
+        const fieldWeight = currentField.weight || 0; // Consider field weight as 0 if not present
 
-        return acc + parseFloat(fieldValue) * parseFloat(fieldWeigth);
+        const numericFieldValue = parseFloat(fieldValue) || 0;
+        const numericFieldWeight = parseFloat(fieldWeight) || 0;
+
+        return acc + numericFieldValue * numericFieldWeight;
       }, 0);
 
     let result = null;

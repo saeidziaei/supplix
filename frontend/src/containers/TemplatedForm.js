@@ -273,7 +273,7 @@ export default function TemplatedForm() {
               nav(`/workspace/${workspaceId}/register/${templateId}`);
             }}
           />
-          {formId && currentWorkspace.role === "Owner" && (
+          {formId && currentWorkspace?.role === "Owner" && (
             <Button
             floated="right"
               size="mini"
@@ -303,18 +303,7 @@ export default function TemplatedForm() {
         </Message>
       )}
 
-      <Button
-        basic
-        primary
-        size="mini"
-        onClick={() => {
-          setFormRecord(null);
-          nav(`/workspace/${workspaceId}/form/${templateId}`);
-        }}
-      >
-        <Icon name="plus" />
-        Record
-      </Button>
+
 
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
         <Button basic size="mini">

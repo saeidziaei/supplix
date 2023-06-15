@@ -5,7 +5,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 
 
-export default function FieldEditor({ value, onChange, onDelete, onDuplicate, isRegisterField }) {
+export default function FieldEditor({ value, onChange, onDelete, onDuplicate, isRegisterField, showWeight  }) {
   const [field, setField] = useState(value);
   const [colorPickerVisible, setColorPickerVisible] = useState({})
 
@@ -52,7 +52,22 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
 
     onChange(updatedField);
   };
+  function renderFieldWeight() {
+    if (!showWeight) return;
+    if (!["number", "select", "dropdown"].includes(field.type)) return;
+
+    return <Form.Input
+    width={4}
+    label="Weight"
+    type="number"
+    value={field.weight}
+    onChange={(e) => handleFieldChange("weight", e.target.value)}
+  />
+  }
   function renderFieldOptions() {
+    if (!getFieldTypeHasOptions(field.type)) 
+      return;
+
     return (
       <Grid  >
         <Grid.Row >
@@ -282,15 +297,9 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               />
             </div>
           )}
-          {/* <Form.Input
-            width={8}
-            label="Question"
-            type="text"
-            value={field.title}
-            onChange={(e) => handleFieldChange("title", e.target.value)}
-          /> */}
+         {renderFieldWeight()}
         </Form.Group>
-        {getFieldTypeHasOptions(field.type) && renderFieldOptions()}
+        {renderFieldOptions()}
       </Form>
     </>
   );
@@ -304,9 +313,11 @@ export const fieldTypes = [
   { text: "Date", value: "date" },
   { text: "Multi", value: "multi", hasOptions: true },
   { text: "Select", value: "select", hasOptions: true },
-  { text: "Select (Weighted)", value: "weightedSelect", hasOptions: true },
   { text: "Dropdown", value: "dropdown", hasOptions: true },
-  { text: "Dropdown (Weighted)", value: "weightedDropdown", hasOptions: true },
   { text: "Competency", value: "competency" },
-  { text: "Aggregate", value: "aggregate", hasOptions: true },
+  { text: "Aggregate", value: "aggregate", hasOptions: true }, 
+  // when there is an aggregate field in a section the following field types can be assigned a weight:
+  //  * Number
+  //  * Select
+  //  * Dropdown
 ];

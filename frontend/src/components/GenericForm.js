@@ -1,7 +1,7 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
-import { Field, FieldArray, Formik } from "formik";
+import { ErrorMessage, Field, FieldArray, Formik } from "formik";
 import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,6 +22,7 @@ import {
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
+import * as Yup from 'yup';
 
 export function GenericForm({
   formDef,
@@ -32,6 +33,20 @@ export function GenericForm({
 }) {
 
   function renderField(f, values, setFieldValue) {
+    return renderFieldInput(f, values, setFieldValue);
+    // return (
+    //   <>
+    //     {renderFieldInput(f, values, setFieldValue)}
+    //     <ErrorMessage
+    //       name={f.name}
+    //       component="div"
+    //       className="ui red pointing above prompt label basic"
+    //     />
+    //   </>
+    // );
+  }
+
+  function renderFieldInput(f, values, setFieldValue) {
     const size = "mini";
     const name = f.name;
     const id = `input-${f.name}`;
@@ -249,10 +264,30 @@ export function GenericForm({
       }),
   };
 
+
+  const generateValidationSchema = (formDef) => {
+    const schema = {};
+
+    // Iterate through each section in the form definition
+    formDef.sections.forEach((section) => {
+      // Iterate through each field in the section
+      section.fields.forEach((field) => {
+        schema[field.name] = Yup.string().required(
+          `${field.name} is required`
+        );
+      });
+    });
+
+    return Yup.object().shape(schema);
+
+  }
+  const validationSchema = generateValidationSchema(formDef);
+
+  
   return (
     <Segment style={{ overflowX: "auto" }}>
       <FormHeader heading={formDef.title} subheading={formDef.category} />
-      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit}>
+      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit} >
         {({ isSubmitting, values, setFieldValue, resetForm }) => (
           <Form size="small">
             {formDef.sections.map((s) =>

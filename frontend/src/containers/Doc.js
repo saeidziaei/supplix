@@ -9,13 +9,8 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import placeholderImage from '../fileplaceholder.jpg';
-import { Document, Page } from 'react-pdf';
-import { pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url
-).toString();
+
 
 export default function Doc() {
   const { workspaceId, docId } = useParams();
@@ -28,26 +23,6 @@ export default function Doc() {
   const { currentUserRoles } = useAppContext();
 
 
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1); //setting 1 to show fisrt page
-
-  
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
-    setPageNumber(1);
-  }
-
-  function changePage(offset) {
-    setPageNumber(prevPageNumber => prevPageNumber + offset);
-  }
-
-  function previousPage() {
-    changePage(-1);
-  }
-
-  function nextPage() {
-    changePage(1);
-  }
 
 
 
@@ -203,6 +178,7 @@ export default function Doc() {
 
   function renderDoc() {
     const isAdmin = currentUserRoles.includes("admins");
+ 
     return (
       <Grid
         textAlign="center"
@@ -210,50 +186,16 @@ export default function Doc() {
         verticalAlign="middle"
       >
         <Grid.Column width="8">
-          {doc.fileName.endsWith(".pdf") ? (
-            <>
-              <div
-                style={{ width: "650px", height: "700px", overflow: "auto" }}
-              >
-                <Document
-                  file={doc.fileURL}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                >
-                  <Page pageNumber={pageNumber} />
-                </Document>
-              </div>
-              <div>
-                <p>
-                  Page {pageNumber || (numPages ? 1 : "--")} of{" "}
-                  {numPages || "--"}
-                </p>
-                <Button
-                  basic size="mini"
-                  disabled={pageNumber <= 1}
-                  onClick={previousPage}
-                >
-                  <Icon name="chevron left"/>
-                  
-                </Button>
-                <Button
-                  basic size="mini"
-                  disabled={pageNumber >= numPages}
-                  onClick={nextPage}
-                ><Icon name="chevron right"/>
-                  
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Image
-              src={doc.fileURL}
-              wrapped
-              alt={doc.fileName}
-              onError={(e) => {
-                e.target.src = placeholderImage;
-              }}
-            />
-          )}
+
+          <Image
+            src={doc.fileURL}
+            wrapped
+            alt={doc.fileName}
+            onError={(e) => {
+              e.target.src = placeholderImage;
+            }}
+          />
+
           <Header>{doc.note}</Header>
           <Label>{doc.category}</Label>
           <p>
@@ -291,6 +233,7 @@ export default function Doc() {
   }
 
   if (isLoading) return <Loader active />;
+  
 
   if (doc) return renderDoc();
   else return rednerUploadForm();

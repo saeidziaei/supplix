@@ -534,6 +534,7 @@ export default function FormTemplate() {
                                 );
                                 setSections(newSections);
                               }}
+                              showWeight={section.fields.some(f => f.type === "aggregate")} // only show weight if there is an aggregate field in this seciton
                             />
                             <Divider />
                           </SortableItem>
