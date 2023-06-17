@@ -202,7 +202,7 @@ const handleCellValueChanged = useCallback(() => {
             valueSetter: registerValueSetter,
           })),
         }];
-    const auditColums = [{headerName: "Audit", children: [{
+    const auditColums = [{headerName: "", children: [{
       field: "created",
       sortable: true,
       width: 80,
@@ -300,7 +300,7 @@ const handleCellValueChanged = useCallback(() => {
         const numericFieldValue = parseFloat(fieldValue) || 0;
         const numericFieldWeight = parseFloat(fieldWeight) || 0;
 
-        return acc + numericFieldValue * numericFieldWeight;
+        return acc + parseFloat(fieldValue) * parseFloat(field.weigth);
       }, 0);
 
     let result = null;

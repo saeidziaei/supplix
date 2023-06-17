@@ -265,23 +265,23 @@ export function GenericForm({
   };
 
 
-  const generateValidationSchema = (formDef) => {
-    const schema = {};
+  // const generateValidationSchema = (formDef) => {
+  //   const schema = {};
 
-    // Iterate through each section in the form definition
-    formDef.sections.forEach((section) => {
-      // Iterate through each field in the section
-      section.fields.forEach((field) => {
-        schema[field.name] = Yup.string().required(
-          `${field.name} is required`
-        );
-      });
-    });
+  //   // Iterate through each section in the form definition
+  //   formDef.sections.forEach((section) => {
+  //     // Iterate through each field in the section
+  //     section.fields.forEach((field) => {
+  //       schema[field.name] = Yup.string().required(
+  //         `${field.name} is required`
+  //       );
+  //     });
+  //   });
 
-    return Yup.object().shape(schema);
+  //   return Yup.object().shape(schema);
 
-  }
-  const validationSchema = generateValidationSchema(formDef);
+  // }
+  // const validationSchema = generateValidationSchema(formDef);
 
   
   return (
@@ -405,11 +405,11 @@ export function GenericForm({
     return (
       <Segment basic vertical key={s.title} size="tiny">
       
-        <Header as="h3">{s.title}</Header>
+        
         <Table celled compact stackable>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>Items</Table.HeaderCell>
+              <Table.HeaderCell>{s.title}</Table.HeaderCell>
               {fields.map((f, i) => (
                 <Table.HeaderCell key={i}>{f.name}</Table.HeaderCell>
               ))}
