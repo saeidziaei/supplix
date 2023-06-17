@@ -323,6 +323,8 @@ const handleCellValueChanged = useCallback(() => {
   }
   const competencyRenderer = (params) => {
     const fieldValue = params.value;
+    if (!fieldValue) return <></>;
+    
     const r = getOptionbyName(requiredOptions, fieldValue.required);
     const c = getOptionbyName(competencyOptions, fieldValue.competency);
 
