@@ -57,8 +57,8 @@ export const main = handler(async (event, tenant) => {
     Item: {
       tenant: tenantId,
       Username: result.User.Username,
-      photo: data.photo,
-      employeeNumber: data.employeeNumber,
+      photo: data.photo || "",
+      employeeNumber: data.employeeNumber || "",
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
     },

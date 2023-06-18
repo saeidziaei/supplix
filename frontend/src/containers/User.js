@@ -2,20 +2,34 @@ import axios from "axios";
 import { Field, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Checkbox, Divider, Form, Grid, Header, Icon, Image, Loader, Segment } from "semantic-ui-react";
+import { Button, Checkbox, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import placeholderUserImage from '../placeholderUserImage.png';
-
+import * as Yup from 'yup';
 
 export default function User() {
   const { username, tenantId } = useParams();
-  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", phone: "", password:"", isAdmin: false }); 
+  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", employeeNumber: "", password:"", isAdmin: false }); 
   const [isLoading, setIsLoading] = useState(true);
   const [changePhoto, setChangePhoto] = useState(false);
   const nav = useNavigate();
   const file = useRef(null);
+
+  const Schema = Yup.object().shape({
+    firstName: Yup.string().required('First name is required'),
+    lastName: Yup.string().required('Last name is required'),
+    email: Yup.string().email('Invalid email').required('Required'),
+    password: Yup.string()
+      .min(8, 'Password must be 8 characters long')
+      .matches(/[0-9]/, 'Password requires a number')
+      .matches(/[a-z]/, 'Password requires a lowercase letter')
+      .matches(/[A-Z]/, 'Password requires an uppercase letter')
+      .matches(/[^\w]/, 'Password requires a symbol'),
+  });
+
+
   function handleFileChange(event) {
     file.current = event.target.files[0];
   }
@@ -154,6 +168,7 @@ export default function User() {
         <Formik
           initialValues={{ ...user }}
           validate={validateForm}
+          validationSchema={Schema}
           onSubmit={handleSubmit}
         >
           {({
@@ -171,19 +186,53 @@ export default function User() {
                 {`${values.firstName} ${values.lastName}`}
               </Header>
               <Segment>
-                {!tenantId &&  // do not upload photo for another tenant's employees as they get uploaded to current tenant folder
+                {!tenantId && ( // do not upload photo for another tenant's employees as they get uploaded to current tenant folder
                   <>
-                   {changePhoto && (<><Form.Input onChange={handleFileChange} type="file" /> <Button size="mini" basic onClick={() => setChangePhoto(false)}><Icon name="undo"/></Button></>)}
-                   {!changePhoto && (<>
-                    <Image style={{ width: "200px", height: "200px", marginRight: "10px" }}  rounded src={values.photoURL || placeholderUserImage} wrapped alt={values.photo} onError={(e) => {
-                        e.target.src = placeholderUserImage;
-                      }}
-                    />
-                    <Button size="mini" basic onClick={() => setChangePhoto(true)}>Change Photo</Button>
-                  </>)}
+                    {changePhoto && (
+                      <>
+                        <Form.Input onChange={handleFileChange} type="file" />{" "}
+                        <Button
+                          size="mini"
+                          basic
+                          onClick={() => setChangePhoto(false)}
+                        >
+                          <Icon name="undo" />
+                        </Button>
+                      </>
+                    )}
+                    {!changePhoto && (
+                      <>
+                        <Image
+                          style={{
+                            width: "200px",
+                            height: "200px",
+                            marginRight: "10px",
+                          }}
+                          rounded
+                          src={values.photoURL || placeholderUserImage}
+                          wrapped
+                          alt={values.photo}
+                          onError={(e) => {
+                            e.target.src = placeholderUserImage;
+                          }}
+                        />
+                        <Button
+                          size="mini"
+                          basic
+                          onClick={() => setChangePhoto(true)}
+                        >
+                          Change Photo
+                        </Button>
+                      </>
+                    )}
                   </>
-                }
+                )}
                 <Divider hidden />
+                {errors.firstName && touched.firstName ? (
+                  <Label pointing="below" color="orange">
+                    {errors.firstName}
+                  </Label>
+                ) : null}
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -193,6 +242,11 @@ export default function User() {
                   value={values.firstName}
                   onChange={handleChange}
                 />
+                {errors.lastName && touched.lastName ? (
+                  <Label pointing="below" color="orange">
+                    {errors.lastName}
+                  </Label>
+                ) : null}
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -201,7 +255,7 @@ export default function User() {
                   placeholder="Last Name"
                   value={values.lastName}
                   onChange={handleChange}
-                />{" "}
+                />
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -211,6 +265,11 @@ export default function User() {
                   value={values.employeeNumber}
                   onChange={handleChange}
                 />
+                {errors.email && touched.email ? (
+                  <Label pointing="below" color="orange">
+                    {errors.email}
+                  </Label>
+                ) : null}
                 <Form.Input
                   fluid
                   iconPosition="left"
@@ -222,16 +281,30 @@ export default function User() {
                   onChange={handleChange}
                 />
                 {!username && (
-                  <Form.Input
-                    fluid
-                    iconPosition="left"
-                    icon="asterisk"
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    value={values.password}
-                    onChange={handleChange}
-                  />
+                  <>
+                    {errors.password && touched.password ? (
+                      <Label pointing="below" color="orange">
+                        {errors.password}
+                      </Label>
+                    ) : null}
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      icon="asterisk"
+                      name="password"
+                      type="password"
+                      placeholder="Password"
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                    <p style={{ textAlign: "left" }}>
+                      <li>At least 8 characters</li>
+                      <li>at least 1 number</li>
+                      <li>at least 1 special character</li>
+                      <li>at least 1 uppercase letter</li>
+                      <li>at least 1 lowercase letter</li>
+                    </p>
+                  </>
                 )}
                 <Field
                   name="isAdmin"

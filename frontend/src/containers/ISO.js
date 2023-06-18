@@ -24,6 +24,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter } from "../lib/helpers";
 import "./ISO.css";
+import { useAppContext } from "../lib/contextLib";
 
 export default function ISO() {
   const [tree, setTree] = useState(null);
@@ -31,10 +32,9 @@ export default function ISO() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [path, setPath] = useState(""); // start from the top, use file system path model to go to children
+  const { currentUserRoles } = useAppContext();
+  
 
-  // const location = useLocation();
-  // const pathInURL = new URLSearchParams(location.search).get('path');
-  // alert(pathInURL);
   useEffect(() => {
     window.history.pushState({ path }, path, `?path=${path}`);
   }, [path]);
@@ -109,6 +109,7 @@ export default function ISO() {
 
   const Node = ({
     values,
+    readonly,
     onEdit,
     onPathChange,
     onAddChild,
@@ -548,12 +549,14 @@ export default function ISO() {
   const currentDataNode = getNodeByPath(tree, path);
 
   if (!currentDataNode) return <Header>Nothing to see here!</Header>;
+  const isAdmin = currentUserRoles.includes("admins");
 
   return (
     <>
       {renderBreadcrumb(tree, path)}
       <Node
         values={currentDataNode}
+        readonly={!isAdmin}
         onEdit={(newDataNode) => setNodeByPath(tree, path, newDataNode)}
         onAddChild={(newDataNode) => {
           addNodeToPath(tree, path, newDataNode);

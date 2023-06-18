@@ -34,18 +34,23 @@ export default function Login() {
 
     try {
       let ret;
+      let password = values.password;
+
       if (newPasswordRequired) {
         await Auth.completeNewPassword(user, values.newPassword);
-      } else {
-        ret = await Auth.signIn(values.email, values.password);
+        password = values.newPassword
+        setNewPasswordRequired(false);
+      } 
 
-        if (ret.challengeName === "NEW_PASSWORD_REQUIRED") {
-          setUser(ret);
-          setNewPasswordRequired(true);
-          setIsLoading(false);
-          return;
-        }
+      ret = await Auth.signIn(values.email, password);
+
+      if (ret.challengeName === "NEW_PASSWORD_REQUIRED") {
+        setUser(ret);
+        setNewPasswordRequired(true);
+        setIsLoading(false);
+        return;
       }
+
       setAuthenticatedUser(ret.signInUserSession.idToken.payload);
       
     } catch (e) {
@@ -59,8 +64,8 @@ export default function Login() {
   return (
     <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
       <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h2" color="olive" textAlign="left">
-          <Icon name="user outline" color="olive" />
+        <Header as="h2"  textAlign="left">
+          <Icon name="user outline"  />
           {newPasswordRequired ? "Choose a new password" : "Login"}
         </Header>
         <Formik
@@ -159,7 +164,7 @@ export default function Login() {
                 {isLoading ? (
                   <Loader active />
                 ) : (
-                  <Button color="olive" type="submit" disabled={isSubmitting}>
+                  <Button basic  type="submit" disabled={isSubmitting}>
                     Submit
                   </Button>
                 )}

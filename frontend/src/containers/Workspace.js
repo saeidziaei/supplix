@@ -18,6 +18,7 @@ import { useAppContext } from "../lib/contextLib";
 
 export default function Workspace() {
   const { currentUserRoles } = useAppContext();
+  
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const nav = useNavigate();

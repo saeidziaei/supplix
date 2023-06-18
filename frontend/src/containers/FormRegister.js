@@ -65,6 +65,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         setFormDef(template.templateDefinition);
 
         const forms = await loadTemplateForms(templateId);
+        
         setForms(forms);
         const formsCopy = cloneDeep(forms);
 
@@ -73,6 +74,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         setColumnDefs(getColumnDefs(template.templateDefinition));
 
         loadAppWorkspace(workspaceId);
+
+
       } catch (e) {
         setHasError(true);
         onError(e);

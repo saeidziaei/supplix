@@ -16,27 +16,33 @@ export default function handler(lambda) {
       const userGroups = getUserGroups(event);
       const isAdmin = userGroups.includes(TOP_LEVEL_ADMIN_GROUP) || userGroups.includes(ADMIN_GROUP);
       let workspaceUser = workspaceId
-        ? await getWorkspaceUser(isAdmin,
-            tenant,
-            workspaceId,
-            event.requestContext.authorizer.jwt.claims.sub
-          )
+        ? await getWorkspaceUser(isAdmin, tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub)
         : null;
       
 
-      if (workspaceId && !workspaceUser) { // workspace is in the url path but the user is not in the team 
-        body = {error: 'Unauthorised. User not in workspace. Contact your administrator please.'};
-        statusCode = 403;
-      }
-      else {
-        if (allowedGroups.length === 0 || allowedGroups.some((group) => userGroups.includes(group))) {
-          body = await lambda(event, tenant, workspaceUser, context);
-          statusCode = 200;
-        } else {
-          body = { error: "Unauthorised" };
-          statusCode = 403;
+      if (workspaceId) { 
+        if (!workspaceUser) { // workspace is in the url path but the user is not in the team 
+          return httpResponse(403, {
+            error:
+              "Unauthorised. User not in workspace. Contact your workspace owner please.",
+          });
+        }
+        const allowedWorkspaceRoles = getWorkspaceAllowedRoles();
+        if (allowedWorkspaceRoles.length > 0 && ! allowedWorkspaceRoles.includes(workspaceUser.role)) {
+          return httpResponse(403, {
+            error:
+              "Unauthorised workspace access.",
+          });
         }
       }
+
+      if (allowedGroups.length > 0 && !allowedGroups.some((group) => userGroups.includes(group))) {
+        return httpResponse(403, { error: "Unauthorised" });
+      }
+
+      body = await lambda(event, tenant, workspaceUser, context);
+      statusCode = 200;
+
     } catch (e) {
       // Print debug messages
       //   debug.flush(e);
@@ -47,21 +53,26 @@ export default function handler(lambda) {
       // {tenantId, workspaceId, e.message .... other info}
     }
 
-    // Return HTTP response
-    return {
-      statusCode,
-      body: JSON.stringify(body),
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
-      },
-    };
+    return httpResponse(statusCode, body);
   };
 }
 
+function httpResponse(statusCode, body) {
+  return {
+    statusCode,
+    body: JSON.stringify(body),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
+  };
+}
 
 function getAllowedGroups() {
   return process.env.ALLOWED_GROUPS ? process.env.ALLOWED_GROUPS.split(",") : [];
+}
+function getWorkspaceAllowedRoles() {
+  return process.env.WORKSPACE_ALLOWED_ROLE ? process.env.WORKSPACE_ALLOWED_ROLE.split(",") : [];
 }
 
 async function getWorkspaceUser(isAdmin, tenant, workspaceId, userId) {

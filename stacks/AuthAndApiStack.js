@@ -3,7 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { Cognito, Api, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
-import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../services/util/constants";
+import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_OWNER_ROLE } from "../services/util/constants";
 import { StringAttribute } from "aws-cdk-lib/aws-cognito";
 
 
@@ -35,6 +35,15 @@ export function AuthAndApiStack({ stack, app }) {
           tenant: tenantAttribute,
         },
       },
+      emailSettings: {
+        fromEmail: "noreply@isocloud.com.au", // Customize the "from" email address
+        replyToEmail: "noreply@isocloud.com.au", // Customize the reply-to email address
+        emailSubject: "Welcome to ISO Cloud", // Customize the subject of the email
+        verificationMessage: "Your verification code is {####}", // Customize the verification message
+        welcomeMessage: "Welcome to ISO Cloud! Your username is {username}", // Customize the welcome message
+        passwordResetMessage: "Your password reset code is {####}", // Customize the password reset message
+      },
+      
     },
   });
 
@@ -179,12 +188,18 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "services/functions/workspacemember/create.main",
           bind: [workspaceUserTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+          },
         },
       },
       "DELETE /workspaces/{workspaceId}/members/{userId}": {
         function: {
           handler: "services/functions/workspacemember/delete.main",
           bind: [workspaceUserTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+          },
         },
       },
 
@@ -254,7 +269,7 @@ export function AuthAndApiStack({ stack, app }) {
           handler: "services/functions/form/delete.main",
           bind: [formTable],
           environment: {
-            ALLOWED_GROUPS: ADMIN_GROUP,
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
           },
         },
       },
@@ -283,12 +298,18 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "services/functions/template/create.main",
           bind: [templateTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
         },
       },
       "PUT   /templates/{templateId}": {
         function: {
           handler: "services/functions/template/update.main",
           bind: [templateTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
         },
       },
       "GET   /workspaces/{workspaceId}/templates/{templateId}/forms": {
@@ -366,6 +387,17 @@ export function AuthAndApiStack({ stack, app }) {
           environment: {},
         },
       },
+      "GET /myuser": {
+        function: {
+          handler: "services/functions/user/get.main",
+          bind: [userTable],
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+          },
+        },
+      },
+
       "GET /users": {
         function: {
           handler: "services/functions/user/list.main",
@@ -479,6 +511,7 @@ export function AuthAndApiStack({ stack, app }) {
   api.attachPermissionsToRoute("GET /users/{username}", ["s3"]);
   api.attachPermissionsToRoute("GET /users", ["s3"]);
   api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", ["s3"]);
+  api.attachPermissionsToRoute("GET /myuser", ["s3"]);
   
   
   auth.attachPermissionsForAuthUsers(auth, [

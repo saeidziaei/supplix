@@ -12,7 +12,8 @@ export const main = handler(async (event, tenant) => {
       ? event.pathParameters.tenantId
       : tenant;
 
-  const username = event.pathParameters.username;
+  // if we are coming here from /myuser path then the username is in the token. The user can only get their own user not anybody else's
+  const username = (event.rawPath === "/myuser") ? event.requestContext.authorizer.jwt.claims.sub : event.pathParameters.username;
   const userPoolId = process.env.USER_POOL_ID;
   const client = new CognitoIdentityServiceProvider();
 

@@ -21,7 +21,7 @@ export default function UserPicker({ users, value, onChange, disabled = false })
   return (
     <Dropdown
       disabled={disabled}
-      fluid
+      
       value={value}
       trigger={selected ? <User user={selected} /> : <span>Select User</span>}
       options={options}

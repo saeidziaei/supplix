@@ -13,11 +13,14 @@ import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import "./Workspaces.css";
+import { useAppContext } from "../lib/contextLib";
 
 export default function Workspaces() {
   const [workspaces, setWorkspaces] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const { currentUserRoles } = useAppContext();
+
 
   useEffect(() => {
     async function onLoad() {
@@ -35,7 +38,15 @@ export default function Workspaces() {
   }, []);
 
   async function loadWorkspaces() {
-    return await makeApiCall("GET", `/workspaces`);
+    // if admin return all
+    const isAdmin = currentUserRoles.includes("admins");
+    if (isAdmin) {
+      return await makeApiCall("GET", `/workspaces`);
+    }
+
+    // return only workspaces that the user is admin of
+    const myWorkspace = await makeApiCall("GET", `/myworkspaces`);
+    return myWorkspace.filter(ws => ws.role === "Owner")
   }
 
 
@@ -108,8 +119,6 @@ export default function Workspaces() {
                                   <List.Header>{d.workspaceName}</List.Header>
                                   <List.Description>{d.note}</List.Description>
                                 </List.Content>
-                                
-
                               </List.Item>
                             );
                           })}

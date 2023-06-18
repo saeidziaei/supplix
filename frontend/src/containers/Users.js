@@ -28,11 +28,7 @@ export default function Users() {
       this.eGui = document.createElement('div');
       this.eGui.classList.add('custom-element');
       this.eGui.innerHTML = `
-          <a href="${
-            tenantId
-              ? `/tenants/${tenantId}/user/${user.Username}`
-              : `/user/${user.Username}`
-          }" target="_blank">${capitalizeFirstLetter(user.given_name)} ${capitalizeFirstLetter(user.family_name)}</a>
+          <a href="${tenantId ? `/tenants/${tenantId}/user/${user.Username}`: `/user/${user.Username}`}">${capitalizeFirstLetter(user.given_name)} ${capitalizeFirstLetter(user.family_name)}</a>
       `;
     }
   
@@ -178,7 +174,7 @@ export default function Users() {
           <LinkContainer to={`/user`}>
             <Button size="tiny" basic color="blue">
               <Icon name="plus" />
-              New Employee
+              Employee
             </Button>
           </LinkContainer>
         )}

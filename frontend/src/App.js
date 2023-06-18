@@ -79,6 +79,8 @@ function App() {
 
     async function loadMyEmployee() {
       function getAttribute(user, attributeName) {
+        if (!user || !user.UserAttributes) return undefined;
+
         const attribute = user.UserAttributes.find(
           (attr) => attr.Name === attributeName
         );
@@ -92,7 +94,7 @@ function App() {
       if (!authenticatedUser)
         return;
       
-      const item = await makeApiCall("GET", `/users/${authenticatedUser.sub}`);
+      const item = await makeApiCall("GET", `/myuser`);
 
       return {
         given_name: getAttribute(item, "given_name") || "",
@@ -102,6 +104,7 @@ function App() {
         ...item
       }
     }
+
 
 
     async function loadMyWorkspaces() {
@@ -127,6 +130,12 @@ function App() {
     onLoad();
   }, [authenticatedUser]);
 
+  const isWorkspaceOwner = () => {
+    if (!workspaces) return false;
+    // owner of at least one workspace
+    return workspaces.some(workspace => workspace.role === "Owner");
+  }
+
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
   async function loadAppWorkspace(workspaceId) {
@@ -135,8 +144,8 @@ function App() {
       return currentWorkspace;
     }
 
-    // const ws = await makeApiCall("GET", `/workspaces/${workspaceId}`);
-    const ws = workspaces.find(w => w.workspaceId === workspaceId);
+    
+    const ws = workspaces?.find(w => w.workspaceId === workspaceId);
     setCurrentWorkspace(ws);
     return ws;
   }
@@ -174,51 +183,54 @@ function App() {
                   </List.Item>
                   <List.Item>
                     <Button
-                    size="mini"
+                      size="mini"
                       color="black"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
                     ></Button>
                     <Button
-                    size="mini"
+                      size="mini"
                       color="grey"
                       icon="refresh"
-                      onClick={() => {window.location.reload();}}
+                      onClick={() => {
+                        window.location.reload();
+                      }}
                     ></Button>
-{employee && <User user={employee}  /> }
+                    {employee && <User user={employee} />}
                   </List.Item>
                 </List>
               </Grid.Column>
-              <Grid.Column width={5}>
-                <Menu vertical>
-                  <Dropdown
-                    item
-                    fluid
-                    text={
-                      currentWorkspace
-                        ? currentWorkspace.workspaceName
-                        : "(Workspace)"
-                    }
-                  >
-                    {workspaces && (
-                      <Dropdown.Menu>
-                        {workspaces.map((w, index) => (
-                          <Dropdown.Item
-                            key={index}
-                            onClick={() => {
-                              setCurrentWorkspace(w);
-                              nav(`/workspace/${w.workspaceId}/registers`);
-                            }}
-                          ><Icon name={w.role === "Owner" ? "chess king" : "user"} />
-                            {w.workspaceName}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    )}
-                  </Dropdown>
-                </Menu>
+              <Grid.Column width={3}>
+                <Dropdown
+                  item
+                  inline
+                  fluid
+                  text={
+                    currentWorkspace
+                      ? currentWorkspace.workspaceName
+                      : "(Select Workspace)"
+                  }
+                >
+                  {workspaces && (
+                    <Dropdown.Menu>
+                      {workspaces.map((w, index) => (
+                        <Dropdown.Item
+                          key={index}
+                          onClick={() => {
+                            setCurrentWorkspace(w);
+                            nav(`/workspace/${w.workspaceId}/registers`);
+                          }}
+                        >
+                          <Icon
+                            name={w.role === "Owner" ? "chess king" : "user"}
+                          />
+                          {w.workspaceName}
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  )}
+                </Dropdown>
               </Grid.Column>
-   
             </Grid.Row>
           </Grid>
           <Grid columns={1}>
@@ -234,7 +246,7 @@ function App() {
                   size="small"
                 >
                   <LinkContainer to="/">
-                    <Nav.Link as={Menu.Item} >
+                    <Nav.Link as={Menu.Item}>
                       <span>
                         <Icon name="home" />
                         Home
@@ -264,18 +276,9 @@ function App() {
                               </span>
                             </Nav.Link>
                           </LinkContainer>
-                          {/* <LinkContainer to="/iso">
-                            <Nav.Link as={Menu.Item}>
-                              <span>
-                                <Icon name="sitemap" />
-                                27001
-                              </span>
-                            </Nav.Link>
-                          </LinkContainer> */}
                         </Menu.Menu>
                       </Menu.Item>
                       {(isAdmin || isTopLevelAdmin) && (
-                        <>
                         <LinkContainer to="/templates">
                           <Nav.Link as={Menu.Item}>
                             <span>
@@ -284,6 +287,8 @@ function App() {
                             </span>
                           </Nav.Link>
                         </LinkContainer>
+                      )}
+                      {(isAdmin || isTopLevelAdmin || isWorkspaceOwner()) && (
                         <LinkContainer to="/workspaces">
                           <Nav.Link as={Menu.Item}>
                             <span>
@@ -292,11 +297,12 @@ function App() {
                             </span>
                           </Nav.Link>
                         </LinkContainer>
-                        </>
                       )}
                       {currentWorkspace && (
                         <>
-                          <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/registers`}>
+                          <LinkContainer
+                            to={`/workspace/${currentWorkspace.workspaceId}/registers`}
+                          >
                             <Nav.Link as={Menu.Item}>
                               <span>
                                 <Icon name="folder open outline" />
@@ -332,7 +338,7 @@ function App() {
                         <LinkContainer to="/users">
                           <Nav.Link as={Menu.Item}>
                             <span>
-                              <Icon name="users"  />
+                              <Icon name="users" />
                               Employees
                             </span>
                           </Nav.Link>

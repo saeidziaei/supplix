@@ -3,8 +3,14 @@ import { Formik } from "formik";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Button, Form, Grid, Header, Icon, Label,
-  Message, Segment
+  Button,
+  Form,
+  Grid,
+  Header,
+  Icon,
+  Label,
+  Message,
+  Segment,
 } from "semantic-ui-react";
 import * as Yup from "yup";
 import { onError } from "../lib/errorLib";
@@ -74,7 +80,10 @@ export default function ResetPassword() {
           placeholder="Email"
           value={values.email}
           onChange={handleChange}
-        />{" "}
+        />
+        <Button basic type="submit">
+          Submit
+        </Button>
       </>
     );
   }
@@ -139,6 +148,9 @@ export default function ResetPassword() {
           <li>at least 1 uppercase letter</li>
           <li>at least 1 lowercase letter</li>
         </p>
+        <Button basic type="submit">
+          Submit
+        </Button>
       </>
     );
   }
@@ -163,8 +175,8 @@ export default function ResetPassword() {
   return (
     <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
       <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h2" color="olive" textAlign="left">
-          <Icon name="user outline" color="olive" />
+        <Header as="h2" textAlign="left">
+          <Icon name="user outline" />
           {!codeSent
             ? "Password Reset"
             : !confirmed
@@ -197,8 +209,6 @@ export default function ResetPassword() {
                       handleChange
                     )
                   : renderSuccessMessage()}
-
-
               </Segment>
             </Form>
           )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button, Divider, Dropdown, Grid, Header, Icon, Image, Loader, Message, Segment, Table } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
@@ -10,7 +10,7 @@ import { getUserById, normaliseCognitoUsers } from "../lib/helpers";
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState(null);
-  let { state } = useLocation();
+  
   const { loadAppWorkspace } = useAppContext();
   const [members, setMembers] = useState([]);
   const [newMember, setNewMember] = useState(null);
@@ -25,15 +25,13 @@ export default function WorkspaceTeam(props) {
 
   useEffect(() => {
     async function loadWorkspace() {
-      // if workspace has been passed in state use it otherwise it is a direct URL to members page and therefore workspace needs to be loaded from the backend
-      // but it needs to be loaded in the app context because it is used by everyone not just this page.
-      return state ?? await loadAppWorkspace(workspaceId); 
+      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
     }
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
     async function loadUsers() {
-      return await makeApiCall("GET", `/users`); // ADMIN
+      return await makeApiCall("GET", `/users`); 
     }
     async function onLoad() {
       try {
@@ -163,7 +161,7 @@ export default function WorkspaceTeam(props) {
               />
               <Divider hidden />
               <Dropdown
-                fluid
+                
                 selection
                 placeholder="Role"
                 value={newMemberRole}
@@ -174,7 +172,13 @@ export default function WorkspaceTeam(props) {
                   value: option,
                 }))}
               />
-              <Divider hidden />
+              {newMemberRole === "Owner" && (
+                  <p>
+                    <Icon name="warning sign" size="large" color="red" /> Owner can manage users, delete records and library items in this workspace
+                    
+                  </p>
+                )}
+              <Divider  />
               <Button basic onClick={addMember} disabled={!(newMember && newMemberRole)}>
                 Add
               </Button>
