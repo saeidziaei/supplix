@@ -334,6 +334,10 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "services/functions/iso/update.main",
           bind: [isoTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+
         },
       },
 

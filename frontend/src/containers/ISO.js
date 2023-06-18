@@ -241,6 +241,7 @@ export default function ISO() {
                 )}
               </>
             )}
+            {!readonly && (
             <Button
               circular
               basic
@@ -248,7 +249,7 @@ export default function ISO() {
               icon="pencil"
               color="black"
               onClick={() => setIsEditing(true)}
-            />
+            />)}
             {path && (
               <>
                <Confirm
@@ -261,6 +262,7 @@ export default function ISO() {
                           setDeleteConfirm({ open: false });
                         }}
                       />
+                      {!readonly && (
               <Popup
                 content={
                   canBeDeleted
@@ -279,10 +281,10 @@ export default function ISO() {
                     }}
                   />
                 }
-              />
+              />)}
               </>
             )}
-            {groupedChildren.length == 0 && (
+            {groupedChildren.length == 0 && !readonly && (
               <Button
                 basic
                 color="black"
@@ -321,10 +323,10 @@ export default function ISO() {
                             onClick={() =>
                               onPathChange(path + "/" + child.guid)
                             }
-                          />
+                          /> 
                           <Item.Header> <DisplayText text={child.title} /></Item.Header>
                           
-                          {index > 0 && (
+                          {!readonly && index > 0 && (
                             <Button
                               size="mini"
                               floated="right"
@@ -334,7 +336,7 @@ export default function ISO() {
                               onClick={() => onMoveChildUp(child.guid)}
                             />
                           )}
-                          {index < group.length - 1 && (
+                          {!readonly && index < group.length - 1 && (
                             <Button
                               size="mini"
                               floated="right"
@@ -348,7 +350,7 @@ export default function ISO() {
                       </Item>
                     ))}
                     <Item>
-                      <Button
+                      {!readonly && (<Button
                         basic
                         color="black"
                         size="tiny"
@@ -361,7 +363,7 @@ export default function ISO() {
                           };
                           onAddChild(newChild);
                         }}
-                      >{`New ${group[0].type}`}</Button>
+                      >{`New ${group[0].type}`}</Button>)}
                     </Item>
                   </Item.Group>
                 </div>
@@ -512,6 +514,7 @@ export default function ISO() {
         const item = await loadProcess();
 
         setTree(item.tree);
+        setSavedTree(item.tree);
 
         const urlPath = searchParams.get("path");
         setPath(urlPath || "");
