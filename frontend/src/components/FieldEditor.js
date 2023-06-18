@@ -314,6 +314,7 @@ export const fieldTypes = [
   { text: "Multi", value: "multi", hasOptions: true },
   { text: "Select", value: "select", hasOptions: true },
   { text: "Dropdown", value: "dropdown", hasOptions: true },
+  { text: "Link", value: "link" },
   { text: "Competency", value: "competency" },
   { text: "Aggregate", value: "aggregate", hasOptions: true }, 
   // when there is an aggregate field in a section the following field types can be assigned a weight:

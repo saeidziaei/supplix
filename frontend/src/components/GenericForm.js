@@ -91,6 +91,20 @@ export function GenericForm({
           />
         );
 
+      case "link":
+        return disabled ? (
+          values[name] ? (<a href={values[name]}>Link</a>) : <span>(empty)</span>
+        ) : (
+          <Input
+            size={size}
+            name={name}
+            id={id}
+            placeholder="Paste link here"
+            value={values[name]}
+            style={{ color: "black!important" }}
+          />
+        );
+
       case "wysiwyg":
         return (
           <CKEditor

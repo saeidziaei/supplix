@@ -324,6 +324,10 @@ const handleCellValueChanged = useCallback(() => {
   const aggregationRenderer = (params) => {
     return <span>{params.value.title}</span>
   }
+  const linkRenderer = (params) => {
+    return params.value ? <a href={params.value}>Link</a> : <></>;
+  }
+  
   const competencyRenderer = (params) => {
     const fieldValue = params.value;
     if (!fieldValue) return <></>;
@@ -409,6 +413,8 @@ const handleCellValueChanged = useCallback(() => {
         return wysiwygRenderer;
       case "aggregate":
         return aggregationRenderer;
+      case "link":
+        return linkRenderer;
       default:
         return defaultRenderer;
     }

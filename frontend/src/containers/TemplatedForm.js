@@ -8,8 +8,10 @@ import {
   Confirm,
   Header,
   Icon,
+  Label,
   Loader,
   Message,
+  Popup,
   Segment
 } from "semantic-ui-react";
 import { GenericForm } from "../components/GenericForm";
@@ -250,7 +252,25 @@ export default function TemplatedForm() {
           ? "Revision"
           : ""}
       </Header>
-
+      {workspaceId && templateId && formId && (
+        <Popup
+          content="Link to this record copied."
+          on="click"
+          trigger={
+            <Label
+              as="a"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `/workspace/${workspaceId}/form/${templateId}/${formId}`
+                );
+              }}
+            >
+              <Icon name="copy" />
+              Link
+            </Label>
+          }
+        />
+      )}
       <GenericForm
         formDef={template.templateDefinition}
         formData={formRecord ? formRecord.formValues : null}
@@ -288,7 +308,7 @@ export default function TemplatedForm() {
           />
           {formId && (isAdmin || currentWorkspace?.role === "Owner") && (
             <Button
-            floated="right"
+              floated="right"
               size="mini"
               color="red"
               onClick={() => setDeleteConfirmOpen(true)}
@@ -315,8 +335,6 @@ export default function TemplatedForm() {
           </Message.Content>
         </Message>
       )}
-
-
 
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
         <Button basic size="mini">
