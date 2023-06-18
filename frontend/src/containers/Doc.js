@@ -14,15 +14,14 @@ import placeholderImage from '../fileplaceholder.jpg';
 
 export default function Doc() {
   const { workspaceId, docId } = useParams();
-  const { loadAppWorkspace } = useAppContext();
   const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { currentUserRoles } = useAppContext();
-
-
+  const { loadAppWorkspace, currentWorkspace } = useAppContext();
+  const isAdmin = currentUserRoles.includes("admins");
 
 
 
@@ -57,6 +56,18 @@ export default function Doc() {
 
   function handleFileChange(event) {
     file.current = event.target.files[0];
+  }
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      setDeleteConfirmOpen(false);
+      await deleteDoc();
+      nav(`/workspace/${workspaceId}/docs`);
+    } catch (e) {
+      onError(e);
+    }
+
+    setIsLoading(false);
   }
   async function deleteDoc() {
     return await makeApiCall("DELETE", `/workspaces/${workspaceId}/docs/${docId}`);
@@ -177,7 +188,7 @@ export default function Doc() {
   }
 
   function renderDoc() {
-    const isAdmin = currentUserRoles.includes("admins");
+    
  
     return (
       <Grid
@@ -211,13 +222,9 @@ export default function Doc() {
             header="This will delete this library item."
             open={deleteConfirmOpen}
             onCancel={() => setDeleteConfirmOpen(false)}
-            onConfirm={async () => {
-              setIsLoading(true);
-              await deleteDoc();
-              nav(`/workspace/${workspaceId}/docs`);
-            }}
+            onConfirm={handleDelete}
           />
-          {isAdmin && docId && (
+          {docId && (isAdmin || currentWorkspace?.role === "Owner") && (
             <Button
               size="mini"
               color="red"

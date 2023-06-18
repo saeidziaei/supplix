@@ -20,6 +20,7 @@ export default function Workspaces() {
 
   const [isLoading, setIsLoading] = useState(true);
   const { currentUserRoles } = useAppContext();
+  const isAdmin = currentUserRoles.includes("admins");
 
 
   useEffect(() => {
@@ -39,7 +40,6 @@ export default function Workspaces() {
 
   async function loadWorkspaces() {
     // if admin return all
-    const isAdmin = currentUserRoles.includes("admins");
     if (isAdmin) {
       return await makeApiCall("GET", `/workspaces`);
     }
@@ -71,11 +71,10 @@ export default function Workspaces() {
 
     return (
       <>
-        <FormHeader heading="Workspaces" />
+        <FormHeader heading="Workspaces" subheading="You are the owner of these workspaces" />
         {(!workspaces || workspaces.length == 0) && (
           <Message
             header="No workspaces found"
-            content="Start by creating your first workspace!"
             icon="exclamation"
           />
         )}
@@ -130,11 +129,13 @@ export default function Workspaces() {
           </Grid>
         )}
         <Divider hidden />
+        {isAdmin && (
         <LinkContainer to={`/workspace`}>
-          <Button basic primary size="small">
-            New Workspace
+          <Button basic primary size="tiny">
+            <Icon name="plus"/>Workspace
           </Button>
         </LinkContainer>
+        )}
       </>
     );
   }

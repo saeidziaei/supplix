@@ -230,6 +230,9 @@ export function AuthAndApiStack({ stack, app }) {
         function: {
           handler: "services/functions/doc/delete.main",
           bind: [docTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+          },
         },
       },
 
@@ -479,6 +482,28 @@ export function AuthAndApiStack({ stack, app }) {
       "PUT /tenants/{tenantId}/users/{username}": {
         function: {
           handler: "services/functions/user/update.main",
+          bind: [userTable],
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: TOP_LEVEL_ADMIN_GROUP,
+          },
+        },
+      },
+      "DELETE /users/{username}": {
+        function: {
+          handler: "services/functions/user/delete.main",
+          bind: [userTable],
+          permissions: [cognitoAccessPolicy],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
+      "DELETE /tenants/{tenantId}/users/{username}": {
+        function: {
+          handler: "services/functions/user/delete.main",
           bind: [userTable],
           permissions: [cognitoAccessPolicy],
           environment: {

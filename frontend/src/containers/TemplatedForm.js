@@ -30,7 +30,9 @@ export default function TemplatedForm() {
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const nav = useNavigate();
+  const { currentUserRoles } = useAppContext();
   const { loadAppWorkspace, currentWorkspace } = useAppContext();
+  const isAdmin = currentUserRoles.includes("admins");
 
   useEffect(() => {
     async function loadForm() {
@@ -175,8 +177,23 @@ export default function TemplatedForm() {
       isRevision: isRevisioning
     });
   }
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      setDeleteConfirmOpen(false);
+      await deleteForm();
+      nav(`/workspace/${workspaceId}/register/${templateId}`);
+    } catch (e) {
+      onError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }
   async function deleteForm() {
-    return await makeApiCall("DELETE", `/workspaces/${workspaceId}/forms/${formId}`);
+    return await makeApiCall(
+      "DELETE",
+      `/workspaces/${workspaceId}/forms/${formId}`
+    );
   }
 
   function handleEdit(revision) {
@@ -267,13 +284,9 @@ export default function TemplatedForm() {
             header="This will delete the record."
             open={deleteConfirmOpen}
             onCancel={() => setDeleteConfirmOpen(false)}
-            onConfirm={async () => {
-              setIsLoading(true);
-              await deleteForm();
-              nav(`/workspace/${workspaceId}/register/${templateId}`);
-            }}
+            onConfirm={handleDelete}
           />
-          {formId && currentWorkspace?.role === "Owner" && (
+          {formId && (isAdmin || currentWorkspace?.role === "Owner") && (
             <Button
             floated="right"
               size="mini"

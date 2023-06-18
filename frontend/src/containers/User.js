@@ -2,7 +2,7 @@ import axios from "axios";
 import { Field, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Checkbox, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
+import { Button, Checkbox, Confirm, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
 import config from "../config";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
@@ -16,6 +16,9 @@ export default function User() {
   const [changePhoto, setChangePhoto] = useState(false);
   const nav = useNavigate();
   const file = useRef(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+
 
   const Schema = Yup.object().shape({
     firstName: Yup.string().required('First name is required'),
@@ -81,6 +84,25 @@ export default function User() {
     return true; // file.current
   }
 
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      setDeleteConfirmOpen(false);
+      await deleteUser();
+      navBack();
+    } catch (e) {
+      onError(e);
+    }
+
+    setIsLoading(false);
+  }
+  async function deleteUser() {
+    console.log("delete", "DELETE", `/users/${username}`);
+    if (tenantId)
+      return await makeApiCall("DELETE", `/tenants/${tenantId}/users/${username}`);
+    else return await makeApiCall("DELETE", `/users/${username}`);
+  }
+
   async function handleSubmit(values) {
     if (changePhoto && file.current && file.current.size > config.MAX_ATTACHMENT_SIZE) {
       alert(
@@ -130,16 +152,17 @@ export default function User() {
     }
   }
 
+  function navBack() {
+    if (tenantId) nav(`/tenants/${tenantId}/users`);
+    else nav("/users");
+  }
   async function handleSave(values) {
     if (username) {
       await updateUser(values);
       window.location.reload();
     } else {
       await createUser(values);
-      if (tenantId)
-        nav(`/tenants/${tenantId}/users`);
-      else
-        nav("/users");
+      navBack();
     }
   }
 
@@ -335,10 +358,31 @@ export default function User() {
                   Submit
                 </Button>
               </Segment>
+
+              
             </Form>
           )}
         </Formik>
+        <Divider hidden />
+        <Confirm
+            size="mini"
+            header="This will delete this user."
+            open={deleteConfirmOpen}
+            onCancel={() => setDeleteConfirmOpen(false)}
+            onConfirm={handleDelete}
+          />
+          {username && (
+            <Button
+              size="mini"
+              color="red"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Icon name="remove circle" />
+              Delete
+            </Button>
+          )}
       </Grid.Column>
+      
     </Grid>
   );
 }

@@ -60,9 +60,6 @@ export const main = handler(async (event, tenant) => {
   }
 
 
-  
-  
-
   let updateExpression = "SET employeeNumber= :employeeNumber, updatedByUser= :updatedByUser, updatedAt= :updatedAt";
   let expressionAttributes = {
     ":employeeNumber": data.employeeNumber || "",
