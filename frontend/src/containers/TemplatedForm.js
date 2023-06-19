@@ -19,6 +19,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
+import { FormikDebug } from "formik-semantic-ui-react";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -49,10 +50,9 @@ export default function TemplatedForm() {
         if (formId) {
           const item = await loadForm();
           setFormRecord(item);
-          
+
           // the api populates template as well
           setTemplate(item.template);
-
         } else {
           // new form - just load the template
           const item = await loadTemplate();
@@ -62,9 +62,9 @@ export default function TemplatedForm() {
         loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     }
 
     onLoad();
@@ -138,7 +138,6 @@ export default function TemplatedForm() {
 
   }
   async function handleSubmit(values) {
- 
     setIsLoading(true);
     try {
       await updateAttachments(values);
@@ -278,6 +277,7 @@ export default function TemplatedForm() {
         handleCancel={isNew ? null : cancelEdit}
         disabled={!editable}
       />
+      
 
       {formRecord && (
         <p style={{ color: "#bbb" }}>
@@ -292,10 +292,10 @@ export default function TemplatedForm() {
       )}
       {!editable && (
         <div>
-          <Button primary size="mini" onClick={() => handleEdit(true)}>
+          <Button primary basic size="mini" onClick={() => handleEdit(true)}>
             Revision
           </Button>
-          <Button secondary size="mini" onClick={() => handleEdit(false)}>
+          <Button secondary basic size="mini" onClick={() => handleEdit(false)}>
             Edit
           </Button>
 
@@ -309,6 +309,7 @@ export default function TemplatedForm() {
           {formId && (isAdmin || currentWorkspace?.role === "Owner") && (
             <Button
               floated="right"
+              basic
               size="mini"
               color="red"
               onClick={() => setDeleteConfirmOpen(true)}

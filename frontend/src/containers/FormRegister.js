@@ -170,16 +170,18 @@ const handleCellValueChanged = useCallback(() => {
   const getColumnDefs = (def) => {
     if (!def) return [];
     const formColumns = def.sections
-      .filter((s) => !s.isTable)
       .map((s) => ({
         headerName: s.title,
         children: s.fields
           .filter((f) => f.type !== "info")
+          .filter((f) => !s.isTable || ["SUM", "AVG", "COUNT", "MIN", "MAX"].includes(f.aggregateFunction)) // in Table sections only show fields with aggegate 
           .map((f) => ({
             field: f.name,
+            headerName: !s.isTable ? f.name : `${f.aggregateFunction}(${f.name})`,
             cellClass: "ag-cell-bordered ag-cell-readonly",
-            // section and field are needed for aggregate
             valueGetter: (params) =>
+              s.isTable ? tableAggregateFieldValueGetter(params, f)
+              :
               f.type === "aggregate"
                 ? aggregateFiledValueGetter(params, s, f)
                 : formValueGetter(params),
@@ -287,6 +289,49 @@ const handleCellValueChanged = useCallback(() => {
     return true;
   };
 
+  const tableAggregateFieldValueGetter = (params, field) => {
+    const formValues = params.data.formValues;
+
+    let sumOfVal = 0;
+    let countOfVal = 0;
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+
+    const targetPattern = new RegExp(`^row\\d+-${field.name}$`); // for instance "row##-Score"
+
+    for (const key in formValues) {
+      if (targetPattern.test(key)) {
+        const val = parseFloat(formValues[key]);
+        countOfVal++;
+        if (!isNaN(val)) {
+          sumOfVal += val;
+          minValue = Math.min(minValue, val);
+          maxValue = Math.max(maxValue, val);
+        }
+      }
+    }
+
+    switch (field.aggregateFunction) {
+      case "SUM":
+        return sumOfVal || 0;
+    
+      case "AVG":
+        return countOfVal > 0 ? sumOfVal / countOfVal : 0;
+    
+      case "COUNT":
+        return countOfVal;
+
+      case "MAX":
+          return maxValue !== -Infinity ? maxValue : undefined;
+    
+      case "MIN":
+          return minValue !== Infinity ? minValue : undefined;    
+          
+      default:
+        return undefined;
+    }
+
+  };
   const aggregateFiledValueGetter = (params, section, field) =>  {
     const data = params.data;
     const fields = section.fields;
@@ -479,7 +524,7 @@ const handleCellValueChanged = useCallback(() => {
             defaultColDef={{
               cellClass: "ag-cell-bordered",
               resizable: true,
-              width: 100,
+              width: 110,
               filter: true,
               sortable: true,
               autoHeight: true,

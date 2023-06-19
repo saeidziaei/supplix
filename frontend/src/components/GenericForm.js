@@ -2,7 +2,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
 import { ErrorMessage, Field, FieldArray, Formik } from "formik";
-import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
+import { Checkbox, Form, FormikDebug, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
@@ -157,7 +157,6 @@ export function GenericForm({
 
       case "multi":
       case "select":
-      case "weightedSelect":
         let newValues = values[name];
         if (!Array.isArray(newValues)) {
           // check to see newValues is actually an array as the type might have changed.
@@ -213,7 +212,6 @@ export function GenericForm({
         );
 
       case "dropdown":
-      case "weightedDropdown":
         const options = f.options.map((o) => ({
           value: o.value,
           text: o.value,
@@ -410,7 +408,9 @@ export function GenericForm({
             {/* <Button secondary>Back</Button> */}
           </Form>
         )}
+        
       </Formik>
+      
     </Segment>
   );
 

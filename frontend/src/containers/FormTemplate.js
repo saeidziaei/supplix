@@ -295,6 +295,7 @@ export default function FormTemplate() {
                         newFields.push(duplicatedField);
                         setRegisterFields(newFields);
                       }}
+                      
                     />
                     <Divider />
                   </SortableItem>
@@ -535,6 +536,7 @@ export default function FormTemplate() {
                                 setSections(newSections);
                               }}
                               showWeight={section.fields.some(f => f.type === "aggregate")} // only show weight if there is an aggregate field in this seciton
+                              showAggregateFunction={section.isTable}
                             />
                             <Divider />
                           </SortableItem>

@@ -3,16 +3,48 @@ import { Button, Dropdown, Form, Grid, Input, Item, List, Table } from "semantic
 import { BlockPicker } from "react-color";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
+import * as Yup from 'yup';
 
 
-export default function FieldEditor({ value, onChange, onDelete, onDuplicate, isRegisterField, showWeight  }) {
+
+export default function FieldEditor({ value, onChange, onDelete, onDuplicate, isRegisterField, showWeight, showAggregateFunction  }) {
   const [field, setField] = useState(value);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const Schema = Yup.object().shape({
+    name: Yup.string()
+      .matches(/^[^.]*$/, "Field name cannot contain a dot")
+      .required("Required"),
+    title: Yup.string()
+      .matches(/^[^.]*$/, "Field title cannot contain a dot")
+      .required("Required"),
+    aggregateFunction: Yup.string(),
+    weight: Yup.number(),
+  });
+
+
   const [colorPickerVisible, setColorPickerVisible] = useState({})
+
 
   function handleFieldChange(element, value) {
     const updatedField = { ...field, [element]: value };
     setField(updatedField);
     onChange(updatedField);
+
+    // Validate field name
+  Schema.validateAt(element, updatedField)
+  .then(() => {
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [element]: undefined,
+    }));
+  })
+  .catch((error) => {
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [element]: error.message,
+    }));
+  });
   }
   function handleOptionChange(optionIndex, element, value) {
     const newOptions = field.options;
@@ -52,6 +84,19 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
 
     onChange(updatedField);
   };
+  function renderFieldAggregateFunction() {
+    if (!showAggregateFunction) return;
+    if (!["number", "select", "dropdown"].includes(field.type)) return;
+    const options = [
+      { key: 1, text: '(no aggregate)', value: "NA" },
+      { key: 2, text: 'Sum', value: "SUM" },
+      { key: 3, text: 'Average', value: "AVG" },
+      { key: 4, text: 'Count', value: "COUNT" },
+      { key: 5, text: 'Minimum', value: "MIN" },
+      { key: 6, text: 'Maximum', value: "MAX" },
+    ];
+    return <Dropdown floating="right" inline options={options} value={field.aggregateFunction} onChange={(e, {value}) => handleFieldChange("aggregateFunction", value)} />;
+  }
   function renderFieldWeight() {
     if (!showWeight) return;
     if (!["number", "select", "dropdown"].includes(field.type)) return;
@@ -283,6 +328,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               type="text"
               value={field.name}
               onChange={(e) => handleFieldChange("name", e.target.value)}
+              error={fieldErrors.name}
             />
           )}
           {field.type == "info" && (
@@ -298,6 +344,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
             </div>
           )}
          {renderFieldWeight()}
+         {renderFieldAggregateFunction()}
         </Form.Group>
         {renderFieldOptions()}
       </Form>
