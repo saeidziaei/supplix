@@ -30,9 +30,9 @@ export default function Workspaces() {
         setWorkspaces(items);
       } catch (e) {
         onError(e);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     }
 
     onLoad();
