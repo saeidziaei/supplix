@@ -11,7 +11,13 @@ export const main = handler(async (event, tenant) => {
       workspaceId: uuid.v1(), 
       workspaceName: data.workspaceName,
       category: data.category || "",
+      subCategory: data.subCategory || "",
+      clientName: data.clientName || "",
+      startDate: data.startDate || "",
+      endDate: data.endDate || "",
+      status: data.status || "",
       note: data.note || "",
+      
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 
     },

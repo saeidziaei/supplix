@@ -32,9 +32,10 @@ export default function TemplatedForm() {
   const [template, setTemplate] = useState(null);
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [workspace, setWorkspace] = useState(null); 
+
   const nav = useNavigate();
   const { currentUserRoles } = useAppContext();
-  const { loadAppWorkspace, currentWorkspace } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
   useEffect(() => {
@@ -45,6 +46,10 @@ export default function TemplatedForm() {
     async function loadTemplate() {
       return await makeApiCall("GET", `/templates/${templateId}`);
     }
+    async function loadWorkspace() {
+      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    }
+
     async function onLoad() {
       try {
         if (formId) {
@@ -59,7 +64,8 @@ export default function TemplatedForm() {
 
           setTemplate(item);
         }
-        loadAppWorkspace(workspaceId);
+        const ws = await loadWorkspace();
+        setWorkspace(ws);
       } catch (e) {
         onError(e);
       } finally {
@@ -306,7 +312,7 @@ export default function TemplatedForm() {
             onCancel={() => setDeleteConfirmOpen(false)}
             onConfirm={handleDelete}
           />
-          {formId && (isAdmin || currentWorkspace?.role === "Owner") && (
+          {formId && (isAdmin || workspace?.role === "Owner") && (
             <Button
               floated="right"
               basic

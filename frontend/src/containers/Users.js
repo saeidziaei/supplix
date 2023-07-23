@@ -5,8 +5,8 @@ import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
 import React, { useEffect, useRef, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
-import { Link, useParams } from "react-router-dom";
-import { Button, Divider, Grid, Icon, Image, List, Loader, Message, Segment } from "semantic-ui-react";
+import { useParams } from "react-router-dom";
+import { Button, Divider, Icon, Image, Loader, Message } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
 import { makeApiCall } from "../lib/apiLib";
@@ -56,6 +56,7 @@ export default function Users() {
     }
   }  
   class PhotoRenderer {
+
     init(params) {
       this.eGui = document.createElement('div');
       this.eGui.classList.add('portrait');
@@ -160,7 +161,7 @@ export default function Users() {
               ref={gridRef}
               columnDefs={columnDefs}
               rowData={users}
-              rowHeight="30"
+              rowHeight="35"
               animateRows={true}
             ></AgGridReact>
           </div>

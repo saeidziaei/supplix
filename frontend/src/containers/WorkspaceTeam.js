@@ -11,7 +11,6 @@ export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState(null);
   
-  const { loadAppWorkspace } = useAppContext();
   const [members, setMembers] = useState([]);
   const [newMember, setNewMember] = useState(null);
   const [newMemberRole, setNewMemberRole] = useState("Member");

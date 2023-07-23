@@ -10,11 +10,25 @@ export const main = handler(async (event, tenant) => {
       tenant: tenant, 
       workspaceId: event.pathParameters.workspaceId, 
     },
-    UpdateExpression: "SET workspaceName = :workspaceName, category = :category, note = :note",
+    UpdateExpression: `SET 
+      workspaceName = :workspaceName, 
+      category = :category, 
+      subCategory = :subCategory, 
+      clientName = :clientName, 
+      note = :note,
+      startDate = :startDate,
+      endDate = :endDate,
+      status = :status    
+      `,
     ExpressionAttributeValues: {
       ":workspaceName": data.workspaceName,
-      ":category": data.category,
-      ":note": data.note,
+      ":category": data.category || "",
+      ":subCategory": data.subCategory || "",
+      ":clientName": data.clientName || "",
+      ":note": data.note || "",
+      ":startDate": data.startDate || "",
+      ":endDate": data.endDate || "",
+      ":status": data.status || "",
     },
     ReturnValues: "ALL_NEW",
   };

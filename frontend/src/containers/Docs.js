@@ -11,7 +11,6 @@ import { useAppContext } from "../lib/contextLib";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
-  const { loadAppWorkspace } = useAppContext();
   const { workspaceId } = useParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +25,6 @@ export default function Docs() {
         });
         
         setDocs(modifiedItems);
-        loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
       }

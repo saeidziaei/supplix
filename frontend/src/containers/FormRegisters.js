@@ -21,7 +21,6 @@ export default function FormRegisters() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const { workspaceId } = useParams();
-  const { loadAppWorkspace } = useAppContext();
 
   useEffect(() => {
     async function onLoad() {
@@ -31,7 +30,6 @@ export default function FormRegisters() {
           const templates = await loadTemplates();
           setTemplates(templates);
 
-          loadAppWorkspace(workspaceId);
       } catch (e) {
         onError(e);
       }

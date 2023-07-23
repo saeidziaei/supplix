@@ -1,8 +1,8 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
-import { ErrorMessage, Field, FieldArray, Formik } from "formik";
-import { Checkbox, Form, FormikDebug, Input, Select } from "formik-semantic-ui-react";
+import { Field, FieldArray, Formik } from "formik";
+import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
@@ -11,7 +11,6 @@ import {
   Button,
   Divider,
   Grid,
-  Header,
   Icon,
   Image,
   Menu,
@@ -22,7 +21,7 @@ import {
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
-import * as Yup from 'yup';
+import "./GenericForm.css";
 
 export function GenericForm({
   formDef,
@@ -48,7 +47,7 @@ export function GenericForm({
 
   function renderFieldInput(f, values, setFieldValue) {
     const size = "mini";
-    const name = f.name;
+    const name = f.name; 
     const id = `input-${f.name}`;
     switch (f.type) {
       case "info":
@@ -86,7 +85,6 @@ export function GenericForm({
             name={name}
             id={id}
             value={values[name]}
-            style={{ color: "black!important" }}
             onChange={(ev) => setFieldValue(name, ev.target.value)}
           />
         );
@@ -101,7 +99,6 @@ export function GenericForm({
             id={id}
             placeholder="Paste link here"
             value={values[name]}
-            style={{ color: "black!important" }}
           />
         );
 
@@ -164,7 +161,7 @@ export function GenericForm({
         }
 
         return (
-          <div key={f.name} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}>
+          <div key={f.name} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }} >
             {f.options.map((o, i) => {
               const selected = newValues.includes(o.value);
               return (
@@ -482,7 +479,7 @@ export function GenericForm({
                     >
                       <Grid.Column 
                         width={4}
-                        style={{ color: "black", backgroundColor: "#eee" }}
+                        style={{ color: "black", textAlign: "right" }}
                       >
                         {f.type === "info" ? "Info" : f.name}
                       </Grid.Column>

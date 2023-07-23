@@ -29,7 +29,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const [savingStatus, setSavingStatus] = useState({isSaving: false});
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
-  const { loadAppWorkspace } = useAppContext();
   const [hasChanges, setHasChanges] = useState(false);
 
 
@@ -73,7 +72,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
 
         setColumnDefs(getColumnDefs(template.templateDefinition));
 
-        loadAppWorkspace(workspaceId);
 
 
       } catch (e) {
@@ -529,6 +527,7 @@ const handleCellValueChanged = useCallback(() => {
               sortable: true,
               autoHeight: true,
             }}
+           
           ></AgGridReact>
         </div>
 

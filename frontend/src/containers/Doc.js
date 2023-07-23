@@ -16,11 +16,11 @@ export default function Doc() {
   const { workspaceId, docId } = useParams();
   const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
+  const [workspace, setWorkspace] = useState(null); 
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { currentUserRoles } = useAppContext();
-  const { loadAppWorkspace, currentWorkspace } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
 
@@ -31,18 +31,19 @@ export default function Doc() {
 
   useEffect(() => {
     async function loadDoc() {
-      return await makeApiCall(
-        "GET",
-        `/workspaces/${workspaceId}/docs/${docId}`
-      );
+      return await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
+    }
+    async function loadWorkspace() {
+      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
     }
 
     async function onLoad() {
       try {
         if (docId) {
-          const item = await loadDoc();
-          setDoc(item);
-          loadAppWorkspace(workspaceId);
+
+          const [workspace, doc] = await Promise.all([loadWorkspace(), loadDoc()]);
+          setWorkspace(workspace);
+          setDoc(doc);
         }
       } catch (e) {
         onError(e);
@@ -224,7 +225,7 @@ export default function Doc() {
             onCancel={() => setDeleteConfirmOpen(false)}
             onConfirm={handleDelete}
           />
-          {docId && (isAdmin || currentWorkspace?.role === "Owner") && (
+          {docId && (isAdmin || workspace?.role === "Owner") && (
             <Button
               size="mini"
               color="red"

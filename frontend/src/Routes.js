@@ -22,6 +22,7 @@ import User from "./containers/User";
 import Workspace from "./containers/Workspace";
 import WorkspaceTeam from "./containers/WorkspaceTeam";
 import Workspaces from "./containers/Workspaces";
+import WorkspaceList from "./containers/WorkspaceList";
 
 
 export default function Links(tenant) {
@@ -29,7 +30,7 @@ export default function Links(tenant) {
   return (
     <Routes>
 
-      <Route path={`/`} element={<Home />} />
+      <Route path={`/`} element={<AuthenticatedRoute><WorkspaceList /></AuthenticatedRoute>} />
       <Route path={`/iso`}  element={<ISO />} />
       <Route path="/login" element={ <UnauthenticatedRoute><Login /></UnauthenticatedRoute>} />
       <Route path="/login/reset" element={<UnauthenticatedRoute><ResetPassword /></UnauthenticatedRoute>} />

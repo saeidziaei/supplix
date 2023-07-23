@@ -28,8 +28,6 @@ function App() {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   
   const [tenant, setTenant] = useState(null);
-  const [currentWorkspace, setCurrentWorkspace] = useState(null);
-  const [workspaces, setWorkspaces] = useState(null);
   const [employee, setEmployee] = useState(null);
 
   const nav = useNavigate();
@@ -107,19 +105,13 @@ function App() {
 
 
 
-    async function loadMyWorkspaces() {
-      if (!authenticatedUser)
-        return;
-        
-      return await makeApiCall("GET", `/myworkspaces`);
-    }
+
 
     async function onLoad() {
       try {
-        const [workspaces, tenant, employee] = await Promise.all([loadMyWorkspaces(), loadMyTenant(), loadMyEmployee()]);
+        const [tenant, employee] = await Promise.all([loadMyTenant(), loadMyEmployee()]);
 
         setTenant(tenant);
-        setWorkspaces(workspaces);
         setEmployee(employee);
       } catch (e) {
         alert(e);
@@ -130,25 +122,9 @@ function App() {
     onLoad();
   }, [authenticatedUser]);
 
-  const isWorkspaceOwner = () => {
-    if (!workspaces) return false;
-    // owner of at least one workspace
-    return workspaces.some(workspace => workspace.role === "Owner");
-  }
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
-  async function loadAppWorkspace(workspaceId) {
-    if (currentWorkspace && currentWorkspace.workspaceId === workspaceId) {
-      // no need to re-load
-      return currentWorkspace;
-    }
-
-    
-    const ws = workspaces?.find(w => w.workspaceId === workspaceId);
-    setCurrentWorkspace(ws);
-    return ws;
-  }
 
   function renderApp() {
     
@@ -187,6 +163,7 @@ function App() {
                       color="black"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                      style={{float:"left"}}
                     ></Button>
                     <Button
                       size="mini"
@@ -195,42 +172,13 @@ function App() {
                       onClick={() => {
                         window.location.reload();
                       }}
+                      style={{float:"left"}}
                     ></Button>
                     {employee && <User user={employee} />}
                   </List.Item>
                 </List>
               </Grid.Column>
-              <Grid.Column width={3}>
-                <Dropdown
-                  item
-                  inline
-                  fluid
-                  text={
-                    currentWorkspace
-                      ? currentWorkspace.workspaceName
-                      : "(Select Workspace)"
-                  }
-                >
-                  {workspaces && (
-                    <Dropdown.Menu>
-                      {workspaces.map((w, index) => (
-                        <Dropdown.Item
-                          key={index}
-                          onClick={() => {
-                            setCurrentWorkspace(w);
-                            nav(`/workspace/${w.workspaceId}/registers`);
-                          }}
-                        >
-                          <Icon
-                            name={w.role === "Owner" ? "chess king" : "user"}
-                          />
-                          {w.workspaceName}
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  )}
-                </Dropdown>
-              </Grid.Column>
+
             </Grid.Row>
           </Grid>
           <Grid columns={1}>
@@ -266,17 +214,16 @@ function App() {
                   {authenticatedUser ? (
                     <>
                       <Menu.Item>
-                        <Menu.Header color="white">ISOs</Menu.Header>
-                        <Menu.Menu>
+
                           <LinkContainer to="/iso">
                             <Nav.Link as={Menu.Item}>
                               <span>
                                 <Icon name="sitemap" />
-                                9001
+                                ISO
                               </span>
                             </Nav.Link>
                           </LinkContainer>
-                        </Menu.Menu>
+                       
                       </Menu.Item>
                       {(isAdmin || isTopLevelAdmin) && (
                         <LinkContainer to="/templates">
@@ -288,41 +235,8 @@ function App() {
                           </Nav.Link>
                         </LinkContainer>
                       )}
-                      {(isAdmin || isTopLevelAdmin || isWorkspaceOwner()) && (
-                        <LinkContainer to="/workspaces">
-                          <Nav.Link as={Menu.Item}>
-                            <span>
-                              <Icon name="laptop" />
-                              Workspaces
-                            </span>
-                          </Nav.Link>
-                        </LinkContainer>
-                      )}
-                      {currentWorkspace && (
-                        <>
-                          <LinkContainer
-                            to={`/workspace/${currentWorkspace.workspaceId}/registers`}
-                          >
-                            <Nav.Link as={Menu.Item}>
-                              <span>
-                                <Icon name="folder open outline" />
-                                Register
-                              </span>
-                            </Nav.Link>
-                          </LinkContainer>
-
-                          <LinkContainer
-                            to={`/workspace/${currentWorkspace.workspaceId}/docs`}
-                          >
-                            <Nav.Link as={Menu.Item}>
-                              <span>
-                                <Icon name="book" />
-                                Library
-                              </span>
-                            </Nav.Link>
-                          </LinkContainer>
-                        </>
-                      )}
+      
+               
                       {isTopLevelAdmin && (
                         <LinkContainer to="/tenants">
                           <Nav.Link as={Menu.Item}>
@@ -390,8 +304,6 @@ function App() {
                         authenticatedUser,
                         setAuthenticatedUser,
                         currentUserRoles,
-                        currentWorkspace,
-                        loadAppWorkspace,
                       }}
                     >
                       <Routes
