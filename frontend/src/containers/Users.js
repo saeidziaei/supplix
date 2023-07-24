@@ -14,6 +14,7 @@ import { s3Get } from "../lib/awsLib";
 import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter, normaliseCognitoUsers } from "../lib/helpers";
 import "./Users.css";
+import User from "../components/User";
 
 export default function Users() {
   const gridRef = useRef();
@@ -55,22 +56,12 @@ export default function Users() {
       return false;
     }
   }  
-  class PhotoRenderer {
+  const PhotoRenderer = (params) => {
+    return (
+      <User user={params.data} compact="true" />
+    );
+  };
 
-    init(params) {
-      this.eGui = document.createElement('div');
-      this.eGui.classList.add('portrait');
-      this.eGui.innerHTML = `<img src="${params.data.photoURL ?? '/placeholderUserImage.png'}">`;
-    }
-  
-    getGui() {
-      return this.eGui;
-    }
-  
-    refresh(params) {
-      return false;
-    }
-  }
 
   const columnDefs = [
     { field: 'Photo', headerName: 'Photo', width: '80', cellRenderer: PhotoRenderer},

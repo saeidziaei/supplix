@@ -30,6 +30,7 @@ function App() {
   const [tenant, setTenant] = useState(null);
   const [employee, setEmployee] = useState(null);
 
+
   const nav = useNavigate();
 
   
@@ -193,7 +194,7 @@ function App() {
                   animation="push"
                   size="small"
                 >
-                  <LinkContainer to="/">
+                  <LinkContainer to="/" onClick={() => setIsSidebarVisible(false)}>
                     <Nav.Link as={Menu.Item}>
                       <span>
                         <Icon name="home" />
@@ -201,7 +202,6 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-
                   {/* <Menu.Item as="a">
                     <Label color="teal">5</Label>
                     Tasks
@@ -213,9 +213,7 @@ function App() {
 
                   {authenticatedUser ? (
                     <>
-                      <Menu.Item>
-
-                          <LinkContainer to="/iso">
+                          <LinkContainer to="/iso" onClick={() => setIsSidebarVisible(false)}>
                             <Nav.Link as={Menu.Item}>
                               <span>
                                 <Icon name="sitemap" />
@@ -224,9 +222,8 @@ function App() {
                             </Nav.Link>
                           </LinkContainer>
                        
-                      </Menu.Item>
                       {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer to="/templates">
+                        <LinkContainer to="/templates" onClick={() => setIsSidebarVisible(false)}>
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="clipboard list" />
@@ -238,7 +235,7 @@ function App() {
       
                
                       {isTopLevelAdmin && (
-                        <LinkContainer to="/tenants">
+                        <LinkContainer to="/tenants" onClick={() => setIsSidebarVisible(false)}>
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="building" color="red" />
@@ -249,7 +246,7 @@ function App() {
                         </LinkContainer>
                       )}
                       {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer to="/users">
+                        <LinkContainer to="/users" onClick={() => setIsSidebarVisible(false)}>
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="users" />

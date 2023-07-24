@@ -3,6 +3,8 @@ import { List } from "semantic-ui-react";
 
 export default function WorkspaceTree({ workspaces, selectedCategory, selectedSubCategory, onChange, disabled = false }) {
   const getCategorySubCategories = (workspaces) => {
+    if (!workspaces || workspaces.length < 1) return [];
+
     const categoriesMap = new Map();
 
     workspaces.forEach((workspace) => {
@@ -39,7 +41,7 @@ export default function WorkspaceTree({ workspaces, selectedCategory, selectedSu
           <List.List>
 
             {categorySubCategories.map(({ category, subCategories }) => (
-              <List.Item key={category}   onClick={() => onChange(category, "")}>
+              <List.Item key={category}   onClick={() => onChange(category, "ALL")}>
                 <List.Icon name="folder" color={selectedCategory === category ? "orange" : "yellow"} size="large" />
                 <List.Content>
                   <List.Header >

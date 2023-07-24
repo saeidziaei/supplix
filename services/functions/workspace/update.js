@@ -18,7 +18,7 @@ export const main = handler(async (event, tenant) => {
       note = :note,
       startDate = :startDate,
       endDate = :endDate,
-      status = :status    
+      workspaceStatus = :workspaceStatus    
       `,
     ExpressionAttributeValues: {
       ":workspaceName": data.workspaceName,
@@ -28,7 +28,7 @@ export const main = handler(async (event, tenant) => {
       ":note": data.note || "",
       ":startDate": data.startDate || "",
       ":endDate": data.endDate || "",
-      ":status": data.status || "",
+      ":workspaceStatus": data.workspaceStatus || "",
     },
     ReturnValues: "ALL_NEW",
   };

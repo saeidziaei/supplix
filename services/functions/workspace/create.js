@@ -10,12 +10,12 @@ export const main = handler(async (event, tenant) => {
       tenant: tenant,
       workspaceId: uuid.v1(), 
       workspaceName: data.workspaceName,
+      workspaceStatus: data.workspaceStatus || "",
       category: data.category || "",
       subCategory: data.subCategory || "",
       clientName: data.clientName || "",
       startDate: data.startDate || "",
       endDate: data.endDate || "",
-      status: data.status || "",
       note: data.note || "",
       
       createdBy: event.requestContext.authorizer.jwt.claims.sub,

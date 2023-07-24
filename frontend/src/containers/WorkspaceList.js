@@ -15,6 +15,7 @@ import {
   List,
   Loader,
   Message,
+  Modal,
   Segment,
   Table,
 } from "semantic-ui-react";
@@ -31,7 +32,9 @@ export default function Workspaces() {
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
+  const [isTreeOpen, setIsTreeOpen] = useState(false);
   const location = useLocation();
+
 
   const [isLoading, setIsLoading] = useState(true);
   const { currentUserRoles } = useAppContext();
@@ -91,17 +94,18 @@ export default function Workspaces() {
 
   const handleCategoryChange = (category, subCategory) => {
     nav(`?category=${category}&subCategory=${subCategory}`);
+    setIsTreeOpen(false);
   };
 
   const filter = (workspaces, category, subCategory) => {
-    if (!category || category == "ALL") {
+    if (!category || category === "ALL") {
       return workspaces;
     }
 
     return workspaces.filter(
       (workspace) =>
         workspace.category === category &&
-        (!subCategory || workspace.subCategory === subCategory)
+        (!subCategory || subCategory === "ALL"  || workspace.subCategory === subCategory)
     );
   };
 
@@ -120,15 +124,15 @@ export default function Workspaces() {
         width: 60,
         cellRenderer: IconRenderer,
       },
-      { field: "category", resizable: true, sortable: true },
-      { field: "subCategory", resizable: true, sortable: true },
       {
         field: "workspaceName",
         headerName: "Workspace",
         resizable: true,
         sortable: true,
-      }, // , cellRenderer: NameRenderer, valueGetter: (params) => {return params.data.given_name + " " + params.data.family_name}  },
-      { field: "status", resizable: true, sortable: true },
+      }, 
+      { field: "category", resizable: true, sortable: true },
+      { field: "subCategory", resizable: true, sortable: true },
+      { field: "workspaceStatus", headerName: "Status", resizable: true, sortable: true },
     ],
     rowStyle: { cursor: "pointer" },
     rowSelection: "single",
@@ -145,51 +149,77 @@ export default function Workspaces() {
     if (!workspaces || workspaces.length === 0) return null;
 
     return (
-      <Grid>
-        <Grid.Row>
-          <Grid.Column width={3}>
-            <WorkspaceTree
-              workspaces={workspaces}
-              selectedCategory={category}
-              selectedSubCategory={subCategory}
-              onChange={handleCategoryChange}
+      <>
+        <FormHeader heading="Workspaces" />
+        <div
+          className="ag-theme-balham"
+          style={{
+            height: "400px",
+            width: "100%",
+          }}
+        >
+          <AgGridReact
+            gridOptions={gridOptions}
+            rowData={filteredWorkspaces}
+            rowHeight="30"
+            animateRows={true}
+          ></AgGridReact>
+        </div>
+        <Divider hidden />
+        <Modal
+          onClose={() => setIsTreeOpen(false)}
+          onOpen={() => setIsTreeOpen(true)}
+          open={isTreeOpen}
+          trigger={
+            <Button
+              basic
+              circular
+              icon="list"
+              color="yellow"
+              size="tiny"
             />
-          </Grid.Column>
-          <Grid.Column width={13}>
-            <FormHeader heading="Workspaces" />
-            <div
-              className="ag-theme-balham"
-              style={{
-                height: "400px",
-                width: "100%",
-              }}
-            >
-              <AgGridReact
-                gridOptions={gridOptions}
-                rowData={filteredWorkspaces}
-                rowHeight="30"
-                animateRows={true}
-              ></AgGridReact>
-            </div>
-            <Divider hidden />
-            {isAdmin && (
-              <LinkContainer to={`/workspace`}>
-                <Button basic primary size="tiny">
-                  <Icon name="plus" />
-                  Workspace
-                </Button>
-              </LinkContainer>
-            )}
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+          }
+        >
+          <Modal.Header>
+            Select a Category or SubCategory to filter the view
+          </Modal.Header>
+          <Modal.Content image>
+            <Modal.Description>
+              <WorkspaceTree
+                workspaces={workspaces}
+                selectedCategory={category}
+                selectedSubCategory={subCategory}
+                onChange={handleCategoryChange}
+              />
+            </Modal.Description>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              basic
+              circular
+              onClick={() => setIsTreeOpen(false)}
+              icon="x"
+            />
+          </Modal.Actions>
+        </Modal>
+       
+        <Divider hidden />
+        {isAdmin && (
+          <LinkContainer to={`/workspace`}>
+            <Button basic primary size="tiny">
+              <Icon name="plus" />
+              Workspace
+            </Button>
+          </LinkContainer>
+        )}
+      </>
     );
   }
   const WorkspaceInfoBox = ({ workspace, canEdit }) => {
     const {
       workspaceId,
       workspaceName,
-      status,
+      workspaceStatus,
       category,
       subCategory,
       clientName,
@@ -210,10 +240,25 @@ export default function Workspaces() {
     const handleEditButtonClick = () => {
       nav(`/workspace/${workspaceId}`);
     };
+    const getStatusColor = () => {
+      switch (workspaceStatus) {
+        case "Completed":
+          return "green";
+      
+        case "Blocked":
+          return "red";
+      
+        case "Cancelled":
+          return "pink";
+      
+        default:
+          return "default"
+      }
+    }
 
     return (
       <Segment size="small" style={{ marginTop: "75px" }}>
-        <Label color="yellow" ribbon>
+        <Label ribbon>
           Workspace Information
         </Label>
         {canEdit && (
@@ -230,7 +275,7 @@ export default function Workspaces() {
           <Table.Body>
             <Table.Row>
               <Table.Cell>
-                <strong>Workspace Name:</strong>
+                <strong>Name:</strong>
               </Table.Cell>
               <Table.Cell>{workspaceName}</Table.Cell>
             </Table.Row>
@@ -238,7 +283,7 @@ export default function Workspaces() {
               <Table.Cell>
                 <strong>Status:</strong>
               </Table.Cell>
-              <Table.Cell>{status}</Table.Cell>
+              <Table.Cell><Label color={getStatusColor()}>{workspaceStatus}</Label></Table.Cell>
             </Table.Row>
             <Table.Row>
               <Table.Cell>

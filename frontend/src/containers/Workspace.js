@@ -60,11 +60,11 @@ export default function Workspace() {
     try {
       if (workspaceId) {
         await updateWorkspace(values);
-        window.location.reload();
       } else {
         await createWorkspace(values);
-        nav("/workspaces");
       }
+      nav("/");
+
     } catch (e) {
       onError(e);
     } finally {
@@ -160,8 +160,8 @@ export default function Workspace() {
                       placeholder="Select"
                       clearable
                       options={statusOptions}
-                      name="status"
-                      value={values.status}
+                      name="workspaceStatus"
+                      value={values.workspaceStatus}
                     />
                   </Form.Field></Form.Group>
                   <Form.Group widths="equal">
@@ -258,7 +258,7 @@ export default function Workspace() {
                 onConfirm={async () => {
                   setIsLoading(true);
                   await deleteWorkspace();
-                  nav("/workspaces");
+                  nav("/");
                 }}
               />
               <Button
