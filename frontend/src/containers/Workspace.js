@@ -10,7 +10,8 @@ import {
   Form,
   Grid,
   Header,
-  Icon, Input, Loader,
+  Icon, Input, Label, Loader,
+  Modal,
   Segment,
   Select
 } from "semantic-ui-react";
@@ -18,15 +19,20 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./Workspaces.css";
+import WorkspacePicker from "../components/WorkspacePicker";
 
 export default function Workspace() {
   const { currentUserRoles } = useAppContext();
   
   const { workspaceId } = useParams();
-  const [workspace, setWorkspace] = useState(null);
+  const [workspace, setWorkspace] = useState({}); // this is a bit different to the rest of the app just because workspace needs to be a placeholder for parentId
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isParentPickerOpen, setIsParentPickerOpen] = useState(false);
+  const [workspaces, setWorkspaces] = useState(null);
+  const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
+  const [pickedParent, setPickedParent] = useState(null);
 
   function validateForm() {
     return true; // file.current
@@ -42,8 +48,11 @@ export default function Workspace() {
         if (workspaceId) {
           const item = await loadWorkspace();
 
-          setWorkspace(item);
-        }
+          // loadWorkspace has workspace in the path therefore it return workspace in a child element
+          const {workspace} = item ?? {};
+
+          setWorkspace(workspace);
+        } 
       } catch (e) {
         onError(e);
       }
@@ -54,8 +63,19 @@ export default function Workspace() {
     onLoad();
   }, []);
 
+  async function loadWorkspaces(e) {
+    e.preventDefault();
+    if (!workspaces) {
+      let list = await makeApiCall("GET", `/workspaces`);
+      
+      setWorkspaces(list.filter(w => w.workspaceId != workspace.workspaceId)); // cannot be its own parent
+      setIsLoadingWorkspaces(false);
+    }
+  }
+
   async function handleSubmit(values, { setSubmitting }) {
     setIsLoading(true);
+    values.parentId = workspace.parentId;
 
     try {
       if (workspaceId) {
@@ -94,11 +114,22 @@ export default function Workspace() {
     return selected;
   }
 
-  
+  const handleParentChange = () => {
+
+    setWorkspace({...workspace, parentId: pickedParent ? pickedParent.workspaceId: null, parent: pickedParent});
+    setIsParentPickerOpen(false);
+  }
+  const statusOptions = [
+    { key: 'na', value: 'N/A', text: 'N/A' },
+    { key: 'inProgress', value: 'In Progress', text: 'In Progress' },
+    { key: 'onHold', value: 'On Hold', text: 'On Hold' },
+    { key: 'cancelled', value: 'Cancelled', text: 'Cancelled' },
+    { key: 'completed', value: 'Completed', text: 'Completed' },
+  ];
+
   function renderWorkspace() {
     const isAdmin = currentUserRoles.includes("admins");
     
-
     return (
       <Grid
         textAlign="center"
@@ -131,39 +162,92 @@ export default function Workspace() {
             {
               let endDate = parseDate(values["endDate"]);
               let startDate = parseDate(values["startDate"]);
-              const statusOptions = [
-                { key: 'na', value: 'N/A', text: 'N/A' },
-                { key: 'inProgress', value: 'In Progress', text: 'In Progress' },
-                { key: 'onHold', value: 'On Hold', text: 'On Hold' },
-                { key: 'cancelled', value: 'Cancelled', text: 'Cancelled' },
-                { key: 'completed', value: 'Completed', text: 'Completed' },
-              ];
+
 
             return (
               <Form onSubmit={handleSubmit} autoComplete="off">
                 <Segment textAlign="left">
-                <Form.Group >
-                  <Form.Field required width={12}>
-                    <label>Workspace Name</label>
-                    <Form.Input
-                      name="workspaceName"
-                      value={values.workspaceName}
-                      onChange={handleChange}
-                    />
-                  </Form.Field>
-                  <Form.Field>
-                    <label>Status</label>
-                    <Select
-                      onChange={(e, { name, value }) =>
-                        setFieldValue(name, value)
-                      }
-                      placeholder="Select"
-                      clearable
-                      options={statusOptions}
-                      name="workspaceStatus"
-                      value={values.workspaceStatus}
-                    />
-                  </Form.Field></Form.Group>
+                  <Form.Group>
+                    <Form.Field required width={12}>
+                      <label>Workspace Name</label>
+                      <Form.Input
+                        name="workspaceName"
+                        value={values.workspaceName}
+                        onChange={handleChange}
+                      />
+                    </Form.Field>
+                    <Form.Field>
+                      <label>Status</label>
+                      <Select
+                        onChange={(e, { name, value }) =>
+                          setFieldValue(name, value)
+                        }
+                        placeholder="Select"
+                        clearable
+                        options={statusOptions}
+                        name="workspaceStatus"
+                        value={values.workspaceStatus}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Modal
+                    onClose={() => setIsParentPickerOpen(false)}
+                    onOpen={() => setIsParentPickerOpen(true)}
+                    open={isParentPickerOpen}
+                    trigger={
+                      <Button
+                        style={{ marginBottom: "20px" }}
+                        color="yellow"
+                        content="Parent Workspace"
+                        icon="list"
+                        label={{
+                          basic: true,
+                          color: "yellow",
+                          pointing: "left",
+                          content: `${workspace && workspace.parent ? workspace.parent.workspaceName : "-"}`,
+                          
+                        }}
+                        onClick={loadWorkspaces}
+                      />
+                    }
+                  >
+                    <Modal.Header>Select Parent Workspace</Modal.Header>
+                    <Modal.Content image>
+                      <Modal.Description>
+                        {isLoadingWorkspaces ? (
+                          <Loader active>Reading workspaces</Loader>
+                        ) : (
+                          <WorkspacePicker
+                            workspaces={workspaces}
+                            allowNull={true}
+                            onChange={(parent) => setPickedParent(parent)} // doesn't set the parent, just sets state 
+                            selectedWorkspaceId={workspace.parentId}
+                          />
+                        )}
+                      </Modal.Description>
+                    </Modal.Content>
+                    <Modal.Actions>
+                      <Label >Selected: {pickedParent ? pickedParent.workspaceName : "(none)"} </Label>
+                      <Button
+                        basic
+                        circular
+                        color="green"
+                        size="tiny"
+                        onClick={() => {setIsParentPickerOpen(false); handleParentChange();}}
+                        icon="check"
+                      />
+                      <Button
+                      color="red"
+                      size="tiny"
+                        basic
+                        circular
+                        onClick={() => {setIsParentPickerOpen(false); }}
+                        icon="x"
+                      />
+
+                    </Modal.Actions>
+                  </Modal>
+
                   <Form.Group widths="equal">
                     <Form.Field>
                       <label>Category</label>
@@ -175,10 +259,10 @@ export default function Workspace() {
                       />
                     </Form.Field>
                     <Form.Field>
-                      <label>Sub Category</label>
+                      <label>Code</label>
                       <Form.Input
-                        name="subCategory"
-                        value={values.subCategory}
+                        name="workspaceCode"
+                        value={values.workspaceCode}
                         onChange={handleChange}
                       />
                     </Form.Field>
@@ -236,7 +320,6 @@ export default function Workspace() {
                       onChange={handleChange}
                     />
                   </Form.Field>
-                 
 
                   <Button type="submit" disabled={isSubmitting}>
                     Save

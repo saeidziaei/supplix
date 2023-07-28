@@ -3,9 +3,9 @@ import { useParams } from "react-router-dom";
 import { Button, Divider, Dropdown, Grid, Header, Icon, Image, Loader, Message, Segment, Table } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { makeApiCall } from "../lib/apiLib";
-import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import { getUserById, normaliseCognitoUsers } from "../lib/helpers";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
@@ -23,9 +23,6 @@ export default function WorkspaceTeam(props) {
   }
 
   useEffect(() => {
-    async function loadWorkspace() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
-    }
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
@@ -34,9 +31,12 @@ export default function WorkspaceTeam(props) {
     }
     async function onLoad() {
       try {
-        const [workspace, members, users] = await Promise.all([loadWorkspace(), loadWorkspaceMembers(), loadUsers()]);
+        const [members, users] = await Promise.all([loadWorkspaceMembers(), loadUsers()]);
+        // loadWorkspaceMembers has workspaceId in the path therefore members are in data element and it also returns workspace
+        const { data, workspace } = members ?? {};
+
+        setMembers(data);
         setWorkspace(workspace);
-        setMembers(members);
         setUsers(normaliseCognitoUsers(users));
       } catch (e) {
         onError(e);
@@ -94,15 +94,9 @@ export default function WorkspaceTeam(props) {
       );
 
     return (
-      <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="top">
-        <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" color="black" textAlign="center">
-            <Icon.Group>
-              <Icon name="list alternate outline" />
-              <Icon corner name="clock outline" />
-            </Icon.Group>
-            {`Workspace : ${workspace.workspaceName}`}
-          </Header>
+      <Grid style={{ height: "100vh" }} verticalAlign="top">
+        <Grid.Column >
+        <WorkspaceInfoBox workspace={workspace}/>
           {(!members || members.length == 0) && (
             <Message
               header="No member found"

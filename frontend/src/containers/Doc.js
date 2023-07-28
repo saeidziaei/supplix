@@ -9,11 +9,13 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import placeholderImage from '../fileplaceholder.jpg';
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 
 
 export default function Doc() {
   const { workspaceId, docId } = useParams();
+
   const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
   const [workspace, setWorkspace] = useState(null); 
@@ -33,17 +35,18 @@ export default function Doc() {
     async function loadDoc() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
     }
-    async function loadWorkspace() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
-    }
+
 
     async function onLoad() {
       try {
         if (docId) {
 
-          const [workspace, doc] = await Promise.all([loadWorkspace(), loadDoc()]);
+          const doc = await loadDoc();
+          // loadDoc has workspaceId in the path therefore items are in data element and it also returns workspace
+          const { data, workspace } = doc ?? {};
+
           setWorkspace(workspace);
-          setDoc(doc);
+          setDoc(data);
         }
       } catch (e) {
         onError(e);
@@ -192,51 +195,49 @@ export default function Doc() {
     
  
     return (
-      <Grid
-        textAlign="center"
-        style={{ height: "100vh" }}
-        verticalAlign="middle"
-      >
-        <Grid.Column width="8">
+      <>
+        <WorkspaceInfoBox workspace={workspace} />
+        <Grid textAlign="center" style={{ height: "100vh" }}>
+          <Grid.Column width="8">
+            <Image
+              src={doc.fileURL}
+              wrapped
+              alt={doc.fileName}
+              onError={(e) => {
+                e.target.src = placeholderImage;
+              }}
+            />
 
-          <Image
-            src={doc.fileURL}
-            wrapped
-            alt={doc.fileName}
-            onError={(e) => {
-              e.target.src = placeholderImage;
-            }}
-          />
+            <Header>{doc.note}</Header>
+            <Label>{doc.category}</Label>
+            <p>
+              <br />
+              <a href={doc.fileURL} download={doc.fileName}>
+                Download {doc.fileName}
+              </a>
+            </p>
 
-          <Header>{doc.note}</Header>
-          <Label>{doc.category}</Label>
-          <p>
-            <br />
-            <a href={doc.fileURL} download={doc.fileName}>
-              Download {doc.fileName}
-            </a>
-          </p>
-
-          <Divider />
-          <Confirm
-            size="mini"
-            header="This will delete this library item."
-            open={deleteConfirmOpen}
-            onCancel={() => setDeleteConfirmOpen(false)}
-            onConfirm={handleDelete}
-          />
-          {docId && (isAdmin || workspace?.role === "Owner") && (
-            <Button
+            <Divider />
+            <Confirm
               size="mini"
-              color="red"
-              onClick={() => setDeleteConfirmOpen(true)}
-            >
-              <Icon name="remove circle" />
-              Delete
-            </Button>
-          )}
-        </Grid.Column>
-      </Grid>
+              header="This will delete this library item."
+              open={deleteConfirmOpen}
+              onCancel={() => setDeleteConfirmOpen(false)}
+              onConfirm={handleDelete}
+            />
+            {docId && (isAdmin || workspace?.role === "Owner") && (
+              <Button
+                size="mini"
+                color="red"
+                onClick={() => setDeleteConfirmOpen(true)}
+              >
+                <Icon name="remove circle" />
+                Delete
+              </Button>
+            )}
+          </Grid.Column>
+        </Grid>
+      </>
     );
   }
 

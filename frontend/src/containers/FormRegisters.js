@@ -15,9 +15,12 @@ import FormHeader from "../components/FormHeader";
 import { useParams } from "react-router-dom";
 import { useAppContext } from "../lib/contextLib";
 import "./FormRegisters.css";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 export default function FormRegisters() {
   const [templates, setTemplates] = useState(null);
+  const [workspace, setWorkspace] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const { workspaceId } = useParams();
@@ -28,8 +31,10 @@ export default function FormRegisters() {
       setIsLoading(true);
       try {
           const templates = await loadTemplates();
-          setTemplates(templates);
+          const { data, workspace } = templates ?? {};
 
+          setTemplates(data);
+          setWorkspace(workspace);
       } catch (e) {
         onError(e);
       }
@@ -61,6 +66,7 @@ export default function FormRegisters() {
     return (
       <>
         <FormHeader heading="Records Register" />
+        <WorkspaceInfoBox workspace={workspace}/>
         {(!templates || templates.length == 0) && (
           <Message
             header="No Record found"

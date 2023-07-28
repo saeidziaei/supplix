@@ -146,10 +146,12 @@ function App() {
                   <List.Item>
                     {tenant ? (
                       <Image
+                        onClick={() => nav("/")}
                         size="small"
                         rounded
                         alt="logo"
                         src={logoURL}
+                        style={{cursor: "pointer"}}
                         onError={(e) => {
                           e.target.src = placeholderImage;
                         }}

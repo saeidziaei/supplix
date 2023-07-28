@@ -14,6 +14,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import { cloneDeep } from 'lodash'; // Import the cloneDeep function from the lodash library
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 
 import "./FormRegisters.css";
@@ -30,7 +31,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-
+  const [workspace, setWorkspace] = useState(null);
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
   
@@ -64,8 +65,12 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         setFormDef(template.templateDefinition);
 
         const forms = await loadTemplateForms(templateId);
-        
-        setForms(forms);
+        // loadTemplateForms has workspaceId in the path therefore members are in data element and it also returns workspace
+        const { data, workspace } = forms ?? {};
+
+        setForms(data);
+        setWorkspace(workspace);
+
         const formsCopy = cloneDeep(forms);
 
         setOriginalForms(formsCopy);
@@ -482,7 +487,9 @@ const handleCellValueChanged = useCallback(() => {
     const hasEntries = forms && forms.length > 0;
     return (
       <>
+      <WorkspaceInfoBox workspace={workspace}/>
         {!isHistory && <Header>{formDef?.title}</Header>}
+        
         {!isPreview && !hasEntries && (
           <Message
             header={

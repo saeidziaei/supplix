@@ -2,8 +2,8 @@ import { Amplify, API, Auth } from 'aws-amplify';
 
 
 
-
 export async function makeApiCall(method, endpoint, body) {
+
   // Get the current user session
   const session = await Auth.currentSession();
   // Get the JWT token from the session
@@ -17,7 +17,7 @@ export async function makeApiCall(method, endpoint, body) {
   switch (method) {
     case "GET":
       return API.get(apiName, endpoint, {
-        headers: headers
+        headers: headers,
       });
     case "POST":
       return API.post(apiName, endpoint, {

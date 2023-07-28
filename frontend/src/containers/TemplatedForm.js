@@ -20,6 +20,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 import { FormikDebug } from "formik-semantic-ui-react";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -248,6 +249,7 @@ export default function TemplatedForm() {
   const editable = isNew || isEditing || isRevisioning;
   return (
     <>
+    <WorkspaceInfoBox workspace={workspace} />
       <Header as="h2">
         {!formId
           ? "New Record"
