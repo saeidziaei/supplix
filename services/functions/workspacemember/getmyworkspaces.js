@@ -16,12 +16,18 @@ export const main = handler(async (event, tenant) => {
 
   const promises = wus.Items.map(async (wu) => {
     let workspace = await getWorkspaceDetail(tenant, wu.workspaceId);
+    if (!workspace) {
+      // Optional: Log that the workspace was missing if needed
+      console.log(`Workspace not found for workspaceId: ${wu.workspaceId}`);
+      return null; // Skip this workspace and continue to the next one
+    }
     workspace.role = wu.role;
     return workspace;
   });
 
-  return Promise.all(promises);
-
+  // Wait for all promises to resolve and filter out any null values (missing workspaces)
+  const result = await Promise.all(promises);
+  return result.filter((workspace) => workspace !== null);
 });
 
 async function getWorkspaceDetail(tenant, workspaceId) {

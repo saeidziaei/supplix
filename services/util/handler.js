@@ -1,6 +1,7 @@
 import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import dynamodb from "./dynamodb";
 import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "./constants";
+import { getWorkspaceById } from "../functions/workspace/get";
 
 export default function handler(lambda) {
   return async function (event, context) {
@@ -10,10 +11,10 @@ export default function handler(lambda) {
     // debug.init(event);
 
     try {
-      const tenant = getTenantFromRequest(event);
-      const workspaceId = getWorkspaceFromRequest(event);
-      const allowedGroups = getAllowedGroups();
       const userGroups = getUserGroups(event);
+      const tenant = getTenantFromRequest(event);
+      const workspaceId = getWorkspaceIdFromRequest(event);
+      const allowedGroups = getAllowedGroups();
       const isAdmin = userGroups.includes(TOP_LEVEL_ADMIN_GROUP) || userGroups.includes(ADMIN_GROUP);
       let workspaceUser = workspaceId
         ? await getWorkspaceUser(isAdmin, tenant, workspaceId, event.requestContext.authorizer.jwt.claims.sub)
@@ -40,7 +41,15 @@ export default function handler(lambda) {
         return httpResponse(403, { error: "Unauthorised" });
       }
 
+
       body = await lambda(event, tenant, workspaceUser, context);
+
+      if (workspaceId && getHttpMethod(event) === 'GET') { // inject workspace into the response
+        let workspace = await getWorkspaceById(tenant, workspaceId);
+        workspace.role = workspaceUser ? workspaceUser.role : "";
+        body = { data: body, workspace };
+      }
+
       statusCode = 200;
 
     } catch (e) {
@@ -55,6 +64,8 @@ export default function handler(lambda) {
 
     return httpResponse(statusCode, body);
   };
+
+
 }
 
 function httpResponse(statusCode, body) {
@@ -67,7 +78,12 @@ function httpResponse(statusCode, body) {
     },
   };
 }
-
+function getHttpMethod(event) {
+  if (!event || !event.requestContext || !event.requestContext.http) 
+    return null;
+    
+  return event.requestContext.http.method;
+}
 function getAllowedGroups() {
   return process.env.ALLOWED_GROUPS ? process.env.ALLOWED_GROUPS.split(",") : [];
 }
@@ -98,7 +114,7 @@ async function getWorkspaceUser(isAdmin, tenant, workspaceId, userId) {
 
 }
 
-function getWorkspaceFromRequest(event) {
+function getWorkspaceIdFromRequest(event) {
   return event.pathParameters ? event.pathParameters.workspaceId : null;
 }
 

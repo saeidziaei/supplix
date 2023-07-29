@@ -55,18 +55,21 @@ export default function TemplatedForm() {
       try {
         if (formId) {
           const item = await loadForm();
-          setFormRecord(item);
-
+          const { data, workspace } = item ?? {};
+          setFormRecord(data);
+          setWorkspace(workspace);
           // the api populates template as well
           setTemplate(item.template);
         } else {
-          // new form - just load the template
+          // new form - just load the template and workspace
           const item = await loadTemplate();
-
           setTemplate(item);
+          const result = await loadWorkspace();
+          const { workspace } = result ?? {};
+          setWorkspace(workspace);
         }
-        const ws = await loadWorkspace();
-        setWorkspace(ws);
+        
+        
       } catch (e) {
         onError(e);
       } finally {

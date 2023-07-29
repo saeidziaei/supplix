@@ -48,14 +48,22 @@ export default function Workspaces() {
   };
 
   const nav = useNavigate();
+  
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
   useEffect(() => {
     async function onLoad() {
       try {
-        const items = await loadWorkspaces();
-        setWorkspaces(items);
+        const workspaces = await loadWorkspaces();
+        // if a user is a member of a ws but not a member of that ws's parent, we just show that we at the root by setting the parentId to null
+        const userWorkspaces = workspaces.map((ws) => ({
+          ...ws,
+          parentId: ws.parentId && workspaces.some((item) => item.workspaceId === ws.parentId)
+            ? ws.parentId
+            : null,
+        }));
+        setWorkspaces(userWorkspaces);
       } catch (e) {
         onError(e);
       } finally {
@@ -153,15 +161,7 @@ export default function Workspaces() {
           ></AgGridReact>
         </div>
 
-        <Divider hidden />
-        {isAdmin && (
-          <LinkContainer to={`/workspace`}>
-            <Button basic primary size="tiny">
-              <Icon name="plus" />
-              Workspace
-            </Button>
-          </LinkContainer>
-        )}
+       
         
 
       </>
@@ -169,7 +169,7 @@ export default function Workspaces() {
   }
 
   function renderWorkspace(ws) {
-    const { workspaceName, workspaceId } = ws;
+    const { workspaceId } = ws;
     return (
       <Grid verticalAlign="middle">
         <Grid.Row>
@@ -211,63 +211,77 @@ export default function Workspaces() {
     if (pickedWorkspace) 
       nav(`?id=${pickedWorkspace.workspaceId}`);
   }
-
+  function renderModalPicker() {
+    return ( <Modal
+      onClose={() => setIsTreeOpen(false)}
+      onOpen={() => setIsTreeOpen(true)}
+      open={isTreeOpen}
+      trigger={
+        <Icon
+          className="clickable"
+          fitted
+          name="list"
+          color="yellow"
+          size="large"
+        />
+      }
+    >
+      <Modal.Header>Select a Workspace</Modal.Header>
+      <Modal.Content image>
+        <Modal.Description>
+          <WorkspacePicker
+            workspaces={workspaces}
+            allowNull={false}
+            onChange={(ws) => setPickedWorkspace(ws)}
+          />
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button
+          basic
+          circular
+          color="green"
+          size="tiny"
+          onClick={() => {
+            setIsTreeOpen(false);
+            handleCurrentWorkspaceChange();
+          }}
+          icon="check"
+        />
+        <Button
+          basic
+          circular
+          onClick={() => setIsTreeOpen(false)}
+          icon="x"
+        />
+      </Modal.Actions>
+    </Modal>);
+  }
   function render() {
     return (
       <>
         {(!workspaces || workspaces.length == 0) && (
           <Message header="No workspaces found" icon="exclamation" />
         )}
-        <Grid>
+        <Grid stackable>
           <Grid.Row>
             <Grid.Column width={1}>
-              <Modal
-                onClose={() => setIsTreeOpen(false)}
-                onOpen={() => setIsTreeOpen(true)}
-                open={isTreeOpen}
-                trigger={
-                  <Button
-                    basic
-                    circular
-                    icon="list"
-                    color="yellow"
-                    size="tiny"
+              <List>
+                <List.Item>
+                  <Icon
+                    className="clickable"
+                    
+                    color="grey"
+                    name="arrow left"
+                    size="large"
+                    style={{marginLeft: "10px"}}
+                    onClick={() => nav(-1)}
                   />
-                }
-              >
-                <Modal.Header>Select a Workspace</Modal.Header>
-                <Modal.Content image>
-                  <Modal.Description>
-                    <WorkspacePicker
-                      workspaces={workspaces}
-                      allowNull={false}
-                      onChange={(ws) => setPickedWorkspace(ws)}
-                    />
-                  </Modal.Description>
-                </Modal.Content>
-                <Modal.Actions>
-                  <Button
-                    basic
-                    circular
-                    color="green"
-                    size="tiny"
-                    onClick={() => {
-                      setIsTreeOpen(false);
-                      handleCurrentWorkspaceChange();
-                    }}
-                    icon="check"
-                  />
-                  <Button
-                    basic
-                    circular
-                    onClick={() => setIsTreeOpen(false)}
-                    icon="x"
-                  />
-                </Modal.Actions>
-              </Modal>
+                </List.Item>
+                <List.Item>{renderModalPicker()}</List.Item>
+              </List>
             </Grid.Column>
-            <Grid.Column width={15}>
-              {" "}
+            <Grid.Column width={14}>
               {selectedWorkspace ? (
                 <>
                   <WorkspaceInfoBox
@@ -277,7 +291,17 @@ export default function Workspaces() {
                   {renderWorkspace(selectedWorkspace)}
                 </>
               ) : (
-                renderChildren()
+                <>{renderChildren()}
+                <Divider hidden />
+                {isAdmin && (
+                  <LinkContainer to={`/workspace`}>
+                    <Button basic primary size="tiny">
+                      <Icon name="plus" />
+                      Workspace
+                    </Button>
+                  </LinkContainer>
+                )}
+                </>
               )}
             </Grid.Column>
           </Grid.Row>

@@ -11,9 +11,10 @@ export const main = handler(async (event, tenant) => {
       workspaceId: event.pathParameters.workspaceId, 
     },
     UpdateExpression: `SET 
+      parentId = :parentId,
       workspaceName = :workspaceName, 
       category = :category, 
-      subCategory = :subCategory, 
+      workspaceCode = :workspaceCode, 
       clientName = :clientName, 
       note = :note,
       startDate = :startDate,
@@ -21,9 +22,10 @@ export const main = handler(async (event, tenant) => {
       workspaceStatus = :workspaceStatus    
       `,
     ExpressionAttributeValues: {
+      ":parentId": data.parentId,
       ":workspaceName": data.workspaceName,
       ":category": data.category || "",
-      ":subCategory": data.subCategory || "",
+      ":workspaceCode": data.workspaceCode || "",
       ":clientName": data.clientName || "",
       ":note": data.note || "",
       ":startDate": data.startDate || "",

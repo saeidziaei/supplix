@@ -9,10 +9,11 @@ export const main = handler(async (event, tenant) => {
     Item: {
       tenant: tenant,
       workspaceId: uuid.v1(), 
+      parentId: data.parentId || null,
       workspaceName: data.workspaceName,
       workspaceStatus: data.workspaceStatus || "",
       category: data.category || "",
-      subCategory: data.subCategory || "",
+      workspaceCode: data.workspaceCode || "",
       clientName: data.clientName || "",
       startDate: data.startDate || "",
       endDate: data.endDate || "",

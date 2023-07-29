@@ -133,7 +133,9 @@ export default function ISO() {
 
           let replacement = '';
           try {
-            const { fileURL, note } = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
+            const result = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
+            const { data } = result ?? {}; // result also contains workspace which we don't need here
+            const { fileURL, note }= data ?? {};
             replacement = `<img alt="${note}" src="${fileURL}"/>`;
           } catch (e) {
             replacement = "library item not found";
