@@ -133,7 +133,6 @@ export default function Workspace() {
     return (
       <Grid
         textAlign="center"
-        style={{ height: "100vh" }}
         verticalAlign="middle"
       >
         <Grid.Column style={{ maxWidth: 550 }}>
@@ -190,6 +189,7 @@ export default function Workspace() {
                       />
                     </Form.Field>
                   </Form.Group>
+                  <Divider hidden />
                   <Modal
                     onClose={() => setIsParentPickerOpen(false)}
                     onOpen={() => setIsParentPickerOpen(true)}
@@ -247,7 +247,7 @@ export default function Workspace() {
 
                     </Modal.Actions>
                   </Modal>
-
+                  
                   <Form.Group widths="equal">
                     <Form.Field>
                       <label>Category</label>
