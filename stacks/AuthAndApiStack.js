@@ -181,7 +181,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET   /workspaces/{workspaceId}/members": {
         function: {
           handler: "services/functions/workspacemember/list.main",
-          bind: [workspaceUserTable],
+          bind: [workspaceUserTable, workspaceTable],
         },
       },
       "POST  /workspaces/{workspaceId}/members": {
@@ -211,13 +211,13 @@ export function AuthAndApiStack({ stack, app }) {
       "GET /workspaces/{workspaceId}/docs": {
         function: {
           handler: "services/functions/doc/list.main",
-          bind: [docTable],
+          bind: [docTable, workspaceTable],
         },
       },
       "GET /workspaces/{workspaceId}/docs/{docId}": {
         function: {
           handler: "services/functions/doc/get.main",
-          bind: [docTable],
+          bind: [docTable, workspaceTable],
         },
       },
       "POST /workspaces/{workspaceId}/docs": {
@@ -239,12 +239,13 @@ export function AuthAndApiStack({ stack, app }) {
       "GET   /workspaces/{workspaceId}/forms": {
         function: {
           handler: "services/functions/form/list.main",
+          bind: [workspaceTable],
         },
       },
       "GET /workspaces/{workspaceId}/forms/{formId}": {
         function: {
           handler: "services/functions/form/get.main",
-          bind: [templateTable, formTable],
+          bind: [templateTable, formTable, workspaceTable],
         },
       },
       "POST  /workspaces/{workspaceId}/forms": {
@@ -288,7 +289,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET   /workspaces/{workspaceId}/templates": {
         function: {
           handler: "services/functions/template/listWithFormCount.main",
-          bind: [templateTable, formTable],
+          bind: [templateTable, formTable, workspaceTable],
         },
       },
       "GET   /templates/{templateId}": {
@@ -318,7 +319,7 @@ export function AuthAndApiStack({ stack, app }) {
       "GET   /workspaces/{workspaceId}/templates/{templateId}/forms": {
         function: {
           handler: "services/functions/template/listForms.main",
-          bind: [formTable],
+          bind: [formTable, workspaceTable],
         },
       },
 
