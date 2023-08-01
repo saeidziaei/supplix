@@ -56,6 +56,20 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "tenant", sortKey: "deletedAt" },
   });
 
+
+  const workspaceTaskTable = new Table(stack, "WorkspaceTask", {
+    fields: {
+      tenant: "string",
+      workspaceId: "string",
+      tenant_workspaceId: "string",
+      taskId: "string", 
+    },
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "taskId" }, 
+    stream: "new_and_old_images",
+    consumers: {
+      notify: "services/functions/workspacetask/notify.main",
+    },
+  });
    
   const workspaceUserTable = new Table(stack, "WorkspaceUser", {
     fields: {
@@ -116,6 +130,7 @@ export function StorageStack({ stack, app }) {
     docTable,
     workspaceTable,
     workspaceUserTable,
+    workspaceTaskTable,
     deletedArchiveTable,
     bucket,
   };

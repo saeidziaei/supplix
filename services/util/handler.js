@@ -1,6 +1,6 @@
 import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-sdk/client-cognito-identity-provider";
 import dynamodb from "./dynamodb";
-import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "./constants";
+import { ADMIN_GROUP, NCR_WORKSAPCE_ID, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_MEMBER_ROLE, WORKSPACE_OWNER_ROLE } from "./constants";
 import { getWorkspaceById } from "../functions/workspace/get";
 
 export default function handler(lambda) {
@@ -90,8 +90,24 @@ function getAllowedGroups() {
 function getWorkspaceAllowedRoles() {
   return process.env.WORKSPACE_ALLOWED_ROLE ? process.env.WORKSPACE_ALLOWED_ROLE.split(",") : [];
 }
-
+function isPublicWorkspace(workspaceId) {
+  return workspaceId === NCR_WORKSAPCE_ID;
+}
 async function getWorkspaceUser(isAdmin, tenant, workspaceId, userId) {
+  if (isAdmin) // admin can access any workspace
+      return {
+        workspaceId,
+        userId,
+        role: WORKSPACE_OWNER_ROLE,
+      };
+  if (isPublicWorkspace(workspaceId)) 
+    return {
+      workspaceId,
+      userId,
+      role: WORKSPACE_MEMBER_ROLE,
+    };
+  
+
   const params = {
     TableName: process.env.WORKSPACEUSER_TABLE,
     Key: {
@@ -101,15 +117,7 @@ async function getWorkspaceUser(isAdmin, tenant, workspaceId, userId) {
   };
 
   const result = await dynamodb.get(params);
-  if (!result.Item) {
-    if (isAdmin) // admin can access any workspace
-      return {
-        workspaceId,
-        userId,
-        role: "Owner",
-      };
-    else return null;
-  }
+
   return result.Item;
 
 }

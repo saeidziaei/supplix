@@ -18,6 +18,7 @@ export function AuthAndApiStack({ stack, app }) {
     docTable,
     workspaceTable,
     workspaceUserTable,
+    workspaceTaskTable,
     deletedArchiveTable,
   } = use(StorageStack);
 
@@ -126,6 +127,7 @@ export function AuthAndApiStack({ stack, app }) {
           DOC_TABLE: docTable.tableName,
           WORKSPACE_TABLE: workspaceTable.tableName,
           WORKSPACEUSER_TABLE: workspaceUserTable.tableName,
+          WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
           DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
           BUCKET: bucket.bucketName,
         },
@@ -202,6 +204,16 @@ export function AuthAndApiStack({ stack, app }) {
           },
         },
       },
+
+
+      "POST  /workspaces/{workspaceId}/task": {
+        function: {
+          handler: "services/functions/workspacetask/create.main",
+          bind: [workspaceTaskTable],
+        },
+      },
+
+
 
       "POST /docs/upload-url": {
         function: {
@@ -543,6 +555,7 @@ export function AuthAndApiStack({ stack, app }) {
   api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", ["s3"]);
   api.attachPermissionsToRoute("GET /myuser", ["s3"]);
   
+  workspaceTaskTable.attachPermissionsToConsumer("notify", ["ses"]);
   
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API

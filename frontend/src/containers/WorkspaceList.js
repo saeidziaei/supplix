@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  Accordion,
   Button,
   Divider,
   Grid,
@@ -23,6 +24,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
+import { NCR } from "../components/NCR";
 
 
 export default function Workspaces() {
@@ -33,7 +35,7 @@ export default function Workspaces() {
   const [isTreeOpen, setIsTreeOpen] = useState(false);
   const location = useLocation();
   const [pickedWorkspace, setPickedWorkspace] = useState(null);
-
+  const [isNoteExpanded, setIsNoteExpanded] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const { currentUserRoles } = useAppContext();
@@ -167,7 +169,27 @@ export default function Workspaces() {
       </>
     );
   }
-
+  function renderNote(note) {
+    if (!note) return null;
+    return (
+      <Accordion fluid>
+        <Accordion.Title
+          active={isNoteExpanded}
+          index={1}
+          onClick={() => setIsNoteExpanded(!isNoteExpanded)}
+        >
+          <Icon name="dropdown" />
+          Note
+        </Accordion.Title>
+        <Accordion.Content active={isNoteExpanded}>
+          <div
+            className="markdown"
+            dangerouslySetInnerHTML={{ __html: selectedWorkspace.note }}
+          />
+        </Accordion.Content>
+      </Accordion>
+    );
+  }
   function renderWorkspace(ws) {
     const { workspaceId } = ws;
     return (
@@ -199,8 +221,16 @@ export default function Workspaces() {
                   Team
                 </List.Item>
               )}
-            </List>
 
+              <List.Item
+                as="a"
+                onClick={() => nav(`/workspace/${workspaceId}/tasks`)}
+              >
+                <List.Icon name="folder" color="yellow" size="large" />
+                Tasks
+              </List.Item>
+            </List>
+            {renderNote(selectedWorkspace.note)}
             {renderChildren()}
           </Grid.Column>
         </Grid.Row>
@@ -211,7 +241,8 @@ export default function Workspaces() {
     if (pickedWorkspace) 
       nav(`?id=${pickedWorkspace.workspaceId}`);
   }
-  function renderModalPicker() {
+
+  function renderModalWorkspacePicker() {
     return ( <Modal
       onClose={() => setIsTreeOpen(false)}
       onOpen={() => setIsTreeOpen(true)}
@@ -266,11 +297,10 @@ export default function Workspaces() {
         <Grid stackable>
           <Grid.Row>
             <Grid.Column width={1}>
-              <List>
+              <List relaxed>
                 <List.Item>
                   <Icon
                     className="clickable"
-                    
                     color="grey"
                     name="arrow left"
                     size="large"
@@ -278,7 +308,8 @@ export default function Workspaces() {
                     onClick={() => nav(-1)}
                   />
                 </List.Item>
-                <List.Item>{renderModalPicker()}</List.Item>
+                <List.Item>{renderModalWorkspacePicker()}</List.Item>
+                <List.Item><NCR workspace={selectedWorkspace} workspaces={workspaces} /> </List.Item>
               </List>
             </Grid.Column>
             <Grid.Column width={14}>

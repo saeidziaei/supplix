@@ -1,0 +1,18 @@
+.ncr {
+    border: 1px solid #B22222;
+    border-radius: 5px;
+    padding: 2px 4px;
+    color: #d38585;
+    font-weight: bold;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    text-align: center;
+    
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .ncr:hover {
+    background-color: #FADADA;
+    color: #B22222;
+  }

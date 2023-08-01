@@ -1,5 +1,6 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
+import { NCR_WORKSAPCE_ID } from "../../util/constants";
 
 export const main = handler(async (event, tenant) => {
   // return await getWorkspaceById(event.pathParameters.workspaceId);
@@ -9,6 +10,12 @@ export const main = handler(async (event, tenant) => {
 
 // populates path up to 3 levels
 export const getWorkspaceById = async (tenant, workspaceId, level = 3) => {
+  if (workspaceId === NCR_WORKSAPCE_ID) 
+  return {
+    workspaceId,
+    workspaceName: "NCR"
+  }
+
   let workspace = await getSingleWorkspace(tenant, workspaceId);
 
   if (!workspace) {

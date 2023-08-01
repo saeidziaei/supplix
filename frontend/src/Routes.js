@@ -23,6 +23,8 @@ import Workspace from "./containers/Workspace";
 import WorkspaceTeam from "./containers/WorkspaceTeam";
 import Workspaces from "./containers/Workspaces";
 import WorkspaceList from "./containers/WorkspaceList";
+import WorkspaceTask from "./containers/WorkspaceTask";
+import WorkspaceTasks from "./containers/WorkspaceTasks";
 
 
 export default function Links(tenant) {
@@ -55,6 +57,10 @@ export default function Links(tenant) {
       <Route path="/workspace/:workspaceId?" element={<AuthenticatedRoute><Workspace /></AuthenticatedRoute>} />
       <Route path="/workspaces" element={<AuthenticatedRoute><Workspaces /></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/team" element={<AuthenticatedRoute><WorkspaceTeam/></AuthenticatedRoute>} />
+
+      <Route path="/workspace/:workspaceId/task/taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
+
 
       <Route path="*" element={<NotFound />} />
       

@@ -18,14 +18,12 @@ export default function Doc() {
 
   const file = useRef(null);
   const [doc, setDoc] = useState(null); // Original before save
-  const [workspace, setWorkspace] = useState(null); 
+  const [workspace, setWorkspace] = useState(null);
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { currentUserRoles } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
-
-
 
   function validateForm() {
     return true; // file.current
@@ -33,21 +31,26 @@ export default function Doc() {
 
   useEffect(() => {
     async function loadDoc() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
-    }
+      if (!docId) {
+        // just return workspace
+        const ret = await makeApiCall("GET", `/workspaces/${workspaceId}`);
+        return { workspace: ret.workspace };
+      }
 
+      return await makeApiCall(
+        "GET",
+        `/workspaces/${workspaceId}/docs/${docId}`
+      );
+    }
 
     async function onLoad() {
       try {
-        if (docId) {
+        const doc = await loadDoc();
+        // loadDoc has workspaceId in the path therefore items are in data element and it also returns workspace
+        const { data, workspace } = doc ?? {};
 
-          const doc = await loadDoc();
-          // loadDoc has workspaceId in the path therefore items are in data element and it also returns workspace
-          const { data, workspace } = doc ?? {};
-
-          setWorkspace(workspace);
-          setDoc(data);
-        }
+        setWorkspace(workspace);
+        setDoc(data);
       } catch (e) {
         onError(e);
       }
@@ -74,7 +77,10 @@ export default function Doc() {
     setIsLoading(false);
   }
   async function deleteDoc() {
-    return await makeApiCall("DELETE", `/workspaces/${workspaceId}/docs/${docId}`);
+    return await makeApiCall(
+      "DELETE",
+      `/workspaces/${workspaceId}/docs/${docId}`
+    );
   }
 
   async function handleSubmit(values, { setSubmitting }) {
@@ -135,7 +141,6 @@ export default function Doc() {
       <Grid
         textAlign="center"
         style={{ height: "100vh" }}
-        verticalAlign="middle"
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="black" textAlign="center">
@@ -176,13 +181,14 @@ export default function Doc() {
                     value={values.note}
                     onChange={handleChange}
                   />
-                  <LinkContainer to={`/workspace/${workspaceId}/docs`}>
-                    <Button basic>Back</Button>
-                  </LinkContainer>
-                  <Button basic primary type="submit" disabled={isSubmitting}>
-                    Submit
-                  </Button>
+ 
                 </Segment>
+                <LinkContainer to={`/workspace/${workspaceId}/docs`}>
+                    <Button basic floated="left">Back</Button>
+                  </LinkContainer>
+                  <Button basic primary type="submit" disabled={isSubmitting} floated="right">
+                    Save
+                  </Button>
               </Form>
             )}
           </Formik>
@@ -192,11 +198,8 @@ export default function Doc() {
   }
 
   function renderDoc() {
-    
- 
     return (
       <>
-        <WorkspaceInfoBox workspace={workspace} />
         <Grid textAlign="center" style={{ height: "100vh" }}>
           <Grid.Column width="8">
             <Image
@@ -242,8 +245,11 @@ export default function Doc() {
   }
 
   if (isLoading) return <Loader active />;
-  
 
-  if (doc) return renderDoc();
-  else return rednerUploadForm();
+  return (
+    <>
+      <WorkspaceInfoBox workspace={workspace} />
+      {doc ? renderDoc() : rednerUploadForm()}
+    </>
+  );
 }

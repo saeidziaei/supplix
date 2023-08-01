@@ -1,4 +1,3 @@
-import { parseISO } from "date-fns";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -20,10 +19,12 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./Workspaces.css";
 import WorkspacePicker from "../components/WorkspacePicker";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import { parseDate } from "../lib/helpers";
 
 export default function Workspace() {
   const { currentUserRoles } = useAppContext();
-  
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState({}); // this is a bit different to the rest of the app just because workspace needs to be a placeholder for parentId
   const nav = useNavigate();
@@ -75,7 +76,7 @@ export default function Workspace() {
 
   async function handleSubmit(values, { setSubmitting }) {
     setIsLoading(true);
-    values.parentId = workspace.parentId;
+    values.parentId = workspace.parentId || null;
 
     try {
       if (workspaceId) {
@@ -102,22 +103,10 @@ export default function Workspace() {
     return await makeApiCall("DELETE", `/workspaces/${workspaceId}`);
   }
 
-  function parseDate(inputDate) {
-    let selected = null;
-    try {
-      selected = parseISO(inputDate);
-    } catch (e) {
-      // incompatible data had been saved, just ignore it
-    }
-    if (selected == "Invalid Date") selected = ""; // new Date();
 
-    return selected;
-  }
 
   const handleParentChange = () => {
-
     setWorkspace({...workspace, parentId: pickedParent ? pickedParent.workspaceId: null, parent: pickedParent});
-    setIsParentPickerOpen(false);
   }
   const statusOptions = [
     { key: 'na', value: 'N/A', text: 'N/A' },
@@ -204,8 +193,11 @@ export default function Workspace() {
                           basic: true,
                           color: "yellow",
                           pointing: "left",
-                          content: `${workspace && workspace.parent ? workspace.parent.workspaceName : "-"}`,
-                          
+                          content: `${
+                            workspace && workspace.parent
+                              ? workspace.parent.workspaceName
+                              : "-"
+                          }`,
                         }}
                         onClick={loadWorkspaces}
                       />
@@ -215,39 +207,46 @@ export default function Workspace() {
                     <Modal.Content image>
                       <Modal.Description>
                         {isLoadingWorkspaces ? (
-                          <Loader active>Reading workspaces</Loader>
+                          <p>Loading workspaces ...</p>
                         ) : (
                           <WorkspacePicker
                             workspaces={workspaces}
                             allowNull={true}
-                            onChange={(parent) => setPickedParent(parent)} // doesn't set the parent, just sets state 
+                            onChange={(parent) => setPickedParent(parent)} // doesn't set the parent, just sets state
                             selectedWorkspaceId={workspace.parentId}
                           />
                         )}
                       </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
-                      <Label >Selected: {pickedParent ? pickedParent.workspaceName : "(none)"} </Label>
+                      <Label>
+                        Selected:{" "}
+                        {pickedParent ? pickedParent.workspaceName : "(none)"}{" "}
+                      </Label>
                       <Button
                         basic
                         circular
                         color="green"
                         size="tiny"
-                        onClick={() => {setIsParentPickerOpen(false); handleParentChange();}}
+                        onClick={() => {
+                          setIsParentPickerOpen(false);
+                          handleParentChange();
+                        }}
                         icon="check"
                       />
                       <Button
-                      color="red"
-                      size="tiny"
+                        color="red"
+                        size="tiny"
                         basic
                         circular
-                        onClick={() => {setIsParentPickerOpen(false); }}
+                        onClick={() => {
+                          setIsParentPickerOpen(false);
+                        }}
                         icon="x"
                       />
-
                     </Modal.Actions>
                   </Modal>
-                  
+
                   <Form.Group widths="equal">
                     <Form.Field>
                       <label>Category</label>
@@ -314,17 +313,22 @@ export default function Workspace() {
                   </Form.Group>
                   <Form.Field>
                     <label>Note</label>
-                    <Form.TextArea
-                      name="note"
-                      value={values.note}
-                      onChange={handleChange}
+
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={values.note}
+                      onChange={(event, editor) => {
+                        const data = editor.getData();
+                        setFieldValue("note", data);
+                      }}
                     />
                   </Form.Field>
 
-                  <Button type="submit" disabled={isSubmitting}>
+                </Segment>
+                
+                <Button basic primary type="submit" disabled={isSubmitting} floated="right">
                     Save
                   </Button>
-                </Segment>
               </Form>
             );}
           }

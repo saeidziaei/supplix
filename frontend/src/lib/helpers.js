@@ -1,3 +1,5 @@
+import { parseISO } from "date-fns";
+
 export const substituteParams = (text, params) => {
   for (const [key, value] of Object.entries(params)) {
     text = text.replace(new RegExp(`\\[\\[!${key}!\\]\\]`, 'g'), value);
@@ -33,7 +35,17 @@ export const getUserById = (users, id) => {
   return user || {given_name: '', family_name: ''};
 }
 
+export const parseDate = (inputDate) => {
+  let selected = null;
+  try {
+    selected = parseISO(inputDate);
+  } catch (e) {
+    // incompatible data had been saved, just ignore it
+  }
+  if (selected == "Invalid Date") selected = ""; // new Date();
 
+  return selected;
+}
 function getAttribute(user, attributeName) {
   const attribute = user.Attributes.find(
     (attr) => attr.Name === attributeName
@@ -44,3 +56,12 @@ function getAttribute(user, attributeName) {
     return "";
   }
 }
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const formattedDate = date.toLocaleDateString("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "2-digit",
+  });
+  return formattedDate === "Invalid Date" ? "" : formattedDate;
+};
