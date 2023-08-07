@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -15,12 +15,12 @@ import {
   Segment
 } from "semantic-ui-react";
 import { GenericForm } from "../components/GenericForm";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
-import { FormikDebug } from "formik-semantic-ui-react";
-import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
+import "./TemplatedForm.css"
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -53,13 +53,15 @@ export default function TemplatedForm() {
 
     async function onLoad() {
       try {
+        setIsLoading(true);
+
         if (formId) {
           const item = await loadForm();
           const { data, workspace } = item ?? {};
           setFormRecord(data);
           setWorkspace(workspace);
           // the api populates template as well
-          setTemplate(item.template);
+          setTemplate(data.template);
         } else {
           // new form - just load the template and workspace
           const item = await loadTemplate();
@@ -281,6 +283,8 @@ export default function TemplatedForm() {
           }
         />
       )}
+      
+      <div className="form-background">
       <GenericForm
         formDef={template.templateDefinition}
         formData={formRecord ? formRecord.formValues : null}
@@ -288,7 +292,7 @@ export default function TemplatedForm() {
         handleCancel={isNew ? null : cancelEdit}
         disabled={!editable}
       />
-      
+      </div>
 
       {formRecord && (
         <p style={{ color: "#bbb" }}>
