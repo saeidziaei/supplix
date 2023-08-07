@@ -329,14 +329,8 @@ export default function Workspaces() {
                     </LinkContainer>
                   )}
                   <Divider />
-                  <Button
-                    content="NCR"
-                    color="red"
-                    basic
-                    icon="right arrow"
-                    labelPosition="right"
-                    onClick={() => nav("/workspace/NCR/tasks")}
-                  />
+                 
+                 <a href="/workspace/NCR/tasks">Review NCRs</a>
                 </>
               )}
             </Grid.Column>

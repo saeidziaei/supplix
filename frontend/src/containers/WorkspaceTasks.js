@@ -19,6 +19,8 @@ import "./FormRegisters.css";
 
 
 export default function WorkspaceTasks() {
+  const NCR_WORKSPACE_ID = "NCR";  
+
   const { workspaceId, templateId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [workspace, setWorkspace] = useState(null);
@@ -26,6 +28,8 @@ export default function WorkspaceTasks() {
   const [users, setUsers] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
+
+  const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -96,7 +100,7 @@ export default function WorkspaceTasks() {
       },
       {
         field: "createdBy",
-        headerName: "Reported",
+        headerName: "Reporter",
         cellRenderer: UserRenderer,
         width: 90
       },
@@ -162,9 +166,9 @@ export default function WorkspaceTasks() {
         {renderSelectedTask()}
         <Divider hidden />
         <LinkContainer to={`/workspace/${workspaceId}/task`}>
-          <Button basic primary size="tiny">
+          <Button basic size="tiny" color={isNCR() ? "red" : "blue"}>
             <Icon name="plus" />
-            Task
+            {isNCR() ? "NCR Item" : "Task"}
           </Button>
         </LinkContainer>
       </>

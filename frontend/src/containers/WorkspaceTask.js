@@ -202,7 +202,7 @@ export default function WorkspaceTask() {
             <Icon name="keyboard outline" color="blue" />
             <Icon corner name="clock outline" color="blue" />
           </Icon.Group>
-          {isNCR() ? "NCR Item" : "Task"}
+          {isNCR() ? "Non-Compliance Report" : "Task"}
         </Header>
         <Formik
           initialValues={task || defaultValues}
