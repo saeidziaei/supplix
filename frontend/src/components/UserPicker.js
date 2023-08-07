@@ -18,10 +18,11 @@ export default function UserPicker({ users, value, onChange, disabled = false })
     onChange(value);
   } 
   const selected = value ? getUserById(users, value) :  null;
+
   return (
     <Dropdown
+      clearable
       disabled={disabled}
-      
       value={value}
       trigger={selected ? <User user={selected} /> : <span>Select User</span>}
       options={options}

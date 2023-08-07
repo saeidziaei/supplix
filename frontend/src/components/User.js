@@ -33,7 +33,7 @@ export default function User({ user, compact = false }) {
     }
   
     return (
-      <div basic style={{minWidth: "250px"}}>
+      <span basic style={{minWidth: "250px"}}>
         {user.photoURL ? (
           <Image  src={user.photoURL} avatar />
         ) : (
@@ -45,7 +45,7 @@ export default function User({ user, compact = false }) {
           </div>
         )}
         {!compact && <span>{`${capitalizeFirstLetter(user.given_name)} ${capitalizeFirstLetter(user.family_name)}`}</span>}
-      </div>
+      </span>
     );
 
 }

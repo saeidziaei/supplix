@@ -1,75 +1,52 @@
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { ModuleRegistry } from "@ag-grid-community/core";
+import { AgGridReact } from "@ag-grid-community/react";
+import "@ag-grid-community/styles/ag-grid.css";
+import "@ag-grid-community/styles/ag-theme-balham.css";
+import { format, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
+import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Button,
-  Divider,
-  Loader,
-  Segment,
-  Tab,
-  Form,
-  Modal,
-  Select,
-  Label,
-  Grid,
-  Confirm,
-  Icon,
-  Header,
-} from "semantic-ui-react";
-import UserPicker from "../components/UserPicker";
+import { Button, Divider, Header, Icon, Loader, Segment } from "semantic-ui-react";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import { normaliseCognitoUsers, parseDate } from "../lib/helpers";
-import "./WorkspaceTask.css";
-import { Formik } from "formik";
-import WorkspacePicker from "../components/WorkspacePicker";
-import DatePicker from "react-datepicker";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { useAppContext } from "../lib/contextLib";
+
+
+import User from "../components/User";
+import { normaliseCognitoUsers } from "../lib/helpers";
+import "./FormRegisters.css";
+
 
 export default function WorkspaceTasks() {
-  const NCR_WORKSPACE_ID = "NCR";  
-
+  const { workspaceId, templateId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
-  const { workspaceId, taskId } = useParams();
   const [workspace, setWorkspace] = useState(null);
-  const [task, setTask] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const { currentUserRoles } = useAppContext();
-  const isAdmin = currentUserRoles.includes("admins");
-
-  const canDelete = () => isAdmin;
-
+  const [tasks, setTasks] = useState(null);
+  const [users, setUsers] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
 
-  function validateForm() {
-    return true; // file.current
-  }
+  ModuleRegistry.registerModules([ClientSideRowModelModule]);
+
   useEffect(() => {
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`);
-    }
-    async function loadTask() {
-      if (!taskId) {
-        // just return workspace
-        const ret = await makeApiCall("GET", `/workspaces/${workspaceId}`);
-        return { workspace: ret.workspace };
-      }
-
-      return await makeApiCall(
-        "GET",
-        `/workspaces/${workspaceId}/tasks/${taskId}`
-      );
-    }
-
     async function onLoad() {
+      async function loadTasks() {
+        return await makeApiCall("GET", `/workspaces/${workspaceId}/tasks`);
+      }
+      async function loadUser() {
+        return await makeApiCall("GET", `/users`); 
+      }
+      
       try {
-        const [users, task] = await Promise.all([loadUsers(), loadTask()]);
-        // workspaceId in the path therefore results are in data element and it also returns workspace
-        const { data, workspace } = task ?? {};
+        setIsLoading(true);
 
-        setTask(data);
+        const [tasks, users] = await Promise.all([loadTasks(), loadUser()]);
+
+        //  has workspaceId in the path therefore result are in data element and it also returns workspace
+        const { data, workspace } = tasks ?? {};
+
+        setTasks(data);
         setWorkspace(workspace);
         setUsers(normaliseCognitoUsers(users));
       } catch (e) {
@@ -78,232 +55,120 @@ export default function WorkspaceTasks() {
 
       setIsLoading(false);
     }
-
     onLoad();
   }, []);
+  const UserRenderer = (params) => {
+    const fieldName = params.colDef.field;
+    const user = users ? users.find((u) => u.Username === params.data[fieldName]) : null;
+    if (!user) return;
+    return (
+      <User user={user} compact={true}  />
+    );
+  };
+  const DateRenderer = (params) => {
+    const fieldName = params.colDef.field;
+    
+    const date = parseISO(params.data[fieldName]);
+    if (date == "Invalid Date") return "";
 
-  const panes = [
-    {
-      menuItem: "Task",
-      render: () => <Tab.Pane attached={false}>{renderTaskForm()}</Tab.Pane>,
+    return format(date, 'dd/MM/yy');
+  };
+  const gridOptions = {
+    defaultColDef: {
+      sortable: true,
+      resizable: true,
+      filter: true,
+      width: 120
     },
-    {
-      menuItem: "Recurring",
-      render: () => (
-        <Tab.Pane attached={false}>{renerRecurringTaskForm()}</Tab.Pane>
-      ),
-    },
-  ];
-  async function createTask(item) {
-    return await makeApiCall("POST", `/workspaces/${workspaceId}/tasks`, item);
+    columnDefs: [
+      { field: "taskCode", headerName: "Code", width: 70 },
+      { field: "taskType", headerName: "Type", width: 70 },
+      { field: "taskName", },
+      { field: "startDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "dueDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "completionDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "taskStatus", headerName: "Status" },
+      {
+        field: "userId",
+        headerName: "Owner",
+        cellRenderer: UserRenderer, 
+        width: 90
+      },
+      {
+        field: "createdBy",
+        headerName: "Reported",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      {
+        field: "updatedBy",
+        headerName: "Updated",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      
+    ],
+    rowStyle: { cursor: "pointer" },
+    rowSelection: "single",
+    onSelectionChanged: onSelectionChanged,
+  };
+
+  function onSelectionChanged() {
+    const selectedRows = gridOptions.api.getSelectedRows();
+    const t = selectedRows.length === 1 ? selectedRows[0] : null;
+    setSelectedTask(t);
   }
-  async function updateTask(item) {
-    return await makeApiCall(
-      "PUT",
-      `/workspaces/${workspaceId}/tasks/${taskId}`,
-      item
+  const renderSelectedTask = () => {
+    if (!selectedTask) return null;
+    return (
+      <Segment>
+        <Button
+          basic
+          circular
+          size="tiny"
+          icon="edit"
+          floated="right"
+          onClick={() =>
+            nav(`/workspace/${workspaceId}/task/${selectedTask.taskId}`)
+          }
+        />
+        <Header>{selectedTask.taskName}</Header>
+        <div
+          className="markdown"
+          dangerouslySetInnerHTML={{ __html: selectedTask.note }}
+        />
+      </Segment>
     );
   }
-  async function deleteTask() {
-    return await makeApiCall(
-      "DELETE",
-      `/workspaces/${workspaceId}/tasks/${taskId}`
-    );
-  }
 
-  async function handleSubmit(values, { setSubmitting }) {
-    setIsLoading(true);
-
-    try {
-      if (taskId) {
-        await updateTask(values);
-      } else {
-        await createTask(values);
-      }
-      nav("/");
-    } catch (e) {
-      onError(e);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-  const statusOptions = [
-    { key: "inProgress", value: "In Progress", text: "In Progress" },
-    { key: "onHold", value: "On Hold", text: "On Hold" },
-    { key: "cancelled", value: "Cancelled", text: "Cancelled" },
-    { key: "completed", value: "Completed", text: "Completed" },
-  ];
-
-  const renerRecurringTaskForm = () => "todo";
-  const renderTaskForm = () => {
+  function render() {
     return (
       <>
-        <Header as="h2" textAlign="center">
-          <Icon.Group>
-            <Icon name="keyboard outline" color="blue" />
-            <Icon corner name="clock outline" color="blue" />
-          </Icon.Group>
-          Task
-        </Header>
-        <Formik
-          initialValues={{ ...task }}
-          validate={validateForm}
-          onSubmit={handleSubmit}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleSubmit,
-            isSubmitting,
-            setFieldValue,
-            /* and other goodies */
-          }) => {
-            let startDate = parseDate(values["startDate"]);
-            let dueDate = parseDate(values["dueDate"]);
-
-            return (
-              <Form onSubmit={handleSubmit} autoComplete="off">
-                <Segment textAlign="left">
-                  <Form.Group>
-                    <Form.Field required width={12}>
-                      <label>Task Name</label>
-                      <Form.Input
-                        name="taskName"
-                        value={values.taskName}
-                        onChange={handleChange}
-                      />
-                    </Form.Field>
-                    <Form.Field>
-                      <label>Status</label>
-                      <Select
-                        onChange={(e, { name, value }) =>
-                          setFieldValue(name, value)
-                        }
-                        placeholder="Select"
-                        clearable
-                        options={statusOptions}
-                        name="taskStatus"
-                        value={values.taskStatus}
-                      />
-                    </Form.Field>
-                  </Form.Group>
-
-                  <Form.Field>
-                    <UserPicker
-                      users={users}
-                      value={values.userId}
-                      onChange={(userId) => setFieldValue("userId", userId)}
-                    />
-                  </Form.Field>
-                  <Form.Group widths="equal">
-                    <Form.Field>
-                      <label>Start</label>
-                      <DatePicker
-                        placeholderText="Select"
-                        isClearable="true"
-                        name="startDate"
-                        dateFormat="dd-MMM-yy"
-                        selected={startDate}
-                        onChange={(date) =>
-                          setFieldValue(
-                            "startDate",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        className="form-field"
-                      />
-                    </Form.Field>
-
-                    <Form.Field>
-                      <label>Due</label>
-                      <DatePicker
-                        placeholderText="Select"
-                        isClearable="true"
-                        name="dueDate"
-                        dateFormat="dd-MMM-yy"
-                        selected={dueDate}
-                        onChange={(date) =>
-                          setFieldValue(
-                            "dueDate",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        className="form-field"
-                      />
-                    </Form.Field>
-                  </Form.Group>
-                  <Form.Field>
-                    <label>Note</label>
-
-                    <CKEditor
-                      editor={ClassicEditor}
-                      data={values.note}
-                      onChange={(event, editor) => {
-                        const data = editor.getData();
-                        setFieldValue("note", data);
-                      }}
-                    />
-                  </Form.Field>
-                </Segment>
-                <Button
-                  style={{ marginTop: "20px" }}
-                  basic
-                  primary
-                  type="submit"
-                  disabled={isSubmitting}
-                  floated="right"
-                >
-                  Save
-                </Button>
-              </Form>
-            );
+        <WorkspaceInfoBox workspace={workspace} />
+        <div
+          className="ag-theme-balham"
+          style={{
+            height: "300px",
+            width: "100%",
           }}
-        </Formik>
+        >
+          <AgGridReact
+            gridOptions={gridOptions}
+            rowData={tasks}
+            rowHeight="30"
+            animateRows={true}
+          ></AgGridReact>
+        </div>
+        {renderSelectedTask()}
         <Divider hidden />
+        <LinkContainer to={`/workspace/${workspaceId}/task`}>
+          <Button basic primary size="tiny">
+            <Icon name="plus" />
+            Task
+          </Button>
+        </LinkContainer>
       </>
     );
-  };
-  const render = () => {
-    return (
-      // <Tab
-      //   menu={{ color: "blue", inverted: true, attached: false, tabular: false }}
-      //   panes={panes}
-      // />
-      <Grid textAlign="center" verticalAlign="middle">
-        <Grid.Column style={{ maxWidth: 550 }}>
-          {renderTaskForm()}
-          {canDelete && taskId && (
-            <>
-              <Divider />
-              <Confirm
-                size="mini"
-                header="This will delete the task."
-                open={deleteConfirmOpen}
-                onCancel={() => setDeleteConfirmOpen(false)}
-                onConfirm={async () => {
-                  setIsLoading(true);
-                  await deleteTask();
-                  nav("/");
-                }}
-              />
-              <Button
-                size="mini"
-                color="red"
-                onClick={() => setDeleteConfirmOpen(true)}
-              >
-                <Icon name="remove circle" />
-                Delete Task
-              </Button>
-            </>
-          )}
-        </Grid.Column>
-      </Grid>
-    );
-  };
-
-  if (isLoading) return <Loader active />;
-
-  return <h1>TODO</h1>;
+  }
+  return isLoading ? <Loader active /> : render();
 }

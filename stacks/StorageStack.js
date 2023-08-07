@@ -1,3 +1,4 @@
+import { AttributeType } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket, Table } from "sst/constructs";
 
 
@@ -62,13 +63,14 @@ export function StorageStack({ stack, app }) {
       tenant: "string",
       workspaceId: "string",
       tenant_workspaceId: "string",
-      taskId: "string", 
+      taskId: "string",
+      userId: "string",
     },
-    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "taskId" }, 
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "taskId" },
+    globalIndexes: {
+      userIndex: { partitionKey: "tenant", sortKey: "userId" },
+    },
     stream: "new_and_old_images",
-    consumers: {
-      notify: "services/functions/workspacetask/notify.main",
-    },
   });
    
   const workspaceUserTable = new Table(stack, "WorkspaceUser", {

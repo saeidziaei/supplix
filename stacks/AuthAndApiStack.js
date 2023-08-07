@@ -205,13 +205,46 @@ export function AuthAndApiStack({ stack, app }) {
         },
       },
 
-
-      "POST  /workspaces/{workspaceId}/task": {
+      "GET   /mytasks": {
+        function: {
+          handler: "services/functions/workspacetask/getmytasks.main",
+          bind: [workspaceTaskTable],
+        },
+      },
+      "GET   /workspaces/{workspaceId}/tasks": {
+        function: {
+          handler: "services/functions/workspacetask/list.main",
+          bind: [workspaceTaskTable],
+        },
+      },
+      "GET   /workspaces/{workspaceId}/tasks/{taskId}": {
+        function: {
+          handler: "services/functions/workspacetask/get.main",
+          bind: [workspaceTaskTable],
+        },
+      },
+      "POST  /workspaces/{workspaceId}/tasks": {
         function: {
           handler: "services/functions/workspacetask/create.main",
           bind: [workspaceTaskTable],
         },
+      },      
+      "PUT  /workspaces/{workspaceId}/tasks/{taskId}": {
+        function: {
+          handler: "services/functions/workspacetask/update.main",
+          bind: [workspaceTaskTable],
+        },
       },
+      "DELETE /workspaces/{workspaceId}/tasks/{taskId}": {
+        function: {
+          handler: "services/functions/workspacetask/delete.main",
+          bind: [workspaceUserTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+          },
+        },
+      },
+
 
 
 
@@ -555,6 +588,17 @@ export function AuthAndApiStack({ stack, app }) {
   api.attachPermissionsToRoute("GET /tenants/{tenantId}/users", ["s3"]);
   api.attachPermissionsToRoute("GET /myuser", ["s3"]);
   
+  workspaceTaskTable.addConsumers(stack, {
+    notify: {
+      handler: "services/functions/workspacetask/notify.main",
+      permissions: [cognitoReadonlyAccessPolicy],
+      environment: {
+        USER_POOL_ID: auth.userPoolId,
+      },
+      // bind: [table],
+    },
+  });
+
   workspaceTaskTable.attachPermissionsToConsumer("notify", ["ses"]);
   
   auth.attachPermissionsForAuthUsers(auth, [

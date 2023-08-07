@@ -1,6 +1,6 @@
-import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP } from "../../util/constants";
 import dynamoDb from "../../util/dynamodb";
 import handler from "../../util/handler";
+import * as uuid from "uuid";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const data = JSON.parse(event.body);
@@ -13,11 +13,17 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       tenant: tenant,
       workspaceId: workspaceId, 
       taskId: uuid.v1(), 
-      userId: data.userId || "",
+      userId: data.userId || "-1", // userId is in a secondary index and cannot be empty
       taskName: data.taskName || "",
       note: data.note || "",
       startDate: data.startDate || "",
       dueDate: data.dueDate || "",
+      completionDate: data.completionDate || "",
+      taskCode: data.taskCode || "",
+      taskType: data.taskType || "",
+      correctiveAction: data.correctiveAction || "", // NCR
+      rootCause: data.rootCause || "", // NCR
+      taskStatus: data.taskStatus || "",
 
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 

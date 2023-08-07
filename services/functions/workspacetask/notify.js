@@ -2,12 +2,14 @@ import handler from "../../util/handler";
 import { SESClient, SendEmailCommand  } from "@aws-sdk/client-ses";
 
 export const main =  async (event, context) => {
+return;
 
     event.Records.forEach((record, index) => {
       const dynamodbData = record.dynamodb;
-      console.log(`Record ${index + 1}:`, JSON.stringify(dynamodbData));
+      console.log(`Record ${index + 1}:`, record, JSON.stringify(dynamodbData));
     });
-  
+  return;
+
 const client = new SESClient();
 
 const params = {

@@ -12,21 +12,21 @@ export const capitalizeFirstLetter = (string) => {
 }
 
 export const normaliseCognitoUser = cu => ({
-  Username: cu.Username,
-  isAdmin: cu.isAdmin,
-  isTopLevelAdmin: cu.isTopLevelAdmin,
-  Enabled: cu.Enabled,
-  UserStatus: cu.UserStatus,
   given_name: getAttribute(cu, "given_name"),
   family_name: getAttribute(cu, "family_name"),
   email: getAttribute(cu, "email"),
   email_verified: getAttribute(cu, "email_verified"),
   phone_number: getAttribute(cu, "phone_number"),
   ...cu
+  // Username: cu.Username,
+  // isAdmin: cu.isAdmin,
+  // isTopLevelAdmin: cu.isTopLevelAdmin,
+  // Enabled: cu.Enabled,
+  // UserStatus: cu.UserStatus,
 });
 
 export const normaliseCognitoUsers = (cUsers) => {
-  if (!cUsers || cUsers.length === 0) return null;
+  if (!cUsers || cUsers.length === 0) return [];
 
   return cUsers.map(normaliseCognitoUser);
 }
@@ -47,7 +47,12 @@ export const parseDate = (inputDate) => {
   return selected;
 }
 function getAttribute(user, attributeName) {
-  const attribute = user.Attributes.find(
+  if (!user) return undefined;
+  
+  const attributeCollection = user.Attributes || user.UserAttributes;
+  if (!attributeCollection) return undefined;
+
+  const attribute = attributeCollection.find(
     (attr) => attr.Name === attributeName
   );
   if (attribute) {

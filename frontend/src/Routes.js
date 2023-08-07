@@ -58,7 +58,7 @@ export default function Links(tenant) {
       <Route path="/workspaces" element={<AuthenticatedRoute><Workspaces /></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/team" element={<AuthenticatedRoute><WorkspaceTeam/></AuthenticatedRoute>} />
 
-      <Route path="/workspace/:workspaceId/task/taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/task/:taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
 
 

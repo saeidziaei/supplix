@@ -15,16 +15,15 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
     workspaceName,
     workspaceStatus,
     category,
-    subCategory,
     clientName,
     startDate,
     endDate,
     note,
-  } = workspace;
+  } = workspace ?? {};
 
   const getWorkspaceWithParents = (workspace) => {
     const workspaceWithParents = [];
-    let parent = workspace.parent;
+    let parent = workspace?.parent;
     while (parent) {
       workspaceWithParents.unshift(parent);
       parent = parent.parent;

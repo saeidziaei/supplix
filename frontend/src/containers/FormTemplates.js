@@ -14,11 +14,22 @@ import {
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
+import FormTemplateSettings from "./FormTemplateSettings";
 import "./FormTemplates.css";
+
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [templateSettingsVisible, setTemplateSettingsVisible] = useState(false);
+  const [savedSettings, setSavedSettings] = useState({});
+
+  const handleTemplateSettingsSave = (settings) => {
+    // Save the settings to your preferred storage (e.g., API, localStorage)
+    // For now, we'll just update the state for demonstration purposes.
+    setSavedSettings(settings);
+    setTemplateSettingsVisible(false);
+  };
 
   useEffect(() => {
     async function onLoad() {
@@ -128,6 +139,15 @@ export default function FormTemplates() {
           Design New Form
         </Button>
       </LinkContainer>
+      
+
+      <Divider />
+      {/* <Button basic onClick={() => setTemplateSettingsVisible(true)}>
+        Template Settings
+      </Button> */}
+      {templateSettingsVisible && (
+        <FormTemplateSettings templates={templates} onSave={handleTemplateSettingsSave} />
+      )}
     </>
   );
 }

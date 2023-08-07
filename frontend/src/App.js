@@ -8,7 +8,7 @@ import {
   Dropdown,
   Grid,
   Icon,
-  Image, List,
+  Image, Label, List,
   Loader, Menu, PlaceholderImage, Segment,
   Sidebar
 } from "semantic-ui-react";
@@ -19,6 +19,8 @@ import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
+import { normaliseCognitoUser } from "./lib/helpers";
+import { NCR } from "./components/NCR";
 
 
 export default App;
@@ -29,6 +31,7 @@ function App() {
   
   const [tenant, setTenant] = useState(null);
   const [employee, setEmployee] = useState(null);
+  const [tasks, setTasks] = useState(null);
 
 
   const nav = useNavigate();
@@ -76,44 +79,26 @@ function App() {
       return tenant;
     }
 
+    async function loadMyTasks() {
+      return await makeApiCall("GET", `/mytasks`);
+    }
     async function loadMyEmployee() {
-      function getAttribute(user, attributeName) {
-        if (!user || !user.UserAttributes) return undefined;
-
-        const attribute = user.UserAttributes.find(
-          (attr) => attr.Name === attributeName
-        );
-        if (attribute) {
-          return attribute.Value;
-        } else {
-          return undefined;
-        }
-      }
-
       if (!authenticatedUser)
         return;
       
       const item = await makeApiCall("GET", `/myuser`);
 
-      return {
-        given_name: getAttribute(item, "given_name") || "",
-        family_name: getAttribute(item, "family_name") || "",
-        phone: getAttribute(item, "phone_number") || "",
-        email: getAttribute(item, "email") || "",
-        ...item
-      }
+      return normaliseCognitoUser(item);
     }
-
-
-
 
 
     async function onLoad() {
       try {
-        const [tenant, employee] = await Promise.all([loadMyTenant(), loadMyEmployee()]);
+        const [tenant, employee, tasks] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks()]);
 
         setTenant(tenant);
         setEmployee(employee);
+        setTasks(tasks);
       } catch (e) {
         alert(e);
       }
@@ -135,7 +120,10 @@ function App() {
 
     const logoURL =
       tenant && tenant.logoURL ? tenant.logoURL : "/iso_cloud_logo_v1.png";
-    
+
+    const tasksCount = tasks ? tasks.length : 0;
+    const isMobile = window.innerWidth <= 768;
+
     return (
       !isAuthenticating && (
         <>
@@ -147,7 +135,7 @@ function App() {
                     {tenant ? (
                       <Image
                         onClick={() => nav("/")}
-                        size="small"
+                        size={isMobile ? "tiny" : "small"}
                         rounded
                         alt="logo"
                         src={logoURL}
@@ -177,9 +165,12 @@ function App() {
                       }}
                       style={{float:"left"}}
                     ></Button>
-                    {employee && <User user={employee} />}
+                    {employee && <User user={employee} compact={isMobile} />}
                   </List.Item>
+                  <List.Item ><NCR /> </List.Item>
                 </List>
+                
+
               </Grid.Column>
 
             </Grid.Row>
@@ -204,10 +195,12 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-                  {/* <Menu.Item as="a">
-                    <Label color="teal">5</Label>
+                   <Menu.Item as="a">
+                    <Label color={tasksCount ? "teal" : "black"}>{tasksCount}</Label>
                     Tasks
                   </Menu.Item>
+                  
+                  {/*
                   <Menu.Item as="a">
                     <Label color="orange">3</Label>
                     Notifications

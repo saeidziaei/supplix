@@ -24,7 +24,6 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
-import { NCR } from "../components/NCR";
 
 
 export default function Workspaces() {
@@ -151,7 +150,7 @@ export default function Workspaces() {
         <div
           className="ag-theme-balham"
           style={{
-            height: "400px",
+            height: "300px",
             width: "100%",
           }}
         >
@@ -162,10 +161,7 @@ export default function Workspaces() {
             animateRows={true}
           ></AgGridReact>
         </div>
-
-       
         
-
       </>
     );
   }
@@ -304,12 +300,11 @@ export default function Workspaces() {
                     color="grey"
                     name="arrow left"
                     size="large"
-                    style={{marginLeft: "10px"}}
+                    style={{ marginLeft: "10px" }}
                     onClick={() => nav(-1)}
                   />
                 </List.Item>
                 <List.Item>{renderModalWorkspacePicker()}</List.Item>
-                <List.Item><NCR workspace={selectedWorkspace} workspaces={workspaces} /> </List.Item>
               </List>
             </Grid.Column>
             <Grid.Column width={14}>
@@ -322,16 +317,26 @@ export default function Workspaces() {
                   {renderWorkspace(selectedWorkspace)}
                 </>
               ) : (
-                <>{renderChildren()}
-                <Divider hidden />
-                {isAdmin && (
-                  <LinkContainer to={`/workspace`}>
-                    <Button basic primary size="tiny">
-                      <Icon name="plus" />
-                      Workspace
-                    </Button>
-                  </LinkContainer>
-                )}
+                <>
+                  {renderChildren()}
+                  <Divider hidden />
+                  {isAdmin && (
+                    <LinkContainer to={`/workspace`}>
+                      <Button basic primary size="tiny">
+                        <Icon name="plus" />
+                        Workspace
+                      </Button>
+                    </LinkContainer>
+                  )}
+                  <Divider />
+                  <Button
+                    content="NCR"
+                    color="red"
+                    basic
+                    icon="right arrow"
+                    labelPosition="right"
+                    onClick={() => nav("/workspace/NCR/tasks")}
+                  />
                 </>
               )}
             </Grid.Column>

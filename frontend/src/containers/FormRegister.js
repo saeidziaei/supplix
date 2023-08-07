@@ -48,17 +48,19 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   useEffect(() => {
     async function onLoad() {
       try {
-        setIsLoading(false);
+        setIsLoading(true);
+
         if (formDef) {
           // all data have been passed from another component, we are just checking formDef
           setColumnDefs(getColumnDefs(formDef));
+          setIsLoading(false);
           return;
         }
         if (isPreview) {
+          setIsLoading(false);
           return;
         }
 
-        setIsLoading(true);
         
         // todo: how do we avoid two roundtrips?
         const template = await loadTemplate(templateId);
@@ -155,7 +157,6 @@ const handleCellValueChanged = useCallback(() => {
       return !objectsAreEqual(originalForm.formValues.register, form.formValues.register);
     });
 
-    console.log(changedForms);
     setSavingStatus({isSaving: true, current: 0, total: changedForms.length});
     processChangedForms(changedForms);
     setSavingStatus({isSaving: false});
@@ -487,7 +488,7 @@ const handleCellValueChanged = useCallback(() => {
     const hasEntries = forms && forms.length > 0;
     return (
       <>
-      <WorkspaceInfoBox workspace={workspace}/>
+       { workspace && <WorkspaceInfoBox workspace={workspace}/> }
         {!isHistory && <Header>{formDef?.title}</Header>}
         
         {!isPreview && !hasEntries && (
