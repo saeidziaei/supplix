@@ -208,19 +208,19 @@ export function AuthAndApiStack({ stack, app }) {
       "GET   /mytasks": {
         function: {
           handler: "services/functions/workspacetask/getmytasks.main",
-          bind: [workspaceTaskTable],
+          bind: [workspaceTaskTable, workspaceTable],
         },
       },
       "GET   /workspaces/{workspaceId}/tasks": {
         function: {
           handler: "services/functions/workspacetask/list.main",
-          bind: [workspaceTaskTable],
+          bind: [workspaceTaskTable, workspaceTable],
         },
       },
       "GET   /workspaces/{workspaceId}/tasks/{taskId}": {
         function: {
           handler: "services/functions/workspacetask/get.main",
-          bind: [workspaceTaskTable],
+          bind: [workspaceTaskTable, workspaceTable],
         },
       },
       "POST  /workspaces/{workspaceId}/tasks": {
