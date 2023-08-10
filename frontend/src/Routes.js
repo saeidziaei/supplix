@@ -60,6 +60,7 @@ export default function Links(tenant) {
 
       <Route path="/workspace/:workspaceId/task/:taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
+      <Route path="/mytasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
 
 
       <Route path="*" element={<NotFound />} />

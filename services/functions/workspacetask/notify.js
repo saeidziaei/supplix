@@ -1,47 +1,61 @@
-import handler from "../../util/handler";
-import { SESClient, SendEmailCommand  } from "@aws-sdk/client-ses";
+import  { getUser } from "../../util/handler";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-export const main =  async (event, context) => {
-return;
+export const main = async (event, context) => {
+  try {
+    const stage = process.env.STAGE;
+    
+    for (const record of event.Records) {
+      
+      const streamData = record.dynamodb;
 
-    event.Records.forEach((record, index) => {
-      const dynamodbData = record.dynamodb;
-      console.log(`Record ${index + 1}:`, record, JSON.stringify(dynamodbData));
-    });
-  return;
+      if (
+        record.eventName === "INSERT" ||
+        (record.eventName === "MODIFY" && isUserIdChanged(streamData))
+      ) {
+        const userId = streamData.NewImage.userId.S;
+        const workspaceId = streamData.NewImage.workspaceId.S;
+        const taskId = streamData.NewImage.taskId.S;
 
-const client = new SESClient();
+        // Fetch user details using getUser function
+        const user = await getUser(userId);
 
-const params = {
-  Source: 'noreply@isocloud.com.au', // The email address you want to send the email from
-  Destination: {
-    ToAddresses: ['support@isocloud.com.au'], // The email address you want to send the email to
-  },
-  Message: {
-    Subject: {
-      Data: 'Dummy Email', // The subject of the email
-    },
-    Body: {
-      Text: {
-        Data: 'This is a dummy email sent using AWS SES!', // The body of the email
-      },
-    },
-  },
+        const emailParams = {
+          Destination: {
+            ToAddresses: [stage === "prod" ? user.email : "support@isocloud.com.au"],
+          },
+          Message: {
+            Body: {
+              Text: {
+                Data: `Hi ${user.firstName},\n\nA new task is assigned to you.  You can access it here: https://isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
+                ${stage === "prod" ? "" : `Stage: ${stage}\n\nShould have been sent to ${user.email}`}`,
+              },
+            },
+            Subject: { Data: "New Task Assigned" },
+          },
+          Source: "noreply@isocloud.com.au", // Replace with your sender email
+        };
+
+        const client = new SESClient();
+
+        const command = new SendEmailCommand(emailParams);
+        const ret = await client.send(command);
+        console.log("Email sent successfully", ret);
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
-const command = new SendEmailCommand(params);
-console.log("command", command);
-try {
-    const ret = await client.send(command);
-    console.log('Email sent successfully', ret);
-    // process data.
-  } catch (error) {
-    console.error(error);
-  } finally {
-    // finally.
+
+function isUserIdChanged(input) {
+  if (!input.NewImage || !input.NewImage.userId) {
+    return false;
   }
-  
 
+  const oldUserId = input.OldImage.userId.S;
+  const newUserId = input.NewImage.userId.S;
 
-
+  return oldUserId !== newUserId;
 }

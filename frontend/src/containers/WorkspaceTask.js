@@ -41,6 +41,8 @@ export default function WorkspaceTask() {
   const nav = useNavigate();
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
+  const canManageTeam = () => (workspace && workspace.role === "Owner");
+
   const canDelete = () => {
     if (isNCR()) {
       return false;
@@ -160,7 +162,7 @@ export default function WorkspaceTask() {
       } else {
         await createTask(values);
       }
-      nav("/");
+      nav(-1);
     } catch (e) {
       onError(e);
     } finally {
@@ -257,6 +259,7 @@ export default function WorkspaceTask() {
                       value={values.userId}
                       onChange={(userId) => setFieldValue("userId", userId)}
                     />
+                    {canManageTeam() && <p className="mini-text"><span>Cannot find the user you are looking for? </span><a href={`/workspace/${workspaceId}/team`}>Manage Team Members</a></p>}
                   </Form.Field>
                   <Form.Field>
                     <label>Description</label>

@@ -35,14 +35,18 @@ export function AuthAndApiStack({ stack, app }) {
         customAttributes: {
           tenant: tenantAttribute,
         },
-      },
-      emailSettings: {
-        fromEmail: "noreply@isocloud.com.au", // Customize the "from" email address
-        replyToEmail: "noreply@isocloud.com.au", // Customize the reply-to email address
-        emailSubject: "Welcome to ISO Cloud", // Customize the subject of the email
-        verificationMessage: "Your verification code is {####}", // Customize the verification message
-        welcomeMessage: "Welcome to ISO Cloud! Your username is {username}", // Customize the welcome message
-        passwordResetMessage: "Your password reset code is {####}", // Customize the password reset message
+        userInvitation: {
+          emailSubject: "Welcome to ISOCloud",
+          emailBody: `<h2>Welcome to ISO Cloud!</h2>
+          <p>
+          Your login details are as follows:<br/><br/>
+Username: {username}<br/>
+Temporary Password: {####}
+</p>          
+          <p>Please use the provided information to access your account here: <a href='https://app.isocloud.com.au/'>ISO Cloud</a></p>
+          <br/><br/>
+          <i>https://app.isocloud.com.au/</i>`
+        }
       },
       
     },
@@ -594,6 +598,7 @@ export function AuthAndApiStack({ stack, app }) {
       permissions: [cognitoReadonlyAccessPolicy],
       environment: {
         USER_POOL_ID: auth.userPoolId,
+        STAGE: stack.stage,
       },
       // bind: [table],
     },

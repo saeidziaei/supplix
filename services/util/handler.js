@@ -150,6 +150,7 @@ export async function getUser(username) {
   return {
     firstName: getAttribute(result, "given_name") || "",
     lastName: getAttribute(result, "family_name") || "",
+    email: getAttribute(result, "email") || "",
   }
 }
 

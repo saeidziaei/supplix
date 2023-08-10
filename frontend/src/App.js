@@ -195,10 +195,12 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
+                  <LinkContainer to="/mytasks" onClick={() => setIsSidebarVisible(false)}>
                    <Menu.Item as="a">
                     <Label color={tasksCount ? "teal" : "black"}>{tasksCount}</Label>
                     Tasks
                   </Menu.Item>
+                  </LinkContainer>
                   
                   {/*
                   <Menu.Item as="a">
