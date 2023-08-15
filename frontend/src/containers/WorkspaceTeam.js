@@ -97,7 +97,7 @@ export default function WorkspaceTeam(props) {
       <Grid style={{ height: "100vh" }} verticalAlign="top">
         <Grid.Column >
         <WorkspaceInfoBox workspace={workspace}/>
-          {(!members || members.length == 0) && (
+          {(!members || members.length === 0) && (
             <Message
               header="No member found"
               content="Start by adding uses to your team!"

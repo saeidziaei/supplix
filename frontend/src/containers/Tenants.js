@@ -3,16 +3,14 @@ import { LinkContainer } from "react-router-bootstrap";
 import { Link } from "react-router-dom";
 import {
   Button,
-  Divider, Header,
   Icon, Loader,
   Message,
-  Segment,
   Table
 } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import "./Tenants.css"
+import "./Tenants.css";
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);
@@ -42,7 +40,7 @@ export default function Tenants() {
     return (
       <>
         <FormHeader heading="Tenants" />
-        {(!tenants || tenants.length == 0) && (
+        {(!tenants || tenants.length === 0) && (
           <Message
             header="No tenants found"
             content="Start by creating your first tenant!"

@@ -21,7 +21,7 @@ import "./FormRegisters.css";
 export default function WorkspaceTasks() {
   const NCR_WORKSPACE_ID = "NCR";  
 
-  const { workspaceId, templateId } = useParams();
+  const { workspaceId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [workspace, setWorkspace] = useState(null);
   const [workspaces, setWorkspaces] = useState(null);
@@ -91,16 +91,21 @@ export default function WorkspaceTasks() {
     );
   };
   const DateRenderer = (params) => {
+    try {
     const fieldName = params.colDef.field;
     
     const date = parseISO(params.data[fieldName]);
     if (date == "Invalid Date") return "";
 
     return format(date, 'dd/MM/yy');
+    }
+    catch  {
+      return "";
+    }
   };
   const WorkspaceRenderer = (params) => {
     const workspaceId = params.data["workspaceId"];
-    const workspace = workspaces ? workspaces.find(w => w.workspaceId == workspaceId) : {};
+    const workspace = workspaces ? workspaces.find(w => w.workspaceId === workspaceId) : {};
     return (<Label color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : workspaceId}</Label>);
   }
   const originalColumnDefs = [
@@ -165,7 +170,7 @@ export default function WorkspaceTasks() {
           icon="edit"
           floated="right"
           onClick={() =>
-            nav(`/workspace/${workspaceId}/task/${selectedTask.taskId}`)
+            nav(`/workspace/${selectedTask.workspaceId}/task/${selectedTask.taskId}`)
           }
         />
         <Header>{selectedTask.taskName}</Header>

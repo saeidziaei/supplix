@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import "./FormHeader.css";
-import { Button, Grid, Icon, Menu } from "semantic-ui-react";
-import "./Competency.css";
-import { Input, Radio,   } from "formik-semantic-ui-react";
 import { useField } from "formik";
+import { Input, Radio, } from "formik-semantic-ui-react";
+import React, { useState } from "react";
+import { Grid, Icon, Menu } from "semantic-ui-react";
+import "./Competency.css";
+import "./FormHeader.css";
 
 export default function Competency(props) {
   const [compact, setCompact] = useState(true);
@@ -65,14 +65,14 @@ export default function Competency(props) {
   );
 
   function getClassName() {
-    if (competency && competency.key == "competent") {
+    if (competency && competency.key === "competent") {
       return "competent";
     }
     if (
       required &&
       competency &&
-      required.key == "required" &&
-      competency.key != "competent"
+      required.key === "required" &&
+      competency.key !== "competent"
     ) {
       return "required-not-competent";
     }
@@ -86,7 +86,7 @@ export default function Competency(props) {
           <Icon  name={required.icon} color={required.color} size="large" />
         )}
 
-        {required && competency && required.key != 'notApplicable' && (
+        {required && competency && required.key !== 'notApplicable' && (
           <Icon name={competency.icon} color={competency.color} size="large" />
         )}
       </>
@@ -104,7 +104,7 @@ export default function Competency(props) {
               value={o.key}
               onClick={() => {
                 setRequired(o);
-                if (o.key == "notApplicable") setCompetency(null);
+                if (o.key === "notApplicable") setCompetency(null);
               }}
             />
           </Menu.Item>
@@ -113,7 +113,7 @@ export default function Competency(props) {
     );
   }
   function renderCompetency() {
-    if (required && required.key != "notApplicable")
+    if (required && required.key !== "notApplicable")
       return (
         <Menu fluid vertical compact>
           {competencyOptions.map((o) => (
@@ -133,7 +133,7 @@ export default function Competency(props) {
       );
     else return null;
   }
-  const courseDisabled = !required || required.key == 'notApplicable';
+  const courseDisabled = !required || required.key === 'notApplicable';
   function renderCourseDetails() {
     return <>
       <Grid.Column width={7}>

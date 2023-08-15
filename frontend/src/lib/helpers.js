@@ -36,16 +36,20 @@ export const getUserById = (users, id) => {
 }
 
 export const parseDate = (inputDate) => {
-  let selected = null;
   try {
-    selected = parseISO(inputDate);
-  } catch (e) {
-    // incompatible data had been saved, just ignore it
-  }
-  if (selected == "Invalid Date") selected = ""; // new Date();
+    let selected = null;
+    try {
+      selected = parseISO(inputDate);
+    } catch (e) {
+      // incompatible data had been saved, just ignore it
+    }
+    if (selected == "Invalid Date") selected = ""; // new Date();
 
-  return selected;
-}
+    return selected;
+  } catch {
+    return "";
+  }
+};
 function getAttribute(user, attributeName) {
   if (!user) return undefined;
   

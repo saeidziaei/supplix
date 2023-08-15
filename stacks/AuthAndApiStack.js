@@ -3,7 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { Cognito, Api, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
-import { ADMIN_GROUP, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_OWNER_ROLE } from "../services/util/constants";
+import { ADMIN_GROUP, RECURRING, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_OWNER_ROLE } from "../services/util/constants";
 import { StringAttribute } from "aws-cdk-lib/aws-cognito";
 
 
@@ -46,7 +46,10 @@ Temporary Password: {####}
           <p>Please use the provided information to access your account here: <a href='https://app.isocloud.com.au/'>ISO Cloud</a></p>
           <br/><br/>
           <i>https://app.isocloud.com.au/</i>`
-        }
+        },
+        // mfa: cognito.Mfa.OPTIONAL,
+        // mfaSecondFactor: cognito.mfaSecondFactor(otp=true)
+
       },
       
     },
@@ -237,6 +240,28 @@ Temporary Password: {####}
         function: {
           handler: "services/functions/workspacetask/update.main",
           bind: [workspaceTaskTable],
+        },
+      },
+      "POST  /workspaces/{workspaceId}/recurring-tasks": {
+        function: {
+          handler: "services/functions/workspacetask/create.main",
+          bind: [workspaceTaskTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+            TASK_MODE: RECURRING,
+          },
+
+        },
+      },      
+      "PUT  /workspaces/{workspaceId}/recurring-tasks/{taskId}": {
+        function: {
+          handler: "services/functions/workspacetask/update.main",
+          bind: [workspaceTaskTable],
+          environment: {
+            WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
+            TASK_MODE: RECURRING,
+          },
+
         },
       },
       "DELETE /workspaces/{workspaceId}/tasks/{taskId}": {

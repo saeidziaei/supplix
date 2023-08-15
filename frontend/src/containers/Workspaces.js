@@ -53,7 +53,7 @@ export default function Workspaces() {
 
   function renderWorkspaces() {
     const groupedChildren =
-    !workspaces || workspaces.length == 0
+    !workspaces || workspaces.length === 0
       ? []
       : workspaces.reduce((result, child) => {
           const group = result.find(
@@ -72,7 +72,7 @@ export default function Workspaces() {
     return (
       <>
         <FormHeader heading="Workspaces" subheading="You are the owner of these workspaces" />
-        {(!workspaces || workspaces.length == 0) && (
+        {(!workspaces || workspaces.length === 0) && (
           <Message
             header="No workspaces found"
             icon="exclamation"

@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
+  Checkbox,
   Confirm,
   Divider,
   Form,
@@ -13,6 +14,8 @@ import {
   Header,
   Icon,
   Loader,
+  Menu,
+  Radio,
   Segment,
   Select,
   Tab
@@ -29,6 +32,7 @@ export default function WorkspaceTask() {
   const NCR_WORKSPACE_ID = "NCR";  
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecurringMode, setIsRecurringMode] = useState(false);
   const { workspaceId, taskId } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [task, setTask] = useState(null);
@@ -42,6 +46,7 @@ export default function WorkspaceTask() {
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
   const canManageTeam = () => (workspace && workspace.role === "Owner");
+  const canManageRecurringTasks = () => (workspace && workspace.role === "Owner");
 
   const canDelete = () => {
     if (isNCR()) {
@@ -101,6 +106,7 @@ export default function WorkspaceTask() {
           const task = await loadTask();
           const { data: taskData } = task ?? {};
           setTask(taskData);
+          setIsRecurringMode(taskData.isRecurring);
         }
       } catch (e) {
         onError(e);
@@ -112,27 +118,14 @@ export default function WorkspaceTask() {
     onLoad();
   }, []);
 
-  const panes = [
-    {
-      menuItem: "Task",
-      render: () => <Tab.Pane attached={false}>{renderTaskForm()}</Tab.Pane>,
-    },
-    {
-      menuItem: "Recurring",
-      render: () => (
-        <Tab.Pane attached={false}>{renerRecurringTaskForm()}</Tab.Pane>
-      ),
-    },
-  ];
+
   async function createTask(item) {
-    return await makeApiCall("POST", `/workspaces/${workspaceId}/tasks`, item);
+    const endpoint  = `/workspaces/${workspaceId}/${isRecurringMode ? "recurring-tasks" : "tasks"}`
+    return await makeApiCall("POST", endpoint, item);
   }
   async function updateTask(item) {
-    return await makeApiCall(
-      "PUT",
-      `/workspaces/${workspaceId}/tasks/${taskId}`,
-      item
-    );
+    const endpoint  = `/workspaces/${workspaceId}/${isRecurringMode ? "recurring-tasks" : "tasks"}`
+    return await makeApiCall("PUT", endpoint, item);
   }
   async function deleteTask() {
     return await makeApiCall(
@@ -182,7 +175,7 @@ export default function WorkspaceTask() {
     { key: "operatoin", value: "Operation", text: "Operation" },
   ];
 
-  const renerRecurringTaskForm = () => "todo";
+  
   const defaultValues = {
     userId: null, 
     taskName: "",
@@ -195,16 +188,26 @@ export default function WorkspaceTask() {
     correctiveAction: "", 
     rootCause: "", 
     taskStatus: "",
+    isRecurring: false,
+    endDate: "",
   }
+  const recurrenceOptions = [
+    { key: "daily", value: "Daily", text: "Daily" },
+    { key: "weekly", value: "Weekly", text: "Weekly" },
+    { key: "monthly", value: "Monthly", text: "Monthly" },
+    { key: "yearly", value: "Yearly", text: "Yearly" },
+  ];
+
+
   const renderTaskForm = () => {
     return (
       <>
         <Header as="h2" textAlign="center">
           <Icon.Group>
             <Icon name="keyboard outline" color="blue" />
-            <Icon corner name="clock outline" color="blue" />
+            <Icon corner={isRecurringMode ? "top left" : "bottom right"} name={isRecurringMode ? "clock outline" : "box"} color="blue" />
           </Icon.Group>
-          {isNCR() ? "Non-Compliance Report" : "Task"}
+          {isNCR() ? "Non-Compliance Report" : isRecurringMode ? "Recurring Task" : "Task"}
         </Header>
         <Formik
           initialValues={task || defaultValues}
@@ -223,6 +226,7 @@ export default function WorkspaceTask() {
           }) => {
             let startDate = parseDate(values["startDate"]);
             let dueDate = parseDate(values["dueDate"]);
+            let endDate = parseDate(values["endDate"]);
             let completionDate = parseDate(values["completionDate"]);
 
             return (
@@ -259,7 +263,14 @@ export default function WorkspaceTask() {
                       value={values.userId}
                       onChange={(userId) => setFieldValue("userId", userId)}
                     />
-                    {canManageTeam() && <p className="mini-text"><span>Cannot find the user you are looking for? </span><a href={`/workspace/${workspaceId}/team`}>Manage Team Members</a></p>}
+                    {canManageTeam() && (
+                      <p className="mini-text">
+                        <span>Cannot find the user you are looking for? </span>
+                        <a href={`/workspace/${workspaceId}/team`}>
+                          Manage Team Members
+                        </a>
+                      </p>
+                    )}
                   </Form.Field>
                   <Form.Field>
                     <label>Description</label>
@@ -275,6 +286,77 @@ export default function WorkspaceTask() {
                     />
                   </Form.Field>
                   <Divider />
+
+                  {canManageRecurringTasks() && // cannot toggle an existing task to recurring
+                  (<>
+                  <Checkbox 
+                    disabled={!!task}
+                      toggle
+                      label="Recurring Task?"
+                      onChange={(e, data) => {
+                        setIsRecurringMode(data.checked)
+                      }}
+                      checked={isRecurringMode}
+                    />
+                    <Divider hidden />
+                    </>)
+                    }
+                  {isRecurringMode && (
+                    <Form.Group>
+                      <Form.Field>
+                        <label>Frequency</label>
+                        <Select
+                          onChange={(e, { name, value }) =>
+                            setFieldValue(name, value)
+                          }
+                          placeholder="Select"
+                          clearable
+                          options={recurrenceOptions}
+                          name="recurrenceType"
+                          value={values.recurrenceType}
+                        />
+                      </Form.Field>
+
+                      <Form.Field>
+                        <label>Start</label>
+                        <DatePicker
+                          placeholderText="Select"
+                          isClearable="true"
+                          name="startDate"
+                          dateFormat="dd-MMM-yy"
+                          selected={startDate}
+                          onChange={(date) =>
+                            setFieldValue(
+                              "startDate",
+                              date ? date.toISOString() : ""
+                            )
+                          }
+                          className="form-field"
+                        />
+                      </Form.Field>
+                      <Form.Field>
+                        <label>End</label>
+                        <DatePicker
+                          placeholderText="Select"
+                          isClearable="true"
+                          name="endDate"
+                          dateFormat="dd-MMM-yy"
+                          selected={endDate}
+                          onChange={(date) =>
+                            setFieldValue(
+                              "endDate",
+                              date ? date.toISOString() : ""
+                            )
+                          }
+                          className="form-field"
+                        />
+                      </Form.Field>
+                    </Form.Group>
+                  )}
+
+
+
+                  {!isRecurringMode && <>
                   <Form.Group widths="equal">
                     <Form.Field>
                       <label>Start</label>
@@ -344,10 +426,11 @@ export default function WorkspaceTask() {
                       />
                     </Form.Field>
                   </Form.Group>
+                  </>}
                   {isNCR() && (
                     <>
-                    <Divider />
-                      <Form.Field  >
+                      <Divider />
+                      <Form.Field>
                         <label>Corrective Action</label>
                         <Form.Input
                           name="correctiveAction"
@@ -355,7 +438,7 @@ export default function WorkspaceTask() {
                           onChange={handleChange}
                         />
                       </Form.Field>
-                      <Form.Field  >
+                      <Form.Field>
                         <label>Root Cause</label>
                         <Form.Input
                           name="rootCause"
@@ -367,7 +450,7 @@ export default function WorkspaceTask() {
                   )}
                 </Segment>
                 <Button
-                  style={{ marginTop: "20px" }}
+                  style={{ marginTop: "40px" }}
                   basic
                   size="small"
                   primary
@@ -387,18 +470,15 @@ export default function WorkspaceTask() {
   };
   const render = () => {
     return (
-      // <Tab
-      //   menu={{ color: "blue", inverted: true, attached: false, tabular: false }}
-      //   panes={panes}
-      // />
       <>
         <WorkspaceInfoBox workspace={workspace} />
+
         <Grid textAlign="center" verticalAlign="middle">
           <Grid.Column style={{ maxWidth: 650 }}>
             {renderTaskForm()}
             {canDelete() && taskId && (
               <>
-                <Divider />
+                <Divider hidden />
                 <Confirm
                   size="mini"
                   header="This will delete the task."

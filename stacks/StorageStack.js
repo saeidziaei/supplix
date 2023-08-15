@@ -1,4 +1,3 @@
-import { AttributeType } from "aws-cdk-lib/aws-dynamodb";
 import { Bucket, Table } from "sst/constructs";
 
 
@@ -65,10 +64,12 @@ export function StorageStack({ stack, app }) {
       tenant_workspaceId: "string",
       taskId: "string",
       userId: "string",
+      isRecurring: "string"
     },
     primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "taskId" },
     globalIndexes: {
       userIndex: { partitionKey: "tenant", sortKey: "userId" },
+      isRecurringIndex: { partitionKey: "tenant", sortKey: "isRecurring" },
     },
     stream: "new_and_old_images",
   });

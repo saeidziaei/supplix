@@ -6,8 +6,11 @@ export const main = async (event, context) => {
     const stage = process.env.STAGE;
     
     for (const record of event.Records) {
-      
       const streamData = record.dynamodb;
+
+      if (streamData.NewImage.isRecurring && streamData.NewImage.isRecurring.S === "Y") {
+        continue; // skip recurring tasks
+      }
 
       if (
         record.eventName === "INSERT" ||
