@@ -4,6 +4,7 @@ import { AuthAndApiStack } from "./stacks/AuthAndApiStack.js"
 import { StorageStack } from "./stacks/StorageStack.js"
 import { FrontendStack } from "./stacks/FrontendStack.js"
 import { AfterDeployStack } from "./stacks/ScriptStack.js"
+import { CronStack } from "./stacks/CronStack.js"
 
 export default {
   config(input) {
@@ -20,6 +21,7 @@ export default {
 
     app
       .stack(StorageStack)  
+      .stack(CronStack)
       .stack(AuthAndApiStack)
       .stack(FrontendStack)
       .stack(AfterDeployStack)

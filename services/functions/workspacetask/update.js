@@ -21,7 +21,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   updatedBy = :updatedBy,
   updatedAt = :updatedAt`;
 
-  expressionAttributeValues = {
+  let expressionAttributeValues = {
     ":userId": data.userId || "",
     ":taskName": data.taskName || "",
     ":note": data.note || "",
@@ -76,5 +76,4 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   await dynamoDb.update(params);
   return { status: true };
 });
-
 

@@ -8,9 +8,11 @@ export const main = handler(async (event, tenant) => {
     TableName: process.env.WORKSPACETASK_TABLE,
     IndexName: "userIndex",
     KeyConditionExpression: "tenant = :tenant AND userId = :userId",
+    FilterExpression: "isRecurring <> :isRecurringValue", // Exclude items where isRecurring is "Y"
     ExpressionAttributeValues: {
       ":tenant": tenant,
       ":userId": userId,
+      ":isRecurringValue": "Y", // Value to filter out
     },
   };
   const result = await dynamoDb.query(params);

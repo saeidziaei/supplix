@@ -10,5 +10,6 @@ export default {
   update: (params) => client.update(params),
   delete: (params) => client.delete(params),
   scan: (params) => client.scan(params),
+  transactWrite: (params) => client.transactWrite(params),
 };
 

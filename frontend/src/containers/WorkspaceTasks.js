@@ -7,14 +7,14 @@ import { format, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Divider, Header, Icon, Label, Loader, Segment } from "semantic-ui-react";
+import { Button, Divider, Header, Icon, Label, Loader, Menu, Segment, Tab } from "semantic-ui-react";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 
 
 import User from "../components/User";
-import { normaliseCognitoUsers } from "../lib/helpers";
+import { dateFromEpoch, normaliseCognitoUsers } from "../lib/helpers";
 import "./FormRegisters.css";
 
 
@@ -26,15 +26,21 @@ export default function WorkspaceTasks() {
   const [workspace, setWorkspace] = useState(null);
   const [workspaces, setWorkspaces] = useState(null);
   const [tasks, setTasks] = useState(null);
+  const [recurringTasks, setRecurringTasks] = useState(null);
   const [users, setUsers] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
   const location = useLocation();
 
+
+
+
+
   // this component is used for multiple paths, determining what needs to be rendered based on path
   const isMytasksPath = location.pathname === "/mytasks"
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
+  const canManageRecurringTasks = () => workspace && workspace.role === "Owner";
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -59,8 +65,9 @@ export default function WorkspaceTasks() {
         const [tasks, users, workspaces] = await Promise.all([
           isMytasksPath ? loadMyTasks() : loadWorkspaceTasks(),
           loadUsers(),
-          isMytasksPath ? loadWorkspaces() : [], // no need to load all workspace if it is showing tasks for one workspace
+          isMytasksPath ? loadWorkspaces() : [], // no need to load all workspaces if it is showing tasks for one workspace
         ]);
+
         
         setUsers(normaliseCognitoUsers(users));
 
@@ -71,7 +78,8 @@ export default function WorkspaceTasks() {
           // for GET workspacetasks workspaceId is in the path therefore result are in data element and it also returns workspace
           const { data, workspace } = tasks ?? {};
 
-          setTasks(data);
+          setTasks(data.filter(t => !t.isRecurring || t.isRecurring === "N"));
+          setRecurringTasks(data.filter(t => t.isRecurring && t.isRecurring === "Y"));
           setWorkspace(workspace);
         }
       } catch (e) {
@@ -94,7 +102,7 @@ export default function WorkspaceTasks() {
     try {
     const fieldName = params.colDef.field;
     
-    const date = parseISO(params.data[fieldName]);
+    const date = dateFromEpoch(params.data[fieldName]);
     if (date == "Invalid Date") return "";
 
     return format(date, 'dd/MM/yy');
@@ -108,57 +116,100 @@ export default function WorkspaceTasks() {
     const workspace = workspaces ? workspaces.find(w => w.workspaceId === workspaceId) : {};
     return (<Label color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : workspaceId}</Label>);
   }
-  const originalColumnDefs = [
-    { field: "taskCode", headerName: "Code", width: 70 },
-    { field: "taskType", headerName: "Type", width: 70 },
-    { field: "taskName", },
-    { field: "startDate", cellRenderer: DateRenderer, width: 90 },
-    { field: "dueDate", cellRenderer: DateRenderer, width: 90 },
-    { field: "completionDate", cellRenderer: DateRenderer, width: 90 },
-    { field: "taskStatus", headerName: "Status" },
-    {
-      field: "userId",
-      headerName: "Owner",
-      cellRenderer: UserRenderer, 
-      width: 90
-    },
-    {
-      field: "createdBy",
-      headerName: "Reporter",
-      cellRenderer: UserRenderer,
-      width: 90
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated",
-      cellRenderer: UserRenderer,
-      width: 90
-    },
-    
-  ];
-  const gridOptions = {
+  
+  const tasksGridOptions = {
     defaultColDef: {
       sortable: true,
       resizable: true,
       filter: true,
       width: 120,
     },
-    columnDefs: isMytasksPath
-      ? [
-          { field: "workspace", headerName: "Workspace", width: 150, cellRenderer: WorkspaceRenderer },
-          ...originalColumnDefs,
-        ]
-      : originalColumnDefs,
+    columnDefs: [
+      isMytasksPath ? { field: "workspace", headerName: "Workspace", width: 150, cellRenderer: WorkspaceRenderer,}: {},
+      { field: "taskCode", headerName: "Code", width: 70 },
+      { field: "taskType", headerName: "Type", width: 70 },
+      { field: "taskName", },
+      { field: "startDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "dueDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "completionDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "taskStatus", headerName: "Status" },
+      {
+        field: "userId",
+        headerName: "Owner",
+        cellRenderer: UserRenderer, 
+        width: 90
+      },
+      {
+        field: "createdBy",
+        headerName: "Reporter",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      {
+        field: "updatedBy",
+        headerName: "Updated",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      
+    ].filter(def => def.field), // remove empty objects
     rowStyle: { cursor: "pointer" },
     rowSelection: "single",
-    onSelectionChanged: onSelectionChanged,
+    onSelectionChanged: onTasksSelectionChanged,
+  };
+  const recurringTasksGridOptions = {
+    defaultColDef: {
+      sortable: true,
+      resizable: true,
+      filter: true,
+      width: 120,
+    },
+    columnDefs: [
+      { field: "frequency", width: 150 },
+      { field: "taskCode", headerName: "Code", width: 70 },
+      { field: "taskType", headerName: "Type", width: 70 },
+      { field: "taskName", },
+      { field: "startDate", cellRenderer: DateRenderer, width: 90 },
+      { field: "endDate", cellRenderer: DateRenderer, width: 90 },
+      {
+        field: "userId",
+        headerName: "Owner",
+        cellRenderer: UserRenderer, 
+        width: 90
+      },
+      {
+        field: "createdBy",
+        headerName: "Reporter",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      {
+        field: "updatedBy",
+        headerName: "Updated",
+        cellRenderer: UserRenderer,
+        width: 90
+      },
+      
+    ],
+    rowStyle: { cursor: "pointer" },
+    rowSelection: "single",
+    onSelectionChanged: onRecurringTasksSelectionChanged,
   };
 
-  function onSelectionChanged() {
-    const selectedRows = gridOptions.api.getSelectedRows();
+  function onTasksSelectionChanged() {
+    const selectedRows = tasksGridOptions.api.getSelectedRows();
     const t = selectedRows.length === 1 ? selectedRows[0] : null;
     setSelectedTask(t);
   }
+
+  function onRecurringTasksSelectionChanged() {
+    const selectedRows = recurringTasksGridOptions.api.getSelectedRows();
+    const t = selectedRows.length === 1 ? selectedRows[0] : null;
+    setSelectedTask(t);
+  }
+
+
+  
   const renderSelectedTask = () => {
     if (!selectedTask) return null;
     return (
@@ -181,7 +232,43 @@ export default function WorkspaceTasks() {
       </Segment>
     );
   }
-
+  const panes = [
+    {
+      menuItem: 'Tasks',
+      render: () => <Tab.Pane attached={false}><div key="tasks"
+      className="ag-theme-balham"
+      style={{
+        height: "350px",
+        width: "100%",
+      }}
+    > 
+      <AgGridReact
+        gridOptions={tasksGridOptions}
+        rowData={tasks}
+        rowHeight="30"
+        animateRows={true}
+      ></AgGridReact>
+    </div></Tab.Pane>,
+    },
+    (canManageRecurringTasks() ? (
+    {
+      menuItem: 'Recurring Tasks',
+      render: () => <Tab.Pane attached={false}><div key="recurring-tasks"
+      className="ag-theme-balham"
+      style={{
+        height: "300px",
+        width: "100%",
+      }}
+    >
+      <AgGridReact
+        gridOptions={recurringTasksGridOptions}
+        rowData={recurringTasks}
+        rowHeight="30"
+        animateRows={true}
+      ></AgGridReact>
+    </div></Tab.Pane>,
+    }) : null),
+  ];
   function render() {
     return (
       <>
@@ -190,20 +277,8 @@ export default function WorkspaceTasks() {
         ) : (
           <WorkspaceInfoBox workspace={workspace} />
         )}
-        <div
-          className="ag-theme-balham"
-          style={{
-            height: "300px",
-            width: "100%",
-          }}
-        >
-          <AgGridReact
-            gridOptions={gridOptions}
-            rowData={tasks}
-            rowHeight="30"
-            animateRows={true}
-          ></AgGridReact>
-        </div>
+       <Tab  menu={{ secondary: true, pointing: true }} panes={panes} />
+        
         {renderSelectedTask()}
         <Divider hidden />
         {!isMytasksPath && (
@@ -214,6 +289,7 @@ export default function WorkspaceTasks() {
             </Button>
           </LinkContainer>
         )}
+        <Button primary onClick={async () => await makeApiCall("POST", `/generate-tasks`)} >Manually Generate Tasks</Button>
       </>
     );
   }

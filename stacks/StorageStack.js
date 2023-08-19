@@ -64,12 +64,13 @@ export function StorageStack({ stack, app }) {
       tenant_workspaceId: "string",
       taskId: "string",
       userId: "string",
-      isRecurring: "string"
+      isRecurring: "string",
+      endDate: "number",
     },
     primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "taskId" },
     globalIndexes: {
       userIndex: { partitionKey: "tenant", sortKey: "userId" },
-      isRecurringIndex: { partitionKey: "tenant", sortKey: "isRecurring" },
+      isRecurringIndex: { partitionKey: "isRecurring" },
     },
     stream: "new_and_old_images",
   });

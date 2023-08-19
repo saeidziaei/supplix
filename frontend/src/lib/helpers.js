@@ -26,7 +26,9 @@ export const normaliseCognitoUser = cu => ({
 });
 
 export const normaliseCognitoUsers = (cUsers) => {
-  if (!cUsers || cUsers.length === 0) return [];
+  if (!Array.isArray(cUsers)) {
+    return [];
+  }
 
   return cUsers.map(normaliseCognitoUser);
 }
@@ -50,6 +52,16 @@ export const parseDate = (inputDate) => {
     return "";
   }
 };
+export const dateFromEpoch = (value) => {
+  try {
+    const ret = new Date(value);
+    return (ret == "Invalid Date") ? undefined : ret;
+  } catch {
+    return undefined;
+  }
+}
+export const dateToEpoch = (date) => date ? date.getTime() : undefined;
+
 function getAttribute(user, attributeName) {
   if (!user) return undefined;
   

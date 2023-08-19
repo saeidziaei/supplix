@@ -13,23 +13,26 @@ import {
   Grid,
   Header,
   Icon,
+  Label,
   Loader,
-  Menu,
-  Radio,
   Segment,
   Select,
-  Tab
 } from "semantic-ui-react";
 import UserPicker from "../components/UserPicker";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
-import { normaliseCognitoUsers, parseDate } from "../lib/helpers";
+import {
+  dateFromEpoch,
+  dateToEpoch,
+  normaliseCognitoUsers,
+} from "../lib/helpers";
 import "./WorkspaceTask.css";
+import * as Yup from "yup";
 
 export default function WorkspaceTask() {
-  const NCR_WORKSPACE_ID = "NCR";  
+  const NCR_WORKSPACE_ID = "NCR";
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRecurringMode, setIsRecurringMode] = useState(false);
@@ -41,12 +44,23 @@ export default function WorkspaceTask() {
   const { currentUserRoles } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set time to the beginning of the day
 
+  let shape = {
+    taskName: Yup.string().required("Task name is required"),
+    };
+  if (isRecurringMode) {
+    shape.endDate = Yup.number()
+        .nullable()
+        .min(Yup.ref("startDate"), "End date must be greater than start date")
+  }
+  const Schema = Yup.object().shape(shape);
   const nav = useNavigate();
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
-  const canManageTeam = () => (workspace && workspace.role === "Owner");
-  const canManageRecurringTasks = () => (workspace && workspace.role === "Owner");
+  const canManageTeam = () => workspace && workspace.role === "Owner";
+  const canManageRecurringTasks = () => workspace && workspace.role === "Owner";
 
   const canDelete = () => {
     if (isNCR()) {
@@ -63,25 +77,30 @@ export default function WorkspaceTask() {
 
     return false;
   };
-  
+
   function validateForm() {
     return true; // file.current
   }
   useEffect(() => {
-
     async function loadTask() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}/tasks/${taskId}`);
+      return await makeApiCall(
+        "GET",
+        `/workspaces/${workspaceId}/tasks/${taskId}`
+      );
     }
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
     async function loadUsers() {
-      return await makeApiCall("GET", `/users`); 
+      return await makeApiCall("GET", `/users`);
     }
 
     async function onLoad() {
       try {
-        const [members, usersData] = await Promise.all([loadWorkspaceMembers(), loadUsers()]);
+        const [members, usersData] = await Promise.all([
+          loadWorkspaceMembers(),
+          loadUsers(),
+        ]);
         const users = normaliseCognitoUsers(usersData);
 
         // workspaceId in the path therefore results are in data element and it also returns workspace
@@ -118,13 +137,16 @@ export default function WorkspaceTask() {
     onLoad();
   }, []);
 
-
   async function createTask(item) {
-    const endpoint  = `/workspaces/${workspaceId}/${isRecurringMode ? "recurring-tasks" : "tasks"}`
+    const endpoint = `/workspaces/${workspaceId}/${
+      isRecurringMode ? "recurring-tasks" : "tasks"
+    }`;
     return await makeApiCall("POST", endpoint, item);
   }
   async function updateTask(item) {
-    const endpoint  = `/workspaces/${workspaceId}/${isRecurringMode ? "recurring-tasks" : "tasks"}`
+    const endpoint = `/workspaces/${workspaceId}/${
+      isRecurringMode ? "recurring-tasks" : "tasks"
+    }/${taskId}`;
     return await makeApiCall("PUT", endpoint, item);
   }
   async function deleteTask() {
@@ -144,7 +166,6 @@ export default function WorkspaceTask() {
     } finally {
       setIsLoading(false);
     }
-
   }
 
   async function handleSubmit(values, { setSubmitting }) {
@@ -170,27 +191,35 @@ export default function WorkspaceTask() {
     { key: "completed", value: "Completed", text: "Completed" },
   ];
   const typeOptions = [
-    { key: "risk management", value: "Risk Management", text: "Risk Management" },
-    { key: "client management", value: "Client Management", text: "Client Management" },
+    {
+      key: "risk management",
+      value: "Risk Management",
+      text: "Risk Management",
+    },
+    {
+      key: "client management",
+      value: "Client Management",
+      text: "Client Management",
+    },
     { key: "operatoin", value: "Operation", text: "Operation" },
   ];
 
-  
   const defaultValues = {
-    userId: null, 
+    userId: null,
     taskName: "",
     note: "",
-    startDate: "",
-    dueDate: "",
-    completionDate: "",
+    startDate: undefined,
+    endDate: undefined,
+    dueDate: undefined,
+    completionDate: undefined,
     taskCode: "",
     taskType: "",
-    correctiveAction: "", 
-    rootCause: "", 
+    correctiveAction: "",
+    rootCause: "",
     taskStatus: "",
     isRecurring: false,
-    endDate: "",
-  }
+    frequency: "Daily"
+  };
   const recurrenceOptions = [
     { key: "daily", value: "Daily", text: "Daily" },
     { key: "weekly", value: "Weekly", text: "Weekly" },
@@ -198,21 +227,29 @@ export default function WorkspaceTask() {
     { key: "yearly", value: "Yearly", text: "Yearly" },
   ];
 
-
   const renderTaskForm = () => {
     return (
       <>
         <Header as="h2" textAlign="center">
           <Icon.Group>
             <Icon name="keyboard outline" color="blue" />
-            <Icon corner={isRecurringMode ? "top left" : "bottom right"} name={isRecurringMode ? "clock outline" : "box"} color="blue" />
+            <Icon
+              corner={isRecurringMode ? "top left" : "bottom right"}
+              name={isRecurringMode ? "repeat" : "box"}
+              color="blue"
+            />
           </Icon.Group>
-          {isNCR() ? "Non-Compliance Report" : isRecurringMode ? "Recurring Task" : "Task"}
+          {isNCR()
+            ? "Non-Compliance Report"
+            : isRecurringMode
+            ? "Recurring Task"
+            : "Task"}
         </Header>
         <Formik
           initialValues={task || defaultValues}
           validate={validateForm}
           onSubmit={handleSubmit}
+          validationSchema={Schema}
         >
           {({
             values,
@@ -224,16 +261,20 @@ export default function WorkspaceTask() {
             setFieldValue,
             /* and other goodies */
           }) => {
-            let startDate = parseDate(values["startDate"]);
-            let dueDate = parseDate(values["dueDate"]);
-            let endDate = parseDate(values["endDate"]);
-            let completionDate = parseDate(values["completionDate"]);
+            let startDate = dateFromEpoch(values["startDate"]);
+            let dueDate = dateFromEpoch(values["dueDate"]);
+            let endDate = dateFromEpoch(values["endDate"]);
+            let completionDate = dateFromEpoch(values["completionDate"]);
 
             return (
               <Form onSubmit={handleSubmit} autoComplete="off">
                 <Segment textAlign="left">
-                  <Form.Group>
-                    <Form.Field required width={12}>
+                  {errors.taskName && touched.taskName && (
+                    <Label pointing="below" color="orange">
+                      {errors.taskName}
+                    </Label>
+                  )}
+                   <Form.Field required >
                       <label>Title</label>
                       <Form.Input
                         name="taskName"
@@ -241,7 +282,16 @@ export default function WorkspaceTask() {
                         onChange={handleChange}
                       />
                     </Form.Field>
+                  <Form.Group widths="equal">
+                   
                     <Form.Field>
+                      <label>Code</label>
+                      <Form.Input
+                        name="taskCode"
+                        value={values.taskCode}
+                        onChange={handleChange}
+                      />
+                    </Form.Field><Form.Field>
                       <label>Type</label>
                       <Select
                         onChange={(e, { name, value }) =>
@@ -287,21 +337,20 @@ export default function WorkspaceTask() {
                   </Form.Field>
                   <Divider />
 
-                  {canManageRecurringTasks() && // cannot toggle an existing task to recurring
-                  (<>
-                  <Checkbox 
-                    disabled={!!task}
-                      toggle
-                      label="Recurring Task?"
-                      onChange={(e, data) => {
-                        setIsRecurringMode(data.checked)
-                      }}
-                      checked={isRecurringMode}
-                    />
-                    <Divider hidden />
-                    </>)
-                    }
-                  {isRecurringMode && (
+                  {canManageRecurringTasks() && !task && ( // cannot toggle an existing task between recurring and non-recurring
+                    <>
+                      <Checkbox
+                        toggle
+                        label="Recurring Task?"
+                        onChange={(e, data) => {
+                          setIsRecurringMode(data.checked);
+                        }}
+                        checked={isRecurringMode}
+                      />
+                      <Divider hidden />
+                    </>
+                  )}
+                  {isRecurringMode && (<>
                     <Form.Group>
                       <Form.Field>
                         <label>Frequency</label>
@@ -310,13 +359,11 @@ export default function WorkspaceTask() {
                             setFieldValue(name, value)
                           }
                           placeholder="Select"
-                          clearable
                           options={recurrenceOptions}
-                          name="recurrenceType"
-                          value={values.recurrenceType}
+                          name="frequency"
+                          value={values.frequency}
                         />
                       </Form.Field>
-
                       <Form.Field>
                         <label>Start</label>
                         <DatePicker
@@ -325,108 +372,112 @@ export default function WorkspaceTask() {
                           name="startDate"
                           dateFormat="dd-MMM-yy"
                           selected={startDate}
-                          onChange={(date) =>
-                            setFieldValue(
-                              "startDate",
-                              date ? date.toISOString() : ""
-                            )
-                          }
+                          onChange={(date) => {
+                            setFieldValue("startDate", dateToEpoch(date));
+                          }}
                           className="form-field"
                         />
                       </Form.Field>
                       <Form.Field>
                         <label>End</label>
+
                         <DatePicker
                           placeholderText="Select"
-                          isClearable="true"
+                          isClearable={true}
                           name="endDate"
                           dateFormat="dd-MMM-yy"
                           selected={endDate}
-                          onChange={(date) =>
-                            setFieldValue(
-                              "endDate",
-                              date ? date.toISOString() : ""
-                            )
-                          }
+                          onChange={(date) => {
+                            setFieldValue("endDate", dateToEpoch(date));
+                          }}
                           className="form-field"
                         />
                       </Form.Field>
                     </Form.Group>
+                    {errors.startDate && touched.startDate && (
+                        <Label pointing="right" color="orange">
+                          {errors.startDate}
+                        </Label>
+                      )}
+                    {errors.endDate && touched.endDate && (
+                        <Label pointing="right" color="orange">
+                          {errors.endDate}
+                        </Label>
+                      )}
+
+                    </>
                   )}
 
+                  {!isRecurringMode && (
+                    <>
+                      {errors.startDate && touched.startDate && (
+                        <Label pointing="below" color="orange">
+                          {errors.startDate}
+                        </Label>
+                      )}
 
+                      <Form.Group widths="equal">
+                        <Form.Field>
+                          <label>Start</label>
+                          <DatePicker
+                            placeholderText="Select"
+                            isClearable="true"
+                            name="startDate"
+                            dateFormat="dd-MMM-yy"
+                            selected={startDate}
+                            onChange={(date) =>
+                              setFieldValue("startDate", dateToEpoch(date))
+                            }
+                            className="form-field"
+                          />
+                        </Form.Field>
 
-                  {!isRecurringMode && <>
-                  <Form.Group widths="equal">
-                    <Form.Field>
-                      <label>Start</label>
-                      <DatePicker
-                        placeholderText="Select"
-                        isClearable="true"
-                        name="startDate"
-                        dateFormat="dd-MMM-yy"
-                        selected={startDate}
-                        onChange={(date) =>
-                          setFieldValue(
-                            "startDate",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        className="form-field"
-                      />
-                    </Form.Field>
-
-                    <Form.Field>
-                      <label>Due</label>
-                      <DatePicker
-                        placeholderText="Select"
-                        isClearable="true"
-                        name="dueDate"
-                        dateFormat="dd-MMM-yy"
-                        selected={dueDate}
-                        onChange={(date) =>
-                          setFieldValue(
-                            "dueDate",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        className="form-field"
-                      />
-                    </Form.Field>
-                  </Form.Group>
-                  <Form.Group widths="equal">
-                    <Form.Field>
-                      <label>Status</label>
-                      <Select
-                        onChange={(e, { name, value }) =>
-                          setFieldValue(name, value)
-                        }
-                        placeholder="Select"
-                        clearable
-                        options={statusOptions}
-                        name="taskStatus"
-                        value={values.taskStatus}
-                      />
-                    </Form.Field>
-                    <Form.Field>
-                      <label>Completion</label>
-                      <DatePicker
-                        placeholderText="Select"
-                        isClearable="true"
-                        name="completionDate"
-                        dateFormat="dd-MMM-yy"
-                        selected={completionDate}
-                        onChange={(date) =>
-                          setFieldValue(
-                            "completionDate",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        className="form-field"
-                      />
-                    </Form.Field>
-                  </Form.Group>
-                  </>}
+                        <Form.Field>
+                          <label>Due</label>
+                          <DatePicker
+                            placeholderText="Select"
+                            isClearable="true"
+                            name="dueDate"
+                            dateFormat="dd-MMM-yy"
+                            selected={dueDate}
+                            onChange={(date) =>
+                              setFieldValue("dueDate", dateToEpoch(date))
+                            }
+                            className="form-field"
+                          />
+                        </Form.Field>
+                      </Form.Group>
+                      <Form.Group widths="equal">
+                        <Form.Field>
+                          <label>Status</label>
+                          <Select
+                            onChange={(e, { name, value }) =>
+                              setFieldValue(name, value)
+                            }
+                            placeholder="Select"
+                            clearable
+                            options={statusOptions}
+                            name="taskStatus"
+                            value={values.taskStatus}
+                          />
+                        </Form.Field>
+                        <Form.Field>
+                          <label>Completion</label>
+                          <DatePicker
+                            placeholderText="Select"
+                            isClearable="true"
+                            name="completionDate"
+                            dateFormat="dd-MMM-yy"
+                            selected={completionDate}
+                            onChange={(date) =>
+                              setFieldValue("completionDate", dateToEpoch(date))
+                            }
+                            className="form-field"
+                          />
+                        </Form.Field>
+                      </Form.Group>
+                    </>
+                  )}
                   {isNCR() && (
                     <>
                       <Divider />

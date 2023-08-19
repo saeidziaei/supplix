@@ -142,6 +142,18 @@ Temporary Password: {####}
       },
     },
     routes: {
+      // TEMP
+      "POST   /generate-tasks": {
+        function: {
+          handler: "services/functions/cron/task-generator.main",
+          bind: [workspaceTaskTable],
+          environment: {
+            WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },
+
       "GET   /workspaces": {
         function: {
           handler: "services/functions/workspace/list.main",
@@ -235,7 +247,7 @@ Temporary Password: {####}
           handler: "services/functions/workspacetask/create.main",
           bind: [workspaceTaskTable],
         },
-      },      
+      },
       "PUT  /workspaces/{workspaceId}/tasks/{taskId}": {
         function: {
           handler: "services/functions/workspacetask/update.main",
@@ -250,9 +262,8 @@ Temporary Password: {####}
             WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
             TASK_MODE: RECURRING,
           },
-
         },
-      },      
+      },
       "PUT  /workspaces/{workspaceId}/recurring-tasks/{taskId}": {
         function: {
           handler: "services/functions/workspacetask/update.main",
@@ -261,7 +272,6 @@ Temporary Password: {####}
             WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
             TASK_MODE: RECURRING,
           },
-
         },
       },
       "DELETE /workspaces/{workspaceId}/tasks/{taskId}": {
@@ -273,9 +283,6 @@ Temporary Password: {####}
           },
         },
       },
-
-
-
 
       "POST /docs/upload-url": {
         function: {
@@ -412,7 +419,6 @@ Temporary Password: {####}
           environment: {
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
-
         },
       },
 

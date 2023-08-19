@@ -11,27 +11,28 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   let item = {
     tenant_workspaceId: `${tenant}_${workspaceId}`, // pk
     tenant: tenant,
-    workspaceId: workspaceId, 
-    taskId: uuid.v1(), 
+    workspaceId: workspaceId,
+    taskId: uuid.v1(),
     userId: data.userId || "-1", // userId is in a secondary index and cannot be empty
     taskName: data.taskName || "",
     note: data.note || "",
 
-    startDate: data.startDate || "",
+    ...(data.startDate ? { startDate: data.startDate } : {}),
 
     taskCode: data.taskCode || "",
     taskType: data.taskType || "",
     taskStatus: data.taskStatus || "",
 
     createdBy: event.requestContext.authorizer.jwt.claims.sub,
-    createdAt: Date.now(), 
+    createdAt: Date.now(),
   };
 
   if (!isRecurring) {
       item = {
         ...item,
-        dueDate: data.dueDate || "",
-        completionDate: data.completionDate || "",
+    ...(data.dueDate ? { dueDate: data.dueDate } : {}),
+    ...(data.completionDate ? { completionDate: data.completionDate } : {}),
+
       };
       if (workspaceId === NCR_WORKSAPCE_ID) {
         item = {
@@ -44,8 +45,8 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       item = {
         ...item,
         isRecurring: "Y",
-        endDate: data.endDate || "",
-        frequency: data.frequency || "",
+        ...(data.endDate ? { endDate: data.endDate } : {}),
+        frequency: data.frequency || "Daily",
       };
     }
   
