@@ -7,7 +7,6 @@ export default function AuthenticatedRoute({ children }) {
   const { authenticatedUser } = useAppContext();
 
   if (!authenticatedUser) {
-    alert(`/login?redirect=${pathname}${search}`);
 
     return <Navigate to={`/login?redirect=${pathname}${search}`} />;
   }

@@ -21,6 +21,7 @@ import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
 import { normaliseCognitoUser } from "./lib/helpers";
 import { NCR } from "./components/NCR";
+import { onError } from "./lib/errorLib";
 
 
 export default App;
@@ -52,8 +53,9 @@ function App() {
         setAuthenticatedUser(session.idToken.payload);
 
       } catch (e) {
-       
-        if (e !== "No current user") {
+        console.log(e);
+        if (e != "No current user") {
+          console.log(e);
           alert(e);
         }
         await Auth.signOut();
@@ -100,12 +102,13 @@ function App() {
         setEmployee(employee);
         setTasks(tasks);
       } catch (e) {
-        alert(e);
+        onError(e);
       }
     }
     
-
-    onLoad();
+    if (authenticatedUser) {
+      onLoad();
+    }
   }, [authenticatedUser]);
 
 
@@ -167,7 +170,8 @@ function App() {
                     ></Button>
                     {employee && <User user={employee} compact={isMobile} />}
                   </List.Item>
-                  <List.Item ><NCR /> </List.Item>
+                  {authenticatedUser &&
+                  <List.Item ><NCR /> </List.Item>}
                 </List>
                 
 

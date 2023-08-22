@@ -230,15 +230,17 @@ export default function WorkspaceTask() {
   ];
 
   const renderTaskForm = () => {
+    const color = isNCR() ? "red" : "blue";
+    const iconName = isNCR() ? "target" : "keyboard outline";
     return (
       <>
         <Header as="h2" textAlign="center">
           <Icon.Group>
-            <Icon name="keyboard outline" color="blue" />
+            <Icon name={iconName} color={color} />
             <Icon
               corner={isRecurringMode ? "top left" : "bottom right"}
               name={isRecurringMode ? "repeat" : "box"}
-              color="blue"
+              color={color}
             />
           </Icon.Group>
           {isNCR()
@@ -339,7 +341,9 @@ export default function WorkspaceTask() {
                   </Form.Field>
                   <Divider />
 
-                  {canManageRecurringTasks() && !task && ( // cannot toggle an existing task between recurring and non-recurring
+                  {canManageRecurringTasks() && 
+                  !isNCR() && // NCRs cannot be recurring
+                  !task && ( // cannot toggle an existing task between recurring and non-recurring
                     <>
                       <Checkbox
                         toggle
