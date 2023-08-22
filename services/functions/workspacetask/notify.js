@@ -30,6 +30,7 @@ export const main = async (event, context) => {
         const userId = streamData.NewImage.userId.S;
         const workspaceId = streamData.NewImage.workspaceId.S;
         const taskId = streamData.NewImage.taskId.S;
+        const taskName = streamData.NewImage.taskName.S;
 
         // Fetch user details using getUser function
         if (!userId || userId === "-1") {
@@ -48,7 +49,7 @@ export const main = async (event, context) => {
               Text: {
                 Data: `Hi ${
                   user.firstName
-                },\n\nA new task is assigned to you.  You can access it here: https://isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
+                },\n\nA new task is assigned to you.\n ${taskName}\nSee more details here: https://isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
                 ${
                   stage === "prod"
                     ? ""

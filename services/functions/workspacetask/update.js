@@ -34,11 +34,12 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   };
 
   if (!isRecurring) {
-    updateExpression += ", dueDate= :dueDate, completionDate = :completionDate";
+    updateExpression += `${data.dueDate ? ", dueDate= :dueDate" : ""} 
+    ${data.completionDate ? ", completionDate= :completionDate" : ""}`;
     expressionAttributeValues = {
       ...expressionAttributeValues,
-      ":dueDate": data.dueDate || "",
-      ":completionDate": data.completionDate || "",
+      ...(data.dueDate ? { ":dueDate": data.dueDate } : {}),
+      ...(data.completionDate ? { ":completionDate": data.completionDate } : {}),
     };
 
     if (workspaceId === NCR_WORKSAPCE_ID) {
@@ -51,11 +52,11 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       };
     }
   } else {
-    updateExpression += ", endDate= :endDate, frequency = :frequency";
+    updateExpression += `${data.endDate ? ", endDate= :endDate" : ""} , frequency = :frequency`;
     expressionAttributeValues = {
       ...expressionAttributeValues,
-      ":endDate": data.endDate || "",
-      ":frequency": data.frequency || "",
+      ...(data.endDate ? { ":endDate": data.endDate } : {}),
+      ":frequency": data.frequency || "Daily",
     };
   }
   const params = {

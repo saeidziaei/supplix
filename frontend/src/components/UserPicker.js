@@ -13,7 +13,6 @@ export default function UserPicker({ users, value, onChange, disabled = false })
       text: u.Username,
     };
   });
-
   const handleChange = (e, {value}) => {
     onChange(value);
   } 

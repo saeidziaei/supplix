@@ -202,6 +202,8 @@ export default function WorkspaceTask() {
       text: "Client Management",
     },
     { key: "operatoin", value: "Operation", text: "Operation" },
+    { key: "quality assurance", value: "Quality Assurance", text: "Quality Assurance" },
+    { key: "asset management", value: "Asset Management", text: "Asset Management" },
   ];
 
   const defaultValues = {
