@@ -5,7 +5,8 @@ export async function main() {
   console.log("[INFO]", "Running task generator cron job");
 
   const now = new Date();
-  now.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+  now.setHours(23, 59, 59, 999); // Set time to the end of the day
+
   const currentDate = now.getTime(); // unix Timestamp Milliseconds
   console.log(currentDate);
   try {
@@ -24,7 +25,6 @@ export async function main() {
 }
 
 async function getRecurringTasks(currentDate) {
-
 
   const queryParams = {
       TableName: process.env.WORKSPACETASK_TABLE,
@@ -53,7 +53,7 @@ async function generateAndSaveTask(task, currentDate) {
 
   console.table(task);
   console.log(currentDate);
-  if (lastRunTime + intervalInMillis < currentDate) {
+  if (lastRunTime + intervalInMillis <= currentDate) {
       const newTask = {
           tenant_workspaceId: task.tenant_workspaceId,
           tenant: task.tenant,
@@ -83,7 +83,7 @@ async function generateAndSaveTask(task, currentDate) {
           },
           UpdateExpression: "SET lastRunTime = :lastRunTime",
           ExpressionAttributeValues: {
-              ":lastRunTime": currentDate,
+              ":lastRunTime": Date.now(),
           },
       };
 
@@ -100,31 +100,30 @@ async function generateAndSaveTask(task, currentDate) {
   }
 }
 
-  
-
 
 // Helper function to get frequency in milliseconds
 function getFrequencyInMillis(frequency) {
+  const dayMilliseconds = 24 * 60 * 60 * 1000;
   switch (frequency) {
     case "Daily":
-      return 24 * 60 * 60 * 1000;
+      return dayMilliseconds;
     case "Weekly":
-      return 7 * 24 * 60 * 60 * 1000;
+      return 7 * dayMilliseconds;
     case "Fortnightly":
-      return 14 * 24 * 60 * 60 * 1000;
+      return 14 * dayMilliseconds;
     case "Monthly":
       // Approximate value, you might want to improve this calculation
-      return 30 * 24 * 60 * 60 * 1000;
+      return 30 * dayMilliseconds;
     case "ThreeMonthly":
       // Approximate value, you might want to improve this calculation
-      return 3 * 30 * 24 * 60 * 60 * 1000;
+      return 3 * 30 * dayMilliseconds;
     case "SixMonthly":
       // Approximate value, you might want to improve this calculation
-      return 6 * 30 * 24 * 60 * 60 * 1000;
+      return 6 * 30 * dayMilliseconds;
     case "Yearly":
       // Approximate value, you might want to improve this calculation
-      return 365 * 24 * 60 * 60 * 1000;
+      return 365 * dayMilliseconds;
     default:
-      return 24 * 60 * 60 * 1000; // Default to daily
+      return dayMilliseconds; // Default to daily
   }
 }
