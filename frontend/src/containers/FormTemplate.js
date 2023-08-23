@@ -34,19 +34,25 @@ import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import "./FormTemplate.css";
 import FormRegister from "./FormRegister";
+import { useAppContext } from "../lib/contextLib";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
+  const { currentUserRoles } = useAppContext();
+  const isAdmin = currentUserRoles.includes("admins");
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [sections, setSections] = useState([]);
   const [registerFields, setRegisterFields] = useState([]);
   const [activeDesigner, setActiveDesigner] = useState("form designer");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const handleMenuClick = (e, { name }) => setActiveDesigner(name);
+
+  const canDeleteTemplate = () => isAdmin;
 
   useEffect(() => {
     async function loadTemplate() {
@@ -76,7 +82,21 @@ export default function FormTemplate() {
 
     onLoad();
   }, []);
-
+  async function deleteTemplate() {
+    return await makeApiCall("DELETE", `/templates/${templateId}`);
+  }
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      setDeleteConfirmOpen(false);
+      await deleteTemplate();
+      nav(`/templates`);
+    } catch (e) {
+      onError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }
   async function handleSubmit() {
     setIsLoading(true);
     try {
@@ -588,11 +608,30 @@ export default function FormTemplate() {
        <Segment attached="bottom">{activeDesigner == 'form designer' ? renderFormDesigner() : rednerRegisterDesigner()}
        
        </Segment>
-       <Button basic color="blue" onClick={handleSubmit}>
+       <Button basic color="blue" size="mini" onClick={handleSubmit}>
           <Icon name="save" />
           Save
         </Button>
-
+        <Confirm
+            size="mini"
+            header="This will delete the form." 
+            content="The existing records are fine but no new records of this form can be produced. Are you sure?"
+            open={deleteConfirmOpen}
+            onCancel={() => setDeleteConfirmOpen(false)}
+            onConfirm={handleDelete}
+          />
+        {templateId && (canDeleteTemplate) && (
+            <Button
+              floated="right"
+              basic
+              size="mini"
+              color="red"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Icon name="remove circle" />
+              Delete Form
+            </Button>
+          )}
       </Grid.Column>
       <Grid.Column width={9}>
         <Header as="h3" color="teal">

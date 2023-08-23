@@ -14,6 +14,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       tenant_workspaceId: `${tenant}_${workspaceUser.workspaceId}`, // pk
       formId: uuid.v1(), // A unique uuid
       templateId: data.templateId,
+      templateVersion: data.templateVersion || 0,
       formValues: data.formValues,
       createdBy: username,
       createdByUser: user,

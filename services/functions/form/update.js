@@ -38,11 +38,11 @@ export const main = handler(async (event, tenant, workspaceUser) => {
     };
     const currentRecord = await dynamoDb.get(getCurrentRecordParams);
 
-    updateExpression += `, history = list_append(if_not_exists(history, :empty_list), :history)`;
+    updateExpression += `, history = list_append(if_not_exists(history, :empty_list), :current_record)`;
     expressionAttributeValues = {
       ...expressionAttributeValues,
       ":empty_list": [],
-      ":history": [currentRecord.Item],
+      ":current_record": [currentRecord.Item],
     };
   }
 

@@ -13,7 +13,6 @@ import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
 import { useParams } from "react-router-dom";
-import { useAppContext } from "../lib/contextLib";
 import "./FormRegisters.css";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
@@ -89,7 +88,7 @@ export default function FormRegisters() {
                           <LinkContainer
                             to={`/workspace/${workspaceId}/form/${t.templateId}`}
                           >
-                            <Button basic primary size="mini">
+                            <Button basic primary size="mini" disabled={t.isDeleted}>
                               <Icon name="add" />
                               Record
                             </Button>
@@ -102,7 +101,7 @@ export default function FormRegisters() {
                             </Button>
                           </LinkContainer>
                         </List.Content>
-                        <List.Icon name='database' size='large' verticalAlign='middle' className="custom-blue-icon" />
+                        <List.Icon name='newspaper outline' size='large' verticalAlign='middle' className="custom-blue-icon" />
                         <List.Content>
                           <List.Header>{def.title}</List.Header>
                           <List.Description>{`${t.formCount} ${pluralize(

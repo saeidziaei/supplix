@@ -396,6 +396,15 @@ Temporary Password: {####}
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
+      },      
+      "DELETE   /templates/{templateId}": {
+        function: {
+          handler: "services/functions/template/delete.main",
+          bind: [templateTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
       },
       "GET   /workspaces/{workspaceId}/templates/{templateId}/forms": {
         function: {

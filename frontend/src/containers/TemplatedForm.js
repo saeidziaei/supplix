@@ -8,7 +8,6 @@ import {
   Confirm,
   Header,
   Icon,
-  Label,
   Loader,
   Message,
   Popup,
@@ -20,7 +19,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
-import "./TemplatedForm.css"
+import "./TemplatedForm.css";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -180,6 +179,7 @@ export default function TemplatedForm() {
   async function createForm(values) {
     return await makeApiCall("POST", `/workspaces/${workspaceId}/forms`, {
       templateId: template.templateId,
+      templateVersion: template.templateVersion,
       formValues: values,
     });
   }
@@ -254,7 +254,7 @@ export default function TemplatedForm() {
   const editable = isNew || isEditing || isRevisioning;
   return (
     <>
-    <WorkspaceInfoBox workspace={workspace} />
+      <WorkspaceInfoBox workspace={workspace} />
       <Header as="h2">
         {!formId
           ? "New Record"
@@ -264,34 +264,33 @@ export default function TemplatedForm() {
           ? "Revision"
           : ""}
       </Header>
-      {workspaceId && templateId && formId && (
-        <Popup
-          content="Link to this record copied."
-          on="click"
-          trigger={
-            <Label
-              as="a"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `/workspace/${workspaceId}/form/${templateId}/${formId}`
-                );
-              }}
-            >
-              <Icon name="copy" />
-              Link
-            </Label>
-          }
-        />
-      )}
-      
+
       <div className="form-background">
-      <GenericForm
-        formDef={template.templateDefinition}
-        formData={formRecord ? formRecord.formValues : null}
-        handleSubmit={handleSubmit}
-        handleCancel={isNew ? null : cancelEdit}
-        disabled={!editable}
-      />
+        <GenericForm
+          formDef={template.templateDefinition}
+          formData={formRecord ? formRecord.formValues : null}
+          handleSubmit={handleSubmit}
+          handleCancel={isNew ? null : cancelEdit}
+          disabled={!editable}
+        />
+        {workspaceId && templateId && formId && (
+          <Popup
+            content="Link to this record copied."
+            on="click"
+            trigger={
+              <Button
+                circular
+                size="tiny"
+                icon="copy"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `/workspace/${workspaceId}/form/${templateId}/${formId}`
+                  );
+                }}
+              />
+            }
+          />
+        )}
       </div>
 
       {formRecord && (

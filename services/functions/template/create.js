@@ -10,6 +10,7 @@ export const main = handler(async (event, tenant) => {
       tenant: tenant,
       templateId: uuid.v1(), // A unique uuid
       templateDefinition: data.templateDefinition,
+      templateVersion: 0,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
     },

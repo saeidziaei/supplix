@@ -110,9 +110,17 @@ function getFrequencyInMillis(frequency) {
       return 24 * 60 * 60 * 1000;
     case "Weekly":
       return 7 * 24 * 60 * 60 * 1000;
+    case "Fortnightly":
+      return 14 * 24 * 60 * 60 * 1000;
     case "Monthly":
       // Approximate value, you might want to improve this calculation
       return 30 * 24 * 60 * 60 * 1000;
+    case "ThreeMonthly":
+      // Approximate value, you might want to improve this calculation
+      return 3 * 30 * 24 * 60 * 60 * 1000;
+    case "SixMonthly":
+      // Approximate value, you might want to improve this calculation
+      return 6 * 30 * 24 * 60 * 60 * 1000;
     case "Yearly":
       // Approximate value, you might want to improve this calculation
       return 365 * 24 * 60 * 60 * 1000;

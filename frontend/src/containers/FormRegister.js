@@ -13,7 +13,7 @@ import { Button, Divider, Header, Icon, Label, Loader, Message, Popup } from "se
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
-import { cloneDeep } from 'lodash'; // Import the cloneDeep function from the lodash library
+import { cloneDeep, template } from 'lodash'; // Import the cloneDeep function from the lodash library
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 
@@ -32,6 +32,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const [columnDefs, setColumnDefs] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [workspace, setWorkspace] = useState(null);
+  const [isTemplateDeleted, setIsTemplateDeleted] = useState(false);
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
   
@@ -65,6 +66,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         // todo: how do we avoid two roundtrips?
         const template = await loadTemplate(templateId);
         setFormDef(template.templateDefinition);
+        setIsTemplateDeleted(template.isDeleted);
 
         const forms = await loadTemplateForms(templateId);
         // loadTemplateForms has workspaceId in the path therefore members are in data element and it also returns workspace
@@ -73,7 +75,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         setForms(data);
         setWorkspace(workspace);
 
-        const formsCopy = cloneDeep(forms);
+        const formsCopy = cloneDeep(data);
 
         setOriginalForms(formsCopy);
 
@@ -547,8 +549,9 @@ const handleCellValueChanged = useCallback(() => {
                 Back
               </Button>
             </LinkContainer>
+            
             <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
-              <Button basic primary size="mini">
+              <Button basic primary size="mini" disabled={isTemplateDeleted}>
                 <Icon name="plus" />
                 Record
               </Button>

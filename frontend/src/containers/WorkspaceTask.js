@@ -125,7 +125,7 @@ export default function WorkspaceTask() {
           const task = await loadTask();
           const { data: taskData } = task ?? {};
           setTask(taskData);
-          setIsRecurringMode(taskData.isRecurring);
+          setIsRecurringMode(taskData.isRecurring === "Y");
         }
       } catch (e) {
         onError(e);
@@ -219,13 +219,15 @@ export default function WorkspaceTask() {
     correctiveAction: "",
     rootCause: "",
     taskStatus: "",
-    isRecurring: false,
     frequency: "Daily"
   };
   const recurrenceOptions = [
     { key: "daily", value: "Daily", text: "Daily" },
     { key: "weekly", value: "Weekly", text: "Weekly" },
+    { key: "fortnightly", value: "Fortnightly", text: "Fortnightly" },
     { key: "monthly", value: "Monthly", text: "Monthly" },
+    { key: "three-monthly", value: "ThreeMonthly", text: "Every 3 Months" },
+    { key: "six-monthly", value: "SixMonthly", text: "Every 6 Months" },
     { key: "yearly", value: "Yearly", text: "Yearly" },
   ];
 

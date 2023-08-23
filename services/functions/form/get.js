@@ -16,8 +16,8 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   if (!form) {
     throw new Error("Item not found.");
   }
-
-  form.template = await getTemplate(tenant, form.templateId);
+  
+  form.template = await getTemplate(tenant, form.templateId, form.templateVersion);
   if (!form.template) {
     throw new Error("Template used for this form not found.");
   }
@@ -41,7 +41,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   return form;
 });
 
-async function getTemplate(tenant, templateId) {
+async function getTemplate(tenant, templateId, templateVersion) {
   const params = {
     TableName: process.env.TEMPLATE_TABLE,
     Key: {
@@ -51,5 +51,26 @@ async function getTemplate(tenant, templateId) {
   };
 
   const result = await dynamoDb.get(params);
-  return result.Item;
+  const template = result.Item;
+
+  if (!template) {
+    return null; // Template not found
+  }
+
+  const getVersionNumber = (version) => (!version ? 0 : version); // 0, null or undefined -> 0
+
+  const templateVersionNumber = getVersionNumber(templateVersion);
+  
+  if (getVersionNumber(template.templateVersion) === templateVersionNumber) {
+    return template;
+  }
+
+  if (template.history && Array.isArray(template.history)) {
+    const templateInHistory = template.history.find(entry => getVersionNumber(entry.templateVersion) === templateVersionNumber);
+    return templateInHistory;
+  }
+
+  
+
+
 }

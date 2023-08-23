@@ -95,7 +95,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
       { key: 5, text: 'Minimum', value: "MIN" },
       { key: 6, text: 'Maximum', value: "MAX" },
     ];
-    return <Dropdown floating="right" inline options={options} value={field.aggregateFunction} onChange={(e, {value}) => handleFieldChange("aggregateFunction", value)} />;
+    return <Dropdown   inline options={options} value={field.aggregateFunction} onChange={(e, {value}) => handleFieldChange("aggregateFunction", value)} />;
   }
   function renderFieldWeight() {
     if (!showWeight) return;
