@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Dropdown, Form, Grid, Input, Item, List, Table } from "semantic-ui-react";
+import { Button, Dropdown, Form, Grid, Input, Item, List, Radio, Table } from "semantic-ui-react";
 import { BlockPicker } from "react-color";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -331,21 +331,43 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               error={fieldErrors.name}
             />
           )}
-          {field.type == "info" && (
-            <div style={{ width: "70%" }}>
-              <CKEditor
-                editor={ClassicEditor}
-                data={field.title}
-                onChange={(event, editor) => {
-                  const data = editor.getData();
-                  handleFieldChange("title", data);
-                }}
-              />
-            </div>
+          {field.type === "info" && (
+            <>
+              <Form.Field>
+                <Radio
+                  label="As Form Content"
+                  name="radioGroup"
+                  value="content"
+                  checked={field.as === "content"}
+                  onChange={(e, {value }) => handleFieldChange("as", value)}
+                />
+              </Form.Field>
+              <Form.Field>
+                <Radio
+                  label="As Help"
+                  name="radioGroup"
+                  value="help"
+                  checked={field.as === "help"}
+                  onChange={(e, {value }) => handleFieldChange("as", value)}
+                />
+              </Form.Field>
+            </>
           )}
-         {renderFieldWeight()}
-         {renderFieldAggregateFunction()}
+          {renderFieldWeight()}
+          {renderFieldAggregateFunction()}
         </Form.Group>
+        {field.type == "info" && (
+          <div>
+            <CKEditor
+              editor={ClassicEditor}
+              data={field.title}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                handleFieldChange("title", data);
+              }}
+            />
+          </div>
+        )}
         {renderFieldOptions()}
       </Form>
     </>

@@ -51,7 +51,13 @@ export function GenericForm({
     const id = `input-${f.name}`;
     switch (f.type) {
       case "info":
-        return (
+        return f.as === "content" ?
+        (<div
+          style={{ textAlign: "left" }}
+          className="markdown"
+          dangerouslySetInnerHTML={{ __html: f.title }}
+        />)
+        : (
           <div style={{ textAlign: "left" }}>
             <Popup hoverable flowing
               trigger={<Icon name="question" color="blue" circular />}
@@ -481,7 +487,7 @@ export function GenericForm({
                         width={4}
                         style={{ color: "black", textAlign: "right" }}
                       >
-                        {f.type === "info" ? "Info" : f.name}
+                        {f.type === "info" ? "" : f.name}
                       </Grid.Column>
                       <Grid.Column width={12} textAlign="left">
                         {renderField(f, values, setFieldValue)}

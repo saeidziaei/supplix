@@ -44,7 +44,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
 
     if (workspaceId === NCR_WORKSAPCE_ID) {
       updateExpression +=
-        ", correctiveAction = :correctiveAction, rootCause = :rootCause,";
+        ", correctiveAction = :correctiveAction, rootCause = :rootCause";
       expressionAttributeValues = {
         ...expressionAttributeValues,
         ":correctiveAction": data.correctiveAction || "",
