@@ -2,3 +2,8 @@ input, textarea, .dropdown {
   color: black !important;
   border-color: rgb(61 95 125)!important;
 }
+
+.signature-canvas {
+  border-radius: 5px;
+  border: #ccc 1px solid;
+}

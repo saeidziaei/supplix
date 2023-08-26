@@ -6,6 +6,7 @@ import {
   Accordion,
   Button,
   Confirm,
+  Divider,
   Header,
   Icon,
   Loader,
@@ -307,11 +308,12 @@ export default function TemplatedForm() {
       {!editable && (
         <div>
           <Button primary basic size="mini" onClick={() => handleEdit(true)}>
-            Revision
-          </Button>
-          <Button secondary basic size="mini" onClick={() => handleEdit(false)}>
             Edit
           </Button>
+          {/* this one is Edit in place. Don't need it for the time being.
+           <Button secondary basic size="mini" onClick={() => handleEdit(false)}>
+            Edit
+          </Button> */}
 
           <Confirm
             size="mini"
@@ -334,23 +336,7 @@ export default function TemplatedForm() {
           )}
         </div>
       )}
-      {formId && (
-        <Message icon>
-          <Icon name="info" />
-          <Message.Content>
-            <p>
-              <strong>Revision</strong> archives the current version and creates
-              a new editable record initially with the same information as the
-              current record.
-            </p>
-            <p>
-              <strong>Edit</strong> is similar but it does not keep history.
-              Most of the times it is better to use <strong>Revision</strong>
-            </p>
-          </Message.Content>
-        </Message>
-      )}
-
+      <Divider  />
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
         <Button basic size="mini">
           All Records...

@@ -47,6 +47,7 @@ export default function FormTemplate() {
   const [category, setCategory] = useState("");
   const [sections, setSections] = useState([]);
   const [registerFields, setRegisterFields] = useState([]);
+  const [hasSignature, setHasSignature] = useState(false);
   const [activeDesigner, setActiveDesigner] = useState("form designer");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -70,6 +71,7 @@ export default function FormTemplate() {
           setTitle(formDef.title);
           setCategory(formDef.category);
           setSections(formDef.sections);
+          setHasSignature(!!formDef.hasSignature);
           setRegisterFields(formDef.registerFields || []);
         } 
 
@@ -101,9 +103,9 @@ export default function FormTemplate() {
     setIsLoading(true);
     try {
       if (templateId) {
-        await updateTemplate({title, category, sections, registerFields});
+        await updateTemplate({title, category, sections, registerFields, hasSignature});
       } else {
-        await createTemplate({title, category, sections, registerFields});
+        await createTemplate({title, category, sections, registerFields, hasSignature});
       }
       nav(`/templates`);
     } catch (e) {
@@ -201,7 +203,7 @@ export default function FormTemplate() {
     }`;
     newSections[sectionIndex].fields.push({
       name: fieldName,
-      title: "What is ... ?",
+      title: "",
       type: "text",
       guid: uuidv4()
     });
@@ -402,8 +404,11 @@ export default function FormTemplate() {
                       }}
                     />
                   </Grid.Column>
-                  <Grid.Column width={3} textAlign="left" verticalAlign="middle">
-                    
+                  <Grid.Column
+                    width={3}
+                    textAlign="left"
+                    verticalAlign="middle"
+                  >
                     <Checkbox
                       toggle
                       label="Table?"
@@ -416,25 +421,55 @@ export default function FormTemplate() {
                       }}
                       checked={section.isTable}
                     />
-
-                </Grid.Column>
+                  </Grid.Column>
                 </GridRow>
-                {!section.isTable && 
-                <Grid.Row >
-                  <Grid.Column width={1} ></Grid.Column>
-                  <Grid.Column width={10} >
-                  <Button.Group size="mini" >
-                    <Button color={section.sectionColumns == 1 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 1)}>Single Column</Button>
-                    <Button color={section.sectionColumns == 2 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 2)}>Two Columns</Button>
-                    <Button color={section.sectionColumns == 3 ? "black" :"grey"} onClick={() => setSectionColumn(sectionIndex, 3)}>Three Columns</Button>
-                  </Button.Group>
-                  </Grid.Column>
-                  <Grid.Column width={5} textAlign="right">
-                  {sectionIndex > 0 && <Button size="mini" basic circular onClick={() =>moveSectionUp(sectionIndex)} icon="chevron up"></Button>}
-                  {sectionIndex < sections.length - 1 && <Button size="mini" basic circular onClick={() =>moveSectionDown(sectionIndex)} icon="chevron down"></Button>}
-                  </Grid.Column>
-                </Grid.Row>
-                } 
+                {!section.isTable && (
+                  <Grid.Row>
+                    <Grid.Column width={1}></Grid.Column>
+                    <Grid.Column width={10}>
+                      <Button.Group size="mini">
+                        <Button
+                          color={section.sectionColumns == 1 ? "black" : "grey"}
+                          onClick={() => setSectionColumn(sectionIndex, 1)}
+                        >
+                          Single Column
+                        </Button>
+                        <Button
+                          color={section.sectionColumns == 2 ? "black" : "grey"}
+                          onClick={() => setSectionColumn(sectionIndex, 2)}
+                        >
+                          Two Columns
+                        </Button>
+                        <Button
+                          color={section.sectionColumns == 3 ? "black" : "grey"}
+                          onClick={() => setSectionColumn(sectionIndex, 3)}
+                        >
+                          Three Columns
+                        </Button>
+                      </Button.Group>
+                    </Grid.Column>
+                    <Grid.Column width={5} textAlign="right">
+                      {sectionIndex > 0 && (
+                        <Button
+                          size="mini"
+                          basic
+                          circular
+                          onClick={() => moveSectionUp(sectionIndex)}
+                          icon="chevron up"
+                        ></Button>
+                      )}
+                      {sectionIndex < sections.length - 1 && (
+                        <Button
+                          size="mini"
+                          basic
+                          circular
+                          onClick={() => moveSectionDown(sectionIndex)}
+                          icon="chevron down"
+                        ></Button>
+                      )}
+                    </Grid.Column>
+                  </Grid.Row>
+                )}
                 {section.isTable && (
                   <>
                     <Grid.Row>
@@ -499,88 +534,93 @@ export default function FormTemplate() {
             </Item>
             <Divider hidden />
 
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
-                >
-                  <SortableContext
-                    items={section.fields.map((f, i) => f.guid )}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <>
-                      <Confirm
-                        size="mini"
-                        header="This will delete the field."
-                        open={removeFieldConfirm.open}
-                        onCancel={() => setRemoveFieldConfirm({ open: false })}
-                        onConfirm={() => {
-                          removeField(
-                            removeFieldConfirm.sectionIndex,
-                            removeFieldConfirm.fieldIndex
-                          );
-                          setRemoveFieldConfirm({ open: false });
-                        }}
-                      />
-                      {section.fields.map((field, fieldIndex) => (
-                        <div key={field.guid}>
-                          <SortableItem id={field.guid}>
-                            <FieldEditor
-                              key={fieldIndex}
-                              value={field}
-                              onDelete={() =>
-                                setRemoveFieldConfirm({
-                                  open: true,
-                                  sectionIndex,
-                                  fieldIndex,
-                                })
-                              }
-                              onChange={(value) => {
-                                const newSections = [...sections];
-                                newSections[sectionIndex].fields[fieldIndex] =
-                                  value;
-                                setSections(newSections);
-                              }}
-                              onDuplicate={() => {
-                                const newSections = [...sections];
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
+            >
+              <SortableContext
+                items={section.fields.map((f, i) => f.guid)}
+                strategy={verticalListSortingStrategy}
+              >
+                <>
+                  <Confirm
+                    size="mini"
+                    header="This will delete the field."
+                    open={removeFieldConfirm.open}
+                    onCancel={() => setRemoveFieldConfirm({ open: false })}
+                    onConfirm={() => {
+                      removeField(
+                        removeFieldConfirm.sectionIndex,
+                        removeFieldConfirm.fieldIndex
+                      );
+                      setRemoveFieldConfirm({ open: false });
+                    }}
+                  />
+                  {section.fields.map((field, fieldIndex) => (
+                    <div key={field.guid}>
+                      <SortableItem id={field.guid}>
+                        <FieldEditor
+                          key={fieldIndex}
+                          value={field}
+                          onDelete={() =>
+                            setRemoveFieldConfirm({
+                              open: true,
+                              sectionIndex,
+                              fieldIndex,
+                            })
+                          }
+                          onChange={(value) => {
+                            const newSections = [...sections];
+                            newSections[sectionIndex].fields[fieldIndex] =
+                              value;
+                            setSections(newSections);
+                          }}
+                          onDuplicate={() => {
+                            const newSections = [...sections];
 
-                                const duplicatedField = {
-                                  ...field,
-                                  title: `${field.title} copy`,
-                                  name: `${field.name} copy`,
-                                  guid: uuidv4(),
-                                };
-                                newSections[sectionIndex].fields.push(
-                                  duplicatedField
-                                );
-                                setSections(newSections);
-                              }}
-                              showWeight={section.fields.some(f => f.type === "aggregate")} // only show weight if there is an aggregate field in this seciton
-                              showAggregateFunction={section.isTable}
-                            />
-                            <Divider />
-                          </SortableItem>
-                        </div>
-                      ))}
-                    </>
-                  </SortableContext>
-                </DndContext>
-                <Button
-                  size="mini"
-                  basic
-                  
-                  onClick={() => addField(sectionIndex)}
-                >
-                  <Icon name="plus" />
-                  Field
-                </Button>
+                            const duplicatedField = {
+                              ...field,
+                              title: `${field.title} copy`,
+                              name: `${field.name} copy`,
+                              guid: uuidv4(),
+                            };
+                            newSections[sectionIndex].fields.push(
+                              duplicatedField
+                            );
+                            setSections(newSections);
+                          }}
+                          showWeight={section.fields.some(
+                            (f) => f.type === "aggregate"
+                          )} // only show weight if there is an aggregate field in this seciton
+                          showAggregateFunction={section.isTable}
+                        />
+                        <Divider />
+                      </SortableItem>
+                    </div>
+                  ))}
+                </>
+              </SortableContext>
+            </DndContext>
+            <Button size="mini" basic onClick={() => addField(sectionIndex)}>
+              <Icon name="plus" />
+              Field
+            </Button>
           </Segment>
         ))}
-        <Button size="mini" basic  onClick={addSection}>
+        <Button size="mini" basic onClick={addSection}>
           <Icon name="plus" />
           Section
         </Button>
         <Divider />
+        <Checkbox
+          toggle
+          label="Needs Signature"
+          onChange={(e, data) => {
+            setHasSignature(data.checked);
+          }}
+          checked={hasSignature}
+        />
       </>
     );
 
@@ -637,7 +677,7 @@ export default function FormTemplate() {
         <Header as="h3" color="teal">
           Form Preview
         </Header>
-        <GenericForm formDef={{ title, category, sections }} />
+        <GenericForm formDef={{ title, category, sections, hasSignature }} />
         <Divider />
         <Header as="h3" color="teal">
           Register Preview

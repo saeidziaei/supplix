@@ -22,6 +22,9 @@ import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
 import "./GenericForm.css";
+import SignatureCanvas from "react-signature-canvas";
+import { useEffect, useRef, useState } from "react";
+
 
 export function GenericForm({
   formDef,
@@ -30,6 +33,17 @@ export function GenericForm({
   disabled,
   handleCancel,
 }) {
+  const SIGNATURE_FIELD_NAME = "form-signature";
+
+  const sigPadRef = useRef(null);
+  const [signature, setSignature] = useState(null);
+
+
+  useEffect(() => {
+    if (sigPadRef.current && signature) {
+      sigPadRef.current.fromDataURL(signature);
+    }
+  }, [signature, disabled]);
 
   function renderField(f, values, setFieldValue) {
     return renderFieldInput(f, values, setFieldValue);
@@ -51,15 +65,17 @@ export function GenericForm({
     const id = `input-${f.name}`;
     switch (f.type) {
       case "info":
-        return f.as === "content" ?
-        (<div
-          style={{ textAlign: "left" }}
-          className="markdown"
-          dangerouslySetInnerHTML={{ __html: f.title }}
-        />)
-        : (
+        return f.as === "content" ? (
+          <div
+            style={{ textAlign: "left" }}
+            className="markdown"
+            dangerouslySetInnerHTML={{ __html: f.title }}
+          />
+        ) : (
           <div style={{ textAlign: "left" }}>
-            <Popup hoverable flowing
+            <Popup
+              hoverable
+              flowing
               trigger={<Icon name="question" color="blue" circular />}
               position="bottom center"
             >
@@ -97,7 +113,11 @@ export function GenericForm({
 
       case "link":
         return disabled ? (
-          values[name] ? (<a href={values[name]}>Link</a>) : <span>(empty)</span>
+          values[name] ? (
+            <a href={values[name]}>Link</a>
+          ) : (
+            <span>(empty)</span>
+          )
         ) : (
           <Input
             size={size}
@@ -163,11 +183,14 @@ export function GenericForm({
         let newValues = values[name];
         if (!Array.isArray(newValues)) {
           // check to see newValues is actually an array as the type might have changed.
-          newValues = []; 
+          newValues = [];
         }
 
         return (
-          <div key={f.name} style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }} >
+          <div
+            key={f.name}
+            style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}
+          >
             {f.options.map((o, i) => {
               const selected = newValues.includes(o.value);
               return (
@@ -186,7 +209,7 @@ export function GenericForm({
                     } else {
                       if (!Array.isArray(newValues)) newValues = [];
 
-                      if (f.type !== "multi") newValues = [];// for single value, empty the answers. For multi keep the existing ones and add the new one
+                      if (f.type !== "multi") newValues = []; // for single value, empty the answers. For multi keep the existing ones and add the new one
 
                       newValues.push(o.value);
                     }
@@ -194,12 +217,13 @@ export function GenericForm({
                     setFieldValue(name, newValues);
                   }}
                 >
-                   {f.type == "multi" && <Icon name={selected ? "check" : ""} color="blue" /> }
+                  {f.type == "multi" && (
+                    <Icon name={selected ? "check" : ""} color="blue" />
+                  )}
                   {o.value}
                 </Button>
               );
             })}
-           
           </div>
         );
 
@@ -241,7 +265,7 @@ export function GenericForm({
   }
   const tabularFieldName = (rowIndex, name) => `row${rowIndex}-${name}`;
 
-  const defaultValues = {
+  let defaultValues = {
     ...formDef.sections
       .reduce((acc, section) => {
         return acc.concat(
@@ -279,6 +303,7 @@ export function GenericForm({
       }),
   };
 
+  defaultValues[SIGNATURE_FIELD_NAME] = "";
 
   // const generateValidationSchema = (formDef) => {
   //   const schema = {};
@@ -298,12 +323,23 @@ export function GenericForm({
   // }
   // const validationSchema = generateValidationSchema(formDef);
 
+  const preSubmit = (values, formikBag) => {
+    const updatedValues = { ...values };
+    if (sigPadRef.current) {
+      updatedValues[SIGNATURE_FIELD_NAME] = sigPadRef.current.getTrimmedCanvas().toDataURL("image/png");
+    }
+    
+    handleSubmit(updatedValues, formikBag);
+  }
+  
   
   return (
     <Segment style={{ overflowX: "auto" }}>
       <FormHeader heading={formDef.title} subheading={formDef.category} />
-      <Formik initialValues={formData || defaultValues} onSubmit={handleSubmit} >
-        {({ isSubmitting, values, setFieldValue, resetForm }) => (
+      <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
+        {({ isSubmitting, values, setFieldValue, resetForm }) => {
+          setSignature(values[SIGNATURE_FIELD_NAME]);
+          return (
           <Form size="small">
             {formDef.sections.map((s) =>
               s.isTable
@@ -348,23 +384,27 @@ export function GenericForm({
                           )}
                           {attachment.fileURL && (
                             <a href={attachment.fileURL} target="_blank">
-                            <Image
-                              src={attachment.fileURL}
-                              wrapped
-                              alt={attachment.fileName}
-                              onError={(e) => {
-                                e.target.src = placeholderImage;
-                              }}
-                            /></a>
+                              <Image
+                                src={attachment.fileURL}
+                                wrapped
+                                alt={attachment.fileName}
+                                onError={(e) => {
+                                  e.target.src = placeholderImage;
+                                }}
+                              />
+                            </a>
                           )}
                         </Grid.Column>
                         <Grid.Column width={10}>
-                          {disabled ? <span>{attachment.fileNote}</span> :
-                          <Field
-                            name={`attachments.${index}.fileNote`} 
-                            placeholder="File Note"
-                            type="text"
-                          />}
+                          {disabled ? (
+                            <span>{attachment.fileNote}</span>
+                          ) : (
+                            <Field
+                              name={`attachments.${index}.fileNote`}
+                              placeholder="File Note"
+                              type="text"
+                            />
+                          )}
                         </Grid.Column>
                       </Grid.Row>
                     ))}
@@ -373,7 +413,8 @@ export function GenericForm({
                       <Button
                         type="button"
                         basic
-                        disabled={ disabled ||
+                        disabled={
+                          disabled ||
                           (values.attachments && values.attachments.length > 5)
                         }
                         circular
@@ -388,7 +429,7 @@ export function GenericForm({
             </FieldArray>
 
             <Divider hidden />
-
+            {formDef.hasSignature && renderSignature()}
             {!disabled && handleSubmit && (
               <div>
                 <Button primary type="submit" size="mini" floated="right">
@@ -408,14 +449,59 @@ export function GenericForm({
                 )}
               </div>
             )}
-            {/* <Button secondary>Back</Button> */}
+            
+            
           </Form>
-        )}
-        
+        )}}
       </Formik>
-      
     </Segment>
   );
+
+
+  function renderSignature() {
+    return (
+      <Table compact basic="very">
+        <Table.Body>
+          <Table.Row>
+            <Table.Cell>
+              <Icon name="pencil" /> Signature
+            </Table.Cell>
+            <Table.Cell>
+              {disabled ? (
+                <img src={signature} />
+              ) : (
+                <>
+                  <SignatureCanvas
+                    canvasProps={{
+                      width: 300,
+                      height: 150,
+                      className: "signature-canvas",
+                    }}
+                    ref={sigPadRef}
+                  />
+                  <br />
+                  <Button
+                    size="mini"
+                    basic
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (sigPadRef.current) {
+                        sigPadRef.current.clear();
+                      }
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </>
+              )}
+            </Table.Cell>
+          </Table.Row>
+        </Table.Body>
+      </Table>
+    );
+  
+  
+  }
 
   function renderSectionTabular(s, values, setFieldValue) {
     const fields = s.fields.filter((f) => f.type !== "aggregate");
