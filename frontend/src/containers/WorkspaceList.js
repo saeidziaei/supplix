@@ -191,8 +191,7 @@ export default function Workspaces() {
     return (
       <Grid verticalAlign="middle">
         <Grid.Row>
-          <Grid.Column width={2}></Grid.Column>
-          <Grid.Column width={14}>
+          <Grid.Column>
             <List divided relaxed>
               <List.Item
                 as="a"

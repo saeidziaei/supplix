@@ -53,7 +53,7 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
   const hasContent = () => workspaceId !== "NCR"
   if (!workspace) return null;
   return (
-    <Accordion styled style={{ margin: "20px" }} fluid>
+    <Accordion styled className="wsinfobox"  fluid>
       <Accordion.Title
         active={isExpanded}
         index={1}
