@@ -142,17 +142,17 @@ Temporary Password: {####}
       },
     },
     routes: {
-      // TEMP
-      "POST   /generate-tasks": {
-        function: {
-          handler: "services/functions/cron/task-generator.main",
-          bind: [workspaceTaskTable],
-          environment: {
-            WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
-            ALLOWED_GROUPS: ADMIN_GROUP,
-          },
-        },
-      },
+      // // TEMP
+      // "POST   /generate-tasks": {
+      //   function: {
+      //     handler: "services/functions/cron/task-generator.main",
+      //     bind: [workspaceTaskTable],
+      //     environment: {
+      //       WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
+      //       ALLOWED_GROUPS: ADMIN_GROUP,
+      //     },
+      //   },
+      // },
 
       "GET   /workspaces": {
         function: {

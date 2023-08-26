@@ -289,7 +289,7 @@ export default function WorkspaceTasks() {
             </Button>
           </LinkContainer>
         )}
-        <Button primary onClick={async () => await makeApiCall("POST", `/generate-tasks`)} >Manually Generate Tasks</Button>
+        
       </>
     );
   }
