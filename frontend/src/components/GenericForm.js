@@ -571,7 +571,7 @@ export function GenericForm({
                     >
                       <Grid.Column 
                         width={4}
-                        style={{ color: "black", textAlign: "right" }}
+                        className="field-column"
                       >
                         {f.type === "info" ? "" : f.name}
                       </Grid.Column>

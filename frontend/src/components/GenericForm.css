@@ -7,3 +7,13 @@ input, textarea, .dropdown {
   border-radius: 5px;
   border: #ccc 1px solid;
 }
+.field-column {
+  color: black;
+  text-align: right;
+}
+
+@media (max-width: 767px) {
+  .field-column {
+    text-align: left;
+  }
+}
