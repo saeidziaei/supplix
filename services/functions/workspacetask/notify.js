@@ -49,7 +49,7 @@ export const main = async (event, context) => {
               Text: {
                 Data: `Hi ${
                   user.firstName
-                },\n\nA new task is assigned to you.\n ${taskName}\nSee more details here: https://isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
+                },\n\nA new task is assigned to you.\n ${taskName}\nSee more details here: https://app.isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
                 ${
                   stage === "prod"
                     ? ""
