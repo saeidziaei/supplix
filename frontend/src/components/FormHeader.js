@@ -1,14 +1,27 @@
 import React from "react";
-import { Header } from "semantic-ui-react";
+import { Header, Image } from "semantic-ui-react";
 import "./FormHeader.css";
 
-export default function FormHeader({ heading, subheading }) {
+export default function FormHeader({ heading, subheading, image }) {
   return (
-    <>
-      <Header as="h3" color="grey" >
-        {heading}
-        <Header.Subheader>{subheading}</Header.Subheader>
-      </Header>
-    </>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <div>
+        <Header as="h3" color="grey">
+          {heading}
+          <Header.Subheader>{subheading}</Header.Subheader>
+        </Header>
+      </div>
+      <div style={{ marginLeft: "auto" }}>
+        <Image src={image} size="small" />
+      </div>
+    </div>
   );
 }
+
+

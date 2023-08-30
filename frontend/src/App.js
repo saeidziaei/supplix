@@ -171,7 +171,7 @@ function App() {
                     {employee && <User user={employee} compact={isMobile} />}
                   </List.Item>
                   {authenticatedUser &&
-                  <List.Item ><NCR /> </List.Item>}
+                  <List.Item ><NCR label={tenant?.NCRLabel} /> </List.Item>}
                 </List>
                 
 
@@ -199,7 +199,10 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-                  <LinkContainer to="/mytasks" onClick={() => setIsSidebarVisible(false)}>
+                 
+                  {authenticatedUser ? (
+                    <>
+                     <LinkContainer to="/mytasks" onClick={() => setIsSidebarVisible(false)}>
                    <Menu.Item as="a">
                     <Label color={tasksCount ? "teal" : "black"}>{tasksCount}</Label>
                     Tasks
@@ -212,8 +215,6 @@ function App() {
                     Notifications
                   </Menu.Item> */}
 
-                  {authenticatedUser ? (
-                    <>
                           <LinkContainer to="/iso" onClick={() => setIsSidebarVisible(false)}>
                             <Nav.Link as={Menu.Item}>
                               <span>
@@ -302,6 +303,7 @@ function App() {
                         authenticatedUser,
                         setAuthenticatedUser,
                         currentUserRoles,
+                        tenant,
                       }}
                     >
                       <Routes

@@ -18,6 +18,7 @@ export const main = handler(async (event, tenant) => {
       startDate: data.startDate || "",
       endDate: data.endDate || "",
       note: data.note || "",
+      templateIds: data.templateIds || [],
       
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 

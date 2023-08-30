@@ -41,9 +41,11 @@ export default function WorkspaceTask() {
   const [task, setTask] = useState(null);
   const [memberUsers, setMemberUsers] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const { currentUserRoles } = useAppContext();
+  const { currentUserRoles, tenant } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
+  const getNCRTitle = () => (tenant && tenant.NCRLabel) ? tenant.NCRLabel : "Non-Compliant Report";
+  
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set time to the beginning of the day
 
@@ -59,7 +61,7 @@ export default function WorkspaceTask() {
   const nav = useNavigate();
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
-  const canManageTeam = () => workspace && workspace.role === "Owner";
+  const canManageTeam = () => !isNCR() && workspace && workspace.role === "Owner";
   const canManageRecurringTasks = () => workspace && workspace.role === "Owner";
 
   const canDelete = () => {
@@ -246,7 +248,7 @@ export default function WorkspaceTask() {
             />
           </Icon.Group>
           {isNCR()
-            ? "Non-Compliance Report"
+            ? getNCRTitle()
             : isRecurringMode
             ? "Recurring Task"
             : "Task"}
@@ -530,7 +532,7 @@ export default function WorkspaceTask() {
   const render = () => {
     return (
       <>
-        <WorkspaceInfoBox workspace={workspace} />
+        {!isNCR() && <WorkspaceInfoBox workspace={workspace} />}
 
         <Grid textAlign="center" verticalAlign="middle">
           <Grid.Column style={{ maxWidth: 650 }}>

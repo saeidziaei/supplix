@@ -14,7 +14,14 @@ export default function Tenant() {
   const file = useRef(null);
 
   const { tenantId } = useParams();
-  const [tenant, setTenant] = useState({ tenantName: "", contactPerson: "", contactNumber: "", contactEmail: "", website:"", note: "" }); 
+  const [tenant, setTenant] = useState({
+    tenantName: "",
+    contactPerson: "",
+    contactNumber: "",
+    contactEmail: "",
+    website: "",
+    note: "",
+  });
   const nav = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -109,11 +116,11 @@ export default function Tenant() {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="blue" textAlign="center">
-          <Icon.Group size="large" className="custom-blue-icon">
-                          <Icon name="building" />
-                          <Icon  name="users"  corner="bottom right" />
-                        </Icon.Group>
-Tenant
+            <Icon.Group size="large" className="custom-blue-icon">
+              <Icon name="building" />
+              <Icon name="users" corner="bottom right" />
+            </Icon.Group>
+            Tenant
           </Header>
           <Formik
             initialValues={{ ...tenant }}
@@ -201,7 +208,18 @@ Tenant
                     value={values.note}
                     onChange={handleChange}
                   />
-
+                  <Divider horizontal>Customisation</Divider>
+                  <Form.Field>
+                    <label>NCR Label</label>
+                    <Form.Input
+                      fluid
+                      iconPosition="left"
+                      name="NCRLabel"
+                      placeholder="e.g. Assignment (if left blank the label will be NCR)"
+                      value={values.NCRLabel}
+                      onChange={handleChange}
+                    />
+                  </Form.Field>
                   <Button primary type="submit" disabled={isSubmitting}>
                     Submit
                   </Button>
@@ -209,7 +227,7 @@ Tenant
               </Form>
             )}
           </Formik>
-          <Divider/>
+          <Divider />
           {tenant && tenant.tenantId && (
             <LinkContainer to={`/tenants/${tenant.tenantId}/users`}>
               <Button basic secondary>
@@ -222,10 +240,7 @@ Tenant
     );
   }
 
-
-
   if (isLoading) return <Loader active />;
 
   return rednerTenant(tenant);
-  
 }

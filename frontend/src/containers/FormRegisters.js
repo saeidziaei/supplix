@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Grid,
+  Header,
   Icon,
-  List, Message, Segment
+  List, Message, Segment, Table
 } from "semantic-ui-react";
 
 import { LinkContainer } from "react-router-bootstrap";
@@ -12,7 +13,7 @@ import { Loader } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormHeader from "../components/FormHeader";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import "./FormRegisters.css";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
@@ -32,7 +33,18 @@ export default function FormRegisters() {
           const templates = await loadTemplates();
           const { data, workspace } = templates ?? {};
 
-          setTemplates(data);
+          if (workspace && workspace.templateIds && workspace.templateIds.length) {
+            // Filter the templates based on the templateIds in the workspace
+            const filteredTemplates = data.filter((template) =>
+              workspace.templateIds.includes(template.templateId)
+            );
+            
+            setTemplates(filteredTemplates);
+          } else {
+            setTemplates(data);
+          }
+
+          
           setWorkspace(workspace);
       } catch (e) {
         onError(e);
@@ -65,7 +77,7 @@ export default function FormRegisters() {
     return (
       <>
         <FormHeader heading="Records Register" />
-        <WorkspaceInfoBox workspace={workspace}/>
+        <WorkspaceInfoBox workspace={workspace} />
         {(!templates || templates.length == 0) && (
           <Message
             header="No Record found"
@@ -74,47 +86,65 @@ export default function FormRegisters() {
           />
         )}
         {renderCategories()}
+
         <Grid columns={2} doubling>
           <Grid.Row>
-          <Grid.Column >
-            <Segment>
-              <List divided relaxed>
-                {templates &&
-                  templates.filter(t => selectedCategory === "ALL" || selectedCategory === t.templateDefinition.category).map((t) => {
-                    const def = t.templateDefinition;
-                    return (
-                      <List.Item key={t.templateId}>
-                        <List.Content floated="right">
-                          <LinkContainer
-                            to={`/workspace/${workspaceId}/form/${t.templateId}`}
-                          >
-                            <Button basic primary size="mini" disabled={t.isDeleted}>
-                              <Icon name="add" />
-                              Record
-                            </Button>
-                          </LinkContainer>
-                          <LinkContainer
-                            to={`/workspace/${workspaceId}/register/${t.templateId}`}
-                          >
-                            <Button basic size="mini">
-                              All Records...
-                            </Button>
-                          </LinkContainer>
-                        </List.Content>
-                        <List.Icon name='newspaper outline' size='large' verticalAlign='middle' className="custom-blue-icon" />
-                        <List.Content>
-                          <List.Header>{def.title}</List.Header>
-                          <List.Description>{`${t.formCount} ${pluralize(
-                            "record",
-                            t.formCount
-                          )}`}</List.Description>
-                        </List.Content>
-                      </List.Item>
-                    );
-                  })}
-              </List>
-            </Segment>
-          </Grid.Column>
+            <Grid.Column>
+              <Segment>
+                <List divided relaxed>
+                  {templates &&
+                    templates
+                      .filter(
+                        (t) =>
+                          selectedCategory === "ALL" ||
+                          selectedCategory === t.templateDefinition.category
+                      )
+                      .map((t) => {
+                        const def = t.templateDefinition;
+                        return (
+                          <List.Item key={t.templateId}>
+                            <List.Content floated="right">
+                              <LinkContainer
+                                to={`/workspace/${workspaceId}/form/${t.templateId}`}
+                              >
+                                <Button
+                                  basic
+                                  primary
+                                  size="mini"
+                                  disabled={t.isDeleted}
+                                >
+                                  <Icon name="add" />
+                                  Record
+                                </Button>
+                              </LinkContainer>
+                            </List.Content>
+
+                            <List.Icon
+                              name="newspaper outline"
+                              size="large"
+                              verticalAlign="middle"
+                              className="custom-blue-icon"
+                            />
+                            <List.Content>
+                              <List.Header>{def.title}</List.Header>
+                              <List.Description>
+                                <Link
+                                  to={`/workspace/${workspaceId}/register/${t.templateId}`}
+                                >
+                                  
+                                  {`${t.formCount} ${pluralize(
+                                    "record",
+                                    t.formCount
+                                  )}`}
+                                </Link>
+                              </List.Description>
+                            </List.Content>
+                          </List.Item>
+                        );
+                      })}
+                </List>
+              </Segment>
+            </Grid.Column>
           </Grid.Row>
         </Grid>
       </>

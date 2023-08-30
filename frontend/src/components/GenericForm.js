@@ -24,6 +24,7 @@ import placeholderImage from '../fileplaceholder.jpg';
 import "./GenericForm.css";
 import SignatureCanvas from "react-signature-canvas";
 import { useEffect, useRef, useState } from "react";
+import { useAppContext } from "../lib/contextLib";
 
 
 export function GenericForm({
@@ -37,6 +38,7 @@ export function GenericForm({
 
   const sigPadRef = useRef(null);
   const [signature, setSignature] = useState(null);
+  const { tenant } = useAppContext();
 
 
   useEffect(() => {
@@ -335,7 +337,7 @@ export function GenericForm({
   
   return (
     <Segment style={{ overflowX: "auto" }}>
-      <FormHeader heading={formDef.title} subheading={formDef.category} />
+      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant.logoURL || "/iso_cloud_logo_v1.png"} />
       <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => {
           setSignature(values[SIGNATURE_FIELD_NAME]);
@@ -548,6 +550,7 @@ export function GenericForm({
 
     return (
       <Segment basic vertical key={s.title} size="tiny">
+        
         {s.title && (
           <Menu size="large" tabular>
             <Menu.Item active>{s.title}</Menu.Item>

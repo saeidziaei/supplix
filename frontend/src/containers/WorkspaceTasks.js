@@ -7,7 +7,7 @@ import { format, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Divider, Header, Icon, Label, Loader, Menu, Segment, Tab } from "semantic-ui-react";
+import { Button, Checkbox, Divider, Header, Icon, Label, Loader, Menu, Radio, Segment, Tab } from "semantic-ui-react";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
@@ -31,7 +31,7 @@ export default function WorkspaceTasks() {
   const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
   const location = useLocation();
-
+  const [showAll, setShowAll] = useState(false);
 
 
 
@@ -47,10 +47,10 @@ export default function WorkspaceTasks() {
   useEffect(() => {
     async function onLoad() {
       async function loadWorkspaceTasks() {
-        return await makeApiCall("GET", `/workspaces/${workspaceId}/tasks`);
+        return await makeApiCall("GET", `/workspaces/${workspaceId}/tasks` + (showAll ? `?showAll=true`: ""));
       }
       async function loadMyTasks() {
-        return await makeApiCall("GET", `/mytasks`);
+        return await makeApiCall("GET", `/mytasks` + (showAll ? `?showAll=true`: ""));
       }
       async function loadUsers() {
         return await makeApiCall("GET", `/users`); 
@@ -89,7 +89,7 @@ export default function WorkspaceTasks() {
       setIsLoading(false);
     }
     onLoad();
-  }, []);
+  }, [showAll, isMytasksPath]);
   const UserRenderer = (params) => {
     const fieldName = params.colDef.field;
     const user = users ? users.find((u) => u.Username === params.data[fieldName]) : null;
@@ -114,9 +114,34 @@ export default function WorkspaceTasks() {
   const WorkspaceRenderer = (params) => {
     const workspaceId = params.data["workspaceId"];
     const workspace = workspaces ? workspaces.find(w => w.workspaceId === workspaceId) : {};
-    return (<Label color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : workspaceId}</Label>);
+    return (<Label color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : "-"}</Label>);
   }
-  
+  const StatusRenderer = (params) => {
+    const taskStatus = params.data["taskStatus"];
+    let color = "grey";
+    switch (taskStatus) {
+      case "Completed":
+        color = "green";
+        break;
+    
+      case "On Hold":
+        color = "orange";
+        break;
+    
+      case "Cancelled":
+        color = "red";
+        break;
+    
+      case "In Progress":
+        color = "teal";
+        break;
+    
+      default:
+        break;
+    }
+
+    return <Label size="tiny" basic color={color}>{taskStatus || "Unknown"}</Label>;
+  }
   const tasksGridOptions = {
     defaultColDef: {
       sortable: true,
@@ -132,7 +157,7 @@ export default function WorkspaceTasks() {
       { field: "startDate", cellRenderer: DateRenderer, width: 90 },
       { field: "dueDate", cellRenderer: DateRenderer, width: 90 },
       { field: "completionDate", cellRenderer: DateRenderer, width: 90 },
-      { field: "taskStatus", headerName: "Status" },
+      { field: "taskStatus", headerName: "Status", cellRenderer: StatusRenderer },
       {
         field: "userId",
         headerName: "Owner",
@@ -208,7 +233,10 @@ export default function WorkspaceTasks() {
     setSelectedTask(t);
   }
 
+  const handleCompletedToggle = () => {
+    setShowAll(!showAll);
 
+  };
   
   const renderSelectedTask = () => {
     if (!selectedTask) return null;
@@ -234,40 +262,58 @@ export default function WorkspaceTasks() {
   }
   const panes = [
     {
-      menuItem: 'Tasks',
-      render: () => <Tab.Pane attached={false}><div key="tasks"
-      className="ag-theme-balham"
-      style={{
-        height: "350px",
-        width: "100%",
-      }}
-    > 
-      <AgGridReact
-        gridOptions={tasksGridOptions}
-        rowData={tasks}
-        rowHeight="30"
-        animateRows={true}
-      ></AgGridReact>
-    </div></Tab.Pane>,
+      menuItem: "Tasks",
+      render: () => (
+        <Tab.Pane attached={false}>
+          <div
+            key="tasks"
+            className="ag-theme-balham"
+            style={{
+              height: "350px",
+              width: "100%",
+            }}
+          >
+            <AgGridReact
+              gridOptions={tasksGridOptions}
+              rowData={tasks}
+              rowHeight="30"
+              animateRows={true}
+            ></AgGridReact>
+          </div>
+          <Segment basic>
+          <Checkbox
+            toggle
+            label="Show Closed Tasks"
+            onChange={handleCompletedToggle}
+            checked={showAll}
+          /></Segment>
+        </Tab.Pane>
+      ),
     },
-    (canManageRecurringTasks() ? (
-    {
-      menuItem: 'Recurring Tasks',
-      render: () => <Tab.Pane attached={false}><div key="recurring-tasks"
-      className="ag-theme-balham"
-      style={{
-        height: "300px",
-        width: "100%",
-      }}
-    >
-      <AgGridReact
-        gridOptions={recurringTasksGridOptions}
-        rowData={recurringTasks}
-        rowHeight="30"
-        animateRows={true}
-      ></AgGridReact>
-    </div></Tab.Pane>,
-    }) : null),
+    canManageRecurringTasks()
+      ? {
+          menuItem: "Recurring Tasks",
+          render: () => (
+            <Tab.Pane attached={false}>
+              <div
+                key="recurring-tasks"
+                className="ag-theme-balham"
+                style={{
+                  height: "300px",
+                  width: "100%",
+                }}
+              >
+                <AgGridReact
+                  gridOptions={recurringTasksGridOptions}
+                  rowData={recurringTasks}
+                  rowHeight="30"
+                  animateRows={true}
+                ></AgGridReact>
+              </div>
+            </Tab.Pane>
+          ),
+        }
+      : null,
   ];
   function render() {
     return (

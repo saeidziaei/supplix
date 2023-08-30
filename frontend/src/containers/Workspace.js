@@ -1,27 +1,31 @@
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
+  Accordion,
   Button,
   Confirm,
   Divider,
   Form,
   Grid,
   Header,
-  Icon, Input, Label, Loader,
+  Icon,
+  Label, Loader,
+  Menu,
   Modal,
   Segment,
-  Select
+  Select,
+  Table
 } from "semantic-ui-react";
+import WorkspacePicker from "../components/WorkspacePicker";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
-import "./Workspaces.css";
-import WorkspacePicker from "../components/WorkspacePicker";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseDate } from "../lib/helpers";
+import "./Workspaces.css";
 
 export default function Workspace() {
   const { currentUserRoles } = useAppContext();
@@ -32,8 +36,30 @@ export default function Workspace() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isParentPickerOpen, setIsParentPickerOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState(null);
-  const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(true);
   const [pickedParent, setPickedParent] = useState(null);
+  const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false);
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const queryStringParentId = queryParams.get('parentWorkspaceId');
+
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
+  const [templates, setTemplates] = useState([]);
+
+  async function loadTemplates() {
+    try {
+      const response = await makeApiCall("GET", `/templates`);
+      setTemplates(response);
+    } catch (error) {
+      onError(error);
+    }
+  }
+
+  useEffect(() => {
+    // Load templates on component mount
+    loadTemplates();
+  }, []);
+
 
   function validateForm() {
     return true; // file.current
@@ -42,18 +68,33 @@ export default function Workspace() {
   useEffect(() => {
     async function loadWorkspace() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    }    
+    async function loadWorkspaces() {
+      return await makeApiCall("GET", `/workspaces`);
     }
 
     async function onLoad() {
       try {
+
+        let workspaceData = {};
+
         if (workspaceId) {
-          const item = await loadWorkspace();
+          const item = await loadWorkspace();// loadWorkspace has workspace in the path therefore it return workspace in a child element
+          workspaceData = item.workspace ?? {};
+          setSelectedTemplateIds(workspaceData.templateIds || []);
+        }
+    
+        const list = await loadWorkspaces();
+        setWorkspaces(list.filter((w) => w.workspaceId !== workspaceData.workspaceId)); // Fix the condition to avoid excluding the current workspace
 
-          // loadWorkspace has workspace in the path therefore it return workspace in a child element
-          const {workspace} = item ?? {};
+        console.log(workspaceData);
+        console.log(queryStringParentId);
+        const parentId = workspaceData.parentId || queryStringParentId;
+        workspaceData.parentId = parentId;
+        workspaceData.parent = list.find((w) => w.workspaceId === parentId);
+    
+        setWorkspace(workspaceData);
 
-          setWorkspace(workspace);
-        } 
       } catch (e) {
         onError(e);
       }
@@ -64,19 +105,11 @@ export default function Workspace() {
     onLoad();
   }, []);
 
-  async function loadWorkspaces(e) {
-    e.preventDefault();
-    if (!workspaces) {
-      let list = await makeApiCall("GET", `/workspaces`);
-      
-      setWorkspaces(list.filter(w => w.workspaceId != workspace.workspaceId)); // cannot be its own parent
-      setIsLoadingWorkspaces(false);
-    }
-  }
 
   async function handleSubmit(values, { setSubmitting }) {
     setIsLoading(true);
     values.parentId = workspace.parentId || null;
+    values.templateIds = selectedTemplateIds;
 
     try {
       if (workspaceId) {
@@ -116,6 +149,66 @@ export default function Workspace() {
     { key: 'completed', value: 'Completed', text: 'Completed' },
   ];
 
+  const templatesCheckboxes = !templates ? null : (<><span className="mini-text">(Leave Unselected to Include All)</span>
+    <Table>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell>Form</Table.HeaderCell>
+          <Table.HeaderCell>Category</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {templates
+  .sort((a, b) => a.templateDefinition.title.localeCompare(b.templateDefinition.title))
+  .map((template) => (
+            <Table.Row key={template.templateId}>
+              <Table.Cell>
+                <Form.Checkbox
+                  key={template.templateId}
+                  label={template.templateDefinition?.title}
+                  value={template.templateId}
+                  checked={selectedTemplateIds.includes(template.templateId)}
+                  onChange={() =>
+                    handleTemplateCheckboxChange(template.templateId)
+                  }
+                />
+              </Table.Cell>
+              <Table.Cell>{template.templateDefinition?.category}</Table.Cell>
+            </Table.Row>
+          ))}
+      </Table.Body>
+    </Table></>
+  );
+  function renderTemplatePicker() {
+    return (
+      <Accordion as={Menu} vertical fluid >
+        <Menu.Item >
+          <Accordion.Title 
+            active={isTemplatePickerOpen}
+            content="Applicable Forms"
+            index={0}
+            onClick={() => setIsTemplatePickerOpen(!isTemplatePickerOpen)}
+          />
+          <Accordion.Content
+            active={isTemplatePickerOpen}
+            content={templatesCheckboxes}
+          />
+        </Menu.Item>
+      </Accordion>
+    );
+  }
+
+  function handleTemplateCheckboxChange(templateId) {
+    if (selectedTemplateIds.includes(templateId)) {
+      setSelectedTemplateIds((prevIds) =>
+        prevIds.filter((id) => id !== templateId)
+      );
+    } else {
+      setSelectedTemplateIds((prevIds) => [...prevIds, templateId]);
+    }
+  }
+
+
   function renderWorkspace() {
     const isAdmin = currentUserRoles.includes("admins");
     
@@ -124,12 +217,12 @@ export default function Workspace() {
         textAlign="center"
         verticalAlign="middle"
       >
-        <Grid.Column style={{ maxWidth: 550 }}>
+        <Grid.Column style={{ maxWidth: 700 }}>
           <Header as="h2" textAlign="center">
             <Icon.Group>
               <Icon name="folder" color="yellow" />
               <Icon corner name="zip" color="yellow" />
-            </Icon.Group>{" "}
+            </Icon.Group>
             Workspace
           </Header>
           <Formik
@@ -199,23 +292,23 @@ export default function Workspace() {
                               : "-"
                           }`,
                         }}
-                        onClick={loadWorkspaces}
+                        onClick={(e) => {
+                          e.preventDefault();
+                        }}
                       />
                     }
                   >
                     <Modal.Header>Select Parent Workspace</Modal.Header>
                     <Modal.Content image>
                       <Modal.Description>
-                        {isLoadingWorkspaces ? (
-                          <p>Loading workspaces ...</p>
-                        ) : (
-                          <WorkspacePicker
-                            workspaces={workspaces}
-                            allowNull={true}
-                            onChange={(parent) => setPickedParent(parent)} // doesn't set the parent, just sets state
-                            selectedWorkspaceId={workspace.parentId}
-                          />
-                        )}
+                        <WorkspacePicker
+                          workspaces={workspaces}
+                          allowNull={true}
+                          onChange={(parent) => setPickedParent(parent)} // doesn't set the parent, just sets state
+                          selectedWorkspaceId={
+                            queryStringParentId || workspace.parentId
+                          }
+                        />
                       </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
@@ -323,12 +416,22 @@ export default function Workspace() {
                       }}
                     />
                   </Form.Field>
+                  
+          
+          {renderTemplatePicker()}
+        
 
                 </Segment>
-                
-                <Button basic primary type="submit" disabled={isSubmitting} floated="right">
-                    Save
-                  </Button>
+
+                <Button
+                  basic
+                  primary
+                  type="submit"
+                  disabled={isSubmitting}
+                  floated="right"
+                >
+                  Save
+                </Button>
               </Form>
             );}
           }

@@ -274,7 +274,8 @@ export default function TemplatedForm() {
           handleCancel={isNew ? null : cancelEdit}
           disabled={!editable}
         />
-        {workspaceId && templateId && formId && (
+      </div>
+      {workspaceId && templateId && formId && (
           <Popup
             content="Link to this record copied."
             on="click"
@@ -292,8 +293,6 @@ export default function TemplatedForm() {
             }
           />
         )}
-      </div>
-
       {formRecord && (
         <p style={{ color: "#bbb" }}>
           Created{" "}

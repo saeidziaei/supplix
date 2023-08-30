@@ -5,7 +5,7 @@ import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
 import React, { useEffect, useState } from "react";
 import { LinkContainer } from "react-router-bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Accordion,
   Button,
@@ -24,6 +24,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
+import pluralize from "pluralize";
 
 
 export default function Workspaces() {
@@ -37,8 +38,9 @@ export default function Workspaces() {
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
-  const { currentUserRoles } = useAppContext();
+  const { currentUserRoles, tenant } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
+
 
 
   const canEditWorkspaceTeam = () => {
@@ -94,6 +96,7 @@ export default function Workspaces() {
     
   }, [workspaces, location.search]);
 
+  const getReviewNCRsLabel = () => `Review  ${pluralize((tenant && tenant.NCRLabel) ? tenant.NCRLabel : "NCR")}`
   async function loadWorkspaces() {
     // if admin return all
     if (isAdmin) {
@@ -188,7 +191,11 @@ export default function Workspaces() {
   }
   function renderWorkspace(ws) {
     const { workspaceId } = ws;
-    return (
+    return (<>
+      <WorkspaceInfoBox
+                    workspace={selectedWorkspace}
+                    editable={canEditWorkspace()}
+                  />
       <Grid verticalAlign="middle">
         <Grid.Row>
           <Grid.Column>
@@ -230,6 +237,7 @@ export default function Workspaces() {
           </Grid.Column>
         </Grid.Row>
       </Grid>
+      </>
     );
   }
   function handleCurrentWorkspaceChange() {
@@ -284,6 +292,7 @@ export default function Workspaces() {
     </Modal>);
   }
   function render() {
+    const linkToNewWorkspace = selectedWorkspace ? `/workspace?parentWorkspaceId=${selectedWorkspace.workspaceId}` : `/workspace`;
     return (
       <>
         {(!workspaces || workspaces.length == 0) && (
@@ -307,31 +316,21 @@ export default function Workspaces() {
               </List>
             </Grid.Column>
             <Grid.Column width={14}>
-              {selectedWorkspace ? (
-                <>
-                  <WorkspaceInfoBox
-                    workspace={selectedWorkspace}
-                    editable={canEditWorkspace()}
-                  />
-                  {renderWorkspace(selectedWorkspace)}
-                </>
-              ) : (
-                <>
-                  {renderChildren()}
-                  <Divider hidden />
-                  {isAdmin && (
-                    <LinkContainer to={`/workspace`}>
-                      <Button basic primary size="tiny">
-                        <Icon name="plus" />
-                        Workspace
-                      </Button>
-                    </LinkContainer>
-                  )}
-                  <Divider />
-                 
-                 <a href="/workspace/NCR/tasks">Review NCRs</a>
-                </>
+              {selectedWorkspace
+                ? renderWorkspace(selectedWorkspace)
+                : renderChildren()}
+              <Divider hidden />
+              {isAdmin && (
+                <Link to={linkToNewWorkspace} >
+                  <Button basic primary size="tiny">
+                    <Icon name="plus" />
+                    Workspace
+                  </Button>
+                </Link>
               )}
+              <Divider />
+
+              <a href="/workspace/NCR/tasks">{getReviewNCRsLabel()}</a>
             </Grid.Column>
           </Grid.Row>
         </Grid>

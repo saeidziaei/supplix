@@ -14,6 +14,7 @@ export const main = handler(async (event) => {
       contactPerson= :contactPerson,
       contactEmail= :contactEmail,
       contactNumber= :contactNumber,
+      NCRLabel= :NCRLabel,
       note= :note,
       logo= :logo`,
     ExpressionAttributeValues: {
@@ -21,6 +22,7 @@ export const main = handler(async (event) => {
       ":contactPerson": data.contactPerson,
       ":contactEmail": data.contactEmail,
       ":contactNumber": data.contactNumber,
+      ":NCRLabel": data.NCRLabel,
       ":note": data.note,
       ":logo": data.logo,
     },

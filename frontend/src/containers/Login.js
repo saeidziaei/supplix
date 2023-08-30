@@ -2,7 +2,7 @@ import { Auth } from "aws-amplify";
 import { Formik } from "formik";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Form, Grid, Header, Icon, Label, Loader, Segment } from "semantic-ui-react";
+import { Button, Divider, Form, Grid, Header, Icon, Image, Label, Loader, Segment } from "semantic-ui-react";
 import * as Yup from 'yup';
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
@@ -62,13 +62,16 @@ export default function Login() {
   }
 
   return (
-    <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
-      <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h2"  textAlign="left">
-          <Icon name="user outline"  />
+    <Grid textAlign="center" className="grid-container" verticalAlign="middle">
+      <Grid.Column className="form-container">
+      <Image src="/iso_cloud_logo_v1.png" />
+      <Divider />
+        <Header as="h2"  textAlign="left" color="grey" >
+        <Icon name="user outline"  />
           {newPasswordRequired ? "Choose a new password" : "Login"}
         </Header>
         <Formik
+          
           initialValues={{ ...values }}
           validationSchema={Schema}
           onSubmit={handleSubmit}
@@ -83,6 +86,8 @@ export default function Login() {
           }) => (
             <Form onSubmit={handleSubmit} autoComplete="off">
               <Segment>
+              
+
                 {!newPasswordRequired && (
                   <>
                     {errors.email && touched.email ? (

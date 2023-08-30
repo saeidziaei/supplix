@@ -32,8 +32,8 @@ export function AuthAndApiStack({ stack, app }) {
     login: ["email"],
     cdk: {
       userPool: {
-        // selfSignUpEnabled: false,
-        // deletionProtection: true,
+        selfSignUpEnabled: false,
+        deletionProtection: true,
         // advance security mode incurs more cost
         // advancedSecurityMode: AdvancedSecurityModeType.ENFORCED,
         customAttributes: {
@@ -127,10 +127,10 @@ Temporary Password: {####}
     customDomain:
       app.stage === "prod" ? `api.${process.env.DOMAIN}` : undefined,
     defaults: {
-      // throttle: {
-      //   rate: 2000,
-      //   burst: 100,
-      // },
+      throttle: {
+        rate: 2000,
+        burst: 100,
+      },
       authorizer: "jwt",
       function: {
         environment: {
