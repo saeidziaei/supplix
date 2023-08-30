@@ -20,7 +20,7 @@ export const main = handler(async (event, tenant) => {
       startDate = :startDate,
       endDate = :endDate,
       workspaceStatus = :workspaceStatus,
-      templateIds = :templateIds
+      templateCategories = :templateCategories
       `,
     ExpressionAttributeValues: {
       ":parentId": data.parentId,
@@ -32,7 +32,7 @@ export const main = handler(async (event, tenant) => {
       ":startDate": data.startDate || "",
       ":endDate": data.endDate || "",
       ":workspaceStatus": data.workspaceStatus || "",
-      ":templateIds": data.templateIds || [],
+      ":templateCategories": data.templateCategories || [],
     },
     ReturnValues: "ALL_NEW",
   };

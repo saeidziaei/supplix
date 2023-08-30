@@ -33,10 +33,10 @@ export default function FormRegisters() {
           const templates = await loadTemplates();
           const { data, workspace } = templates ?? {};
 
-          if (workspace && workspace.templateIds && workspace.templateIds.length) {
+          if (workspace && workspace.templateCategories && workspace.templateCategories.length) {
             // Filter the templates based on the templateIds in the workspace
             const filteredTemplates = data.filter((template) =>
-              workspace.templateIds.includes(template.templateId)
+              workspace.templateCategories.includes(template.templateDefinition?.category)
             );
             
             setTemplates(filteredTemplates);

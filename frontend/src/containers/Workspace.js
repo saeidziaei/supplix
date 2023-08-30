@@ -43,13 +43,22 @@ export default function Workspace() {
   const queryParams = new URLSearchParams(location.search);
   const queryStringParentId = queryParams.get('parentWorkspaceId');
 
-  const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
-  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateCategories, setSelectedTemplateCategories] = useState([]);
+  const [templateCategories, setTemplateCategories] = useState([]);
 
   async function loadTemplates() {
     try {
       const response = await makeApiCall("GET", `/templates`);
-      setTemplates(response);
+      const uniqueCategoriesSet = new Set();
+      response.forEach((t) => {
+        const category = t.templateDefinition?.category;
+        if (category) {
+          uniqueCategoriesSet.add(category);
+        }
+      });
+
+      const uniqueCategoriesArray = Array.from(uniqueCategoriesSet);
+      setTemplateCategories(uniqueCategoriesArray);
     } catch (error) {
       onError(error);
     }
@@ -81,14 +90,12 @@ export default function Workspace() {
         if (workspaceId) {
           const item = await loadWorkspace();// loadWorkspace has workspace in the path therefore it return workspace in a child element
           workspaceData = item.workspace ?? {};
-          setSelectedTemplateIds(workspaceData.templateIds || []);
+          setSelectedTemplateCategories(workspaceData.templateCategories || []);
         }
     
         const list = await loadWorkspaces();
         setWorkspaces(list.filter((w) => w.workspaceId !== workspaceData.workspaceId)); // Fix the condition to avoid excluding the current workspace
 
-        console.log(workspaceData);
-        console.log(queryStringParentId);
         const parentId = workspaceData.parentId || queryStringParentId;
         workspaceData.parentId = parentId;
         workspaceData.parent = list.find((w) => w.workspaceId === parentId);
@@ -109,7 +116,7 @@ export default function Workspace() {
   async function handleSubmit(values, { setSubmitting }) {
     setIsLoading(true);
     values.parentId = workspace.parentId || null;
-    values.templateIds = selectedTemplateIds;
+    values.templateCategories = selectedTemplateCategories;
 
     try {
       if (workspaceId) {
@@ -149,31 +156,28 @@ export default function Workspace() {
     { key: 'completed', value: 'Completed', text: 'Completed' },
   ];
 
-  const templatesCheckboxes = !templates ? null : (<><span className="mini-text">(Leave Unselected to Include All)</span>
+  const templatesCheckboxes = !templateCategories ? null : (<><span className="mini-text">(Uncheck All to Include All Categories)</span>
     <Table>
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell>Form</Table.HeaderCell>
           <Table.HeaderCell>Category</Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {templates
-  .sort((a, b) => a.templateDefinition.title.localeCompare(b.templateDefinition.title))
-  .map((template) => (
-            <Table.Row key={template.templateId}>
+        {templateCategories
+  .map((templateCategory) => (
+            <Table.Row key={templateCategory}>
               <Table.Cell>
                 <Form.Checkbox
-                  key={template.templateId}
-                  label={template.templateDefinition?.title}
-                  value={template.templateId}
-                  checked={selectedTemplateIds.includes(template.templateId)}
+                  label={templateCategory}
+                  value={templateCategory}
+                  checked={selectedTemplateCategories.includes(templateCategory)}
                   onChange={() =>
-                    handleTemplateCheckboxChange(template.templateId)
+                    handleTemplateCategoryCheckboxChange(templateCategory)
                   }
                 />
               </Table.Cell>
-              <Table.Cell>{template.templateDefinition?.category}</Table.Cell>
+              
             </Table.Row>
           ))}
       </Table.Body>
@@ -198,13 +202,13 @@ export default function Workspace() {
     );
   }
 
-  function handleTemplateCheckboxChange(templateId) {
-    if (selectedTemplateIds.includes(templateId)) {
-      setSelectedTemplateIds((prevIds) =>
-        prevIds.filter((id) => id !== templateId)
+  function handleTemplateCategoryCheckboxChange(templateCategory) {
+    if (selectedTemplateCategories.includes(templateCategory)) {
+      setSelectedTemplateCategories((prevIds) =>
+        prevIds.filter((id) => id !== templateCategory)
       );
     } else {
-      setSelectedTemplateIds((prevIds) => [...prevIds, templateId]);
+      setSelectedTemplateCategories((prevIds) => [...prevIds, templateCategory]);
     }
   }
 
