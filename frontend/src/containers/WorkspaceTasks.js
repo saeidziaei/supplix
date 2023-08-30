@@ -321,7 +321,7 @@ export default function WorkspaceTasks() {
         {isMytasksPath ? (
           <Header>My Tasks</Header>
         ) : (
-          <WorkspaceInfoBox workspace={workspace} />
+          !isNCR() && (<WorkspaceInfoBox workspace={workspace} />)
         )}
        <Tab  menu={{ secondary: true, pointing: true }} panes={panes} />
         
@@ -331,7 +331,7 @@ export default function WorkspaceTasks() {
           <LinkContainer to={`/workspace/${workspaceId}/task`}>
             <Button basic size="tiny" color={isNCR() ? "red" : "blue"}>
               <Icon name="plus" />
-              {isNCR() ? "NCR Item" : "Task"}
+              New
             </Button>
           </LinkContainer>
         )}
