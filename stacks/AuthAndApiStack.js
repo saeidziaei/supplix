@@ -195,7 +195,7 @@ Temporary Password: {####}
       "DELETE   /workspaces/{workspaceId}": {
         function: {
           handler: "services/functions/workspace/delete.main",
-          bind: [workspaceTable, workspaceTable],
+          bind: [workspaceTable, workspaceTaskTable],
           environment: {
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
