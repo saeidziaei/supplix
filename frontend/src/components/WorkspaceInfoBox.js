@@ -8,7 +8,6 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
   const nav = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const canEdit = editable || workspace?.role === "Owner";
 
   const {
     workspaceId,
@@ -20,6 +19,8 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
     endDate,
     note,
   } = workspace ?? {};
+
+  const canEdit = workspaceId && (editable || workspace?.role === "Owner");
 
   const getWorkspaceWithParents = (workspace) => {
     const workspaceWithParents = [];

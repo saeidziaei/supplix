@@ -337,7 +337,7 @@ export function GenericForm({
   
   return (
     <Segment style={{ overflowX: "auto" }}>
-      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant.logoURL || "/iso_cloud_logo_v1.png"} />
+      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
       <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => {
           setSignature(values[SIGNATURE_FIELD_NAME]);

@@ -42,9 +42,7 @@ export function StorageStack({ stack, app }) {
       parentId: "string"
     },
     primaryIndex: { partitionKey: "tenant", sortKey: "workspaceId" },
-    // globalIndexes: [
-    //   { partitionKey: "tenant", sortKey: "parentId"}
-    // ]
+    stream: "new_and_old_images",
   });
 
 

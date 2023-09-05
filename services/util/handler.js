@@ -45,7 +45,13 @@ export default function handler(lambda) {
       body = await lambda(event, tenant, workspaceUser, context);
 
       if (workspaceId && getHttpMethod(event) === 'GET') { // inject workspace into the response
-        let workspace = await getWorkspaceById(tenant, workspaceId);
+        let workspace;
+        try {
+          workspace = await getWorkspaceById(tenant, workspaceId);
+        } catch (error) {
+          // for workspaces that have been deleted. Some children should be still accessible (e.g. tasks )
+          workspace = { };
+        }
         workspace.role = workspaceUser ? workspaceUser.role : "";
         body = { data: body, workspace };
       }

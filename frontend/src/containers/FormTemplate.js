@@ -35,6 +35,7 @@ import { onError } from "../lib/errorLib";
 import "./FormTemplate.css";
 import FormRegister from "./FormRegister";
 import { useAppContext } from "../lib/contextLib";
+import TextareaAutosize from 'react-textarea-autosize';
 
 export default function FormTemplate() {
   const {templateId} = useParams();
@@ -50,6 +51,24 @@ export default function FormTemplate() {
   const [hasSignature, setHasSignature] = useState(false);
   const [activeDesigner, setActiveDesigner] = useState("form designer");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+  const [jsonInput, setJsonInput] = useState('');
+  const [isRawEditing, setIsRawEditing] = useState(false);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'J') {
+      setIsRawEditing(!isRawEditing);
+      setJsonInput(JSON.stringify({title, category, sections, hasSignature, registerFields}, null, 2));
+    }
+  });
+  const handleRawEdit = () => {
+    try {
+      setFormDef(JSON.parse(jsonInput));
+      setIsRawEditing(false);
+    } catch (e) {
+      onError(e);
+    }
+  }
 
   const handleMenuClick = (e, { name }) => setActiveDesigner(name);
 
@@ -68,11 +87,7 @@ export default function FormTemplate() {
         if (templateId) {
           const item = await loadTemplate();
           const formDef = item.templateDefinition;
-          setTitle(formDef.title);
-          setCategory(formDef.category);
-          setSections(formDef.sections);
-          setHasSignature(!!formDef.hasSignature);
-          setRegisterFields(formDef.registerFields || []);
+          setFormDef(formDef);
         } 
 
       } catch (e) {
@@ -84,6 +99,14 @@ export default function FormTemplate() {
 
     onLoad();
   }, []);
+  function setFormDef(formDef) {
+    setTitle(formDef.title);
+    setCategory(formDef.category);
+    setSections(formDef.sections);
+    setHasSignature(!!formDef.hasSignature);
+    setRegisterFields(formDef.registerFields || []);
+  }
+
   async function deleteTemplate() {
     return await makeApiCall("DELETE", `/templates/${templateId}`);
   }
@@ -633,45 +656,59 @@ export default function FormTemplate() {
   return (
     <Grid stackable>
       <Grid.Column width={7}>
-      <Menu tabular attached='top' >
-        <Menu.Item
-          name='form designer'
-          active={activeDesigner === 'form designer'}
-          onClick={handleMenuClick}
-        />
-        <Menu.Item
-          name='register designer'
-          active={activeDesigner === 'register designer'}
-          onClick={handleMenuClick}
-        />
-      </Menu>
-       <Segment attached="bottom">{activeDesigner == 'form designer' ? renderFormDesigner() : rednerRegisterDesigner()}
-       
-       </Segment>
-       <Button basic color="blue" size="mini" onClick={handleSubmit}>
+        <Menu tabular attached="top">
+          <Menu.Item
+            name="form designer"
+            active={activeDesigner === "form designer"}
+            onClick={handleMenuClick}
+          />
+          <Menu.Item
+            name="register designer"
+            active={activeDesigner === "register designer"}
+            onClick={handleMenuClick}
+          />
+        </Menu>
+        {isRawEditing && (<>
+         
+          <TextareaAutosize
+          
+            value={jsonInput} 
+            onChange={(e) => setJsonInput(e.target.value)}
+            rows={10}
+            cols={40}
+          />
+          <Divider hidden />
+          <Button onClick={handleRawEdit}  color="green" icon="check circle" /></>
+        )}
+        <Segment attached="bottom">
+          {activeDesigner == "form designer"
+            ? renderFormDesigner()
+            : rednerRegisterDesigner()}
+        </Segment>
+        <Button basic color="blue" size="mini" onClick={handleSubmit}>
           <Icon name="save" />
           Save
         </Button>
         <Confirm
+          size="mini"
+          header="This will delete the form."
+          content="The existing records are fine but no new records of this form can be produced. Are you sure?"
+          open={deleteConfirmOpen}
+          onCancel={() => setDeleteConfirmOpen(false)}
+          onConfirm={handleDelete}
+        />
+        {templateId && canDeleteTemplate() && (
+          <Button
+            floated="right"
+            basic
             size="mini"
-            header="This will delete the form." 
-            content="The existing records are fine but no new records of this form can be produced. Are you sure?"
-            open={deleteConfirmOpen}
-            onCancel={() => setDeleteConfirmOpen(false)}
-            onConfirm={handleDelete}
-          />
-        {templateId && (canDeleteTemplate) && (
-            <Button
-              floated="right"
-              basic
-              size="mini"
-              color="red"
-              onClick={() => setDeleteConfirmOpen(true)}
-            >
-              <Icon name="remove circle" />
-              Delete Form
-            </Button>
-          )}
+            color="red"
+            onClick={() => setDeleteConfirmOpen(true)}
+          >
+            <Icon name="remove circle" />
+            Delete Form
+          </Button>
+        )}
       </Grid.Column>
       <Grid.Column width={9}>
         <Header as="h3" color="teal">

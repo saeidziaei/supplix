@@ -195,7 +195,7 @@ Temporary Password: {####}
       "DELETE   /workspaces/{workspaceId}": {
         function: {
           handler: "services/functions/workspace/delete.main",
-          bind: [workspaceTable, deletedArchiveTable],
+          bind: [workspaceTable],
           environment: {
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
@@ -235,7 +235,7 @@ Temporary Password: {####}
       "GET   /mytasks": {
         function: {
           handler: "services/functions/workspacetask/getmytasks.main",
-          bind: [workspaceTaskTable, workspaceTable],
+          bind: [workspaceTaskTable],
         },
       },
       "GET   /workspaces/{workspaceId}/tasks": {
@@ -285,7 +285,7 @@ Temporary Password: {####}
       "DELETE /workspaces/{workspaceId}/tasks/{taskId}": {
         function: {
           handler: "services/functions/workspacetask/delete.main",
-          bind: [workspaceUserTable],
+          bind: [workspaceTaskTable],
           environment: {
             WORKSPACE_ALLOWED_ROLE: WORKSPACE_OWNER_ROLE,
           },
@@ -647,12 +647,22 @@ Temporary Password: {####}
         USER_POOL_ID: auth.userPoolId,
         STAGE: stack.stage,
       },
-      // bind: [table],
     },
   });
 
   workspaceTaskTable.attachPermissionsToConsumer("notify", ["ses"]);
   
+
+  workspaceTable.addConsumers(stack, {
+    archiver: {
+      handler: "services/functions/workspace/archiver.main",
+      environment : {
+        DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
+      }, 
+      bind: [deletedArchiveTable]
+    }
+  })
+
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API
     api,

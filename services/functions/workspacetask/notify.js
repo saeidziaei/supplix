@@ -15,6 +15,9 @@ export const main = async (event, context) => {
         );
         continue;
       }
+      if (!streamData.NewImage) {
+        continue; // skip deletion
+      }
 
       if (
         streamData.NewImage.isRecurring &&
