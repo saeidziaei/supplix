@@ -11,13 +11,14 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useParams } from "react-router-dom";
 import { Button, Divider, Header, Icon, Label, Loader, Message, Popup } from "semantic-ui-react";
 import { makeApiCall } from "../lib/apiLib";
-import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import { cloneDeep, template } from 'lodash'; // Import the cloneDeep function from the lodash library
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 
 import "./FormRegisters.css";
+import { normaliseCognitoUsers, templateEmployeeField } from "../lib/helpers";
+import User from "../components/User";
 
 
 export default function FormRegister({ formDefInput, formsInput, isHistory, isPreview }) {
@@ -27,15 +28,16 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const [forms, setForms] = useState(formsInput);
   const [originalForms, setOriginalForms] = useState(formsInput);
   const [isLoading, setIsLoading] = useState(true);
-  const [savingStatus, setSavingStatus] = useState({isSaving: false});
+  const [savingStatus, setSavingStatus] = useState({ isSaving: false });
   const [hasError, setHasError] = useState(false);
   const [columnDefs, setColumnDefs] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [isTemplateDeleted, setIsTemplateDeleted] = useState(false);
+  const [employees, setEmployees] = useState(null);
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
-  
+
   useEffect(() => {
     setFormDef(formDefInput);
     if (formDefInput) {
@@ -43,10 +45,12 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       setColumnDefs(getColumnDefs(formDefInput));
       return;
     }
-
   }, [formDefInput]);
 
   useEffect(() => {
+    async function loadUsers() {
+      return await makeApiCall("GET", `/users`);
+    }
     async function onLoad() {
       try {
         setIsLoading(true);
@@ -62,7 +66,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
           return;
         }
 
-        
         // todo: how do we avoid two roundtrips?
         const template = await loadTemplate(templateId);
         setFormDef(template.templateDefinition);
@@ -79,10 +82,14 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
 
         setOriginalForms(formsCopy);
 
-        setColumnDefs(getColumnDefs(template.templateDefinition));
+        const fieldName = templateEmployeeField(template?.templateDefinition);
+        if (fieldName) {
+          // there is an employee field in the form definition, we need to load users
+          const items = await loadUsers();
+          setEmployees(normaliseCognitoUsers(items));
+        }
 
-
-
+        // setColumnDefs(getColumnDefs(template.templateDefinition));
       } catch (e) {
         setHasError(true);
         onError(e);
@@ -93,11 +100,13 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     onLoad();
   }, []);
 
-  
-const handleCellValueChanged = useCallback(() => {
-  setHasChanges(true);
-}, []);
+  useEffect(() => {
+    setColumnDefs(getColumnDefs(formDef));
+  }, [formDef, employees]);
 
+  const handleCellValueChanged = useCallback(() => {
+    setHasChanges(true);
+  }, []);
 
   const autoSizeAll = useCallback((skipHeader) => {
     const allColumnIds = [];
@@ -105,18 +114,18 @@ const handleCellValueChanged = useCallback(() => {
       allColumnIds.push(column.getId());
     });
     gridRef.current.columnApi.autoSizeColumns(allColumnIds, skipHeader);
-
   }, []);
 
   async function loadTemplate(templateId) {
     return await makeApiCall("GET", `/templates/${templateId}`);
   }
   async function loadTemplateForms(templateId) {
-    return await makeApiCall("GET", `/workspaces/${workspaceId}/templates/${templateId}/forms`);
+    return await makeApiCall(
+      "GET",
+      `/workspaces/${workspaceId}/templates/${templateId}/forms`
+    );
   }
 
-
-  
   const handleSave = async () => {
     async function processChangedForms() {
       try {
@@ -125,9 +134,9 @@ const handleCellValueChanged = useCallback(() => {
           setSavingStatus({ current: index + 1 });
           await updateForm(form.formId, form.formValues);
         }
-        console.log('All forms have been updated successfully.');
+        console.log("All forms have been updated successfully.");
       } catch (error) {
-        console.error('Error updating forms:', error);
+        console.error("Error updating forms:", error);
         onError(error);
       }
     }
@@ -156,88 +165,29 @@ const handleCellValueChanged = useCallback(() => {
         (originalForm) => originalForm.formId === form.formId
       );
 
-      return !objectsAreEqual(originalForm.formValues.register, form.formValues.register);
+      return !objectsAreEqual(
+        originalForm.formValues.register,
+        form.formValues.register
+      );
     });
 
-    setSavingStatus({isSaving: true, current: 0, total: changedForms.length});
+    setSavingStatus({ isSaving: true, current: 0, total: changedForms.length });
     processChangedForms(changedForms);
-    setSavingStatus({isSaving: false});
+    setSavingStatus({ isSaving: false });
 
     setHasChanges(false);
   };
 
   async function updateForm(formId, values) {
-    return await makeApiCall("PUT", `/workspaces/${workspaceId}/forms/${formId}`, {
-      formValues: values,
-      isRevision: false // or should it be true?
-    });
+    return await makeApiCall(
+      "PUT",
+      `/workspaces/${workspaceId}/forms/${formId}`,
+      {
+        formValues: values,
+        isRevision: false, // or should it be true?
+      }
+    );
   }
-
-  const getColumnDefs = (def) => {
-    if (!def) return [];
-    const formColumns = def.sections
-      .map((s) => ({
-        headerName: s.title,
-        children: s.fields
-          .filter((f) => f.type !== "info")
-          .filter((f) => !s.isTable || ["SUM", "AVG", "COUNT", "MIN", "MAX"].includes(f.aggregateFunction)) // in Table sections only show fields with aggegate 
-          .map((f) => ({
-            field: f.name,
-            headerName: !s.isTable ? f.name : `${f.aggregateFunction}(${f.name})`,
-            cellClass: "ag-cell-bordered ag-cell-readonly",
-            valueGetter: (params) =>
-              s.isTable ? tableAggregateFieldValueGetter(params, f)
-              :
-              f.type === "aggregate"
-                ? aggregateFiledValueGetter(params, s, f)
-                : formValueGetter(params),
-            cellStyle: (params) =>
-              f.type === "aggregate"
-                ? { backgroundColor: params.value.color }
-                : null,
-            cellRenderer: formValueRenderer(f.type),
-          })),
-      }))
-      .flat();
-
-    const registerColumns = !def.registerFields
-      ? []
-      : [{
-          headerName: "Register",
-          children: def.registerFields.map((f) => ({
-            field: f.name,
-            editable: !isHistory,
-            singleClickEdit: true,
-            onCellValueChanged: handleCellValueChanged,
-            valueGetter: registerValueGetter,
-            valueSetter: registerValueSetter,
-          })),
-        }];
-    const auditColums = [{headerName: "", children: [{
-      field: "created",
-      sortable: true,
-      width: 80,
-      valueGetter: () => "create",
-      cellRenderer: auditRenderer,
-      cellClass: "ag-cell-bordered ag-cell-readonly"
-    },
-    {
-      field: "updated",
-      sortable: true,
-      width: 80,
-      valueGetter: () => "update",
-      cellRenderer: auditRenderer,
-      cellClass: "ag-cell-bordered ag-cell-readonly"
-    },]}];
-    return [
-      ...(isHistory
-        ? []
-        : [{ field: "", width: 100, cellRenderer: actionRenderer, cellClass: "ag-cell-bordered ag-cell-readonly", }]),
-      ...formColumns,
-      ...registerColumns,
-      ...auditColums
-    ];
-  };
 
   const requiredOptions = [
     {
@@ -287,7 +237,9 @@ const handleCellValueChanged = useCallback(() => {
   };
 
   const registerValueGetter = (params) => {
-    return params.data.formValues.register ? params.data.formValues.register[params.colDef.field] : undefined;
+    return params.data.formValues.register
+      ? params.data.formValues.register[params.colDef.field]
+      : undefined;
   };
   const registerValueSetter = (params) => {
     params.data.formValues.register = params.data.formValues.register || {};
@@ -320,32 +272,29 @@ const handleCellValueChanged = useCallback(() => {
     switch (field.aggregateFunction) {
       case "SUM":
         return sumOfVal || 0;
-    
+
       case "AVG":
         return countOfVal > 0 ? sumOfVal / countOfVal : 0;
-    
+
       case "COUNT":
         return countOfVal;
 
       case "MAX":
-          return maxValue !== -Infinity ? maxValue : undefined;
-    
+        return maxValue !== -Infinity ? maxValue : undefined;
+
       case "MIN":
-          return minValue !== Infinity ? minValue : undefined;    
-          
+        return minValue !== Infinity ? minValue : undefined;
+
       default:
         return undefined;
     }
-
   };
-  const aggregateFiledValueGetter = (params, section, field) =>  {
+  const aggregateFiledValueGetter = (params, section, field) => {
     const data = params.data;
     const fields = section.fields;
 
     const sum = fields
-      .filter(
-        (f) => ["number", "select", "dropdown"].includes(f.type) 
-      )
+      .filter((f) => ["number", "select", "dropdown"].includes(f.type))
       .reduce((acc, currentField) => {
         // get value of current field
         const fieldValue = data.formValues[currentField.name];
@@ -370,19 +319,19 @@ const handleCellValueChanged = useCallback(() => {
     });
 
     return result || { color: "white", title: "-" };
-  }
+  };
 
   const aggregationRenderer = (params) => {
-    return <span>{params.value.title}</span>
-  }
+    return <span>{params.value.title}</span>;
+  };
   const linkRenderer = (params) => {
     return params.value ? <a href={params.value}>Link</a> : <></>;
-  }
-  
+  };
+
   const competencyRenderer = (params) => {
     const fieldValue = params.value;
     if (!fieldValue) return <></>;
-    
+
     const r = getOptionbyName(requiredOptions, fieldValue.required);
     const c = getOptionbyName(competencyOptions, fieldValue.competency);
 
@@ -399,9 +348,18 @@ const handleCellValueChanged = useCallback(() => {
   const dateRenderer = (params) => {
     return parseISO(params.value).toDateString();
   };
+  const employeeRenderer = (params) => {
+    if (!employees) return <span>?</span>;
+    const user = employees.find((emp) => emp.Username === params.value);
+    return user ? (
+      <User user={user} compact={false} />
+    ) : (
+      <span>User Not Found</span>
+    );
+  };
   const wysiwygRenderer = (params) => {
     let value = params.value;
-    
+
     return (
       <Popup
         hoverable
@@ -423,12 +381,17 @@ const handleCellValueChanged = useCallback(() => {
       />
     );
   };
+
   const actionRenderer = (params) => {
     const d = params.data;
 
     return (
-      <LinkContainer to={`/workspace/${workspaceId}/form/${d.templateId}/${d.formId}`}>
-        <a  size="mini"  as="a" >Details</a>
+      <LinkContainer
+        to={`/workspace/${workspaceId}/form/${d.templateId}/${d.formId}`}
+      >
+        <a size="mini" as="a">
+          Details
+        </a>
       </LinkContainer>
     );
   };
@@ -440,14 +403,13 @@ const handleCellValueChanged = useCallback(() => {
         header="Created"
         trigger={<span>{new Date(d.createdAt).toLocaleDateString()}</span>}
       />
-    ) : (
-      d.updatedAt ? 
+    ) : d.updatedAt ? (
       <Popup
         content={renderActionInfo(d.updatedAt, d.updatedByUser)}
         header="Updated"
         trigger={<span>{new Date(d.updatedAt).toLocaleDateString()}</span>}
       />
-      :
+    ) : (
       <></>
     );
   };
@@ -458,6 +420,8 @@ const handleCellValueChanged = useCallback(() => {
         return competencyRenderer;
       case "date":
         return dateRenderer;
+      case "employee":
+        return employeeRenderer;
       case "number":
         return numberRenderer;
       case "wysiwyg":
@@ -490,9 +454,9 @@ const handleCellValueChanged = useCallback(() => {
     const hasEntries = forms && forms.length > 0;
     return (
       <>
-       { workspace && <WorkspaceInfoBox workspace={workspace}/> }
+        {workspace && <WorkspaceInfoBox workspace={workspace} />}
         {!isHistory && <Header>{formDef?.title}</Header>}
-        
+
         {!isPreview && !hasEntries && (
           <Message
             header={
@@ -537,7 +501,6 @@ const handleCellValueChanged = useCallback(() => {
               sortable: true,
               autoHeight: true,
             }}
-           
           ></AgGridReact>
         </div>
 
@@ -549,14 +512,19 @@ const handleCellValueChanged = useCallback(() => {
                 Back
               </Button>
             </LinkContainer>
-            
+
             <LinkContainer to={`/workspace/${workspaceId}/form/${templateId}`}>
               <Button basic primary size="mini" disabled={isTemplateDeleted}>
                 <Icon name="plus" />
                 Record
               </Button>
             </LinkContainer>
-            {hasChanges && <Button basic color="blue" floated="right" onClick={handleSave} ><Icon name="save"/>Save</Button>}
+            {hasChanges && (
+              <Button basic color="blue" floated="right" onClick={handleSave}>
+                <Icon name="save" />
+                Save
+              </Button>
+            )}
           </>
         )}
       </>
@@ -564,7 +532,102 @@ const handleCellValueChanged = useCallback(() => {
   }
 
   if (isLoading) return <Loader active />;
-  if (savingStatus.isSaving) return <Loader active>{`Savign ${savingStatus.current} of ${savingStatus.total}`}</Loader>;
+
+  function getColumnDefs(def) {
+    if (!def) return [];
+    const formColumns = def.sections
+      .map((s) => ({
+        headerName: s.title,
+        children: s.fields
+          .filter((f) => f.type !== "info")
+          .filter(
+            (f) =>
+              !s.isTable ||
+              ["SUM", "AVG", "COUNT", "MIN", "MAX"].includes(
+                f.aggregateFunction
+              )
+          ) // in Table sections only show fields with aggegate
+          .map((f) => ({
+            field: f.name,
+            headerName: !s.isTable
+              ? f.name
+              : `${f.aggregateFunction}(${f.name})`,
+            cellClass: "ag-cell-bordered ag-cell-readonly",
+            valueGetter: (params) =>
+              s.isTable
+                ? tableAggregateFieldValueGetter(params, f)
+                : f.type === "aggregate"
+                ? aggregateFiledValueGetter(params, s, f)
+                : formValueGetter(params),
+            cellStyle: (params) =>
+              f.type === "aggregate"
+                ? { backgroundColor: params.value.color }
+                : null,
+            cellRenderer: formValueRenderer(f.type),
+          })),
+      }))
+      .flat();
+
+    const registerColumns = !def.registerFields
+      ? []
+      : [
+          {
+            headerName: "Register",
+            children: def.registerFields.map((f) => ({
+              field: f.name,
+              editable: !isHistory,
+              singleClickEdit: true,
+              onCellValueChanged: handleCellValueChanged,
+              valueGetter: registerValueGetter,
+              valueSetter: registerValueSetter,
+            })),
+          },
+        ];
+    const auditColums = [
+      {
+        headerName: "",
+        children: [
+          {
+            field: "created",
+            sortable: true,
+            width: 80,
+            valueGetter: () => "create",
+            cellRenderer: auditRenderer,
+            cellClass: "ag-cell-bordered ag-cell-readonly",
+          },
+          {
+            field: "updated",
+            sortable: true,
+            width: 80,
+            valueGetter: () => "update",
+            cellRenderer: auditRenderer,
+            cellClass: "ag-cell-bordered ag-cell-readonly",
+          },
+        ],
+      },
+    ];
+    return [
+      ...(isHistory
+        ? []
+        : [
+            {
+              field: "",
+              width: 100,
+              cellRenderer: actionRenderer,
+              cellClass: "ag-cell-bordered ag-cell-readonly",
+            },
+          ]),
+      ...formColumns,
+      ...registerColumns,
+      ...auditColums,
+    ];
+  }
+  if (savingStatus.isSaving)
+    return (
+      <Loader
+        active
+      >{`Savign ${savingStatus.current} of ${savingStatus.total}`}</Loader>
+    );
   if (hasError) return <Message>:/</Message>;
   return renderRegister();
 }

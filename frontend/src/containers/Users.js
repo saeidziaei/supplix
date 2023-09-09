@@ -41,6 +41,9 @@ export default function Users() {
       return false;
     }
   }
+  const UserRegisterRenderer = (params) => {
+    return <a href={`/user/register/${params.data.Username}`}>Details</a>
+  }
   class EmailRenderer {
     init(params) {
       this.eGui = document.createElement('div');
@@ -68,6 +71,7 @@ export default function Users() {
     { field: 'Name', headerName: 'Name', resizable: true, sortable: true, cellRenderer: NameRenderer, valueGetter: (params) => {return params.data.given_name + " " + params.data.family_name}  },
     { field: 'employeeNumber', resizable: true, sortable: true },
     { field: 'email', headerName: 'Email', resizable: true, sortable: true, cellRenderer: EmailRenderer  },
+    { field: 'register', headerName: 'Register', resizable: false, sortable: false, cellRenderer: UserRegisterRenderer  },
   ];
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);

@@ -3,7 +3,7 @@ import { AuthAndApiStack } from "./AuthAndApiStack";
 import { StorageStack } from "./StorageStack";
 
 export function AfterDeployStack({ stack }) {
-  const { tenantTable } = use(StorageStack);
+  const { tenantTable, formTable } = use(StorageStack);
   const { auth, cognitoAccessPolicy } = use(AuthAndApiStack);
 
   dependsOn(AuthAndApiStack);
@@ -24,6 +24,14 @@ export function AfterDeployStack({ stack }) {
         ADMIN_USERNAME: process.env.ADMIN_USERNAME
      },
       permissions: [cognitoAccessPolicy],
+    },
+  });
+
+  new Script(stack, "FormsWithoutUser", {
+    onCreate: {
+      handler: "services/functions/script/setemptyuser.handler",
+      environment: { FORM_TABLE: formTable.tableName, },
+      permissions: [formTable],
     },
   });
 

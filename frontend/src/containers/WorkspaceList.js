@@ -127,6 +127,7 @@ export default function Workspaces() {
         headerName: "Workspace",
         resizable: true,
         sortable: true,
+        sort: "asc"
       }, 
       { field: "category", resizable: true, sortable: true },
       { field: "workspaceCode", headerName: "Code", resizable: true, sortable: true },

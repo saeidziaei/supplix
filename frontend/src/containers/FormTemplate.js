@@ -36,6 +36,7 @@ import "./FormTemplate.css";
 import FormRegister from "./FormRegister";
 import { useAppContext } from "../lib/contextLib";
 import TextareaAutosize from 'react-textarea-autosize';
+import { normaliseCognitoUsers } from "../lib/helpers";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
@@ -51,7 +52,7 @@ export default function FormTemplate() {
   const [hasSignature, setHasSignature] = useState(false);
   const [activeDesigner, setActiveDesigner] = useState("form designer");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-
+  const [users, setUsers] = useState(null);
   const [jsonInput, setJsonInput] = useState('');
   const [isRawEditing, setIsRawEditing] = useState(false);
 
@@ -76,12 +77,11 @@ export default function FormTemplate() {
 
   useEffect(() => {
     async function loadTemplate() {
-      return await makeApiCall(
-        "GET",
-        `/templates/${templateId}`
-      );
+      return await makeApiCall("GET", `/templates/${templateId}`);
     }
-
+    async function loadUsers() {
+      return await makeApiCall("GET", `/users`);
+    }
     async function onLoad() {
       try {
         if (templateId) {
@@ -89,6 +89,8 @@ export default function FormTemplate() {
           const formDef = item.templateDefinition;
           setFormDef(formDef);
         } 
+        const items = await loadUsers();
+        setUsers(normaliseCognitoUsers(items));
 
       } catch (e) {
         onError(e);
@@ -714,7 +716,7 @@ export default function FormTemplate() {
         <Header as="h3" color="teal">
           Form Preview
         </Header>
-        <GenericForm formDef={{ title, category, sections, hasSignature }} />
+        <GenericForm formDef={{ title, category, sections, hasSignature }} users={users} />
         <Divider />
         <Header as="h3" color="teal">
           Register Preview

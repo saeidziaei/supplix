@@ -46,6 +46,15 @@ export const main = handler(async (event, tenant, workspaceUser) => {
     };
   }
 
+
+  if (data.userId) {
+    updateExpression += `, userId = :userId`;
+    expressionAttributeValues = {
+      ...expressionAttributeValues,
+      ":userId": data.userId,
+    }
+  }
+
   const params = {
     TableName: process.env.FORM_TABLE,
     Key: {

@@ -614,6 +614,16 @@ Temporary Password: {####}
           },
         },
       },
+      "GET /users/forms/{username}": {
+        function: {
+          handler: "services/functions/user/getuserforms.main",
+          bind: [formTable],
+          environment: {
+            USER_POOL_ID: auth.userPoolId,
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
+        },
+      },      
     },
   });
 

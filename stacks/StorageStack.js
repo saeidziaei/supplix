@@ -96,10 +96,14 @@ export function StorageStack({ stack, app }) {
     fields: {
       tenant: "string",
       workspaceId: "string",
-      tenant_workspaceId: "string",
+      tenant_workspaceId: "string", 
       formId: "string",
+      userId: "string" // when the record is directly related to a user. i.e. a certificate this employee has
     },
     primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "formId" },
+    globalIndexes: {
+      userIndex: { partitionKey: "tenant", sortKey: "userId" },
+    },
   });
 
   const templateTable = new Table(stack , "Template", {

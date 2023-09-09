@@ -86,3 +86,18 @@ export const formatDate = (dateString) => {
   });
   return formattedDate === "Invalid Date" ? "" : formattedDate;
 };
+
+
+export const templateEmployeeField = (template) => {
+  if (!template || !template.sections) return null;
+
+  for (const section of template.sections) {
+    if (!section.fields) return null;
+    for (const field of section.fields) {
+      if (field.type === 'employee') {
+        return field.name; // Found an "employee" type field
+      }
+    }
+  }
+  return null; // No "employee" type field found
+}

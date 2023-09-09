@@ -25,6 +25,7 @@ import "./GenericForm.css";
 import SignatureCanvas from "react-signature-canvas";
 import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "../lib/contextLib";
+import UserPicker from "./UserPicker";
 
 
 export function GenericForm({
@@ -33,6 +34,7 @@ export function GenericForm({
   handleSubmit,
   disabled,
   handleCancel,
+  users
 }) {
   const SIGNATURE_FIELD_NAME = "form-signature";
 
@@ -97,6 +99,17 @@ export function GenericForm({
             thousandSeparator={true}
             value={values[name]}
             onValueChange={(v) => setFieldValue(name, v.floatValue)}
+          />
+        );
+
+      case "employee":
+        return (
+          <UserPicker 
+            users={users}
+            disabled={disabled}
+            name={name}
+            value={values[name]}
+            onChange={(userId) => setFieldValue(name, userId)}
           />
         );
 

@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Label, Icon, Table, Accordion, Breadcrumb } from "semantic-ui-react";
-import {formatDate} from "../lib/helpers"
-import "./WorkspaceInfoBox.css"
+import {
+  Button,
+  Label,
+  Icon,
+  Table,
+  Accordion,
+  Breadcrumb,
+} from "semantic-ui-react";
+import { formatDate } from "../lib/helpers";
+import "./WorkspaceInfoBox.css";
 
 export const WorkspaceInfoBox = ({ workspace, editable }) => {
   const nav = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
-
 
   const {
     workspaceId,
@@ -36,6 +42,10 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
   const handleEditButtonClick = () => {
     nav(`/workspace/${workspaceId}`);
   };
+  const handleWorkspaceParentClick = () => {
+    if (workspace.parentId) nav(`/?id=${workspace.parentId}`);
+    else nav("/");
+  };
   const getStatusColor = () => {
     switch (workspaceStatus) {
       case "Completed":
@@ -51,10 +61,10 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
         return "grey";
     }
   };
-  const hasContent = () => workspaceId !== "NCR"
+  const hasContent = () => workspaceId !== "NCR";
   if (!workspace) return null;
   return (
-    <Accordion styled className="wsinfobox"  fluid>
+    <Accordion styled className="wsinfobox" fluid>
       <Accordion.Title
         active={isExpanded}
         index={1}
@@ -63,8 +73,16 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
         <Label ribbon color={workspaceId === "NCR" ? "red" : "yellow"}>
           {workspaceName}
         </Label>
-
         {hasContent() && <Icon name="dropdown" />}
+        
+        <Button
+          basic
+          circular
+          size="tiny"
+          icon="angle up"
+          floated="right"
+          onClick={handleWorkspaceParentClick}
+        />
       </Accordion.Title>
       {hasContent() && (
         <Accordion.Content active={isExpanded}>

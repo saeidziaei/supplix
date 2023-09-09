@@ -6,7 +6,6 @@ import FormRegister from "./containers/FormRegister";
 import FormRegisters from "./containers/FormRegisters";
 import FormTemplate from "./containers/FormTemplate";
 import FormTemplates from "./containers/FormTemplates";
-import Home from "./containers/Home";
 import ISO from "./containers/ISO";
 import Login from "./containers/Login";
 import NotFound from "./containers/NotFound";
@@ -25,6 +24,7 @@ import Workspaces from "./containers/Workspaces";
 import WorkspaceList from "./containers/WorkspaceList";
 import WorkspaceTask from "./containers/WorkspaceTask";
 import WorkspaceTasks from "./containers/WorkspaceTasks";
+import UserFormRegister from "./containers/UserFormRegister";
 
 
 export default function Links(tenant) {
@@ -49,7 +49,7 @@ export default function Links(tenant) {
       <Route path="/workspace/:workspaceId/registers" element={<AuthenticatedRoute><FormRegisters /></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/register/:templateId" element={<AuthenticatedRoute><FormRegister /></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/form/:templateId/:formId?" element={<AuthenticatedRoute><TemplatedForm /></AuthenticatedRoute>} />
-      
+      <Route path="/user/register/:username" element={<AuthenticatedRoute><UserFormRegister /></AuthenticatedRoute>} />
 
       <Route path="/tenant/:tenantId?" element={<AuthenticatedRoute><Tenant /></AuthenticatedRoute>} />
       <Route path="/tenants" element={<AuthenticatedRoute><Tenants /></AuthenticatedRoute>} />

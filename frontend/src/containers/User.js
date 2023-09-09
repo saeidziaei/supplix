@@ -49,10 +49,10 @@ export default function User() {
     }
   }
   useEffect(() => {
-    function loadUser() {
+    async function loadUser() {
       if (tenantId)
-        return makeApiCall("GET", `/tenants/${tenantId}/users/${username}`);
-      else return makeApiCall("GET", `/users/${username}`);
+        return await makeApiCall("GET", `/tenants/${tenantId}/users/${username}`);
+      else return await makeApiCall("GET", `/users/${username}`);
     }
 
     async function onLoad() {

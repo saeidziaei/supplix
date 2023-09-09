@@ -5,6 +5,8 @@ import { getUserById } from "../lib/helpers";
 
 export default function UserPicker({ users, value, onChange, disabled = false }) {
 
+  if (!users) return <p>No users available</p>;
+  
   const options = users.map((u) => {
     return {
       key: u.Username,

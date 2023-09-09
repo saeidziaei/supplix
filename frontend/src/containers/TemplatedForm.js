@@ -21,6 +21,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 import "./TemplatedForm.css";
+import { normaliseCognitoUsers, templateEmployeeField } from "../lib/helpers";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -34,6 +35,8 @@ export default function TemplatedForm() {
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [workspace, setWorkspace] = useState(null); 
+  const [employees, setEmployees] = useState(null); 
+  const [employeeFieldName, setEmployeeFieldName] = useState(null); 
 
   const nav = useNavigate();
   const { currentUserRoles } = useAppContext();
@@ -50,10 +53,13 @@ export default function TemplatedForm() {
     async function loadWorkspace() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}`);
     }
-
+    async function loadUsers() {
+      return await makeApiCall("GET", `/users`);
+    }
     async function onLoad() {
       try {
         setIsLoading(true);
+        let template;
 
         if (formId) {
           const item = await loadForm();
@@ -61,16 +67,23 @@ export default function TemplatedForm() {
           setFormRecord(data);
           setWorkspace(workspace);
           // the api populates template as well
-          setTemplate(data.template);
+          template = data.template;
         } else {
           // new form - just load the template and workspace
-          const item = await loadTemplate();
-          setTemplate(item);
+          template = await loadTemplate();
           const result = await loadWorkspace();
           const { workspace } = result ?? {};
           setWorkspace(workspace);
         }
+        setTemplate(template);
         
+        const fieldName = templateEmployeeField(template?.templateDefinition);
+        if (fieldName) { // there is an employee field in the form definition, we need to load users
+          const items = await loadUsers();
+          setEmployees(normaliseCognitoUsers(items));
+          setEmployeeFieldName(fieldName);
+        }
+
         
       } catch (e) {
         onError(e);
@@ -178,18 +191,27 @@ export default function TemplatedForm() {
     }
   }
   async function createForm(values) {
-    return await makeApiCall("POST", `/workspaces/${workspaceId}/forms`, {
+    let item = {
       templateId: template.templateId,
       templateVersion: template.templateVersion,
       formValues: values,
-    });
+    };
+    if (employeeFieldName) { // the form is related to an employee
+      item["userId"] = values[employeeFieldName];
+    }
+    return await makeApiCall("POST", `/workspaces/${workspaceId}/forms`, item);
   }
 
   async function updateForm(values) {
-    return await makeApiCall("PUT", `/workspaces/${workspaceId}/forms/${formId}`, {
+    let item = {
       formValues: values,
       isRevision: isRevisioning
-    });
+    };
+    if (employeeFieldName) { // the form is related to an employee
+      item["userId"] = values[employeeFieldName];
+    }
+
+    return await makeApiCall("PUT", `/workspaces/${workspaceId}/forms/${formId}`, item);
   }
   async function handleDelete() {
     try {
@@ -273,6 +295,7 @@ export default function TemplatedForm() {
           handleSubmit={handleSubmit}
           handleCancel={isNew ? null : cancelEdit}
           disabled={!editable}
+          users={employees}
         />
       </div>
       {workspaceId && templateId && formId && (
