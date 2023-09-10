@@ -288,7 +288,7 @@ export default function TemplatedForm() {
           : ""}
       </Header>
 
-      <div className="form-background">
+      <div className="form-background" style={{ background: 'linear-gradient(to right, #ccc, #eee)' }}>
         <GenericForm
           formDef={template.templateDefinition}
           formData={formRecord ? formRecord.formValues : null}

@@ -68,3 +68,13 @@ export const main = handler(async (event, tenant) => {
 
   return result;
 });
+
+
+// Contactors logic
+//
+// The first tenant that add a contractor the user gets added (with tenant = contractors)
+// Unlink internal usrs, attributes such as first name, last name etc. are defined in the database (instead of cognito). This is so tenants cannot interfere with one another
+// The contractor logins as any other user. The UI will be completely different (no workspaces, no NCR and so on)
+// Cognito User attributes (first and last name etc.) can only be edited by contractors themselves. 
+// When a tenant deletes a contracto the cognito entity will reman active and only assciation gets deleted
+// When a different tenant adds the same contractor, cognito entity will be reused

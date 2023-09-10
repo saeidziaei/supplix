@@ -383,6 +383,7 @@ export const fieldTypes = [
   { text: "Employee", value: "employee" },
   { text: "Multi", value: "multi", hasOptions: true },
   { text: "Select", value: "select", hasOptions: true },
+  // { text: "Checkbox", value: "checkbox", hasOptions: true },
   { text: "Dropdown", value: "dropdown", hasOptions: true },
   { text: "Link", value: "link" },
   { text: "Competency", value: "competency" },

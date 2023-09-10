@@ -9,13 +9,13 @@ export const main = handler(async (event) => {
     Item: {
       tenantId: uuid.v1(), // A unique uuid
       tenantName: data.tenantName, 
-      contactPerson: data.contactPerson,
-      contactEmail: data.contactEmail,
-      contactNumber: data.contactNumber,
-      website: data.website,
-      note: data.note,
-      logo: data.logo,
-      NCRLabel: data.NCRLabel,
+      contactPerson: data.contactPerson || "",
+      contactEmail: data.contactEmail || "",
+      contactNumber: data.contactNumber || "",
+      website: data.website || "",
+      note: data.note || "",
+      logo: data.logo || "",
+      NCRLabel: data.NCRLabel || "",
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), // Current Unix timestamp
     },
