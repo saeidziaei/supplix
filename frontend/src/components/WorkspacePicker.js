@@ -83,6 +83,7 @@ export default function WorkspacePicker({
             <div {...getNodeProps()} style={{ paddingLeft: 20 * (level - 1) }}>
               <Icon
                 size="large"
+                className="folder-icon"
                 color="yellow"
                 name={`folder${isExpanded ? " open" : ""}${
                   !isBranch ? " outline" : ""

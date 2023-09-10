@@ -110,7 +110,7 @@ export default function Workspaces() {
   const IconRenderer = () => {
     return (
       <Icon.Group size="big">
-        <Icon name="folder" color="yellow" />
+        <Icon name="folder" color="yellow" className="folder-icon" />
       </Icon.Group>
     );
   };
@@ -205,14 +205,14 @@ export default function Workspaces() {
                 as="a"
                 onClick={() => nav(`/workspace/${workspaceId}/registers`)}
               >
-                <List.Icon name="folder" color="yellow" size="large" />
+                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
                 Register
               </List.Item>
               <List.Item
                 as="a"
                 onClick={() => nav(`/workspace/${workspaceId}/docs`)}
               >
-                <List.Icon name="folder" color="yellow" size="large" />
+                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
                 Library
               </List.Item>
               {canEditWorkspaceTeam() && (
@@ -220,7 +220,7 @@ export default function Workspaces() {
                   as="a"
                   onClick={() => nav(`/workspace/${workspaceId}/team`)}
                 >
-                  <List.Icon name="folder" color="yellow" size="large" />
+                  <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
                   Team
                 </List.Item>
               )}
@@ -229,7 +229,7 @@ export default function Workspaces() {
                 as="a"
                 onClick={() => nav(`/workspace/${workspaceId}/tasks`)}
               >
-                <List.Icon name="folder" color="yellow" size="large" />
+                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
                 Tasks
               </List.Item>
             </List>
