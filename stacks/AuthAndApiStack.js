@@ -315,6 +315,12 @@ Temporary Password: {####}
           bind: [docTable],
         },
       },
+      "PUT /workspaces/{workspaceId}/docs/{docId}": {
+        function: {
+          handler: "services/functions/doc/update.main",
+          bind: [docTable],
+        },
+      },
       "DELETE /workspaces/{workspaceId}/docs/{docId}": {
         function: {
           handler: "services/functions/doc/delete.main",

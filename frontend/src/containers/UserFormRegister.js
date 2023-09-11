@@ -105,7 +105,7 @@ export default function UserFormRegister() {
     if (!forms || forms.length === 0) return <p>No Employee Records Found</p>;
 
     return (
-      <Card.Group itemsPerRow="2">
+      <Card.Group itemsPerRow="2" doubling="true">
         {forms.map((form) => {
           const def = form.template?.templateDefinition;
           const textValues = extractTextValues(form);
