@@ -114,7 +114,7 @@ export default function WorkspaceTasks() {
   const WorkspaceRenderer = (params) => {
     const workspaceId = params.data["workspaceId"];
     const workspace = workspaces ? workspaces.find(w => w.workspaceId === workspaceId) : {};
-    return (<Label color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : "-"}</Label>);
+    return (<Label horizontal color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : "-"}</Label>);
   }
   const StatusRenderer = (params) => {
     const taskStatus = params.data["taskStatus"];

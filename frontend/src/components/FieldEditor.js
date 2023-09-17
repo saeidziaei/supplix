@@ -119,7 +119,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
           <Grid.Column width={2}>Optoins</Grid.Column>
           {field.type !== "aggregate" && (<>
             <Grid.Column width={3}>Value</Grid.Column>
-            {field.type === "select" && <Grid.Column width={3}>Color</Grid.Column>}
+            {field.type === "select" && <Grid.Column width={8}>Register Color (optional) </Grid.Column>}
             </>
           )}
           {(field.type === "weightedSelect" ||

@@ -387,7 +387,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }
 
   if (color) 
-    return (<Label size="tiny" basic color={color}>{params.value}</Label>);
+    return (<Label size="tiny" horizontal basic color={color}>{params.value}</Label>);
   
   return params.value;
   };
