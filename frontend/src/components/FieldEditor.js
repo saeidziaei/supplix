@@ -114,11 +114,13 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
       return;
 
     return (
-      <Grid  >
-        <Grid.Row >
+      <Grid>
+        <Grid.Row>
           <Grid.Column width={2}>Optoins</Grid.Column>
-          {field.type !== "aggregate" && (
+          {field.type !== "aggregate" && (<>
             <Grid.Column width={3}>Value</Grid.Column>
+            {field.type === "select" && <Grid.Column width={3}>Color</Grid.Column>}
+            </>
           )}
           {(field.type === "weightedSelect" ||
             field.type === "weightedDropdown") && (
@@ -133,15 +135,13 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
             </>
           )}
         </Grid.Row>
-       
 
         {field.options.map((option, optionIndex) => (
-          
-
-          <Grid.Row verticalAlign="middle"
+          <Grid.Row
+            verticalAlign="middle"
             key={optionIndex}
             className="no-padding"
-            style={{ backgroundColor: `${option.color}` }}
+            
           >
             <Grid.Column width={2}>
               <Button
@@ -153,22 +153,48 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               ></Button>
             </Grid.Column>
             {field.type !== "aggregate" && (
-              <Grid.Column width={3}>
-                <Form.Input
-                  key={`option-value-${optionIndex}`}
-                  type={
-                    field.type === "weightedSelect" ||
-                    field.type === "weightedDropdown"
-                      ? "number"
-                      : "text"
-                  }
-                  size="mini"
-                  value={option.value}
-                  onChange={(e) =>
-                    handleOptionChange(optionIndex, "value", e.target.value)
-                  }
-                />
-              </Grid.Column>
+              <>
+                <Grid.Column width={3}>
+                  <Form.Input
+                    key={`option-value-${optionIndex}`}
+                    type={
+                      field.type === "weightedSelect" ||
+                      field.type === "weightedDropdown"
+                        ? "number"
+                        : "text"
+                    }
+                    size="mini"
+                    value={option.value}
+                    
+                    onChange={(e) =>
+                      handleOptionChange(optionIndex, "value", e.target.value)
+                    }
+                  />
+                </Grid.Column>
+                {field.type === "select" &&
+                <Grid.Column width={3}>
+                  <Dropdown
+                    clearable
+                    options={[
+                      "blue",
+                      "green",
+                      "red",
+                      "teal",
+                      "yellow",
+                      "brown",
+                      "grey",
+                      "black",
+                    ].map((c, i) => ({ key: i, text: c, value: c }))}
+                    selection
+                    value={option.color}
+                    
+                    onChange={(e, d) =>
+                      handleOptionChange(optionIndex, "color", d.value)
+                    }
+                  />
+                 
+                </Grid.Column>}
+              </>
             )}
             {(field.type === "weightedSelect" ||
               field.type === "weightedDropdown") && (
@@ -225,25 +251,25 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
                 </Grid.Column>
 
                 <Grid.Column width={3}>
-                  {colorPickerVisible[`${optionIndex}`] && 
+                  {colorPickerVisible[`${optionIndex}`] && (
                     <BlockPicker
                       key={`option-color-${optionIndex}`}
                       size="mini"
                       color={option.color}
                       onChange={(c) => {
                         handleOptionChange(optionIndex, "color", c.hex);
-                        let newObject = {...colorPickerVisible};
+                        let newObject = { ...colorPickerVisible };
                         newObject[`${optionIndex}`] = false;
                         setColorPickerVisible(newObject);
                       }}
                     />
-                  }
+                  )}
                   {!colorPickerVisible[`${optionIndex}`] && (
                     <Button
                       size="tiny"
                       basic
                       onClick={() => {
-                        let newObject = {...colorPickerVisible};
+                        let newObject = { ...colorPickerVisible };
                         newObject[`${optionIndex}`] = true;
                         setColorPickerVisible(newObject);
                       }}
@@ -255,7 +281,6 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               </>
             )}
           </Grid.Row>
-          
         ))}
         <Grid.Row>
           <Grid.Column>

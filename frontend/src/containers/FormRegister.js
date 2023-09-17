@@ -369,8 +369,27 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       />
     );
   };
-  const defaultRenderer = (params) => {
-    return params.value;
+   const defaultRenderer = (params) => {
+    let color = "";
+
+    
+    for (let section of formDef.sections) {
+      
+      for (let field of section.fields) {
+          if (field.type === "select" && field.options && field.name === params.colDef.field) {
+              for (let option of field.options) {
+                  if (Array.isArray(params.value) && params.value.length === 1 && option.value === params.value[0]) {
+                      color = option.color;
+                  }
+              }
+          }
+      } 
+  }
+
+  if (color) 
+    return (<Label size="tiny" basic color={color}>{params.value}</Label>);
+  
+  return params.value;
   };
   const numberRenderer = (params) => {
     return (

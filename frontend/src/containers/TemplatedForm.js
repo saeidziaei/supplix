@@ -188,6 +188,7 @@ export default function TemplatedForm() {
       setIsLoading(false);
       setIsEditing(false);
       setIsUploading(false);
+      setIsRevisioning(false);
     }
   }
   async function createForm(values) {

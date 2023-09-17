@@ -23,7 +23,7 @@ import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
 import "./GenericForm.css";
 import SignatureCanvas from "react-signature-canvas";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useAppContext } from "../lib/contextLib";
 import UserPicker from "./UserPicker";
 
@@ -39,15 +39,16 @@ export function GenericForm({
   const SIGNATURE_FIELD_NAME = "form-signature";
 
   const sigPadRef = useRef(null);
-  const [signature, setSignature] = useState(null);
   const { tenant } = useAppContext();
 
 
   useEffect(() => {
-    if (sigPadRef.current && signature) {
-      sigPadRef.current.fromDataURL(signature);
+    if (sigPadRef.current && formData) {
+      sigPadRef.current.fromDataURL(formData[SIGNATURE_FIELD_NAME]);
     }
-  }, [signature, disabled]);
+  }, [formData, disabled]);
+
+
 
   function renderField(f, values, setFieldValue) {
     return renderFieldInput(f, values, setFieldValue);
@@ -353,7 +354,8 @@ export function GenericForm({
       <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
       <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => {
-          setSignature(values[SIGNATURE_FIELD_NAME]);
+          // setSignature(values[SIGNATURE_FIELD_NAME]);
+          
           return (
           <Form size="small">
             {formDef.sections.map((s) =>
@@ -444,7 +446,7 @@ export function GenericForm({
             </FieldArray>
 
             <Divider hidden />
-            {formDef.hasSignature && renderSignature()}
+            {formDef.hasSignature && renderSignature(values[SIGNATURE_FIELD_NAME])}
             {!disabled && handleSubmit && (
               <div>
                 <Button primary type="submit" size="mini" floated="right">
@@ -473,7 +475,7 @@ export function GenericForm({
   );
 
 
-  function renderSignature() {
+  function renderSignature(signature) {
     return (
       <Table compact basic="very">
         <Table.Body>
