@@ -376,11 +376,20 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     for (let section of formDef.sections) {
       
       for (let field of section.fields) {
-          if (field.type === "select" && field.options && field.name === params.colDef.field) {
+        const canHaveColor = (field.type === "select" || field.type === "dropdown");
+
+          if (canHaveColor && field.options && field.name === params.colDef.field) {
               for (let option of field.options) {
-                  if (Array.isArray(params.value) && params.value.length === 1 && option.value === params.value[0]) {
-                      color = option.color;
+                if (Array.isArray(params.value)) {
+                  if ( // select
+                    params.value.length === 1 &&
+                    option.value === params.value[0]
+                  ) {
+                    color = option.color;
                   }
+                } else { // dropdown
+                  if (option.value === params.value) color = option.color;
+                }
               }
           }
       } 

@@ -113,13 +113,14 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
     if (!getFieldTypeHasOptions(field.type)) 
       return;
 
+    const canHaveColor = (field.type === "select" || field.type === "dropdown");
     return (
       <Grid>
         <Grid.Row>
           <Grid.Column width={2}>Optoins</Grid.Column>
           {field.type !== "aggregate" && (<>
             <Grid.Column width={3}>Value</Grid.Column>
-            {field.type === "select" && <Grid.Column width={8}>Register Color (optional) </Grid.Column>}
+            {canHaveColor && <Grid.Column width={8}>Register Color (optional) </Grid.Column>}
             </>
           )}
           {(field.type === "weightedSelect" ||
@@ -171,7 +172,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
                     }
                   />
                 </Grid.Column>
-                {field.type === "select" &&
+                {canHaveColor &&
                 <Grid.Column width={3}>
                   <Dropdown
                     clearable
