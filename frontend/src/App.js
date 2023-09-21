@@ -142,7 +142,7 @@ function App() {
                     {tenant ? (
                       <Image
                         onClick={() => nav("/")}
-                        size={isMobile ? "tiny" : "small"}
+                        size="small"
                         rounded
                         alt="logo"
                         src={logoURL}
@@ -158,7 +158,7 @@ function App() {
                   <List.Item>
                     <Button
                       size="mini"
-                      color="black"
+                      color="white"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
                       style={{ float: "left" }}
@@ -196,7 +196,7 @@ function App() {
                 <Sidebar
                   as={Menu}
                   visible={isSidebarVisible}
-                  inverted
+                  
                   vertical
                   onHide={() => setIsSidebarVisible(false)}
                   animation="push"
