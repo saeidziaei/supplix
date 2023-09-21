@@ -161,14 +161,13 @@ function App() {
                       color="white"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                      style={{ float: "left" }}
+                      
                     ></Button>
                     
                   </List.Item>
-                </List>
-              </Grid.Column>
-              <Grid.Column width="6"  textAlign={isMobile ? "center" : "right"} verticalAlign="top">
-                <List horizontal>
+                  </List>
+                  </Grid.Column>
+                  <Grid.Column width="5"  textAlign="right"><List horizontal>
                   {employee && (
                     <List.Item>
         <Popup pinned on="click"
