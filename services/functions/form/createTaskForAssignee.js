@@ -66,7 +66,7 @@ function isAssigneeIdChanged(input) {
     return false;
   }
 
-  const oldUserId = input.OldImage.assigneeId.S;
+  const oldUserId = input.OldImage.assigneeId ? input.OldImage.assigneeId.S : "-1";
   const newUserId = input.NewImage.assigneeId.S;
 
   return oldUserId !== newUserId;
