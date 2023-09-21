@@ -22,7 +22,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   updatedAt = :updatedAt`;
 
   let expressionAttributeValues = {
-    ":userId": data.userId || "",
+    ":userId": data.userId || "-1",
     ":taskName": data.taskName || "",
     ":note": data.note || "",
     ":startDate": data.startDate || "",

@@ -10,7 +10,6 @@ import {
   Header,
   Icon,
   Loader,
-  Message,
   Popup,
   Segment
 } from "semantic-ui-react";
@@ -21,7 +20,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 import "./TemplatedForm.css";
-import { normaliseCognitoUsers, templateEmployeeField } from "../lib/helpers";
+import { templateEmployeeField } from "../lib/helpers";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -35,8 +34,9 @@ export default function TemplatedForm() {
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(-1);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [workspace, setWorkspace] = useState(null); 
-  const [employees, setEmployees] = useState(null); 
   const [employeeFieldName, setEmployeeFieldName] = useState(null); 
+  const { users } = useAppContext();
+  const [memberUsers, setMemberUsers] = useState([]);
 
   const nav = useNavigate();
   const { currentUserRoles } = useAppContext();
@@ -50,37 +50,43 @@ export default function TemplatedForm() {
     async function loadTemplate() {
       return await makeApiCall("GET", `/templates/${templateId}`);
     }
-    async function loadWorkspace() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}`);
+    async function loadWorkspaceMembers() {
+      return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`);
-    }
+
     async function onLoad() {
       try {
         setIsLoading(true);
+        
         let template;
+
+        const members = await loadWorkspaceMembers()
+        const { data: membersData, workspace } = members ?? {};
+        setWorkspace(workspace);
+        if (!membersData || membersData.length === 0) {
+          setMemberUsers([]);
+        } else {
+          const memberUsers = users.filter((user) =>
+            membersData.some((member) => member.userId === user.Username)
+          );
+          setMemberUsers(memberUsers);
+        }
+
 
         if (formId) {
           const item = await loadForm();
-          const { data, workspace } = item ?? {};
+          const { data } = item ?? {};
           setFormRecord(data);
-          setWorkspace(workspace);
           // the api populates template as well
           template = data.template;
         } else {
           // new form - just load the template and workspace
           template = await loadTemplate();
-          const result = await loadWorkspace();
-          const { workspace } = result ?? {};
-          setWorkspace(workspace);
         }
         setTemplate(template);
         
         const fieldName = templateEmployeeField(template?.templateDefinition);
         if (fieldName) { // there is an employee field in the form definition, we need to load users
-          const items = await loadUsers();
-          setEmployees(normaliseCognitoUsers(items));
           setEmployeeFieldName(fieldName);
         }
 
@@ -93,7 +99,7 @@ export default function TemplatedForm() {
     }
 
     onLoad();
-  }, [formId]);
+  }, [formId, users]);
 
   async function uploadFile(file) {
 
@@ -252,10 +258,11 @@ export default function TemplatedForm() {
 
     setActiveAccordionIndex(newIndex);
   }
-  const renderActionInfo = (ts, user) => {
+  const renderActionInfo = (ts, userId) => {
     const date = new Date(ts);
+    const user = users ? users.find(u => u.Username === userId) : {}; 
     
-    return (ts ? date.toLocaleString() : "") + " by " + (user ? `${user.firstName} ${user.lastName}` : "");
+    return (ts ? date.toLocaleString() : "") + " by " + (user ? `${user.given_name} ${user.family_name}` : "");
   }
 
   if (isUploading) return <Loader active>Uploading attachments</Loader>;
@@ -296,7 +303,8 @@ export default function TemplatedForm() {
           handleSubmit={handleSubmit}
           handleCancel={isNew ? null : cancelEdit}
           disabled={!editable}
-          users={employees}
+          users={users}
+          members={memberUsers}
         />
       </div>
       {workspaceId && templateId && formId && (
@@ -320,11 +328,11 @@ export default function TemplatedForm() {
       {formRecord && (
         <p style={{ color: "#bbb" }}>
           Created{" "}
-          {renderActionInfo(formRecord.createdAt, formRecord.createdByUser)}{" "}
+          {renderActionInfo(formRecord.createdAt, formRecord.createdBy)}{" "}
           <br />{" "}
           {formRecord.updatedAt
             ? "Last Edited " +
-              renderActionInfo(formRecord.updatedAt, formRecord.updatedByUser)
+              renderActionInfo(formRecord.updatedAt, formRecord.updatedBy)
             : ""}
         </p>
       )}

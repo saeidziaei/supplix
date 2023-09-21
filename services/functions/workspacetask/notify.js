@@ -25,21 +25,20 @@ export const main = async (event, context) => {
       ) {
         continue; // skip recurring tasks
       }
-
       if (
         record.eventName === "INSERT" ||
         (record.eventName === "MODIFY" && isUserIdChanged(streamData))
       ) {
         const userId = streamData.NewImage.userId.S;
-        const workspaceId = streamData.NewImage.workspaceId.S;
-        const taskId = streamData.NewImage.taskId.S;
-        const taskName = streamData.NewImage.taskName.S;
-
-        // Fetch user details using getUser function
         if (!userId || userId === "-1") {
           continue; // skip if no owner
         }
         const user = await getUser(userId);
+        
+        const workspaceId = streamData.NewImage.workspaceId.S;
+        const taskId = streamData.NewImage.taskId.S;
+        const taskName = streamData.NewImage.taskName.S;
+
 
         const emailParams = {
           Destination: {

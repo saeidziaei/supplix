@@ -677,6 +677,17 @@ Temporary Password: {####}
       }, 
       bind: [deletedArchiveTable]
     }
+  });
+
+  formTable.addConsumers(stack, {
+    taskForAssignee : {
+      handler: "services/functions/form/createTaskForAssignee.main",
+      environment: {
+        WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
+        TEMPLATE_TABLE: templateTable.tableName, 
+      },
+      bind: [workspaceTaskTable, templateTable]
+    }
   })
 
   auth.attachPermissionsForAuthUsers(auth, [

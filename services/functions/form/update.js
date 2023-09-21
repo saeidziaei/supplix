@@ -1,10 +1,9 @@
-import handler, { getUser } from "../../util/handler";
+import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 import s3 from "../../util/s3";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const username = event.requestContext.authorizer.jwt.claims.sub;
-  const user = await getUser(username);
 
   const data = JSON.parse(event.body);
 
@@ -17,16 +16,18 @@ export const main = handler(async (event, tenant, workspaceUser) => {
 
   let updateExpression = `SET 
     formValues = :formValues,
+    assigneeId = :assigneeId,
     updatedBy= :updatedBy,
-    updatedByUser= :updatedByUser,
     updatedAt= :updatedAt`;
 
   let expressionAttributeValues = {
     ":formValues": data.formValues,
+    ":assigneeId": (data.formValues && data.formValues.assigneeId) ? data.formValues.assigneeId : "-1",
     ":updatedBy": username,
-    ":updatedByUser": user,
     ":updatedAt": Date.now(),
   };
+
+
 
   if (data.isRevision === true) {
     const getCurrentRecordParams = {
@@ -47,13 +48,14 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   }
 
 
-  if (data.userId) {
+  if (data.userId) { // this form is about this user
     updateExpression += `, userId = :userId`;
     expressionAttributeValues = {
       ...expressionAttributeValues,
       ":userId": data.userId,
     }
   }
+
 
   const params = {
     TableName: process.env.FORM_TABLE,

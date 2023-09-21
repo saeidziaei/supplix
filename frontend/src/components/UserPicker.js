@@ -3,7 +3,7 @@ import { Dropdown } from "semantic-ui-react";
 import User from "./User";
 import { getUserById } from "../lib/helpers";
 
-export default function UserPicker({ users, value, onChange, disabled = false }) {
+export default function UserPicker({ users, value, onChange, disabled = false, upward = false }) {
 
   if (!users) return <p>No users available</p>;
   
@@ -22,6 +22,7 @@ export default function UserPicker({ users, value, onChange, disabled = false })
 
   return (
     <Dropdown
+      upward={upward}
       clearable
       disabled={disabled}
       value={value}

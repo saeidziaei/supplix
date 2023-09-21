@@ -104,6 +104,7 @@ export function StorageStack({ stack, app }) {
     globalIndexes: {
       userIndex: { partitionKey: "tenant", sortKey: "userId" },
     },
+    stream: "new_and_old_images",
   });
 
   const templateTable = new Table(stack , "Template", {

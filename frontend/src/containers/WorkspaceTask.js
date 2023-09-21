@@ -26,7 +26,6 @@ import { onError } from "../lib/errorLib";
 import {
   dateFromEpoch,
   dateToEpoch,
-  normaliseCognitoUsers,
 } from "../lib/helpers";
 import "./WorkspaceTask.css";
 import * as Yup from "yup";
@@ -41,8 +40,9 @@ export default function WorkspaceTask() {
   const [task, setTask] = useState(null);
   const [memberUsers, setMemberUsers] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const { currentUserRoles, tenant } = useAppContext();
+  const { currentUserRoles, tenant, users } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
+  
 
   const getNCRTitle = () => (tenant && tenant.NCRLabel) ? tenant.NCRLabel : "Non-Compliant Report";
   
@@ -93,17 +93,12 @@ export default function WorkspaceTask() {
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`);
-    }
+ 
 
     async function onLoad() {
       try {
-        const [members, usersData] = await Promise.all([
-          loadWorkspaceMembers(),
-          loadUsers(),
-        ]);
-        const users = normaliseCognitoUsers(usersData);
+        const members = await loadWorkspaceMembers()
+        
 
         // workspaceId in the path therefore results are in data element and it also returns workspace
         const { data: membersData, workspace } = members ?? {};

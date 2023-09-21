@@ -50,7 +50,7 @@ export const main = handler(async (event, tenant) => {
         const s3params = {
           Bucket: process.env.BUCKET,
           Key: `private/${tenantId}/${dbUser.photo}`,
-          Expires: 5 * 60, // 5 minutes
+          Expires: 7 * 24 * 60 * 60, // 7 days
         };
         const photoURL = await s3.getSignedUrlForGet(s3params);
         Object.assign(user, dbUser, { photoURL });

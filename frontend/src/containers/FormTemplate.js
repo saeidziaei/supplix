@@ -36,13 +36,12 @@ import "./FormTemplate.css";
 import FormRegister from "./FormRegister";
 import { useAppContext } from "../lib/contextLib";
 import TextareaAutosize from 'react-textarea-autosize';
-import { normaliseCognitoUsers } from "../lib/helpers";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const nav = useNavigate();
-  const { currentUserRoles } = useAppContext();
+  const { currentUserRoles, users } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
   const [title, setTitle] = useState("");
@@ -52,9 +51,10 @@ export default function FormTemplate() {
   const [hasSignature, setHasSignature] = useState(false);
   const [activeDesigner, setActiveDesigner] = useState("form designer");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [users, setUsers] = useState(null);
+  
   const [jsonInput, setJsonInput] = useState('');
   const [isRawEditing, setIsRawEditing] = useState(false);
+
 
   document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.shiftKey && event.key === 'J') {
@@ -79,9 +79,7 @@ export default function FormTemplate() {
     async function loadTemplate() {
       return await makeApiCall("GET", `/templates/${templateId}`);
     }
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`);
-    }
+
     async function onLoad() {
       try {
         if (templateId) {
@@ -89,8 +87,6 @@ export default function FormTemplate() {
           const formDef = item.templateDefinition;
           setFormDef(formDef);
         } 
-        const items = await loadUsers();
-        setUsers(normaliseCognitoUsers(items));
 
       } catch (e) {
         onError(e);

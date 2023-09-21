@@ -6,6 +6,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { getUserById, normaliseCognitoUsers } from "../lib/helpers";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
+import { useAppContext } from "../lib/contextLib";
 
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
@@ -14,9 +15,9 @@ export default function WorkspaceTeam(props) {
   const [members, setMembers] = useState([]);
   const [newMember, setNewMember] = useState(null);
   const [newMemberRole, setNewMemberRole] = useState("Member");
-  const [users, setUsers] = useState([]);
   const [isInAddMode, setIsInAddMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { users } = useAppContext();
   
   function validateForm() {
     return true; // file.current
@@ -26,18 +27,15 @@ export default function WorkspaceTeam(props) {
     async function loadWorkspaceMembers() {
       return await makeApiCall("GET", `/workspaces/${workspaceId}/members`);
     }
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`); 
-    }
+
     async function onLoad() {
       try {
-        const [members, users] = await Promise.all([loadWorkspaceMembers(), loadUsers()]);
+        const members = await loadWorkspaceMembers();
         // loadWorkspaceMembers has workspaceId in the path therefore members are in data element and it also returns workspace
         const { data, workspace } = members ?? {};
 
         setMembers(data);
         setWorkspace(workspace);
-        setUsers(normaliseCognitoUsers(users));
       } catch (e) {
         onError(e);
       }

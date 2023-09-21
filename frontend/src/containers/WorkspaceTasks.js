@@ -14,8 +14,9 @@ import { onError } from "../lib/errorLib";
 
 
 import User from "../components/User";
-import { dateFromEpoch, normaliseCognitoUsers } from "../lib/helpers";
+import { dateFromEpoch } from "../lib/helpers";
 import "./FormRegisters.css";
+import { useAppContext } from "../lib/contextLib";
 
 
 export default function WorkspaceTasks() {
@@ -27,12 +28,11 @@ export default function WorkspaceTasks() {
   const [workspaces, setWorkspaces] = useState(null);
   const [tasks, setTasks] = useState(null);
   const [recurringTasks, setRecurringTasks] = useState(null);
-  const [users, setUsers] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
   const location = useLocation();
   const [showAll, setShowAll] = useState(false);
-
+  const { users } = useAppContext();
 
 
 
@@ -40,7 +40,7 @@ export default function WorkspaceTasks() {
   const isMytasksPath = location.pathname === "/mytasks"
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
-  const canManageRecurringTasks = () => workspace && workspace.role === "Owner";
+  const canManageRecurringTasks = () => !isNCR() && workspace && workspace.role === "Owner";
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -52,9 +52,7 @@ export default function WorkspaceTasks() {
       async function loadMyTasks() {
         return await makeApiCall("GET", `/mytasks` + (showAll ? `?showAll=true`: ""));
       }
-      async function loadUsers() {
-        return await makeApiCall("GET", `/users`); 
-      }      
+     
       async function loadWorkspaces() {
         return await makeApiCall("GET", `/workspaces`); 
       }
@@ -62,14 +60,13 @@ export default function WorkspaceTasks() {
       try {
         setIsLoading(true);
 
-        const [tasks, users, workspaces] = await Promise.all([
+        const [tasks, workspaces] = await Promise.all([
           isMytasksPath ? loadMyTasks() : loadWorkspaceTasks(),
-          loadUsers(),
+          
           isMytasksPath ? loadWorkspaces() : [], // no need to load all workspaces if it is showing tasks for one workspace
         ]);
 
         
-        setUsers(normaliseCognitoUsers(users));
 
         if (isMytasksPath) {
           setTasks(tasks);
@@ -140,7 +137,7 @@ export default function WorkspaceTasks() {
         break;
     }
 
-    return <Label size="tiny" basic color={color}>{taskStatus || "Unknown"}</Label>;
+    return <Label size="tiny" horizontal basic color={color}>{taskStatus || "Unknown"}</Label>;
   }
   const tasksGridOptions = {
     defaultColDef: {

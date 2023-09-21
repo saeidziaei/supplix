@@ -34,7 +34,8 @@ export function GenericForm({
   handleSubmit,
   disabled,
   handleCancel,
-  users
+  users, // all users
+  members // workspace members
 }) {
   const SIGNATURE_FIELD_NAME = "form-signature";
 
@@ -347,134 +348,6 @@ export function GenericForm({
     
     handleSubmit(updatedValues, formikBag);
   }
-  
-  
-  return (
-    <Segment style={{ overflowX: "auto" }}>
-      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
-      <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
-        {({ isSubmitting, values, setFieldValue, resetForm }) => {
-          // setSignature(values[SIGNATURE_FIELD_NAME]);
-          
-          return (
-          <Form size="small">
-            {formDef.sections.map((s) =>
-              s.isTable
-                ? renderSectionTabular(s, values, setFieldValue)
-                : renderSection(s, values, setFieldValue)
-            )}
-
-            <div>
-              <Icon name="attach" />
-              Attachments
-            </div>
-            <FieldArray name="attachments">
-              {({ insert, remove, push }) => (
-                <Grid>
-                  {values.attachments &&
-                    values.attachments.length > 0 &&
-                    values.attachments.map((attachment, index) => (
-                      <Grid.Row key={index} verticalAlign="middle">
-                        <Grid.Column width={1}>
-                          <Button
-                            circular
-                            size="mini"
-                            icon="x"
-                            basic
-                            disabled={disabled}
-                            onClick={() => remove(index)}
-                          />
-                        </Grid.Column>
-                        <Grid.Column width={5}>
-                          {!disabled && !attachment.fileURL && (
-                            <input
-                              id="file"
-                              name={`attachments.${index}.file`}
-                              type="file"
-                              onChange={(event) => {
-                                setFieldValue(
-                                  `attachments.${index}.file`,
-                                  event.currentTarget.files[0]
-                                );
-                              }}
-                            />
-                          )}
-                          {attachment.fileURL && (
-                            <a href={attachment.fileURL} target="_blank">
-                              <Image
-                                src={attachment.fileURL}
-                                wrapped
-                                alt={attachment.fileName}
-                                onError={(e) => {
-                                  e.target.src = placeholderImage;
-                                }}
-                              />
-                            </a>
-                          )}
-                        </Grid.Column>
-                        <Grid.Column width={10}>
-                          {disabled ? (
-                            <span>{attachment.fileNote}</span>
-                          ) : (
-                            <Field
-                              name={`attachments.${index}.fileNote`}
-                              placeholder="File Note"
-                              type="text"
-                            />
-                          )}
-                        </Grid.Column>
-                      </Grid.Row>
-                    ))}
-                  <Grid.Row>
-                    <Grid.Column>
-                      <Button
-                        type="button"
-                        basic
-                        disabled={
-                          disabled ||
-                          (values.attachments && values.attachments.length > 5)
-                        }
-                        circular
-                        icon="plus"
-                        size="mini"
-                        onClick={() => push({ file: "", fileNote: "" })}
-                      />
-                    </Grid.Column>
-                  </Grid.Row>
-                </Grid>
-              )}
-            </FieldArray>
-
-            <Divider hidden />
-            {formDef.hasSignature && renderSignature(values[SIGNATURE_FIELD_NAME])}
-            {!disabled && handleSubmit && (
-              <div>
-                <Button primary type="submit" size="mini" floated="right">
-                  Submit
-                </Button>
-                {handleCancel && (
-                  <Button
-                    size="mini"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      resetForm();
-                      handleCancel();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                )}
-              </div>
-            )}
-            
-            
-          </Form>
-        )}}
-      </Formik>
-    </Segment>
-  );
-
-
   function renderSignature(signature) {
     return (
       <Table compact basic="very">
@@ -605,4 +478,143 @@ export function GenericForm({
       </Segment>
     );
   }
+  
+  
+  return (
+    <Segment style={{ overflowX: "auto" }}>
+      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
+      <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
+        {({ isSubmitting, values, setFieldValue, resetForm }) => {
+          // setSignature(values[SIGNATURE_FIELD_NAME]);
+          
+          return (
+            <Form size="small">
+              {formDef.sections.map((s) =>
+                s.isTable
+                  ? renderSectionTabular(s, values, setFieldValue)
+                  : renderSection(s, values, setFieldValue)
+              )}
+
+
+              <div>
+                <Icon name="attach" />
+                Attachments
+              </div>
+              <FieldArray name="attachments">
+                {({ insert, remove, push }) => (
+                  <Grid>
+                    {values.attachments &&
+                      values.attachments.length > 0 &&
+                      values.attachments.map((attachment, index) => (
+                        <Grid.Row key={index} verticalAlign="middle">
+                          <Grid.Column width={1}>
+                            <Button
+                              circular
+                              size="mini"
+                              icon="x"
+                              basic
+                              disabled={disabled}
+                              onClick={() => remove(index)}
+                            />
+                          </Grid.Column>
+                          <Grid.Column width={5}>
+                            {!disabled && !attachment.fileURL && (
+                              <input
+                                id="file"
+                                name={`attachments.${index}.file`}
+                                type="file"
+                                onChange={(event) => {
+                                  setFieldValue(
+                                    `attachments.${index}.file`,
+                                    event.currentTarget.files[0]
+                                  );
+                                }}
+                              />
+                            )}
+                            {attachment.fileURL && (
+                              <a href={attachment.fileURL} target="_blank">
+                                <Image
+                                  src={attachment.fileURL}
+                                  wrapped
+                                  alt={attachment.fileName}
+                                  onError={(e) => {
+                                    e.target.src = placeholderImage;
+                                  }}
+                                />
+                              </a>
+                            )}
+                          </Grid.Column>
+                          <Grid.Column width={10}>
+                            {disabled ? (
+                              <span>{attachment.fileNote}</span>
+                            ) : (
+                              <Field
+                                name={`attachments.${index}.fileNote`}
+                                placeholder="File Note"
+                                type="text"
+                              />
+                            )}
+                          </Grid.Column>
+                        </Grid.Row>
+                      ))}
+                    <Grid.Row>
+                      <Grid.Column>
+                        <Button
+                          type="button"
+                          basic
+                          disabled={
+                            disabled ||
+                            (values.attachments &&
+                              values.attachments.length > 5)
+                          }
+                          circular
+                          icon="plus"
+                          size="mini"
+                          onClick={() => push({ file: "", fileNote: "" })}
+                        />
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid>
+                )}
+              </FieldArray>
+              {members && (<Segment>
+                  <span>Assigned to </span>
+                   <UserPicker
+                   upward={true}
+                   disabled={disabled}
+                    users={members}
+                    value={values.assigneeId}
+                    onChange={(userId) => setFieldValue("assigneeId", userId)}
+                  /> 
+                </Segment>
+              )}
+              <Divider hidden />
+              {formDef.hasSignature &&
+                renderSignature(values[SIGNATURE_FIELD_NAME])}
+              
+              {!disabled && handleSubmit && (
+                <div>
+                  <Button primary type="submit" size="mini" floated="right">
+                    Submit
+                  </Button>
+                  {handleCancel && (
+                    <Button
+                      size="mini"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        resetForm();
+                        handleCancel();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+            </Form>
+          );}}
+      </Formik>
+    </Segment>
+  );
+
 }

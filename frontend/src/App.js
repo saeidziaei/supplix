@@ -9,7 +9,7 @@ import {
   Grid,
   Icon,
   Image, Label, List,
-  Loader, Menu, PlaceholderImage, Segment,
+  Loader, Menu, PlaceholderImage, Popup, Segment,
   Sidebar
 } from "semantic-ui-react";
 import "./App.css";
@@ -19,7 +19,7 @@ import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
-import { normaliseCognitoUser } from "./lib/helpers";
+import { normaliseCognitoUser, normaliseCognitoUsers } from "./lib/helpers";
 import { NCR } from "./components/NCR";
 import { onError } from "./lib/errorLib";
 
@@ -33,6 +33,7 @@ function App() {
   const [tenant, setTenant] = useState(null);
   const [employee, setEmployee] = useState(null);
   const [tasks, setTasks] = useState(null);
+  const [users, setUsers] = useState([]);
 
 
   const nav = useNavigate();
@@ -80,7 +81,9 @@ function App() {
       }
       return tenant;
     }
-
+    async function loadUsers() {
+      return await makeApiCall("GET", `/users`);
+    }
     async function loadMyTasks() {
       return await makeApiCall("GET", `/mytasks`);
     }
@@ -96,11 +99,12 @@ function App() {
 
     async function onLoad() {
       try {
-        const [tenant, employee, tasks] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks()]);
+        const [tenant, employee, tasks, userItems] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks(), loadUsers()]);
 
         setTenant(tenant);
         setEmployee(employee);
         setTasks(tasks);
+        setUsers(normaliseCognitoUsers(userItems))
       } catch (e) {
         onError(e);
       }
@@ -142,7 +146,7 @@ function App() {
                         rounded
                         alt="logo"
                         src={logoURL}
-                        style={{cursor: "pointer"}}
+                        style={{ cursor: "pointer" }}
                         onError={(e) => {
                           e.target.src = placeholderImage;
                         }}
@@ -157,26 +161,33 @@ function App() {
                       color="black"
                       icon="bars"
                       onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                      style={{float:"left"}}
+                      style={{ float: "left" }}
                     ></Button>
-                    <Button
-                      size="mini"
-                      color="grey"
-                      icon="refresh"
-                      onClick={() => {
-                        window.location.reload();
-                      }}
-                      style={{float:"left"}}
-                    ></Button>
-                    {employee && <User user={employee} compact={isMobile} />}
+                    
                   </List.Item>
-                  {authenticatedUser &&
-                  <List.Item ><NCR label={tenant?.NCRLabel} /> </List.Item>}
                 </List>
-                
-
               </Grid.Column>
+              <Grid.Column width="8"  textAlign={isMobile ? "center" : "right"}>
+                <List divided horizontal>
+                  {employee && (
+                    <List.Item>
+        <Popup pinned on="click"
+          trigger={<span style={{cursor: "pointer"}}><User user={employee} /></span>}
+          content={<Button size="tiny" basic content='Logout' icon='log out' onClick={handleLogout}/>}
+          position='bottom right'
+        />
 
+
+
+                    </List.Item>
+                  )}
+                  {authenticatedUser && (
+                    <List.Item>
+                      <NCR label={tenant?.NCRLabel} />{" "}
+                    </List.Item>
+                  )}
+                </List>
+              </Grid.Column>
             </Grid.Row>
           </Grid>
           <Grid columns={1}>
@@ -191,41 +202,45 @@ function App() {
                   animation="push"
                   size="small"
                 >
-                  <LinkContainer to="/" onClick={() => setIsSidebarVisible(false)}>
+                  <LinkContainer
+                    to="/"
+                    onClick={() => setIsSidebarVisible(false)}
+                  >
                     <Nav.Link as={Menu.Item}>
                       <span>
                         <Icon name="home" />
-                        Home
+                        Workspaces
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-                 
+
                   {authenticatedUser ? (
                     <>
-                     <LinkContainer to="/mytasks" onClick={() => setIsSidebarVisible(false)}>
-                   <Menu.Item as="a">
-                    <Label color={tasksCount ? "teal" : "black"}>{tasksCount}</Label>
-                    Tasks
-                  </Menu.Item>
-                  </LinkContainer>
-                  
-                  {/*
+                      <LinkContainer
+                        to="/mytasks"
+                        onClick={() => setIsSidebarVisible(false)}
+                      >
+                        <Menu.Item as="a">
+                          <Label color={tasksCount ? "teal" : "black"}>
+                            {tasksCount}
+                          </Label>
+                          Tasks
+                        </Menu.Item>
+                      </LinkContainer>
+
+                      {/*
                   <Menu.Item as="a">
                     <Label color="orange">3</Label>
                     Notifications
                   </Menu.Item> */}
 
-                          <LinkContainer to="/iso" onClick={() => setIsSidebarVisible(false)}>
-                            <Nav.Link as={Menu.Item}>
-                              <span>
-                                <Icon name="sitemap" />
-                                ISO
-                              </span>
-                            </Nav.Link>
-                          </LinkContainer>
-                       
+                     
+
                       {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer to="/templates" onClick={() => setIsSidebarVisible(false)}>
+                        <LinkContainer
+                          to="/templates"
+                          onClick={() => setIsSidebarVisible(false)}
+                        >
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="clipboard list" />
@@ -234,10 +249,12 @@ function App() {
                           </Nav.Link>
                         </LinkContainer>
                       )}
-      
-               
+
                       {isTopLevelAdmin && (
-                        <LinkContainer to="/tenants" onClick={() => setIsSidebarVisible(false)}>
+                        <LinkContainer
+                          to="/tenants"
+                          onClick={() => setIsSidebarVisible(false)}
+                        >
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="building" color="red" />
@@ -248,7 +265,10 @@ function App() {
                         </LinkContainer>
                       )}
                       {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer to="/users" onClick={() => setIsSidebarVisible(false)}>
+                        <LinkContainer
+                          to="/users"
+                          onClick={() => setIsSidebarVisible(false)}
+                        >
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="users" />
@@ -257,14 +277,7 @@ function App() {
                           </Nav.Link>
                         </LinkContainer>
                       )}
-                      <LinkContainer to="/logout">
-                        <Nav.Link as={Menu.Item} onClick={handleLogout}>
-                          <span>
-                            <Icon name="log out" />
-                            Logout
-                          </span>
-                        </Nav.Link>
-                      </LinkContainer>
+                      
                     </>
                   ) : (
                     <>
@@ -304,6 +317,7 @@ function App() {
                         setAuthenticatedUser,
                         currentUserRoles,
                         tenant,
+                        users,
                       }}
                     >
                       <Routes

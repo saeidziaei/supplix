@@ -5,20 +5,20 @@ import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-balham.css";
 import { parseISO } from "date-fns";
+import { cloneDeep } from 'lodash'; // Import the cloneDeep function from the lodash library
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { LinkContainer } from "react-router-bootstrap";
 import { useParams } from "react-router-dom";
 import { Button, Divider, Header, Icon, Label, Loader, Message, Popup } from "semantic-ui-react";
+import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import { cloneDeep, template } from 'lodash'; // Import the cloneDeep function from the lodash library
-import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 
 
-import "./FormRegisters.css";
-import { normaliseCognitoUsers, templateEmployeeField } from "../lib/helpers";
 import User from "../components/User";
+import { useAppContext } from "../lib/contextLib";
+import "./FormRegisters.css";
 
 
 export default function FormRegister({ formDefInput, formsInput, isHistory, isPreview }) {
@@ -34,7 +34,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const [hasChanges, setHasChanges] = useState(false);
   const [workspace, setWorkspace] = useState(null);
   const [isTemplateDeleted, setIsTemplateDeleted] = useState(false);
-  const [employees, setEmployees] = useState(null);
+  const { users: employees } = useAppContext();
 
   ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule]);
 
@@ -48,9 +48,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }, [formDefInput]);
 
   useEffect(() => {
-    async function loadUsers() {
-      return await makeApiCall("GET", `/users`);
-    }
+
     async function onLoad() {
       try {
         setIsLoading(true);
@@ -82,12 +80,6 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
 
         setOriginalForms(formsCopy);
 
-        const fieldName = templateEmployeeField(template?.templateDefinition);
-        if (fieldName) {
-          // there is an employee field in the form definition, we need to load users
-          const items = await loadUsers();
-          setEmployees(normaliseCognitoUsers(items));
-        }
 
         // setColumnDefs(getColumnDefs(template.templateDefinition));
       } catch (e) {
@@ -348,14 +340,21 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   const dateRenderer = (params) => {
     return parseISO(params.value).toDateString();
   };
+  
+
+  const employeeFormValueRenderer = (params) => {
+    const userId = params.data.formValues[params.colDef.field];
+    return employeeComponent(userId);
+  };
   const employeeRenderer = (params) => {
+    const userId = params.value;
+    return employeeComponent(userId);
+  };
+
+  const employeeComponent = (userId) => {
     if (!employees) return <span>?</span>;
-    const user = employees.find((emp) => emp.Username === params.value);
-    return user ? (
-      <User user={user} compact={false} />
-    ) : (
-      <span>User Not Found</span>
-    );
+    const user = employees.find((emp) => emp.Username === userId);
+    return user ? <User user={user} compact={false} /> : <span></span>;
   };
   const wysiwygRenderer = (params) => {
     let value = params.value;
@@ -423,24 +422,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       </LinkContainer>
     );
   };
-  const auditRenderer = (params) => {
-    const d = params.data;
-    return params.value === "create" ? (
-      <Popup
-        content={renderActionInfo(d.createdAt, d.createdByUser)}
-        header="Created"
-        trigger={<span>{new Date(d.createdAt).toLocaleDateString()}</span>}
-      />
-    ) : d.updatedAt ? (
-      <Popup
-        content={renderActionInfo(d.updatedAt, d.updatedByUser)}
-        header="Updated"
-        trigger={<span>{new Date(d.updatedAt).toLocaleDateString()}</span>}
-      />
-    ) : (
-      <></>
-    );
-  };
+ 
 
   const formValueRenderer = (fieldType) => {
     switch (fieldType) {
@@ -463,16 +445,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     }
   };
 
-  function renderActionInfo(ts, user) {
-    const date = new Date(ts);
 
-    return (
-      <>
-        {user ? `${user.firstName} ${user.lastName}` : "-"}
-        <p>{ts ? date.toLocaleString() : ""}</p>
-      </>
-    );
-  }
 
   const exportGridToCSV = useCallback(() => {
     gridRef.current.api.exportDataAsCsv();
@@ -615,22 +588,23 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       {
         headerName: "",
         children: [
-          {
-            field: "created",
-            sortable: true,
-            width: 80,
-            valueGetter: () => "create",
-            cellRenderer: auditRenderer,
-            cellClass: "ag-cell-bordered ag-cell-readonly",
-          },
-          {
-            field: "updated",
-            sortable: true,
-            width: 80,
-            valueGetter: () => "update",
-            cellRenderer: auditRenderer,
-            cellClass: "ag-cell-bordered ag-cell-readonly",
-          },
+          
+          {field: "assigneeId",
+          headerName: "Assignee",
+          sortable: true,
+          cellRenderer: employeeFormValueRenderer,
+          cellClass: "ag-cell-bordered ag-cell-readonly",
+        },
+          {field: "createdBy",
+          sortable: true,
+          cellRenderer: employeeRenderer,
+          cellClass: "ag-cell-bordered ag-cell-readonly",
+        },
+          {field: "updatedBy",
+          sortable: true,
+          cellRenderer: employeeRenderer,
+          cellClass: "ag-cell-bordered ag-cell-readonly",
+        }
         ],
       },
     ];

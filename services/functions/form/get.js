@@ -41,7 +41,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
   return form;
 });
 
-async function getTemplate(tenant, templateId, templateVersion) {
+export async function getTemplate(tenant, templateId, templateVersion) {
   const params = {
     TableName: process.env.TEMPLATE_TABLE,
     Key: {
@@ -57,11 +57,12 @@ async function getTemplate(tenant, templateId, templateVersion) {
     return null; // Template not found
   }
 
-  const getVersionNumber = (version) => (!version ? 0 : version); // 0, null or undefined -> 0
+  const getVersionNumber = (version) => (!version ? 0 : version); // returns 0 for any of 0, null or undefined 
 
   const templateVersionNumber = getVersionNumber(templateVersion);
+
   
-  if (getVersionNumber(template.templateVersion) === templateVersionNumber) {
+  if (getVersionNumber(template.templateVersion) == templateVersionNumber) {
     return template;
   }
 

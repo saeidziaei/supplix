@@ -60,10 +60,10 @@ export const main = handler(async (event, tenant) => {
   }
 
 
-  let updateExpression = "SET employeeNumber= :employeeNumber, updatedByUser= :updatedByUser, updatedAt= :updatedAt";
+  let updateExpression = "SET employeeNumber= :employeeNumber, updatedBy = :updatedBy, updatedAt= :updatedAt";
   let expressionAttributes = {
     ":employeeNumber": data.employeeNumber || "",
-    ":updatedByUser": event.requestContext.authorizer.jwt.claims.sub,
+    ":updatedBy": event.requestContext.authorizer.jwt.claims.sub,
     ":updatedAt": Date.now(),
   };
 
