@@ -134,9 +134,9 @@ function App() {
     return (
       !isAuthenticating && (
         <>
-          <Grid doubling stackable style={{ marginBottom: "-3rem" }}>
+          <Grid  style={{ marginBottom: "-3rem" }}>
             <Grid.Row verticalAlign="middle">
-              <Grid.Column width="7">
+              <Grid.Column width="10">
                 <List divided horizontal>
                   <List.Item>
                     {tenant ? (
@@ -167,12 +167,12 @@ function App() {
                   </List.Item>
                 </List>
               </Grid.Column>
-              <Grid.Column width="8"  textAlign={isMobile ? "center" : "right"}>
-                <List divided horizontal>
+              <Grid.Column width="6"  textAlign={isMobile ? "center" : "right"} verticalAlign="top">
+                <List horizontal>
                   {employee && (
                     <List.Item>
         <Popup pinned on="click"
-          trigger={<span style={{cursor: "pointer"}}><User user={employee} /></span>}
+          trigger={<span style={{cursor: "pointer"}}><User user={employee} compact={isMobile} /></span>}
           content={<Button size="tiny" basic content='Logout' icon='log out' onClick={handleLogout}/>}
           position='bottom right'
         />
@@ -181,11 +181,7 @@ function App() {
 
                     </List.Item>
                   )}
-                  {authenticatedUser && (
-                    <List.Item>
-                      <NCR label={tenant?.NCRLabel} />{" "}
-                    </List.Item>
-                  )}
+               
                 </List>
               </Grid.Column>
             </Grid.Row>
@@ -277,7 +273,11 @@ function App() {
                           </Nav.Link>
                         </LinkContainer>
                       )}
-                      
+                      {authenticatedUser && (
+                    <Menu.Item>
+                      <NCR label={tenant?.NCRLabel} />
+                    </Menu.Item>
+                  )}
                     </>
                   ) : (
                     <>
