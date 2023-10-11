@@ -14,6 +14,7 @@ import {
 } from "semantic-ui-react";
 import * as Yup from "yup";
 import { onError } from "../lib/errorLib";
+import "./ResetPassword.css"
 
 export default function ResetPassword() {
   const [values, setValues] = useState({
@@ -81,7 +82,8 @@ export default function ResetPassword() {
           value={values.email}
           onChange={handleChange}
         />
-        <Button basic type="submit">
+        <Button  type="submit"  fluid
+                     className="submit">
           Submit
         </Button>
       </>
@@ -148,7 +150,11 @@ export default function ResetPassword() {
           <li>at least 1 uppercase letter</li>
           <li>at least 1 lowercase letter</li>
         </p>
-        <Button basic type="submit">
+        <Button  type="submit"  fluid
+                      style={{
+                        backgroundColor: "rgb(61 95 125)",
+                        color: "white",
+                      }}>
           Submit
         </Button>
       </>
@@ -173,9 +179,11 @@ export default function ResetPassword() {
   }
 
   return (
-    <Grid textAlign="center" style={{ height: "100vh" }} verticalAlign="middle">
-      <Grid.Column style={{ maxWidth: 450 }}>
-        <Header as="h2" textAlign="left">
+    <Grid textAlign="center" className="grid-container" >
+      <Grid.Row textAlign="center" verticalAlign="top">
+        <Grid.Column width="10" className="form-container" textAlign="center">
+      <img src="/iso_cloud_logo_v1.png" />
+        <Header as="h3" color="grey" textAlign="center">
           <Icon name="user outline" />
           {!codeSent
             ? "Password Reset"
@@ -198,7 +206,7 @@ export default function ResetPassword() {
             isSubmitting,
           }) => (
             <Form onSubmit={handleSubmit} autoComplete="off">
-              <Segment>
+              <>
                 {!codeSent
                   ? renderRequestCodeForm(values, errors, touched, handleChange)
                   : !confirmed
@@ -209,11 +217,12 @@ export default function ResetPassword() {
                       handleChange
                     )
                   : renderSuccessMessage()}
-              </Segment>
+              </>
             </Form>
           )}
         </Formik>
       </Grid.Column>
+      </Grid.Row>
     </Grid>
   );
 }

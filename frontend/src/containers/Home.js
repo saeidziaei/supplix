@@ -9,7 +9,6 @@ import FormHeader from "../components/FormHeader";
 import "./Home.css";
 
 export default function Home() {
-
   return (
     <div className="Home" style={{ backgroundColor: "black" }}>
       <FormHeader heading="Home" />

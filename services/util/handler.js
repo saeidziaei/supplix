@@ -2,6 +2,7 @@ import { CognitoIdentityProvider as CognitoIdentityServiceProvider } from "@aws-
 import dynamodb from "./dynamodb";
 import { ADMIN_GROUP, NCR_WORKSAPCE_ID, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_MEMBER_ROLE, WORKSPACE_OWNER_ROLE } from "./constants";
 import { getWorkspaceById } from "../functions/workspace/get";
+import httpResponse from "./httpresponse";
 
 export default function handler(lambda) {
   return async function (event, context) {
@@ -74,16 +75,7 @@ export default function handler(lambda) {
 
 }
 
-function httpResponse(statusCode, body) {
-  return {
-    statusCode,
-    body: JSON.stringify(body),
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
-    },
-  };
-}
+
 function getHttpMethod(event) {
   if (!event || !event.requestContext || !event.requestContext.http) 
     return null;

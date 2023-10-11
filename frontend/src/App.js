@@ -5,7 +5,6 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
-  Dropdown,
   Grid,
   Icon,
   Image, Label, List,
@@ -14,14 +13,14 @@ import {
 } from "semantic-ui-react";
 import "./App.css";
 import Routes from "./Routes";
+import { NCR } from "./components/NCR";
 import User from "./components/User";
 import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
-import { normaliseCognitoUser, normaliseCognitoUsers } from "./lib/helpers";
-import { NCR } from "./components/NCR";
 import { onError } from "./lib/errorLib";
+import { normaliseCognitoUser, normaliseCognitoUsers } from "./lib/helpers";
 
 
 export default App;
@@ -60,7 +59,7 @@ function App() {
           alert(e);
         }
         await Auth.signOut();
-        nav("/login");
+        // nav("/login");
       }
 
       setIsAuthenticating(false);
@@ -156,13 +155,8 @@ function App() {
                     )}
                   </List.Item>
                   <List.Item>
-                    <Button
-                      size="mini"
-                      color="white"
-                      icon="bars"
-                      onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                      
-                    ></Button>
+                    <Icon name="bars" onClick={() => setIsSidebarVisible(!isSidebarVisible)} style={{cursor: "pointer"}} />
+                    
                     
                   </List.Item>
                   </List>
@@ -194,10 +188,14 @@ function App() {
                   
                   vertical
                   onHide={() => setIsSidebarVisible(false)}
-                  animation="push"
+                  animation="overlay"
                   size="small"
                 >
-                  <LinkContainer
+                  
+
+                  {authenticatedUser ? (
+                    <>
+                    <LinkContainer
                     to="/"
                     onClick={() => setIsSidebarVisible(false)}
                   >
@@ -208,9 +206,6 @@ function App() {
                       </span>
                     </Nav.Link>
                   </LinkContainer>
-
-                  {authenticatedUser ? (
-                    <>
                       <LinkContainer
                         to="/mytasks"
                         onClick={() => setIsSidebarVisible(false)}
@@ -308,7 +303,7 @@ function App() {
                   </Menu.Item>
                 </Sidebar>
 
-                <Sidebar.Pusher>
+                <Sidebar.Pusher dimmed={isSidebarVisible}>
                   <Segment basic style={{ minHeight: "100vh" }}>
                     <AppContext.Provider
                       value={{

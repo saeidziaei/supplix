@@ -60,7 +60,7 @@ export default function User({ user, compact = false, card = false }) {
         </div>
       )}
       {!compact && (
-        <span>{`${capitalizeFirstLetter(
+        <span> {`${capitalizeFirstLetter(
           user.given_name
         )} ${capitalizeFirstLetter(user.family_name)}`}</span>
       )}

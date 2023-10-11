@@ -2,3 +2,8 @@
     margin: 3px;
     font-size: .8rem;
 }
+
+.submit {
+    background-color: #4e8ff1!important;
+    color: white!important;
+}

@@ -126,7 +126,13 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "docId" },
   });
 
-
+  const stripeEventTable = new Table(stack , "StripeEvent", {
+    fields: {
+      stripeEventId: "string", // this prevents doulbe processing of a duplicate stripe event
+    },
+    primaryIndex: { partitionKey: "stripeEventId" },
+    stream: "new_image",
+  });
   
   return { 
     tenantTable,
@@ -139,6 +145,7 @@ export function StorageStack({ stack, app }) {
     workspaceUserTable,
     workspaceTaskTable,
     deletedArchiveTable,
+    stripeEventTable,
     bucket,
   };
 }

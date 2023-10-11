@@ -1,7 +1,7 @@
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 
-import { Cognito, Api, use } from "sst/constructs";
+import { Cognito, Api, use, Function } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 import { ADMIN_GROUP, RECURRING, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_OWNER_ROLE } from "../services/util/constants";
 import { StringAttribute } from "aws-cdk-lib/aws-cognito";
@@ -20,6 +20,7 @@ export function AuthAndApiStack({ stack, app }) {
     workspaceUserTable,
     workspaceTaskTable,
     deletedArchiveTable,
+    stripeEventTable,
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -112,6 +113,7 @@ Temporary Password: {####}
     ],
   });
   // Create the API
+
   const api = new Api(stack, "Api", {
     cors: true,
     authorizers: {
@@ -121,6 +123,13 @@ Temporary Password: {####}
           id: auth.userPoolId,
           clientIds: [auth.userPoolClientId],
         },
+      },
+      stripeAuthorizer: {
+        type: "lambda",
+        function: new Function(stack, "Authorizer", {
+          handler: "services/functions/stripe/authorizer.main"
+        }),
+        resultsCacheTtl: "30 seconds",
       },
     },
     // customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
@@ -144,23 +153,20 @@ Temporary Password: {####}
           WORKSPACEUSER_TABLE: workspaceUserTable.tableName,
           WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
           DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
+          STRIPEEVENT_TABLE: stripeEventTable.tableName,
           BUCKET: bucket.bucketName,
         },
         permissions: [workspaceUserTable],
       },
     },
     routes: {
-      // // TEMP
-      // "POST   /generate-tasks": {
-      //   function: {
-      //     handler: "services/functions/cron/task-generator.main",
-      //     bind: [workspaceTaskTable],
-      //     environment: {
-      //       WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
-      //       ALLOWED_GROUPS: ADMIN_GROUP,
-      //     },
-      //   },
-      // },
+      "POST   /stripe-webhook": {
+        function: {
+          handler: "services/functions/stripe/webhook.main",
+          bind: [stripeEventTable],
+        },
+        authorizer: "none",
+      },
 
       "GET   /workspaces": {
         function: {
@@ -665,7 +671,6 @@ Temporary Password: {####}
       },
     },
   });
-
   workspaceTaskTable.attachPermissionsToConsumer("notify", ["ses"]);
   
 
@@ -688,7 +693,20 @@ Temporary Password: {####}
       },
       bind: [workspaceTaskTable, templateTable]
     }
-  })
+  });
+
+  stripeEventTable.addConsumers(stack, {
+    fullfilorder : {
+      handler: "services/functions/stripe/fullfilorder.main",
+      environment: {
+        STRIPEEVENT_TABLE: stripeEventTable.tableName,
+        TENANT_TABLE: tenantTable.tableName, 
+      },
+      bind: [stripeEventTable, tenantTable]
+    }
+  });
+  stripeEventTable.attachPermissionsToConsumer("fullfilorder", ["ses"]);
+
 
   auth.attachPermissionsForAuthUsers(auth, [
     // Allow access to the API
