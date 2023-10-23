@@ -509,6 +509,7 @@ export function GenericForm({
                         <Grid.Row key={index} verticalAlign="middle">
                           <Grid.Column width={1}>
                             <Button
+                              className="hide-on-print"
                               circular
                               size="mini"
                               icon="x"
