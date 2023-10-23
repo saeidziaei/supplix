@@ -153,13 +153,13 @@ Temporary Password: {####}
       },
     },
     routes: {
-      "POST   /stripe-webhook": {
-        function: {
-          handler: "services/functions/stripe/webhook.main",
-          bind: [stripeEventTable],
-        },
-        authorizer: "none",
-      },
+      // "POST   /stripe-webhook": {
+      //   function: {
+      //     handler: "services/functions/stripe/webhook.main",
+      //     bind: [stripeEventTable],
+      //   },
+      //   authorizer: "none",
+      // },
 
       "GET   /workspaces": {
         function: {

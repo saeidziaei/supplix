@@ -502,7 +502,7 @@ export function GenericForm({
               </div>
               <FieldArray name="attachments">
                 {({ insert, remove, push }) => (
-                  <Grid>
+                  <Grid className="dynamic-field">
                     {values.attachments &&
                       values.attachments.length > 0 &&
                       values.attachments.map((attachment, index) => (
@@ -517,7 +517,7 @@ export function GenericForm({
                               onClick={() => remove(index)}
                             />
                           </Grid.Column>
-                          <Grid.Column width={5}>
+                          <Grid.Column width={10}>
                             {!disabled && !attachment.fileURL && (
                               <input
                                 id="file"
