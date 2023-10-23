@@ -338,7 +338,7 @@ export default function TemplatedForm() {
       )}
       {!editable && (
         <div>
-          <Button primary basic size="mini" onClick={() => handleEdit(true)}>
+          <Button className="hide-on-print" primary basic size="mini" onClick={() => handleEdit(true)}>
             Edit
           </Button>
           {/* this one is Edit in place. Don't need it for the time being.
@@ -355,6 +355,7 @@ export default function TemplatedForm() {
           />
           {formId && (isAdmin || workspace?.role === "Owner") && (
             <Button
+              className="hide-on-print"
               floated="right"
               basic
               size="mini"
@@ -369,13 +370,13 @@ export default function TemplatedForm() {
       )}
       <Divider  />
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
-        <Button basic size="mini">
+        <Button className="hide-on-print" basic size="mini">
           All Records...
         </Button>
       </LinkContainer>
 
       {formRecord && formRecord.history && (
-        <Accordion>
+        <Accordion className="hide-on-print">
           <Accordion.Title
             active={activeAccordionIndex === 0}
             index={0}

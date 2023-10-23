@@ -19,4 +19,8 @@
     -webkit-print-color-adjust: exact; /* For WebKit browsers like Chrome */
     color-adjust: exact; /* For Firefox and some other browsers */
   }
+
+  .hide-on-print {
+    display: none!important;
+  }
 }
