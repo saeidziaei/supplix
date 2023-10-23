@@ -124,13 +124,6 @@ Temporary Password: {####}
           clientIds: [auth.userPoolClientId],
         },
       },
-      stripeAuthorizer: {
-        type: "lambda",
-        function: new Function(stack, "Authorizer", {
-          handler: "services/functions/stripe/authorizer.main"
-        }),
-        resultsCacheTtl: "30 seconds",
-      },
     },
     // customDomain: app.stage === "prod" ? `api.${process.env.DOMAIN}` : app.stage === "stg" ? `api.stg.${process.env.DOMAIN}` : undefined,
     customDomain:
