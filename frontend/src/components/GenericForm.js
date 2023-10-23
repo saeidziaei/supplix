@@ -52,7 +52,7 @@ export function GenericForm({
 
 
   function renderField(f, values, setFieldValue) {
-    return renderFieldInput(f, values, setFieldValue);
+    return (<div className="dynamic-field">{renderFieldInput(f, values, setFieldValue)}</div>); 
     // return (
     //   <>
     //     {renderFieldInput(f, values, setFieldValue)}

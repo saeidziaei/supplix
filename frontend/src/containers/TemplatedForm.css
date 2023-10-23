@@ -3,3 +3,20 @@
   margin-top: 10px;
   margin-bottom: 3px;
 }
+
+@media print {
+  /* Reset the text color to black for disabled elements */
+  .dynamic-field {
+    color: #000!important; /* Set the text color to black */
+    background-color: transparent; /* Make the background transparent for readability */
+    opacity: 1!important;
+    page-break-inside: avoid;
+  }
+  .ui.disabled.dropdown {
+    opacity: 1!important;
+  }
+  body {
+    -webkit-print-color-adjust: exact; /* For WebKit browsers like Chrome */
+    color-adjust: exact; /* For Firefox and some other browsers */
+  }
+}

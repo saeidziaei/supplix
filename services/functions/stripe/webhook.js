@@ -41,8 +41,11 @@ export const main = async (request, context) => {
       await saveStripeEvent({...event, lineItems});
     } 
   } catch (err) {
-    console.log(err);
-    return httpResponse("400", { msg: `Webhook Error: ${err.message}`});
+  if (err.name === "ConditionalCheckFailedException") {
+    return httpResponse("200", { msg: "Event already handled." });
+  }
+
+  return httpResponse("400", { msg: `Webhook Error: ${err.message}`});
   }
 
   return httpResponse("200", { msg: "Request handled successfully." });
@@ -55,11 +58,12 @@ async function saveStripeEvent(stripeEvent) {
   const params = {
     TableName: process.env.STRIPEEVENT_TABLE,
     Item: {
-      stripeEventId: stripeEvent.id, // this is also a safety measure against re-processing an event
+      stripeEventId: stripeEvent.id, 
       stripeEvent: stripeEvent,
       createdAt: Date.now(), // Current Unix timestamp
       isProcessed: false,
     },
+    ConditionExpression: 'attribute_not_exists(stripeEventId)' // this is a safety measure against re-processing an event
   };
 
   await dynamoDb.put(params);

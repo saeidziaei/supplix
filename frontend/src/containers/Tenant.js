@@ -220,6 +220,13 @@ export default function Tenant() {
                       onChange={handleChange}
                     />
                   </Form.Field>
+                  <Divider horizontal>Subscription</Divider>
+                  <Form.Field>
+                    <label>Price ID</label><Form.Input fluid iconPosition="left" name="priceId" value={values.priceId} onChange={handleChange}/>
+                    <label>Payment Status</label><Form.Input fluid iconPosition="left" name="paymentStatus" value={values.paymentStatus} onChange={handleChange}/>
+                    <label>Stripe Event: {values.stripeEventId}</label>
+                  </Form.Field>
+
                   <Button primary type="submit" disabled={isSubmitting}>
                     Submit
                   </Button>
