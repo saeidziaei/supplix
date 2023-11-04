@@ -481,8 +481,9 @@ export function GenericForm({
   
   
   return (
-    <Segment style={{ overflowX: "auto" }}>
-      <FormHeader heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
+    
+    <Segment >
+      <FormHeader   heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
       <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => {
           // setSignature(values[SIGNATURE_FIELD_NAME]);
@@ -502,7 +503,7 @@ export function GenericForm({
               </div>
               <FieldArray name="attachments">
                 {({ insert, remove, push }) => (
-                  <Grid className="dynamic-field">
+                  <Grid  className="dynamic-field">
                     {values.attachments &&
                       values.attachments.length > 0 &&
                       values.attachments.map((attachment, index) => (
@@ -518,7 +519,7 @@ export function GenericForm({
                               onClick={() => remove(index)}
                             />
                           </Grid.Column>
-                          <Grid.Column width={10}>
+                          <Grid.Column width={9}>
                             {!disabled && !attachment.fileURL && (
                               <input
                                 id="file"

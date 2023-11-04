@@ -283,6 +283,9 @@ export default function TemplatedForm() {
   //    or it is being revisioned
   const isNew = !formId;
   const editable = isNew || isEditing || isRevisioning;
+  
+  
+
   return (
     <>
       <WorkspaceInfoBox workspace={workspace} />
@@ -296,7 +299,9 @@ export default function TemplatedForm() {
           : ""}
       </Header>
 
-      <div className="form-background" style={{ background: 'linear-gradient(to right, #ccc, #eee)' }}>
+      
+      
+      <div className="form-background" style={{ background: 'linear-gradient(to right, #ccc, #eee)', height: 'auto!important' }}>
         <GenericForm
           formDef={template.templateDefinition}
           formData={formRecord ? formRecord.formValues : null}

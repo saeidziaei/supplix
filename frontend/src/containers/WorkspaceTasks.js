@@ -20,63 +20,82 @@ import { useAppContext } from "../lib/contextLib";
 
 
 export default function WorkspaceTasks() {
-  const NCR_WORKSPACE_ID = "NCR";  
+  const NCR_WORKSPACE_ID = "NCR";
 
-  const { workspaceId } = useParams();
+  const { workspaceId, username } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [workspace, setWorkspace] = useState(null);
   const [workspaces, setWorkspaces] = useState(null);
   const [tasks, setTasks] = useState(null);
-  const [recurringTasks, setRecurringTasks] = useState(null);
+  const [recurringTasks, setRecurringTasks] = useState(null); 
   const [selectedTask, setSelectedTask] = useState(null);
   const nav = useNavigate();
   const location = useLocation();
   const [showAll, setShowAll] = useState(false);
   const { users } = useAppContext();
 
-
-
   // this component is used for multiple paths, determining what needs to be rendered based on path
-  const isMytasksPath = location.pathname === "/mytasks"
+  const isMytasksPath = location.pathname === "/mytasks";
+  const isUserTasksPath = location.pathname.startsWith("/user/");
+  
+  const isMultiWorkspace = isMytasksPath || isUserTasksPath;
 
   const isNCR = () => workspaceId === NCR_WORKSPACE_ID;
-  const canManageRecurringTasks = () => !isNCR() && workspace && workspace.role === "Owner";
+  const canManageRecurringTasks = () =>
+    !isNCR() && workspace && workspace.role === "Owner";
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
   useEffect(() => {
     async function onLoad() {
       async function loadWorkspaceTasks() {
-        return await makeApiCall("GET", `/workspaces/${workspaceId}/tasks` + (showAll ? `?showAll=true`: ""));
+        return await makeApiCall(
+          "GET",
+          `/workspaces/${workspaceId}/tasks` + (showAll ? `?showAll=true` : "")
+        );
       }
       async function loadMyTasks() {
-        return await makeApiCall("GET", `/mytasks` + (showAll ? `?showAll=true`: ""));
+        return await makeApiCall(
+          "GET",
+          `/mytasks` + (showAll ? `?showAll=true` : "")
+        );
       }
-     
+      async function loadUserTasks() {
+        return await makeApiCall(
+          "GET",
+          `/users/${username}/tasks` + (showAll ? `?showAll=true` : "")
+        );
+      }
+
       async function loadWorkspaces() {
-        return await makeApiCall("GET", `/workspaces`); 
+        return await makeApiCall("GET", `/workspaces`);
       }
-      
+
+      async function loadTasks() {
+        if (isMytasksPath) return await loadMyTasks();
+        if (isUserTasksPath) return await loadUserTasks();
+        return await loadWorkspaceTasks();
+      }
+
       try {
         setIsLoading(true);
 
         const [tasks, workspaces] = await Promise.all([
-          isMytasksPath ? loadMyTasks() : loadWorkspaceTasks(),
-          
-          isMytasksPath ? loadWorkspaces() : [], // no need to load all workspaces if it is showing tasks for one workspace
+          loadTasks(),
+          isMultiWorkspace ? loadWorkspaces() : [], // no need to load all workspaces if it is showing tasks for one workspace
         ]);
 
-        
-
-        if (isMytasksPath) {
+        if (isMultiWorkspace) {
           setTasks(tasks);
           setWorkspaces(workspaces);
         } else {
           // for GET workspacetasks workspaceId is in the path therefore result are in data element and it also returns workspace
           const { data, workspace } = tasks ?? {};
 
-          setTasks(data.filter(t => !t.isRecurring || t.isRecurring === "N"));
-          setRecurringTasks(data.filter(t => t.isRecurring && t.isRecurring === "Y"));
+          setTasks(data.filter((t) => !t.isRecurring || t.isRecurring === "N"));
+          setRecurringTasks(
+            data.filter((t) => t.isRecurring && t.isRecurring === "Y")
+          );
           setWorkspace(workspace);
         }
       } catch (e) {
@@ -86,33 +105,42 @@ export default function WorkspaceTasks() {
       setIsLoading(false);
     }
     onLoad();
-  }, [showAll, isMytasksPath]);
+  }, [showAll, isMytasksPath, isUserTasksPath, users]);
   const UserRenderer = (params) => {
     const fieldName = params.colDef.field;
-    const user = users ? users.find((u) => u.Username === params.data[fieldName]) : null;
+    const user = users
+      ? users.find((u) => u.Username === params.data[fieldName])
+      : null;
     if (!user) return;
-    return (
-      <User user={user} compact={true}  />
-    );
+    return <User user={user} compact={true} />;
   };
   const DateRenderer = (params) => {
     try {
-    const fieldName = params.colDef.field;
-    
-    const date = dateFromEpoch(params.data[fieldName]);
-    if (date == "Invalid Date") return "";
+      const fieldName = params.colDef.field;
 
-    return format(date, 'dd/MM/yy');
-    }
-    catch  {
+      const date = dateFromEpoch(params.data[fieldName]);
+      if (date == "Invalid Date") return "";
+
+      return format(date, "dd/MM/yy");
+    } catch {
       return "";
     }
   };
   const WorkspaceRenderer = (params) => {
     const workspaceId = params.data["workspaceId"];
-    const workspace = workspaces ? workspaces.find(w => w.workspaceId === workspaceId) : {};
-    return (<Label horizontal color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"} size="tiny">{workspace ? workspace.workspaceName : "-"}</Label>);
-  }
+    const workspace = workspaces
+      ? workspaces.find((w) => w.workspaceId === workspaceId)
+      : {};
+    return (
+      <Label
+        horizontal
+        color={workspaceId === NCR_WORKSPACE_ID ? "red" : "yellow"}
+        size="tiny"
+      >
+        {workspace ? workspace.workspaceName : "-"}
+      </Label>
+    );
+  };
   const StatusRenderer = (params) => {
     const taskStatus = params.data["taskStatus"];
     let color = "grey";
@@ -120,25 +148,29 @@ export default function WorkspaceTasks() {
       case "Completed":
         color = "green";
         break;
-    
+
       case "On Hold":
         color = "orange";
         break;
-    
+
       case "Cancelled":
         color = "red";
         break;
-    
+
       case "In Progress":
         color = "teal";
         break;
-    
+
       default:
         break;
     }
 
-    return <Label size="tiny" horizontal basic color={color}>{taskStatus || "Unknown"}</Label>;
-  }
+    return (
+      <Label size="tiny" horizontal basic color={color}>
+        {taskStatus || "Unknown"}
+      </Label>
+    );
+  };
   const tasksGridOptions = {
     defaultColDef: {
       sortable: true,
@@ -147,34 +179,44 @@ export default function WorkspaceTasks() {
       width: 120,
     },
     columnDefs: [
-      isMytasksPath ? { field: "workspace", headerName: "Workspace", width: 150, cellRenderer: WorkspaceRenderer,}: {},
+      isMultiWorkspace
+        ? {
+            field: "workspace",
+            headerName: "Workspace",
+            width: 150,
+            cellRenderer: WorkspaceRenderer,
+          }
+        : {},
       { field: "taskCode", headerName: "Code", width: 70 },
       { field: "taskType", headerName: "Type", width: 70 },
-      { field: "taskName", },
+      { field: "taskName" },
       { field: "startDate", cellRenderer: DateRenderer, width: 90 },
       { field: "dueDate", cellRenderer: DateRenderer, width: 90 },
       { field: "completionDate", cellRenderer: DateRenderer, width: 90 },
-      { field: "taskStatus", headerName: "Status", cellRenderer: StatusRenderer },
+      {
+        field: "taskStatus",
+        headerName: "Status",
+        cellRenderer: StatusRenderer,
+      },
       {
         field: "userId",
         headerName: "Owner",
-        cellRenderer: UserRenderer, 
-        width: 90
+        cellRenderer: UserRenderer,
+        width: 90,
       },
       {
         field: "createdBy",
         headerName: "Reporter",
         cellRenderer: UserRenderer,
-        width: 90
+        width: 90,
       },
       {
         field: "updatedBy",
         headerName: "Updated",
         cellRenderer: UserRenderer,
-        width: 90
+        width: 90,
       },
-      
-    ].filter(def => def.field), // remove empty objects
+    ].filter((def) => def.field), // remove empty objects
     rowStyle: { cursor: "pointer" },
     rowSelection: "single",
     onSelectionChanged: onTasksSelectionChanged,
@@ -190,28 +232,27 @@ export default function WorkspaceTasks() {
       { field: "frequency", width: 150 },
       { field: "taskCode", headerName: "Code", width: 70 },
       { field: "taskType", headerName: "Type", width: 70 },
-      { field: "taskName", },
+      { field: "taskName" },
       { field: "startDate", cellRenderer: DateRenderer, width: 90 },
       { field: "endDate", cellRenderer: DateRenderer, width: 90 },
       {
         field: "userId",
         headerName: "Owner",
-        cellRenderer: UserRenderer, 
-        width: 90
+        cellRenderer: UserRenderer,
+        width: 90,
       },
       {
         field: "createdBy",
         headerName: "Reporter",
         cellRenderer: UserRenderer,
-        width: 90
+        width: 90,
       },
       {
         field: "updatedBy",
         headerName: "Updated",
         cellRenderer: UserRenderer,
-        width: 90
+        width: 90,
       },
-      
     ],
     rowStyle: { cursor: "pointer" },
     rowSelection: "single",
@@ -232,9 +273,8 @@ export default function WorkspaceTasks() {
 
   const handleCompletedToggle = () => {
     setShowAll(!showAll);
-
   };
-  
+
   const renderSelectedTask = () => {
     if (!selectedTask) return null;
     return (
@@ -246,7 +286,9 @@ export default function WorkspaceTasks() {
           icon="edit"
           floated="right"
           onClick={() =>
-            nav(`/workspace/${selectedTask.workspaceId}/task/${selectedTask.taskId}`)
+            nav(
+              `/workspace/${selectedTask.workspaceId}/task/${selectedTask.taskId}`
+            )
           }
         />
         <Header>{selectedTask.taskName}</Header>
@@ -256,7 +298,7 @@ export default function WorkspaceTasks() {
         />
       </Segment>
     );
-  }
+  };
   const panes = [
     {
       menuItem: "Tasks",
@@ -278,12 +320,13 @@ export default function WorkspaceTasks() {
             ></AgGridReact>
           </div>
           <Segment basic>
-          <Checkbox
-            toggle
-            label="Show Closed Tasks"
-            onChange={handleCompletedToggle}
-            checked={showAll}
-          /></Segment>
+            <Checkbox
+              toggle
+              label="Show Closed Tasks"
+              onChange={handleCompletedToggle}
+              checked={showAll}
+            />
+          </Segment>
         </Tab.Pane>
       ),
     },
@@ -312,19 +355,31 @@ export default function WorkspaceTasks() {
         }
       : null,
   ];
+  const getHeader = () => {
+    if (isMytasksPath) return <Header>My Tasks</Header>;
+    if (isUserTasksPath) {
+      const user = users ? users.find((u) => u.Username === username) : null;
+
+      return (
+        <>
+          <Header>User Tasks</Header>
+          {user && <User compact="false" user={user} />}
+        </>
+      );
+    }
+
+    if (isNCR()) return "";
+    return <WorkspaceInfoBox workspace={workspace} />;
+  };
   function render() {
     return (
       <>
-        {isMytasksPath ? (
-          <Header>My Tasks</Header>
-        ) : (
-          !isNCR() && (<WorkspaceInfoBox workspace={workspace} />)
-        )}
-       <Tab  menu={{ secondary: true, pointing: true }} panes={panes} />
-        
+        {getHeader()}
+        <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+
         {renderSelectedTask()}
         <Divider hidden />
-        {!isMytasksPath && (
+        {!isMultiWorkspace && (
           <LinkContainer to={`/workspace/${workspaceId}/task`}>
             <Button basic size="tiny" color={isNCR() ? "red" : "blue"}>
               <Icon name="plus" />
@@ -332,7 +387,6 @@ export default function WorkspaceTasks() {
             </Button>
           </LinkContainer>
         )}
-        
       </>
     );
   }

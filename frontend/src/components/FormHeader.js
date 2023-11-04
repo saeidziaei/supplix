@@ -5,11 +5,13 @@ import "./FormHeader.css";
 export default function FormHeader({ heading, subheading, image }) {
   return (
     <div
+    
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
       }}
+
     >
       <div>
         <Header as="h3" color="grey">

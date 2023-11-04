@@ -1,5 +1,5 @@
+import { sendEmail } from "../../util/email";
 import { getUser } from "../../util/handler";
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 export const main = async (event, context) => {
   const stage = process.env.STAGE;
@@ -39,35 +39,19 @@ export const main = async (event, context) => {
         const taskId = streamData.NewImage.taskId.S;
         const taskName = streamData.NewImage.taskName.S;
 
+        const to = stage === "prod" ? user.email : "support@isocloud.com.au";
+        const body = `Hi ${
+              user.firstName
+            },\n\nA new task is assigned to you.\n ${taskName}\nSee more details here: https://app.isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
+            ${
+              stage === "prod"
+                ? ""
+                : `Stage: ${stage}\n\nShould have been sent to ${user.email}`
+            }`;
+        const subject = "New Task Assigned";
 
-        const emailParams = {
-          Destination: {
-            ToAddresses: [
-              stage === "prod" ? user.email : "support@isocloud.com.au",
-            ],
-          },
-          Message: {
-            Body: {
-              Text: {
-                Data: `Hi ${
-                  user.firstName
-                },\n\nA new task is assigned to you.\n ${taskName}\nSee more details here: https://app.isocloud.com.au/workspace/${workspaceId}/task/${taskId} 
-                ${
-                  stage === "prod"
-                    ? ""
-                    : `Stage: ${stage}\n\nShould have been sent to ${user.email}`
-                }`,
-              },
-            },
-            Subject: { Data: "New Task Assigned" },
-          },
-          Source: "noreply@isocloud.com.au",
-        };
-
-        const client = new SESClient();
-
-        const command = new SendEmailCommand(emailParams);
-        const ret = await client.send(command);
+        const ret = await sendEmail(to, subject, body);
+      
         console.log("Email sent successfully", ret);
       }
     } catch (error) {

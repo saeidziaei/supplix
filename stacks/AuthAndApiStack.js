@@ -153,13 +153,13 @@ Temporary Password: {####}
       },
     },
     routes: {
-      // "POST   /stripe-webhook": {
-      //   function: {
-      //     handler: "services/functions/stripe/webhook.main",
-      //     bind: [stripeEventTable],
-      //   },
-      //   authorizer: "none",
-      // },
+      "POST   /stripe-webhook": {
+        function: {
+          handler: "services/functions/stripe/webhook.main",
+          bind: [stripeEventTable],
+        },
+        authorizer: "none",
+      },
 
       "GET   /workspaces": {
         function: {
@@ -233,8 +233,17 @@ Temporary Password: {####}
 
       "GET   /mytasks": {
         function: {
-          handler: "services/functions/workspacetask/getmytasks.main",
+          handler: "services/functions/workspacetask/getusertasks.main",
           bind: [workspaceTaskTable],
+        },
+      },
+      "GET   /users/{username}/tasks": {
+        function: {
+          handler: "services/functions/workspacetask/getusertasks.main",
+          bind: [workspaceTaskTable],
+          environment: {
+            ALLOWED_GROUPS: ADMIN_GROUP,
+          },
         },
       },
       "GET   /workspaces/{workspaceId}/tasks": {
@@ -691,11 +700,14 @@ Temporary Password: {####}
   stripeEventTable.addConsumers(stack, {
     fullfilorder : {
       handler: "services/functions/stripe/fullfilorder.main",
+      permissions: [cognitoReadonlyAccessPolicy],
       environment: {
         STRIPEEVENT_TABLE: stripeEventTable.tableName,
         TENANT_TABLE: tenantTable.tableName, 
+        USER_TABLE: userTable.tableName,
+        USER_POOL_ID: auth.userPoolId,
       },
-      bind: [stripeEventTable, tenantTable]
+      bind: [stripeEventTable, tenantTable, userTable]
     }
   });
   stripeEventTable.attachPermissionsToConsumer("fullfilorder", ["ses"]);

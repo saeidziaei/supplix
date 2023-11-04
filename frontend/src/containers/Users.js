@@ -42,7 +42,11 @@ export default function Users() {
     }
   }
   const UserRegisterRenderer = (params) => {
+    // TODO path should be user/:username/register , right?!
     return <a href={`/user/register/${params.data.Username}`}>Details</a>
+  }
+  const UserTasksRenderer = (params) => {
+    return <a href={`/user/${params.data.Username}/tasks`}>Tasks</a>
   }
   class EmailRenderer {
     init(params) {
@@ -72,6 +76,7 @@ export default function Users() {
     { field: 'employeeNumber', resizable: true, sortable: true },
     { field: 'email', headerName: 'Email', resizable: true, sortable: true, cellRenderer: EmailRenderer  },
     { field: 'register', headerName: 'Register', resizable: false, sortable: false, cellRenderer: UserRegisterRenderer  },
+    { field: 'tasks', headerName: 'Tasks', resizable: false, sortable: false, cellRenderer: UserTasksRenderer  },
   ];
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);

@@ -4,11 +4,16 @@
   margin-bottom: 3px;
 }
 
+
 @media print {
   /* Reset the text color to black for disabled elements */
   .dynamic-field {
     color: #000!important; /* Set the text color to black */
     background-color: transparent; /* Make the background transparent for readability */
+    opacity: 1!important;
+    page-break-inside: avoid;
+  }
+  .dynamic-field > * {
     opacity: 1!important;
     page-break-inside: avoid;
   }
@@ -23,4 +28,8 @@
   .hide-on-print {
     display: none!important;
   }
+
+
+
 }
+

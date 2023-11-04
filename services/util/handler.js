@@ -136,7 +136,7 @@ export function getUserGroups(event) {
 export async function getUser(username) {
   
   const userPoolId = process.env.USER_POOL_ID;
-  const client = new CognitoIdentityServiceProvider();
+  const client = new CognitoIdentityServiceProvider(); 
 
   const params = {
     UserPoolId: userPoolId,

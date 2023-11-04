@@ -193,6 +193,9 @@ export default function Login() {
                   <p style={{ textAlign: "left" }}>
                     Forgot Password? Click <Link to="/login/reset">here</Link>
                   </p>
+                  <p style={{ textAlign: "left" }}>
+                    Don't have an account? Sign up <Link to="/signup">here</Link>
+                  </p>
                 </>
               </Form>
             )}

@@ -32,7 +32,7 @@ export default function Links(tenant) {
 
   return (
     <Routes>
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/signup" element={<UnauthenticatedRoute><Signup /></UnauthenticatedRoute>} />
       <Route path={`/`} element={<AuthenticatedRoute><WorkspaceList /></AuthenticatedRoute>} />
       <Route path={`/iso`}  element={<ISO />} />
       <Route path="/login" element={ <UnauthenticatedRoute><Login /></UnauthenticatedRoute>} />
@@ -63,6 +63,7 @@ export default function Links(tenant) {
       <Route path="/workspace/:workspaceId/task/:taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
       <Route path="/mytasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
+      <Route path="/user/:username/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
 
 
       <Route path="*" element={<NotFound />} />

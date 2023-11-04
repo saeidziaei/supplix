@@ -2,7 +2,9 @@ import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
-  const userId = event.requestContext.authorizer.jwt.claims.sub;
+  // if ADMIN is calling the call could be for any user. For normal usres they see their tasks only so get userId from the context
+  const userId = event.pathParameters && event.pathParameters.username ? event.pathParameters.username : event.requestContext.authorizer.jwt.claims.sub;
+  
   const { showAll } = event.queryStringParameters || {};
 
   const params = {

@@ -1,10 +1,11 @@
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import * as uuid from "uuid";
 import dynamoDb from "../../util/dynamodb";
+import { createNewUser } from "../user/create";
+import { generateRandomPassword } from "../../../frontend/src/lib/helpers";
+import { sendEmail } from "../../util/email";
+import { getPlanName } from "../../util/plan";
 
 export const main = async (event, context) => {
-  const basicPlanPriceId = process.env.BASIC_PLAN_PRICE_ID;
-  const redPlanPriceId = process.env.RED_PLAN_PRICE_ID;
 
   for (const record of event.Records) {
     try {
@@ -28,7 +29,8 @@ export const main = async (event, context) => {
         const stripeEventId = streamData.NewImage.stripeEventId.S;
         const customer_details = eventData.customer_details.M;
         const paymentStatus = eventData.payment_status.S;
-        const lineItem = streamData.NewImage.stripeEvent.M.lineItems.M.data.L[0].M;
+        const lineItem =
+          streamData.NewImage.stripeEvent.M.lineItems.M.data.L[0].M;
         const custom_fields = eventData.custom_fields.L;
 
         const priceId = lineItem.price.M.id.S;
@@ -38,9 +40,10 @@ export const main = async (event, context) => {
         const contactNumber = customer_details.phone.S;
         const address = customer_details.address.M;
         const note = `Address: ${address.line1.S}, ${address.city.S}, ${address.state.S}`;
-        const companyName = custom_fields[0].M.text.M.value.S
-  
- 
+        const companyName = custom_fields[0].M.text.M.value.S;
+
+        const plan = getPlanName(priceId);
+
         // 1. create tenant
         const tenantId = uuid.v1();
 
@@ -48,7 +51,7 @@ export const main = async (event, context) => {
           TableName: process.env.TENANT_TABLE,
           Item: {
             tenantId,
-            tenantName: companyName, 
+            tenantName: companyName,
             contactPerson,
             contactEmail,
             contactNumber,
@@ -56,16 +59,15 @@ export const main = async (event, context) => {
             priceId,
             paymentStatus,
             createdBy: "system",
-            createdAt: Date.now(), 
+            createdAt: Date.now(),
             stripeEventId, // link this tenant to the stripe event
           },
         };
-      
-        
+
         // 2. mark event as processed
         const streipeEventUpdateParams = {
           TableName: process.env.STRIPEEVENT_TABLE,
-          
+
           Key: {
             stripeEventId: stripeEventId,
           },
@@ -79,52 +81,50 @@ export const main = async (event, context) => {
           ReturnValues: "ALL_NEW",
         };
 
-
         const transactParams = {
-          TransactItems: [{ Put: tenantPutParams }, { Update: streipeEventUpdateParams }],
+          TransactItems: [
+            { Put: tenantPutParams },
+            { Update: streipeEventUpdateParams },
+          ],
         };
         await dynamoDb.transactWrite(transactParams);
 
-
-        // 3. Notify admin
-        let plan = "Unknown";
-        switch (priceId) {
-          case basicPlanPriceId:
-            plan = "ISOCloud Basic";
-            break;
-        
-          case redPlanPriceId:
-            plan = "ISOCloud Red";
-            break;
-        
-          default:
-            break;
+        // 3. Create admin user
+        let isUserCreated = false;
+        try {
+          const password = generateRandomPassword();
+          await createNewUser(
+            tenantId,
+            true,
+            contactEmail,
+            password,
+            contactPerson,
+            "",
+            "",
+            "",
+            "system"
+          );
+          isUserCreated = true;
+        } catch (e) {
+          console.log("User could not be created", e);
         }
-        const emailParams = {
-          Destination: {
-            ToAddresses: ["support@isocloud.com.au"],
-          },
-          Message: {
-            Body: {
-              Text: {
-                Data: `Hi support!\n\nA new tenant has been created. Please create their admin user and get in touch with them.
-                \n\n 
-                Tenant: ${companyName}\n
-                Payment Status: ${paymentStatus}\n
-                Plan: ${plan}\n
-                Livemode: ${livemode}\n
-                `,
-              },
-            },
-            Subject: { Data: `New Tenant ${companyName}` },
-          },
-          Source: "noreply@isocloud.com.au",
-        };
 
-        const client = new SESClient();
+        // 4. Notify admin
+        const userInfo = isUserCreated
+          ? `Admin user: ${contactEmail}`
+          : `WARNING - The admin user for this tenant could not be created. Please check the emaile address ${contactEmail} isn't reused.`;
+        const to = "support@isocloud.com.au";
+        const body = `Hi support!\n\nA new tenant has been created through subscription.
+            \n${userInfo}
+            \n\n 
+            Tenant: ${companyName}\n
+            Payment Status: ${paymentStatus}\n
+            Plan: ${plan}\n
+            Livemode: ${livemode}\n
+            `;
+        const subject = `New Tenant ${companyName}`;
 
-        const command = new SendEmailCommand(emailParams);
-        const ret = await client.send(command);
+        const ret = await sendEmail(to, subject, body);
         console.log("Email sent successfully", ret);
       }
     } catch (error) {

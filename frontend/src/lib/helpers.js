@@ -101,3 +101,32 @@ export const templateEmployeeField = (template) => {
   }
   return null; // No "employee" type field found
 }
+
+
+export const generateRandomPassword = () => {
+  const specialChars = "!@#$%^&*()_+{}[]|:;<>,.?/";
+  const digits = "0123456789";
+  const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  // Choose a random special character
+  const specialChar =
+    specialChars[Math.floor(Math.random() * specialChars.length)];
+
+  // Choose a random digit
+  const digit = digits[Math.floor(Math.random() * digits.length)];
+
+  // Generate the remaining characters (6 characters) with letters
+  let remainingChars = "";
+  for (let i = 0; i < 6; i++) {
+    remainingChars += letters[Math.floor(Math.random() * letters.length)];
+  }
+
+  // Combine all the parts and shuffle them
+  const password = specialChar + digit + remainingChars;
+  const shuffledPassword = password
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
+
+  return shuffledPassword;
+};
