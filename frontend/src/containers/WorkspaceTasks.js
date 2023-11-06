@@ -363,7 +363,7 @@ export default function WorkspaceTasks() {
       return (
         <>
           <Header>User Tasks</Header>
-          {user && <User compact="false" user={user} />}
+          {user && <User  user={user} />}
         </>
       );
     }
