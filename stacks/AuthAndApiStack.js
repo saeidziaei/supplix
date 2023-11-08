@@ -157,6 +157,11 @@ Temporary Password: {####}
         function: {
           handler: "services/functions/stripe/webhook.main",
           bind: [stripeEventTable],
+          environment: {
+            STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY,
+            ENDPOINT_SECRET : process.env.ENDPOINT_SECRET
+          },
+
         },
         authorizer: "none",
       },
@@ -706,6 +711,8 @@ Temporary Password: {####}
         TENANT_TABLE: tenantTable.tableName, 
         USER_TABLE: userTable.tableName,
         USER_POOL_ID: auth.userPoolId,
+        BASIC_PLAN_PRICE_ID: process.env.BASIC_PLAN_PRICE_ID,
+        RED_PLAN_PRICE_ID: process.env.RED_PLAN_PRICE_ID,
       },
       bind: [stripeEventTable, tenantTable, userTable]
     }
