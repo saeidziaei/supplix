@@ -705,7 +705,7 @@ Temporary Password: {####}
   stripeEventTable.addConsumers(stack, {
     fullfilorder : {
       handler: "services/functions/stripe/fullfilorder.main",
-      permissions: [cognitoReadonlyAccessPolicy],
+      permissions: [cognitoAccessPolicy],
       environment: {
         STRIPEEVENT_TABLE: stripeEventTable.tableName,
         TENANT_TABLE: tenantTable.tableName, 
