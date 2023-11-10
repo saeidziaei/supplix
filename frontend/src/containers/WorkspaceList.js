@@ -36,6 +36,7 @@ export default function Workspaces() {
   const location = useLocation();
   const [pickedWorkspace, setPickedWorkspace] = useState(null);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const [preppedContent, setPreppedContent] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const { currentUserRoles, tenant } = useAppContext();
@@ -96,6 +97,58 @@ export default function Workspaces() {
     
   }, [workspaces, location.search]);
 
+  useEffect(() => {
+    async function prepContent(text) {
+      const libraryRegex = /!\[library\]\(\/workspace\/([a-f\d-]+)\/doc\/([a-f\d-]+)\)/g;
+
+      let match = libraryRegex.exec(text);
+      while (match) {
+        const workspaceId = match[1];
+        const docId = match[2];
+
+        let replacement = '';
+        try {
+          const result = await makeApiCall("GET", `/workspaces/${workspaceId}/docs/${docId}`);
+          const { data } = result ?? {}; // result also contains workspace which we don't need here
+          const { fileURL, note }= data ?? {};
+          replacement = `<img alt="${note}" src="${fileURL}"/>`;
+        } catch (e) {
+          replacement = "library item not found";
+        }
+        text = text.replace(match[0], replacement);
+        match = libraryRegex.exec(text);
+
+      }
+
+      const urlRegex = /\!\[external\]\((https?:\/\/[^\)]+)\)/g; // matches ![external](URL)
+      match = urlRegex.exec(text);
+      while (match) {
+        const url = match[1];
+        
+        const replacement = `<img alt="external image" src="${url}"/>`;
+        text = text.replace(match[0], replacement);
+
+        match = urlRegex.exec(text);
+      }
+
+      return text;
+    }
+    async function onLoad() {
+      try {
+        if (!selectedWorkspace) return;
+
+        const preppedContent = await prepContent(selectedWorkspace.note);
+
+        setPreppedContent(preppedContent);
+      } catch (e) {
+        onError(e);
+      }
+
+      setIsLoading(false);
+    }
+
+    onLoad();
+  }, [selectedWorkspace]);
   const getReviewNCRsLabel = () => `Review  ${pluralize((tenant && tenant.NCRLabel) ? tenant.NCRLabel : "NCR")}`
   async function loadWorkspaces() {
     // if admin return all
@@ -170,8 +223,9 @@ export default function Workspaces() {
       </>
     );
   }
-  function renderNote(note) {
-    if (!note) return null;
+  function renderNote() {
+
+    if (!preppedContent) return null;
     return (
       <Accordion fluid>
         <Accordion.Title
@@ -185,7 +239,7 @@ export default function Workspaces() {
         <Accordion.Content active={isNoteExpanded}>
           <div
             className="markdown"
-            dangerouslySetInnerHTML={{ __html: selectedWorkspace.note }}
+            dangerouslySetInnerHTML={{ __html: preppedContent }}
           />
         </Accordion.Content>
       </Accordion>
@@ -234,7 +288,7 @@ export default function Workspaces() {
                 Tasks
               </List.Item>
             </List>
-            {renderNote(selectedWorkspace.note)}
+            {renderNote()}
             {renderChildren()}
           </Grid.Column>
         </Grid.Row>

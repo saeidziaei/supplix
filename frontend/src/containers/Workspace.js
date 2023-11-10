@@ -16,6 +16,7 @@ import {
   Label, Loader,
   Menu,
   Modal,
+  Popup,
   Segment,
   Select,
   Table
@@ -419,9 +420,23 @@ export default function Workspace() {
                         setFieldValue("note", data);
                       }}
                     />
-                  </Form.Field>
-                  
+                      <Popup
+              hoverable
+              flowing
+              trigger={<Icon name="question" color="blue" circular size="small" />}
+              position="bottom center"
+            >
+              <p> To embed images use this format: <br/><br/>
+              <strong>For library images: </strong>![library](/workspace/<i>abc</i><strong>/doc/</strong><i>def</i>) <br/>
+              <strong>For external images: </strong>![external](https://<i>address-of-image</i>) <br/>
+
+
           
+              </p>
+            </Popup>
+                  </Form.Field>
+
+
           {renderTemplatePicker()}
         
 
