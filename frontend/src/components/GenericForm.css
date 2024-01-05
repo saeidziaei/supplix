@@ -11,6 +11,30 @@ input, textarea, .dropdown {
   color: black;
   text-align: right;
 }
+.field-column-disabled {
+  color: black;
+  text-align: right;
+  background-color: #eee;
+  border: 1px solid #ccc;
+}
+
+.title-disabled {
+  padding: 3px;
+  background-color: #ccc;
+  border-left: 10px solid black;
+  margin-left: -10px;
+}
+.disabledNumericFormat {
+  font-size: 1.5em; 
+  font-weight: bold; 
+  color: #333;
+}
+
+.disabledWysiwygFormat {
+  font-size: 1.5em; 
+  color: #333;
+  text-align: left;
+}
 
 @media (max-width: 767px) {
   .field-column {

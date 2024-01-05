@@ -77,7 +77,9 @@ export function GenericForm({
             className="markdown"
             dangerouslySetInnerHTML={{ __html: f.title }}
           />
-        ) : (
+        ) : disabled ? null
+        :
+        (
           <div style={{ textAlign: "left" }}>
             <Popup
               hoverable
@@ -96,7 +98,8 @@ export function GenericForm({
       case "number":
         return (
           <NumericFormat
-            disabled={disabled}
+            displayType={disabled ? "text" : "input"}
+            className={disabled ? "disabledNumericFormat" : ""}
             name={name}
             thousandSeparator={true}
             value={values[name]}
@@ -116,9 +119,9 @@ export function GenericForm({
         );
 
       case "text":
-        return (
+        return (disabled ? <h3>{values[name]}</h3> :
           <TextareaAutosize
-            disabled={disabled}
+            
             rows={1}
             size={size}
             name={name}
@@ -147,8 +150,12 @@ export function GenericForm({
 
       case "wysiwyg":
         return (
+          disabled ? <div
+          className="disabledWysiwygFormat"
+          dangerouslySetInnerHTML={{ __html: values[name] }}
+        /> :
           <CKEditor
-            disabled={disabled}
+            
             editor={ClassicEditor}
             data={values[name]}
             onChange={(event, editor) => {
@@ -167,8 +174,9 @@ export function GenericForm({
         }
         if (selected == "Invalid Date") selected = ""; // new Date();
         return (
+          disabled? <h3>{selected}</h3> :
           <DatePicker
-            disabled={disabled}
+            
             placeholderText="Select"
             isClearable={!disabled}
             size={size}
@@ -210,6 +218,14 @@ export function GenericForm({
           >
             {f.options.map((o, i) => {
               const selected = newValues.includes(o.value);
+              if (disabled) {
+                if (!selected) {
+                  return null;
+                } else {
+                  return (<h3>{o.value}</h3>);
+                }
+              } 
+
               return (
                 <Button
                   key={i}
@@ -261,8 +277,8 @@ export function GenericForm({
           text: o.value,
         }));
         return (
+          disabled ? <h3>{values[name]}</h3>:
           <Select
-            disabled={disabled}
             compact
             placeholder="Select"
             clearable
@@ -439,7 +455,7 @@ export function GenericForm({
     return (
       <Segment basic vertical key={s.title} size="tiny">
         
-        {s.title && (
+        {s.title && (disabled ? <h1 className="title-disabled">{s.title}</h1> :
           <Menu size="large" tabular>
             <Menu.Item active>{s.title}</Menu.Item>
           </Menu>
@@ -462,11 +478,11 @@ export function GenericForm({
                     >
                       <Grid.Column 
                         width={4}
-                        className="field-column"
+                        className={disabled ? "field-column-disabled" : "field-column"}
                       >
                         {f.type === "info" ? "" : f.name}
                       </Grid.Column>
-                      <Grid.Column width={12} textAlign="left">
+                      <Grid.Column width={12} textAlign="left" >
                         {renderField(f, values, setFieldValue)}
                       </Grid.Column>
                     </Grid.Row>
@@ -509,7 +525,7 @@ export function GenericForm({
                       values.attachments.map((attachment, index) => (
                         <Grid.Row key={index} verticalAlign="middle">
                           <Grid.Column width={1}>
-                            <Button
+                            {!disabled && <Button
                               className="hide-on-print"
                               circular
                               size="mini"
@@ -517,7 +533,7 @@ export function GenericForm({
                               basic
                               disabled={disabled}
                               onClick={() => remove(index)}
-                            />
+                            />}
                           </Grid.Column>
                           <Grid.Column width={9}>
                             {!disabled && !attachment.fileURL && (
@@ -561,6 +577,7 @@ export function GenericForm({
                       ))}
                     <Grid.Row>
                       <Grid.Column>
+                        {!disabled &&
                         <Button
                           type="button"
                           basic
@@ -573,13 +590,13 @@ export function GenericForm({
                           icon="plus"
                           size="mini"
                           onClick={() => push({ file: "", fileNote: "" })}
-                        />
+                        />}
                       </Grid.Column>
                     </Grid.Row>
                   </Grid>
                 )}
               </FieldArray>
-              {members && (<Segment>
+              {members && (!disabled || values.assigneeId) && (<Segment>
                   <span>Assigned to </span>
                    <UserPicker
                    upward={true}
