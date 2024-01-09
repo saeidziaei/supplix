@@ -3,12 +3,16 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO } from "date-fns";
 import { Field, FieldArray, Formik } from "formik";
 import { Checkbox, Form, Input, Select } from "formik-semantic-ui-react";
+import { useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
+import SignatureCanvas from "react-signature-canvas";
 import TextareaAutosize from 'react-textarea-autosize';
 import {
   Button,
+  Card,
+  CardGroup,
   Divider,
   Grid,
   Icon,
@@ -21,10 +25,8 @@ import {
 import Competency from "../components/Competency";
 import FormHeader from "../components/FormHeader";
 import placeholderImage from '../fileplaceholder.jpg';
-import "./GenericForm.css";
-import SignatureCanvas from "react-signature-canvas";
-import { useEffect, useRef } from "react";
 import { useAppContext } from "../lib/contextLib";
+import "./GenericForm.css";
 import UserPicker from "./UserPicker";
 
 
@@ -502,7 +504,6 @@ export function GenericForm({
       <FormHeader   heading={formDef.title} subheading={formDef.category} image={tenant?.logoURL || "/iso_cloud_logo_v1.png"} />
       <Formik initialValues={formData || defaultValues} onSubmit={preSubmit}>
         {({ isSubmitting, values, setFieldValue, resetForm }) => {
-          // setSignature(values[SIGNATURE_FIELD_NAME]);
           
           return (
             <Form size="small">
@@ -511,31 +512,40 @@ export function GenericForm({
                   ? renderSectionTabular(s, values, setFieldValue)
                   : renderSection(s, values, setFieldValue)
               )}
-
-
               <div>
                 <Icon name="attach" />
                 Attachments
               </div>
               <FieldArray name="attachments">
                 {({ insert, remove, push }) => (
-                  <Grid  className="dynamic-field">
+                  <CardGroup>
                     {values.attachments &&
                       values.attachments.length > 0 &&
                       values.attachments.map((attachment, index) => (
-                        <Grid.Row key={index} verticalAlign="middle">
-                          <Grid.Column width={1}>
-                            {!disabled && <Button
+                        <Card key={index}>
+                          {!disabled && <Card.Content><Button
                               className="hide-on-print"
-                              circular
                               size="mini"
+                              circular
                               icon="x"
                               basic
                               disabled={disabled}
                               onClick={() => remove(index)}
-                            />}
-                          </Grid.Column>
-                          <Grid.Column width={9}>
+                            ></Button></Card.Content>}
+                            {attachment.fileURL && (
+                              <a href={attachment.fileURL} target="_blank">
+                                <Image
+                                  src={attachment.fileURL}
+                                  wrapped
+                                  alt={attachment.fileName}
+                                  onError={(e) => {
+                                    e.target.src = placeholderImage;
+                                  }}
+                                />
+                              </a>
+                            )}
+                          
+                          <Card.Content>
                             {!disabled && !attachment.fileURL && (
                               <input
                                 id="file"
@@ -549,20 +559,8 @@ export function GenericForm({
                                 }}
                               />
                             )}
-                            {attachment.fileURL && (
-                              <a href={attachment.fileURL} target="_blank">
-                                <Image
-                                  src={attachment.fileURL}
-                                  wrapped
-                                  alt={attachment.fileName}
-                                  onError={(e) => {
-                                    e.target.src = placeholderImage;
-                                  }}
-                                />
-                              </a>
-                            )}
-                          </Grid.Column>
-                          <Grid.Column width={10}>
+                           
+                            
                             {disabled ? (
                               <span>{attachment.fileNote}</span>
                             ) : (
@@ -571,9 +569,10 @@ export function GenericForm({
                                 placeholder="File Note"
                                 type="text"
                               />
-                            )}
-                          </Grid.Column>
-                        </Grid.Row>
+                            )}</Card.Content>
+                             
+                          
+                        </Card>
                       ))}
                     <Grid.Row>
                       <Grid.Column>
@@ -593,9 +592,11 @@ export function GenericForm({
                         />}
                       </Grid.Column>
                     </Grid.Row>
-                  </Grid>
+                  </CardGroup>
                 )}
               </FieldArray>
+
+
               {members && (!disabled || values.assigneeId) && (<Segment>
                   <span>Assigned to </span>
                    <UserPicker
