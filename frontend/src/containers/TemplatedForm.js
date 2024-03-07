@@ -20,7 +20,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 import "./TemplatedForm.css";
-import { templateEmployeeField } from "../lib/helpers";
+import { isSystemTemplate, loadSystemTemplate, templateEmployeeField } from "../lib/helpers";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -41,6 +41,7 @@ export default function TemplatedForm() {
   const nav = useNavigate();
   const { currentUserRoles } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
+  const isSystemForm = isSystemTemplate(templateId);
 
   useEffect(() => {
     async function loadForm() {
@@ -48,6 +49,10 @@ export default function TemplatedForm() {
     }
 
     async function loadTemplate() {
+      if (isSystemForm) {
+        return loadSystemTemplate(templateId);
+      }
+
       return await makeApiCall("GET", `/templates/${templateId}`);
     }
     async function loadWorkspaceMembers() {
@@ -77,8 +82,13 @@ export default function TemplatedForm() {
           const item = await loadForm();
           const { data } = item ?? {};
           setFormRecord(data);
-          // the api populates template as well
-          template = data.template;
+          
+          if (isSystemForm) {
+            template = loadSystemTemplate(templateId);
+          } else {
+            // the api populates template as well
+            template = data.template;
+          }
         } else {
           // new form - just load the template and workspace
           template = await loadTemplate();
@@ -130,6 +140,8 @@ export default function TemplatedForm() {
     });
   }
   async function updateAttachments(values) {
+    if (!values.attachments) return;
+
     setIsUploading(true);
     values.attachments = values.attachments.filter(a => a.file || a.fileName); // the user added attachment line but didn't pick a file. Don't remove the existing attachments
 
@@ -269,7 +281,7 @@ export default function TemplatedForm() {
 
   if (isLoading) return <Loader active />;
 
-  if (!template || !template.templateDefinition) {
+  if (!isSystemForm && (!template || !template.templateDefinition)) {
     return (
       <Segment>
         <Header as="h3">Form definition does not exist.</Header>
@@ -310,6 +322,8 @@ export default function TemplatedForm() {
           disabled={!editable}
           users={users}
           members={memberUsers}
+          isSystemForm={isSystemForm}
+          systemFormName={templateId}
         />
       </div>
       {workspaceId && templateId && formId && (

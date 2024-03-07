@@ -1,4 +1,5 @@
 import { parseISO } from "date-fns";
+import systemTemplateConfig from '../components/systemTemplates/systemTemplateConfig'; 
 
 export const substituteParams = (text, params) => {
   for (const [key, value] of Object.entries(params)) {
@@ -129,4 +130,18 @@ export const generateRandomPassword = () => {
     .join("");
 
   return shuffledPassword;
+};
+
+export const isSystemTemplate = (templateId) => templateId.startsWith("SYS_");
+export const loadSystemTemplate = (templateId) => {
+  // Extract the system template from systemTemplateConfig
+  const systemTemplate = systemTemplateConfig.systemTemplates.find(
+    (template) => template.templateId === templateId
+  );
+  if (systemTemplate) {
+    // Return the system template
+    return systemTemplate;
+  } else {
+    throw new Error(`System template with ID ${templateId} not found`);
+  }
 };

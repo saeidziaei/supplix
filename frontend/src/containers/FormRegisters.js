@@ -16,6 +16,7 @@ import FormHeader from "../components/FormHeader";
 import { Link, useParams } from "react-router-dom";
 import "./FormRegisters.css";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
+import systemTemplateConfig from '../components/systemTemplates/systemTemplateConfig'; 
 
 export default function FormRegisters() {
   const [templates, setTemplates] = useState(null);
@@ -30,22 +31,34 @@ export default function FormRegisters() {
 
       setIsLoading(true);
       try {
-          const templates = await loadTemplates();
-          const { data, workspace } = templates ?? {};
+        const templates = await loadTemplates();
+        const { data, workspace } = templates ?? {};
 
-          if (workspace && workspace.templateCategories && workspace.templateCategories.length) {
-            // Filter the templates based on the templateIds in the workspace
-            const filteredTemplates = data.filter((template) =>
-              workspace.templateCategories.includes(template.templateDefinition?.category)
-            );
-            
-            setTemplates(filteredTemplates);
-          } else {
-            setTemplates(data);
-          }
+        // Merge systemTemplates with the templates read from the database
+        const mergedTemplates = [
+          ...data,
+          ...systemTemplateConfig.systemTemplates,
+        ];
 
-          
-          setWorkspace(workspace);
+
+        if (
+          workspace &&
+          workspace.templateCategories &&
+          workspace.templateCategories.length
+        ) {
+          // Filter the templates based on the templateIds in the workspace
+          const filteredTemplates = mergedTemplates.filter((template) =>
+            workspace.templateCategories.includes(
+              template.templateDefinition?.category
+            )
+          );
+
+          setTemplates(filteredTemplates);
+        } else {
+          setTemplates(mergedTemplates);
+        }
+
+        setWorkspace(workspace);
       } catch (e) {
         onError(e);
       }

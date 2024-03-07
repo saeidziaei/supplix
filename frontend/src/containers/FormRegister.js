@@ -15,6 +15,7 @@ import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 
+import { isSystemTemplate, loadSystemTemplate } from "../lib/helpers";
 
 import User from "../components/User";
 import { useAppContext } from "../lib/contextLib";
@@ -109,6 +110,9 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }, []);
 
   async function loadTemplate(templateId) {
+    if (isSystemTemplate(templateId)) {
+      return loadSystemTemplate(templateId);
+    }
     return await makeApiCall("GET", `/templates/${templateId}`);
   }
   async function loadTemplateForms(templateId) {

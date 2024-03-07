@@ -1,6 +1,7 @@
 import handler from "../../util/handler";
 import dynamoDb from "../../util/dynamodb";
 import s3 from "../../util/s3";
+import isSystemTemplate  from "../../util/systemTemplates";
 
 export const main = handler(async (event, tenant, workspaceUser) => {
   const params = {
@@ -17,9 +18,15 @@ export const main = handler(async (event, tenant, workspaceUser) => {
     throw new Error("Item not found.");
   }
   
-  form.template = await getTemplate(tenant, form.templateId, form.templateVersion);
-  if (!form.template) {
-    throw new Error("Template used for this form not found.");
+  if (!isSystemTemplate(form.templateId)) {
+    form.template = await getTemplate(
+      tenant,
+      form.templateId,
+      form.templateVersion
+    );
+    if (!form.template) {
+      throw new Error("Template used for this form not found.");
+    }
   }
 
 

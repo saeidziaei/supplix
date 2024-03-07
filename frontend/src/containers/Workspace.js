@@ -27,6 +27,7 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import { parseDate } from "../lib/helpers";
 import "./Workspaces.css";
+import systemTemplateConfig from '../components/systemTemplates/systemTemplateConfig'; 
 
 export default function Workspace() {
   const { currentUserRoles } = useAppContext();
@@ -56,6 +57,11 @@ export default function Workspace() {
         if (category) {
           uniqueCategoriesSet.add(category);
         }
+      });
+
+      // Extract categories from config file for system templates
+      systemTemplateConfig.systemTemplates.forEach((t) => {
+        uniqueCategoriesSet.add(t.category);
       });
 
       const uniqueCategoriesArray = Array.from(uniqueCategoriesSet);
@@ -157,7 +163,7 @@ export default function Workspace() {
     { key: 'completed', value: 'Completed', text: 'Completed' },
   ];
 
-  const templatesCheckboxes = !templateCategories ? null : (<><span className="mini-text">(Uncheck All to Include All Categories)</span>
+  const templatesCheckboxes = !templateCategories ? null : (<><span className="mini-text">When no specific categories are selected, all categories will be included by default.</span>
     <Table>
       <Table.Header>
         <Table.Row>
