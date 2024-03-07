@@ -1,0 +1,5 @@
+
+.risk-assessment-table > tbody > tr > td,
+.risk-assessment-table > thead > tr > th {
+    padding: 0!important;
+}

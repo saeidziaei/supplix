@@ -1,0 +1,23 @@
+.risk-matrix {
+  border-collapse: collapse;
+}
+
+.risk-matrix th, .risk-matrix td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center!important;
+}
+
+.selected {
+  font-weight: bold;
+  border: 1px solid black!important;
+}
+.selected-cell {
+  margin-top: 0px;
+  padding: 5px;
+ }
+
+.selected-cell span {
+  display: block;
+  margin-bottom: 10px;
+}

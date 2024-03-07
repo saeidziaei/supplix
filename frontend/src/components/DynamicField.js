@@ -86,7 +86,15 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
     
           case "text":
             return disabled ? (
-              <h3>{value}</h3>
+              f.basic ? (
+                <span>
+                  {typeof value === "object" ? JSON.stringify(value) : value}
+                </span>
+              ) : (
+                <h3>
+                  {typeof value === "object" ? JSON.stringify(value) : value}
+                </h3>
+              )
             ) : (
               <TextareaAutosize
                 rows={1}
