@@ -87,9 +87,9 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
           case "text":
             return disabled ? (
               f.basic ? (
-                <span>
+                <div>
                   {typeof value === "object" ? JSON.stringify(value) : value}
-                </span>
+                </div>
               ) : (
                 <h3>
                   {typeof value === "object" ? JSON.stringify(value) : value}
@@ -125,7 +125,7 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
     
           case "wysiwyg":
             return disabled ? (
-              <div
+              <span
                 className="disabledWysiwygFormat"
                 dangerouslySetInnerHTML={{ __html: value }}
               />

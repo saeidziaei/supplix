@@ -17,6 +17,7 @@ import { Link, useParams } from "react-router-dom";
 import "./FormRegisters.css";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import systemTemplateConfig from '../components/systemTemplates/systemTemplateConfig'; 
+import { isSystemTemplate } from "../lib/helpers";
 
 export default function FormRegisters() {
   const [templates, setTemplates] = useState(null);
@@ -144,11 +145,7 @@ export default function FormRegisters() {
                                 <Link
                                   to={`/workspace/${workspaceId}/register/${t.templateId}`}
                                 >
-                                  
-                                  {`${t.formCount} ${pluralize(
-                                    "record",
-                                    t.formCount
-                                  )}`}
+                                  { isSystemTemplate(t.templateId) ? "View" : `${t.formCount} ${pluralize("record", t.formCount)}`}
                                 </Link>
                               </List.Description>
                             </List.Content>

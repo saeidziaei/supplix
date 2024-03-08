@@ -13,7 +13,7 @@ const RiskMatrix = ({value, disabled, onChange}) => {
       const row = parseInt(values[0]);
       const column = parseInt(values[1]);
 
-      return { row, column };
+      return row == -1 ? null : { row, column };
     };
     if (value) setSelectedCell(parseInput(value));
   }, [value]);
@@ -32,7 +32,7 @@ const RiskMatrix = ({value, disabled, onChange}) => {
   const columns = ['Very Likely', 'Likely', 'Unlikely', 'Very Unlikely'];
 
   const getSelectedCellInfo = () => {
-    if (!selectedCell) return null;
+    if (!selectedCell) return {color: "black", rating: "-"};
 
     
     return getCellInfo(rows[selectedCell.row], selectedCell.column);
@@ -62,7 +62,7 @@ const RiskMatrix = ({value, disabled, onChange}) => {
       <table className="risk-matrix">
         <thead>
           <tr>
-            <th><Icon type='button' name='delete' className='clickable' onClick={() => handleCellClick(-1, -1)}></Icon></th>
+            <th></th>
             {columns.map((col, index) => (
               <th key={index}>{col}</th>
             ))}
@@ -118,8 +118,10 @@ const RiskMatrix = ({value, disabled, onChange}) => {
         
       </ModalContent>
       <ModalActions>
+      
+        <Button size='tiny' basic floated='left' icon="delete" onClick={() => handleCellClick(-1, -1)}>Clear</Button>
         <Button size='tiny' color='black' basic onClick={() => setShowMatrix(false)}>
-          Cancel
+          Close
         </Button>
       </ModalActions>
     </Modal>

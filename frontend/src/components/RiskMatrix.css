@@ -13,6 +13,7 @@
   border: 1px solid black!important;
 }
 .selected-cell {
+  font-weight: bold;
   margin-top: 0px;
   padding: 5px;
  }
