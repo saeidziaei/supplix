@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Button, Header, Icon, Modal, ModalActions, ModalContent, ModalDescription, ModalHeader } from "semantic-ui-react";
 import './RiskMatrix.css';
-import {Button, Header, Icon, Image, Modal, ModalActions, ModalContent, ModalDescription, ModalHeader, Segment} from "semantic-ui-react";
 
 const RiskMatrix = ({value, disabled, onChange}) => {
   const [selectedCell, setSelectedCell] = useState(null);

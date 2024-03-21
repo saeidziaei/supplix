@@ -91,9 +91,9 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
                   {typeof value === "object" ? JSON.stringify(value) : value}
                 </div>
               ) : (
-                <h3>
+                <h4>
                   {typeof value === "object" ? JSON.stringify(value) : value}
-                </h3>
+                </h4>
               )
             ) : (
               <TextareaAutosize
@@ -102,7 +102,7 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
                 name={name}
                 id={id}
                 value={value}
-                onChange={(ev) => setFieldValue(name, ev.target.value)}
+                onChange={(ev) =>  setFieldValue(name, ev.target.value)}
               />
             );
     

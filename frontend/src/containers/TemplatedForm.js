@@ -224,7 +224,7 @@ export default function TemplatedForm() {
   async function updateForm(values) {
     let item = {
       formValues: values,
-      isRevision: isRevisioning
+      isRevision: isSystemForm ? false : isRevisioning // this is bad, needs refactoring. For simplicity we just disable history on systemForms
     };
     if (employeeFieldName) { // the form is related to an employee
       item["userId"] = values[employeeFieldName];
@@ -313,7 +313,7 @@ export default function TemplatedForm() {
 
       
       
-      <div className="form-background" style={{ background: 'linear-gradient(to right, #ccc, #eee)', height: 'auto!important' }}>
+      <div className="form-background" style={{ background: 'linear-gradient(to right, #3f8fff, #6bc0ff)', height: 'auto!important' }}>
         <GenericForm
           formDef={template.templateDefinition}
           formData={formRecord ? formRecord.formValues : null}

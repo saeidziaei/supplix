@@ -61,7 +61,7 @@ export default function Workspace() {
 
       // Extract categories from config file for system templates
       systemTemplateConfig.systemTemplates.forEach((t) => {
-        uniqueCategoriesSet.add(t.category);
+        uniqueCategoriesSet.add(t.templateDefinition.category);
       });
 
       const uniqueCategoriesArray = Array.from(uniqueCategoriesSet);

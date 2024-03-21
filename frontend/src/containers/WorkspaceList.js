@@ -180,7 +180,7 @@ export default function Workspaces() {
         headerName: "Workspace",
         resizable: true,
         sortable: true,
-        
+        sort: 'asc',
       }, 
       { field: "category", resizable: true, sortable: true },
       { field: "clientName", headerName: "Client", resizable: true, sortable: true },
