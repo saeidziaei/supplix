@@ -9,11 +9,14 @@ input, textarea, .dropdown {
 }
 .field-column {
   color: black;
-  text-align: right;
+  text-align: left;
+  padding-left: 10px;
+  background-color: #eee;
 }
 .field-column-disabled {
   color: black;
-  text-align: right;
+  text-align: left;
+  padding-left: 10px;
   background-color: #eee;
   border: 1px solid #ccc;
 }

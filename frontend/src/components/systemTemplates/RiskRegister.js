@@ -223,7 +223,7 @@ export default function RiskRegister({values, setFieldValue, disabled}) {
     placeholder='Select Strengths'
     fluid
     selection
-    options={values && values.strengths && values.strengths.length > 0 ? values.strengths.map((strength, index) => ({key: index, value:strength.item, text: strength.item})) : null}
+    options={values && values.strengths && values.strengths.length > 0 ? values.strengths.map((strength, index) => ({key: index, value:index, text: strength.item})) : null}
   />
                 </Segment>
               </GridColumn>

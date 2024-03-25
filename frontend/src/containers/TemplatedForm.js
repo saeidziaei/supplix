@@ -191,6 +191,7 @@ export default function TemplatedForm() {
         // update the formRecord state with the new form data
         const updatedForm = { ...formRecord, formValues: values };
         setFormRecord(updatedForm);
+        window.location.reload(); // this is needed to refresh the images that are just uploaded. Makes the 2 lines above redeundant !?
       } else {
         
         const ret = await createForm(values);
@@ -199,7 +200,7 @@ export default function TemplatedForm() {
       }
 
       nav(`/workspace/${workspaceId}/form/${templateId}/${formId||newFormId}`); 
-      // window.location.reload();
+      
     } catch (e) {
       onError(e);
     } finally {

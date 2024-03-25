@@ -77,7 +77,6 @@ async function removeS3Object(tenant, fileName) {
     Bucket: process.env.BUCKET,
     Key: `private/${tenant}/${fileName}`,
   };
-
   await s3.deleteObject(params);
 }
 

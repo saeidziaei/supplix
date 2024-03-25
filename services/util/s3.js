@@ -4,9 +4,9 @@ import { GetObjectCommand, PutObjectCommand, S3 } from "@aws-sdk/client-s3";
 const s3 = new S3();
 
 export default {
-  getObject: (params) => s3.getObject(params).promise(),
-  putObject: (params) => s3.putObject(params).promise(),
-  deleteObject: (params) => s3.deleteObject(params).promise(),
+  getObject: (params) => s3.getObject(params),
+  putObject: (params) => s3.putObject(params),
+  deleteObject: (params) => s3.deleteObject(params),
   getSignedUrlForPut: (params) => {
     const putObjectParams = {Bucket: params.Bucket, Key: params.Key, ContentType: params.ContentType};
     return getSignedUrl(s3, new PutObjectCommand(putObjectParams), {expiresIn: params.Expires});

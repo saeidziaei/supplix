@@ -272,6 +272,7 @@ export function GenericForm({
                         <Button
                           className="hide-on-print"
                           size="mini"
+                          type="button"
                           circular
                           icon="x"
                           basic
