@@ -43,10 +43,11 @@ export default function TemplatedForm() {
   const isAdmin = currentUserRoles.includes("admins");
   const isSystemForm = isSystemTemplate(templateId);
 
+  async function loadForm() {
+    return await makeApiCall("GET", `/workspaces/${workspaceId}/forms/${formId}`);
+  }
+
   useEffect(() => {
-    async function loadForm() {
-      return await makeApiCall("GET", `/workspaces/${workspaceId}/forms/${formId}`);
-    }
 
     async function loadTemplate() {
       if (isSystemForm) {
@@ -188,18 +189,18 @@ export default function TemplatedForm() {
       let newFormId;
       if (formId) {
         await updateForm(values);
-        // update the formRecord state with the new form data
-        const updatedForm = { ...formRecord, formValues: values };
-        setFormRecord(updatedForm);
-        window.location.reload(); // this is needed to refresh the images that are just uploaded. Makes the 2 lines above redeundant !?
+        // Fetch the updated form data after updating the form
+        const updatedFormData = await loadForm(); 
+        const { data } = updatedFormData ?? {};
+        setFormRecord(data);
       } else {
         
         const ret = await createForm(values);
         setFormRecord(ret);
         newFormId = ret.formId;
+        nav(`/workspace/${workspaceId}/form/${templateId}/${newFormId}`); 
       }
 
-      nav(`/workspace/${workspaceId}/form/${templateId}/${formId||newFormId}`); 
       
     } catch (e) {
       onError(e);
