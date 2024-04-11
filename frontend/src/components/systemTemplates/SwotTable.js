@@ -1,7 +1,7 @@
 import { FieldArray } from "formik";
 import React from "react";
 import { Button, Icon, Table, TableBody, TableCell, TableRow } from "semantic-ui-react";
-import { DynamicField } from "./DynamicField";
+import { DynamicField } from "../DynamicField";
 const SwotTable = ({ values, tableName, color, setFieldValue, disabled }) => {
   return (
     <Table celled className={tableName} color={color} key={tableName} >

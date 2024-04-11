@@ -348,7 +348,7 @@ export function GenericForm({
   function renderSystemForm(systemFormName, values, setFieldValue) {
     switch (systemFormName) {
       case "SYS_RSK":
-        return <RiskRegister values={values} setFieldValue={setFieldValue} disabled={disabled}/>;
+        return <RiskRegister  values={values} setFieldValue={setFieldValue} disabled={disabled} users={users}/>;
     
       default:
         throw new Error(`System template with ID ${systemFormName} not found`);

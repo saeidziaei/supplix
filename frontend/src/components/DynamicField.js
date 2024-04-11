@@ -1,6 +1,6 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { parseISO } from "date-fns";
+import { parseISO, format } from "date-fns";
 import { Checkbox, Input, Select } from "formik-semantic-ui-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -147,9 +147,9 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
             } catch (e) {
               // incompatible data had been saved, just ignore it
             }
-            if (selected == "Invalid Date") selected = ""; // new Date();
+            if (selected == "Invalid Date") selected = ""; 
             return disabled ? (
-              <h3>{selected}</h3>
+              <div>{selected ? format(selected, "dd-MM-yyyy") : ""}</div>
             ) : (
               <DatePicker
                 placeholderText="Select"
@@ -236,12 +236,14 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
             );
     
           case "dropdown":
-            const options = f.options.map((o) => ({
+            const options = f.options ? f.options.map((o) => ({
               value: o.value,
-              text: o.value,
-            }));
+              text: o.text || o.value,
+            })) : [];
+            const displayText = options.find((o) => o.value === value)?.text || value
             return disabled ? (
-              <h3>{value}</h3>
+              f.basic ? <div>{displayText}</div> :
+              <h4>{displayText}</h4>
             ) : (
               <Select
                 compact

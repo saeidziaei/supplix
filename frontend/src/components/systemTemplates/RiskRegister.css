@@ -3,3 +3,7 @@
 .risk-assessment-table > thead > tr > th {
     padding: 0!important;
 }
+.first-header {
+    background-color: #ccc!important;
+    color: grey!important;;
+}
