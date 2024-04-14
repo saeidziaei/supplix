@@ -419,6 +419,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                               fieldDefinition={{
                                 name: `risks.${index}.owner`,
                                 type: "employee",
+                                compact: disabled,
                               }}
                               value={values["risks"][index]["owner"]}
                               valueSetter={setFieldValue}
@@ -444,6 +445,187 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                                 basic: "true",
                               }}
                               value={values["risks"][index]["progressUpdate"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    {!disabled && (
+                      <Button
+                        compact
+                        basic
+                        size="tiny"
+                        type="button"
+                        onClick={() => push({ description: "", level: "" })}
+                      >
+                        <Icon name="plus" />
+                        
+                      </Button>
+                    )}
+                  </>
+                )}
+              </FieldArray>
+            </TableBody>
+          </Table>
+        </TabPane>
+      ),
+    },
+    {
+      menuItem: "Business Opportunity Assessment",
+      render: () => (
+        <TabPane>
+          <Table celled className="bizopportunity-assessment-table">
+
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell></TableHeaderCell>
+                <TableHeaderCell>Strength</TableHeaderCell>
+                <TableHeaderCell>Opportunity</TableHeaderCell>
+                <TableHeaderCell>SO Strategy</TableHeaderCell>
+                <TableHeaderCell>Decided Actions</TableHeaderCell>
+                <TableHeaderCell>Resources Required</TableHeaderCell>
+                <TableHeaderCell>Owner</TableHeaderCell>
+                <TableHeaderCell>Implementation Date</TableHeaderCell>
+                <TableHeaderCell>Progress Update</TableHeaderCell>
+
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              <FieldArray name="bizopportunities">
+                {({ insert, remove, push }) => (
+                  <>
+                    {values.bizopportunities &&
+                      values.bizopportunities.length > 0 &&
+                      values.bizopportunities.map((bizopportunity, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            {!disabled && (
+                              <Icon
+                                name="delete"
+                                className="clickable"
+                                onClick={() => remove(index)}
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.strength`,
+                                type: "dropdown",
+                                basic: "true",
+                                options:
+                                  values &&
+                                  values.strengths &&
+                                  values.strengths.length > 0
+                                    ? values.strengths.map(
+                                        (strength, index) => ({
+                                          key: index,
+                                          value: index,
+                                          text: strength.item,
+                                        })
+                                      )
+                                    : null,
+                              }}
+                              value={values["bizopportunities"][index]["strength"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.opportunity`,
+                                type: "dropdown",
+                                basic: "true",
+                                options:
+                                  values &&
+                                  values.opportunities &&
+                                  values.opportunities.length > 0
+                                    ? values.opportunities.map(
+                                        (opportunity, index) => ({
+                                          key: index,
+                                          value: index,
+                                          text: opportunity.item,
+                                        })
+                                      )
+                                    : null,
+                              }}
+                              value={values["bizopportunities"][index]["opportunity"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.sostrategy`,
+                                type: "text",
+                                basic: "true",
+                              }}
+                              value={values["bizopportunities"][index]["sostrategy"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                          <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.decidedActions`,
+                                type: "text",
+                                basic: "true",
+                              }}
+                              value={values["bizopportunities"][index]["decidedActions"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.resources`,
+                                type: "text",
+                                basic: "true",
+                              }}
+                              value={values["bizopportunities"][index]["resources"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              users={users}
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.owner`,
+                                type: "employee",
+                                compact: disabled,
+                              }}
+                              value={values["bizopportunities"][index]["owner"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.implementationDate`,
+                                type: "date",
+                              }}
+                              value={values["bizopportunities"][index]["implementationDate"]}
+                              valueSetter={setFieldValue}
+                              disabled={disabled}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <DynamicField
+                              fieldDefinition={{
+                                name: `bizopportunities.${index}.progressUpdate`,
+                                type: "text",
+                                basic: "true",
+                              }}
+                              value={values["bizopportunities"][index]["progressUpdate"]}
                               valueSetter={setFieldValue}
                               disabled={disabled}
                             />

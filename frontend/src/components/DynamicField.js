@@ -81,6 +81,7 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
                 name={name}
                 value={value}
                 onChange={(userId) => setFieldValue(name, userId)}
+                compact={f.compact}
               />
             );
     
