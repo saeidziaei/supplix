@@ -13,7 +13,7 @@ import {
 import { formatDate } from "../lib/helpers";
 import "./WorkspaceInfoBox.css";
 
-export const WorkspaceInfoBox = ({ workspace, editable }) => {
+export const WorkspaceInfoBox = ({ workspace, editable, leafFolder="" }) => {
   const nav = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -68,36 +68,39 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
   if (!workspace) return null;
   return (
     <Accordion styled className="wsinfobox" fluid>
-      <Accordion.Title
-        active={isExpanded}
-        index={1}
-        
-      >
-              <Label color={workspaceId === "NCR" ? "red" : ""} size="large">
-        <Breadcrumb>
-          {workspace.parent && workspace.parent.parent && (
-            <>
-              <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.parent.parent.workspaceId)}>
-                {workspace.parent.parent.workspaceName}
-              </BreadcrumbSection>
+      <Accordion.Title active={isExpanded} index={1}>
+        <Label color={workspaceId === "NCR" ? "red" : ""} size="large">
+          <Breadcrumb>
+            {workspace.parent && workspace.parent.parent && (
+              <>
+                <BreadcrumbSection link onClick={() =>navigateToWorkspace(workspace.parent.parent.workspaceId)}>{workspace.parent.parent.workspaceName}</BreadcrumbSection>
+                <BreadcrumbDivider icon="right chevron" />
+              </>
+            )}
+            {workspace.parent && (
+              <>
+                <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.parent.workspaceId)}>{workspace.parent.workspaceName}</BreadcrumbSection>
+                <BreadcrumbDivider icon="right chevron" />
+              </>
+            )}
+            {leafFolder ? 
+              (<>
+              <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.workspaceId)}>{workspace.workspaceName}</BreadcrumbSection>
               <BreadcrumbDivider icon="right chevron" />
-            </>
-          )}
-          {workspace.parent && (
-            <>
-              <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.parent.workspaceId)}>
-                {workspace.parent.workspaceName}
-              </BreadcrumbSection>
-              <BreadcrumbDivider icon="right chevron" />
-            </>
-          )}
-          <BreadcrumbSection active>
-            {workspace.workspaceName}
-          </BreadcrumbSection>
-        </Breadcrumb>
-      </Label>
+            </>)
+            :
+              (<BreadcrumbSection active>{workspace.workspaceName}</BreadcrumbSection >) 
+            }
+              
+            {leafFolder && (
+              <BreadcrumbSection active>{leafFolder}</BreadcrumbSection>
+            )}
+          </Breadcrumb>
+        </Label>
 
-        {hasContent() && <Icon name="dropdown" onClick={() => setIsExpanded(!isExpanded)} />}
+        {hasContent() && (
+          <Icon name="dropdown" onClick={() => setIsExpanded(!isExpanded)} />
+        )}
       </Accordion.Title>
       {hasContent() && (
         <Accordion.Content active={isExpanded}>

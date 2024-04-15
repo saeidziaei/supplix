@@ -3,8 +3,8 @@ import { ModuleRegistry } from "@ag-grid-community/core";
 import { AgGridReact } from "@ag-grid-community/react";
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
+import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
-import { LinkContainer } from "react-router-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Accordion,
@@ -19,12 +19,10 @@ import {
 } from "semantic-ui-react";
 import FormHeader from "../components/FormHeader";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
-import WorkspacePicker from '../components/WorkspacePicker';
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
-import pluralize from "pluralize";
 
 
 export default function Workspaces() {
@@ -94,7 +92,6 @@ export default function Workspaces() {
       return;
     }
     let ws = id ? findWorkspaceById(id) : null;
-    console.log(ws, workspaces);
     // set 2 parents if applicable
     if (ws && ws.parentId) {
       ws.parent = findWorkspaceById(ws.parentId);
@@ -315,52 +312,6 @@ export default function Workspaces() {
       nav(`?id=${pickedWorkspace.workspaceId}`);
   }
 
-  function renderModalWorkspacePicker() {
-    return ( <Modal
-      onClose={() => setIsTreeOpen(false)}
-      onOpen={() => setIsTreeOpen(true)}
-      open={isTreeOpen}
-      trigger={
-        <Icon
-          className="clickable"
-          fitted
-          name="list"
-          color="yellow"
-          size="large"
-        />
-      }
-    >
-      <Modal.Header>Select a Workspace</Modal.Header>
-      <Modal.Content image>
-        <Modal.Description>
-          <WorkspacePicker
-            workspaces={workspaces}
-            allowNull={false}
-            onChange={(ws) => setPickedWorkspace(ws)}
-          />
-        </Modal.Description>
-      </Modal.Content>
-      <Modal.Actions>
-        <Button
-          basic
-          circular
-          color="green"
-          size="tiny"
-          onClick={() => {
-            setIsTreeOpen(false);
-            handleCurrentWorkspaceChange();
-          }}
-          icon="check"
-        />
-        <Button
-          basic
-          circular
-          onClick={() => setIsTreeOpen(false)}
-          icon="x"
-        />
-      </Modal.Actions>
-    </Modal>);
-  }
   function render() {
     const linkToNewWorkspace = selectedWorkspace ? `/workspace?parentWorkspaceId=${selectedWorkspace.workspaceId}` : `/workspace`;
     return (
@@ -368,42 +319,22 @@ export default function Workspaces() {
         {(!workspaces || workspaces.length == 0) && (
           <Message header="No workspaces found" icon="exclamation" />
         )}
-        <Grid stackable>
-          <Grid.Row>
-            <Grid.Column width={1}>
-              <List relaxed>
-                <List.Item>
-                  <Icon
-                    className="clickable"
-                    color="grey"
-                    name="arrow left"
-                    size="large"
-                    style={{ marginLeft: "10px" }}
-                    onClick={() => nav(-1)}
-                  />
-                </List.Item>
-                <List.Item>{renderModalWorkspacePicker()}</List.Item>
-              </List>
-            </Grid.Column>
-            <Grid.Column width={14}>
-              {selectedWorkspace
-                ? renderWorkspace(selectedWorkspace)
-                : renderChildren()}
-              <Divider hidden />
-              {isAdmin && (
-                <Link to={linkToNewWorkspace} >
-                  <Button basic primary size="tiny">
-                    <Icon name="plus" />
-                    Workspace
-                  </Button>
-                </Link>
-              )}
-              <Divider />
 
-              <a href="/workspace/NCR/tasks">{getReviewNCRsLabel()}</a>
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
+        {selectedWorkspace
+          ? renderWorkspace(selectedWorkspace)
+          : renderChildren()}
+        <Divider hidden />
+        {isAdmin && (
+          <Link to={linkToNewWorkspace}>
+            <Button basic primary size="tiny">
+              <Icon name="plus" />
+              Workspace
+            </Button>
+          </Link>
+        )}
+        <Divider />
+
+        <a href="/workspace/NCR/tasks">{getReviewNCRsLabel()}</a>
       </>
     );
   }

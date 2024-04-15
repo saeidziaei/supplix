@@ -90,8 +90,7 @@ export default function FormRegisters() {
   function renderTemplatesList() {
     return (
       <>
-        <FormHeader heading="Records Register" />
-        <WorkspaceInfoBox workspace={workspace} />
+        <WorkspaceInfoBox workspace={workspace} leafFolder="Records Register"/>
         {(!templates || templates.length == 0) && (
           <Message
             header="No Record found"

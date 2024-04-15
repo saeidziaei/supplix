@@ -369,7 +369,7 @@ export default function WorkspaceTasks() {
     }
 
     if (isNCR()) return "";
-    return <WorkspaceInfoBox workspace={workspace} />;
+    return <WorkspaceInfoBox workspace={workspace} leafFolder="Tasks" />;
   };
   function render() {
     return (

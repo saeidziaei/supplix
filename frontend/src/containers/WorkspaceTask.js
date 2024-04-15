@@ -527,7 +527,7 @@ export default function WorkspaceTask() {
   const render = () => {
     return (
       <>
-        {!isNCR() && <WorkspaceInfoBox workspace={workspace} />}
+        {!isNCR() && <WorkspaceInfoBox workspace={workspace} leafFolder="Tasks" />}
 
         <Grid textAlign="center" verticalAlign="middle">
           <Grid.Column style={{ maxWidth: 650 }}>

@@ -68,9 +68,9 @@ export default function Docs() {
 
     return (
       <>
-        <WorkspaceInfoBox workspace={workspace} />
+        <WorkspaceInfoBox workspace={workspace} leafFolder="Library" />
 
-        <FormHeader heading="Library" />
+        
         {(!docs || docs.length == 0) && (
           <Message
             header="No docs found in your library"

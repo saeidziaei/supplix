@@ -298,22 +298,17 @@ export default function TemplatedForm() {
   const isNew = !formId;
   const editable = isNew || isEditing || isRevisioning;
   
-  
+  const leafFolder = !formId
+  ? "New Record"
+  : isEditing
+  ? "Edit"
+  : isRevisioning
+  ? "Revision"
+  : "Record";
 
   return (
     <>
-      <WorkspaceInfoBox workspace={workspace} />
-      <Header as="h2">
-        {!formId
-          ? "New Record"
-          : isEditing
-          ? "Edit"
-          : isRevisioning
-          ? "Revision"
-          : ""}
-      </Header>
-
-      
+      <WorkspaceInfoBox workspace={workspace} leafFolder={leafFolder} />
       
       <div className="form-background" style={{ background: 'linear-gradient(to right, #3f8fff, #6bc0ff)', height: 'auto!important' }}>
         <GenericForm

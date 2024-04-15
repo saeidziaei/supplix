@@ -301,7 +301,7 @@ export default function Doc() {
 
   return (
     <>
-      <WorkspaceInfoBox workspace={workspace} />
+      <WorkspaceInfoBox workspace={workspace} leafFolder="Library" />
       {doc ? renderDoc() : renderForm()}
     </>
   );

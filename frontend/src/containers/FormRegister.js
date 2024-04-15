@@ -459,7 +459,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     const hasEntries = forms && forms.length > 0;
     return (
       <>
-        {workspace && <WorkspaceInfoBox workspace={workspace} />}
+        {workspace && <WorkspaceInfoBox workspace={workspace} leafFolder="Register" />}
         {!isHistory && <Header>{formDef?.title}</Header>}
 
         {!isPreview && !hasEntries && (
