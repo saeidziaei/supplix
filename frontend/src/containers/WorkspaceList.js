@@ -56,6 +56,10 @@ export default function Workspaces() {
 
   ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
+  const findWorkspaceById = (workspacesId) => {
+    return workspaces.find((ws) => ws.workspaceId === workspacesId);
+  }
+
   useEffect(() => {
     async function onLoad() {
       try {
@@ -78,6 +82,8 @@ export default function Workspaces() {
     onLoad();
   }, []);
 
+  
+
   useEffect(() => {
     // Extract the category and subCategory parameters from the URL
     const searchParams = new URLSearchParams(location.search);
@@ -87,7 +93,15 @@ export default function Workspaces() {
       setChildren([]);
       return;
     }
-    let ws = id ? workspaces.find((ws) => ws.workspaceId === id) : null;
+    let ws = id ? findWorkspaceById(id) : null;
+    console.log(ws, workspaces);
+    // set 2 parents if applicable
+    if (ws && ws.parentId) {
+      ws.parent = findWorkspaceById(ws.parentId);
+      if (ws.parent && ws.parent.parentId) {
+        ws.parent.parent = findWorkspaceById(ws.parent.parentId);
+      }
+    }
     setSelectedWorkspace(ws);
 
     setIsTopLevel(!id);

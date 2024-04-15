@@ -25,9 +25,29 @@ import { DynamicField } from "../DynamicField";
 import RiskMatrix from "./RiskMatrix";
 import "./RiskRegister.css";
 import SwotTable from "./SwotTable";
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import { ModuleRegistry } from "@ag-grid-community/core";
+import { AgGridReact } from "@ag-grid-community/react";
+import "@ag-grid-community/styles/ag-grid.css";
+import "@ag-grid-community/styles/ag-theme-alpine.css";
 
 export default function RiskRegister({values, setFieldValue, disabled, users}) {
-
+  ModuleRegistry.registerModules([ClientSideRowModelModule]);
+  const gridOptions = {
+    columnDefs: [
+      {
+        field: "strength",
+        headerName: "Strength",
+        resizable: true,
+        sortable: true,
+        sort: 'asc',
+      }, 
+      { field: "opportunity", headerName: "Opportunity", resizable: true, sortable: true },
+      { field: "osstrategy", headerName: "OS Strategy", resizable: true, sortable: true },
+    ],
+    rowStyle: { cursor: "pointer" },
+    rowSelection: "single",
+  };
   const panes = [
     {
       menuItem: "Control the Risk",
@@ -474,7 +494,21 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
     {
       menuItem: "Business Opportunity Assessment",
       render: () => (
-        <TabPane>
+        <TabPane><>
+          {/* <div
+            className="ag-theme-balham"
+            style={{
+              height: "500px",
+              width: "100%",
+            }}
+          >
+            <AgGridReact
+              gridOptions={gridOptions}
+              rowData={values.bizopportunities}
+              rowHeight="35"
+              animateRows={true}
+            ></AgGridReact>
+          </div> */}
           <Table celled className="bizopportunity-assessment-table">
 
             <TableHeader>
@@ -648,7 +682,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                 )}
               </FieldArray>
             </TableBody>
-          </Table>
+          </Table></>
         </TabPane>
       ),
     },

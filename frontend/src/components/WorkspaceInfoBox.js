@@ -7,6 +7,8 @@ import {
   Table,
   Accordion,
   Breadcrumb,
+  BreadcrumbSection,
+  BreadcrumbDivider,
 } from "semantic-ui-react";
 import { formatDate } from "../lib/helpers";
 import "./WorkspaceInfoBox.css";
@@ -42,10 +44,11 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
   const handleEditButtonClick = () => {
     nav(`/workspace/${workspaceId}`);
   };
-  const handleWorkspaceParentClick = () => {
-    if (workspace.parentId) nav(`/?id=${workspace.parentId}`);
+  const navigateToWorkspace = (id) => {
+    if (id) nav(`/?id=${id}`);
     else nav("/");
   };
+
   const getStatusColor = () => {
     switch (workspaceStatus) {
       case "Completed":
@@ -68,21 +71,33 @@ export const WorkspaceInfoBox = ({ workspace, editable }) => {
       <Accordion.Title
         active={isExpanded}
         index={1}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <Label ribbon color={workspaceId === "NCR" ? "red" : "yellow"}>
-          {workspaceName}
-        </Label>
-        {hasContent() && <Icon name="dropdown" />}
         
-        <Button
-          basic
-          circular
-          size="tiny"
-          icon="angle up"
-          floated="right"
-          onClick={handleWorkspaceParentClick}
-        />
+      >
+              <Label color={workspaceId === "NCR" ? "red" : ""} size="large">
+        <Breadcrumb>
+          {workspace.parent && workspace.parent.parent && (
+            <>
+              <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.parent.parent.workspaceId)}>
+                {workspace.parent.parent.workspaceName}
+              </BreadcrumbSection>
+              <BreadcrumbDivider icon="right chevron" />
+            </>
+          )}
+          {workspace.parent && (
+            <>
+              <BreadcrumbSection link onClick={() => navigateToWorkspace(workspace.parent.workspaceId)}>
+                {workspace.parent.workspaceName}
+              </BreadcrumbSection>
+              <BreadcrumbDivider icon="right chevron" />
+            </>
+          )}
+          <BreadcrumbSection active>
+            {workspace.workspaceName}
+          </BreadcrumbSection>
+        </Breadcrumb>
+      </Label>
+
+        {hasContent() && <Icon name="dropdown" onClick={() => setIsExpanded(!isExpanded)} />}
       </Accordion.Title>
       {hasContent() && (
         <Accordion.Content active={isExpanded}>
