@@ -2,7 +2,6 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
@@ -13,11 +12,13 @@ import {
   Grid,
   Header,
   Icon,
-  Label,
   Loader,
-  Segment,
-  Select,
+  Segment
 } from "semantic-ui-react";
+import * as Yup from "yup";
+import DateInput from "../components/DateInput";
+import SelectInput from "../components/SelectInput";
+import TextInput from "../components/TextInput";
 import UserPicker from "../components/UserPicker";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
@@ -27,8 +28,6 @@ import {
   dateFromEpoch,
   dateToEpoch,
 } from "../lib/helpers";
-import "./WorkspaceTask.css";
-import * as Yup from "yup";
 
 export default function WorkspaceTask() {
   const NCR_WORKSPACE_ID = "NCR";
@@ -272,247 +271,220 @@ export default function WorkspaceTask() {
             return (
               <Form onSubmit={handleSubmit} autoComplete="off">
                 <Segment textAlign="left">
-                  {errors.taskName && touched.taskName && (
-                    <Label pointing="below" color="orange">
-                      {errors.taskName}
-                    </Label>
-                  )}
-                   <Form.Field required >
-                      <label>Title</label>
-                      <Form.Input
+                  <div className="w-full grid grid-cols-6 gap-4">
+                    <div className="col-span-6 px-0 md:px-3">
+                      <TextInput
+                        label="Title"
+                        isMandatory={true}
                         name="taskName"
                         value={values.taskName}
                         onChange={handleChange}
+                        error={
+                          errors.taskName &&
+                          touched.taskName && { message: errors.taskName }
+                        }
                       />
-                    </Form.Field>
-                  <Form.Group widths="equal">
-                   
-                    <Form.Field>
-                      <label>Code</label>
-                      <Form.Input
+                    </div>
+                    <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                      <TextInput
+                        label="Code"
                         name="taskCode"
                         value={values.taskCode}
                         onChange={handleChange}
                       />
-                    </Form.Field><Form.Field>
-                      <label>Type</label>
-                      <Select
+                    </div>
+                    <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                      <SelectInput
+                        label="Type"
                         onChange={(e, { name, value }) =>
                           setFieldValue(name, value)
                         }
-                        placeholder="Select"
-                        clearable
                         options={typeOptions}
                         name="taskType"
                         value={values.taskType}
                       />
-                    </Form.Field>
-                  </Form.Group>
+                    </div>
 
-                  <Form.Field>
-                    <span>Assignee </span>
-                    <UserPicker
-                      users={memberUsers}
-                      value={values.userId}
-                      onChange={(userId) => setFieldValue("userId", userId)}
-                    />
-                    {canManageTeam() && (
-                      <p className="mini-text">
-                        <span>Cannot find the user you are looking for? </span>
-                        <a href={`/workspace/${workspaceId}/team`}>
-                          Manage Team Members
-                        </a>
-                      </p>
-                    )}
-                  </Form.Field>
-                  <Form.Field>
-                    <label>Description</label>
-
-                    <CKEditor
-                      placeholder="Description"
-                      editor={ClassicEditor}
-                      data={values.note}
-                      onChange={(event, editor) => {
-                        const data = editor.getData();
-                        setFieldValue("note", data);
-                      }}
-                    />
-                  </Form.Field>
-                  <Divider />
-
-                  {canManageRecurringTasks() && 
-                  !isNCR() && // NCRs cannot be recurring
-                  !task && ( // cannot toggle an existing task between recurring and non-recurring
-                    <>
-                      <Checkbox
-                        toggle
-                        label="Recurring Task?"
-                        onChange={(e, data) => {
-                          setIsRecurringMode(data.checked);
-                        }}
-                        checked={isRecurringMode}
+                    <div className="col-span-6 px-0 md:px-3">
+                      <UserPicker
+                        label="Assignee"
+                        users={memberUsers}
+                        value={values.userId}
+                        onChange={(userId) => setFieldValue("userId", userId)}
                       />
-                      <Divider hidden />
-                    </>
-                  )}
-                  {isRecurringMode && (<>
-                    <Form.Group>
-                      <Form.Field>
-                        <label>Frequency</label>
-                        <Select
-                          onChange={(e, { name, value }) =>
-                            setFieldValue(name, value)
-                          }
-                          placeholder="Select"
-                          options={recurrenceOptions}
-                          name="frequency"
-                          value={values.frequency}
-                        />
-                      </Form.Field>
-                      <Form.Field>
-                        <label>Start</label>
-                        <DatePicker
-                          placeholderText="Select"
-                          isClearable="true"
-                          name="startDate"
-                          dateFormat="dd-MMM-yy"
-                          selected={startDate}
-                          onChange={(date) => {
-                            setFieldValue("startDate", dateToEpoch(date));
-                          }}
-                          className="form-field"
-                        />
-                      </Form.Field>
-                      <Form.Field>
-                        <label>End</label>
-
-                        <DatePicker
-                          placeholderText="Select"
-                          isClearable={true}
-                          name="endDate"
-                          dateFormat="dd-MMM-yy"
-                          selected={endDate}
-                          onChange={(date) => {
-                            setFieldValue("endDate", dateToEpoch(date));
-                          }}
-                          className="form-field"
-                        />
-                      </Form.Field>
-                    </Form.Group>
-                    {errors.startDate && touched.startDate && (
-                        <Label pointing="right" color="orange">
-                          {errors.startDate}
-                        </Label>
+                      {canManageTeam() && (
+                        <p className="mini-text">
+                          <span>
+                            Cannot find the user you are looking for?{" "}
+                          </span>
+                          <a href={`/workspace/${workspaceId}/team`}>
+                            Manage Team Members
+                          </a>
+                        </p>
                       )}
-                    {errors.endDate && touched.endDate && (
-                        <Label pointing="right" color="orange">
-                          {errors.endDate}
-                        </Label>
-                      )}
+                    </div>
+                    <div className="col-span-6 px-0 md:px-3">
+                      <label className="w-full  flex flex-row items-center justify-start">
+                        Description
+                      </label>
+                      <CKEditor
+                        placeholder="Description"
+                        editor={ClassicEditor}
+                        data={values.note}
+                        onChange={(event, editor) => {
+                          const data = editor.getData();
+                          setFieldValue("note", data);
+                        }}
+                      />
+                    </div>
+                    <div className="col-span-6 px-0 md:px-3">
+                      <Divider />
+                      {canManageRecurringTasks() &&
+                        !isNCR() && // NCRs cannot be recurring
+                        !task && ( // cannot toggle an existing task between recurring and non-recurring
+                          <>
+                            <Checkbox
+                              toggle
+                              label="Recurring Task?"
+                              onChange={(e, data) => {
+                                setIsRecurringMode(data.checked);
+                              }}
+                              checked={isRecurringMode}
+                            />
+                            <Divider hidden />
+                          </>
+                        )}
+                    </div>
 
-                    </>
-                  )}
-
-                  {!isRecurringMode && (
-                    <>
-                      {errors.startDate && touched.startDate && (
-                        <Label pointing="below" color="orange">
-                          {errors.startDate}
-                        </Label>
-                      )}
-
-                      <Form.Group widths="equal">
-                        <Form.Field>
-                          <label>Start</label>
-                          <DatePicker
-                            placeholderText="Select"
-                            isClearable="true"
-                            name="startDate"
-                            dateFormat="dd-MMM-yy"
-                            selected={startDate}
-                            onChange={(date) =>
-                              setFieldValue("startDate", dateToEpoch(date))
-                            }
-                            className="form-field"
-                          />
-                        </Form.Field>
-
-                        <Form.Field>
-                          <label>Due</label>
-                          <DatePicker
-                            placeholderText="Select"
-                            isClearable="true"
-                            name="dueDate"
-                            dateFormat="dd-MMM-yy"
-                            selected={dueDate}
-                            onChange={(date) =>
-                              setFieldValue("dueDate", dateToEpoch(date))
-                            }
-                            className="form-field"
-                          />
-                        </Form.Field>
-                      </Form.Group>
-                      <Form.Group widths="equal">
-                        <Form.Field>
-                          <label>Status</label>
-                          <Select
+                    {isRecurringMode && (
+                      <>
+                        <div className="col-span-6 md:col-span-2 px-0 md:px-3">
+                          <SelectInput
+                            label="Frequency"
                             onChange={(e, { name, value }) =>
                               setFieldValue(name, value)
                             }
-                            placeholder="Select"
-                            clearable
+                            options={recurrenceOptions}
+                            name="frequency"
+                            value={values.frequency}
+                          />
+                        </div>
+
+                        <div className="col-span-6 md:col-span-2 px-0 md:px-3">
+                          <DateInput
+                            label="Start"
+                            name="startDate"
+                            value={startDate}
+                            onChange={(date) => {
+                              setFieldValue("startDate", dateToEpoch(date));
+                            }}
+                            error={
+                              errors.startDate &&
+                              touched.startDate && { message: errors.startDate }
+                            }
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-2 px-0 md:px-3">
+                          <DateInput
+                            label="End"
+                            name="endDate"
+                            value={endDate}
+                            onChange={(date) => {
+                              setFieldValue("endDate", dateToEpoch(date));
+                            }}
+                            error={
+                              errors.endDate &&
+                              touched.endDate && { message: errors.endDate }
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {!isRecurringMode && (
+                      <>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                          <DateInput
+                            label="Start"
+                            name="startDate"
+                            value={startDate}
+                            onChange={(date) => {
+                              setFieldValue("startDate", dateToEpoch(date));
+                            }}
+                            error={
+                              errors.startDate &&
+                              touched.startDate && { message: errors.startDate }
+                            }
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                          <DateInput
+                            label="Due"
+                            name="dueDate"
+                            value={dueDate}
+                            onChange={(date) => {
+                              setFieldValue("dueDate", dateToEpoch(date));
+                            }}
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                          <SelectInput
+                            label="Status"
+                            onChange={(e, { name, value }) =>
+                              setFieldValue(name, value)
+                            }
                             options={statusOptions}
                             name="taskStatus"
                             value={values.taskStatus}
                           />
-                        </Form.Field>
-                        <Form.Field>
-                          <label>Completion</label>
-                          <DatePicker
-                            placeholderText="Select"
-                            isClearable="true"
+                        </div>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                          <DateInput
+                            label="Completion"
                             name="completionDate"
-                            dateFormat="dd-MMM-yy"
-                            selected={completionDate}
-                            onChange={(date) =>
-                              setFieldValue("completionDate", dateToEpoch(date))
-                            }
-                            className="form-field"
+                            value={completionDate}
+                            onChange={(date) => {
+                              setFieldValue(
+                                "completionDate",
+                                dateToEpoch(date)
+                              );
+                            }}
                           />
-                        </Form.Field>
-                      </Form.Group>
-                    </>
-                  )}
-                  {isNCR() && (
-                    <>
-                      <Divider />
-                      <Form.Field>
-                        <label>Corrective Action</label>
-                        <Form.Input
-                          name="correctiveAction"
-                          value={values.correctiveAction}
-                          onChange={handleChange}
-                        />
-                      </Form.Field>
-                      <Form.Field>
-                        <label>Root Cause</label>
-                        <Form.Input
-                          name="rootCause"
-                          value={values.rootCause}
-                          onChange={handleChange}
-                        />
-                      </Form.Field>
-                    </>
-                  )}
+                        </div>
+                      </>
+                    )}
+                    {isNCR() && (
+                      <>
+                        <div className="col-span-6  px-0 md:px-3"><Divider /></div>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                        
+                          <TextInput
+                            label="Corrective Action"
+                            name="correctiveAction"
+                            value={values.correctiveAction}
+                            onChange={handleChange}
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-3 px-0 md:px-3">
+                          <TextInput
+                            label="Root Cause"
+                            name="rootCause"
+                            value={values.rootCause}
+                            onChange={handleChange}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </Segment>
+
                 <Button
-                  style={{ marginTop: "40px" }}
-                  basic
-                  size="small"
-                  primary
-                  type="submit"
+                  className={`px-3 md:px-0 w-[96%] md:w-full m-auto !mt-4 !bg-gradient-to-tr ${
+                    isNCR()
+                      ? "!from-red-400 !to-red-700"
+                      : "!from-blue-500 !to-blue-400"
+                  }  !shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] !text-white !rounded-xl hover:!text-gray-300 transition duration-300`}
                   disabled={isSubmitting}
-                  floated="right"
                 >
                   Save
                 </Button>

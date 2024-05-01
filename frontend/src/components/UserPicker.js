@@ -1,9 +1,9 @@
 import React from "react";
-import { Dropdown } from "semantic-ui-react";
+import { Select } from "semantic-ui-react";
 import User from "./User";
 import { getUserById } from "../lib/helpers";
 
-export default function UserPicker({ users, value, onChange, disabled = false, upward = false, compact = false }) {
+export default function UserPicker({ label="Employee", users, value, onChange, disabled = false, upward = false, compact = false, isMandatory = false }) {
 
   if (!users) return <p>No users available</p>;
   
@@ -23,7 +23,11 @@ export default function UserPicker({ users, value, onChange, disabled = false, u
   return disabled ? (
     selected && <User user={selected} compact={compact} />
   ) : (
-    <Dropdown
+    <div className='w-full '>
+            <label className='w-full  flex flex-row items-center justify-start'>
+                {label} {isMandatory && <span className='text-[#DA2A29]'>*</span>}
+            </label>
+    <Select
       upward={upward}
       clearable
       value={value}
@@ -36,6 +40,7 @@ export default function UserPicker({ users, value, onChange, disabled = false, u
       }
       options={options}
       onChange={handleChange}
-    />
+      className='w-full p-1 !rounded-xl !mt-1 *:!bg-[#E9EFF6] !bg-[#E9EFF6] !border-none  *:!border-none *:!rounded-2xl *:!outline-none hover:!shadow-lg transition duration-300'
+    /></div>
   );
 }

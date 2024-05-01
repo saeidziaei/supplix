@@ -21,6 +21,7 @@ import { s3Get } from "./lib/awsLib";
 import { AppContext } from "./lib/contextLib";
 import { onError } from "./lib/errorLib";
 import { normaliseCognitoUser, normaliseCognitoUsers } from "./lib/helpers";
+import MasterLayout from "./components/MasterLayout";
 
 
 export default App;
@@ -305,6 +306,7 @@ function App() {
 
                 <Sidebar.Pusher dimmed={isSidebarVisible}>
                   <Segment basic style={{ minHeight: "100vh" }}>
+                    <MasterLayout>
                     <AppContext.Provider
                       value={{
                         authenticatedUser,
@@ -318,8 +320,9 @@ function App() {
                         tenant={tenant}
                         currentUserRoles={currentUserRoles}
                       />
-                      {/* <Routes /> */}
+                      
                     </AppContext.Provider>
+                    </MasterLayout>
                   </Segment>
                 </Sidebar.Pusher>
               </Sidebar.Pushable>

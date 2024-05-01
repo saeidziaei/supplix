@@ -80,7 +80,7 @@ export default function FormRegisters() {
       return (
         <List horizontal size="large">
           {categories.map((category, index) => (
-            <List.Item key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
+            <List.Item className="rounded !p-3 !m-1 bg-blue-100 hover:bg-slate-300" key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
           ))}
         </List>
       );
@@ -120,7 +120,8 @@ export default function FormRegisters() {
                               <LinkContainer
                                 to={`/workspace/${workspaceId}/form/${t.templateId}`}
                               >
-                                <Button
+                                <div
+                                className="lg:w-auto px-5 !rounded-xl !mx-2 border-2 !text-[#008CDB] border-[#008CDB] py-2 cursor-pointer hover:bg-[#008CDB]/10 transition duration-300"
                                   basic
                                   primary
                                   size="mini"
@@ -128,7 +129,7 @@ export default function FormRegisters() {
                                 >
                                   <Icon name="add" />
                                   Record
-                                </Button>
+                                </div>
                               </LinkContainer>
                             </List.Content>
 
@@ -136,7 +137,7 @@ export default function FormRegisters() {
                               name="newspaper outline"
                               size="large"
                               verticalAlign="middle"
-                              className="custom-blue-icon"
+                              className="custom-blue-icon outline-none"
                             />
                             <List.Content>
                               <List.Header>{def.title}</List.Header>

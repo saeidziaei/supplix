@@ -512,6 +512,28 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         <Divider hidden />
         {!isHistory && !isPreview && (
           <>
+          <div className='w-full mt-1 py-4 px-2 flex  lg:flex-row flex-col items-center justify-between bg-[#DBE5F0] md:rounded-2xl'>
+          <LinkContainer to={`/workspace/${workspaceId}/registers`}>
+          <div className="!w-1/3 lg:w-auto !rounded-xl !mx-2  border-2 border-gray-500 py-3 px-2  text-gray-500 cursor-pointer hover:bg-[#00DBB3]/5 transition duration-300 ">
+            Back
+          </div>
+          </LinkContainer>
+          
+          <div className="!w-1/3 lg:w-auto !rounded-xl !mx-2  border-2 border-[#00DBB3] py-3 px-2  text-[#00DBB3] cursor-pointer hover:bg-[#00DBB3]/5 transition duration-300 ">
+
+                        <span className={'flex flex-row items-center justify-center lg:justify-center '}>
+                            <div className='mr-2'>
+                                <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 7.00001C19.5333 7.00001 20 7.20001 20.4 7.60001C20.8 8.00001 21 8.46668 21 9.00001V11C21 11.1167 20.9875 11.2417 20.9625 11.375C20.9375 11.5083 20.9 11.6333 20.85 11.75L17.85 18.8C17.7 19.1333 17.45 19.4167 17.1 19.65C16.75 19.8833 16.3833 20 16 20H8C7.45 20 6.97917 19.8042 6.5875 19.4125C6.19583 19.0208 6 18.55 6 18V7.82501C6 7.55834 6.05417 7.30418 6.1625 7.06251C6.27083 6.82084 6.41667 6.60834 6.6 6.42501L12.025 1.02501C12.275 0.791677 12.5708 0.65001 12.9125 0.60001C13.2542 0.55001 13.5833 0.608344 13.9 0.77501C14.2167 0.941677 14.4458 1.17501 14.5875 1.47501C14.7292 1.77501 14.7583 2.08334 14.675 2.40001L13.55 7.00001H19ZM2 20C1.45 20 0.979167 19.8042 0.5875 19.4125C0.195833 19.0208 0 18.55 0 18V9.00001C0 8.45001 0.195833 7.97918 0.5875 7.58751C0.979167 7.19584 1.45 7.00001 2 7.00001C2.55 7.00001 3.02083 7.19584 3.4125 7.58751C3.80417 7.97918 4 8.45001 4 9.00001V18C4 18.55 3.80417 19.0208 3.4125 19.4125C3.02083 19.8042 2.55 20 2 20Z" fill="#00DBB3"/>
+                                </svg>
+                            </div>
+                            <span>
+                            Green Title
+                        </span>
+
+                        </span>
+                    </div>
+
             <LinkContainer to={`/workspace/${workspaceId}/registers`}>
               <Button basic secondary size="mini">
                 Back
@@ -524,6 +546,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
                 Record
               </Button>
             </LinkContainer>
+            </div>
             {hasChanges && (
               <Button basic color="blue" floated="right" onClick={handleSave}>
                 <Icon name="save" />

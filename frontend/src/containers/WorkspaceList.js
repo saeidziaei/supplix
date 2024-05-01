@@ -173,7 +173,7 @@ export default function Workspaces() {
  
   const IconRenderer = () => {
     return (
-      <Icon.Group size="big">
+      <Icon.Group size="large">
         <Icon name="folder" color="yellow" className="folder-icon" />
       </Icon.Group>
     );
@@ -263,42 +263,58 @@ export default function Workspaces() {
                     workspace={selectedWorkspace}
                     editable={canEditWorkspace()}
                   />
+
+<div class="mx-auto max-w-6xl text-center p-6 dark:bg-gray-900">
+    
+    <div
+        class="gr mx-auto max-w-5xl items-stretch space-y-4 text-left sm:flex sm:space-y-0 sm:space-x-8 sm:text-center">
+        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+            href={`/workspace/${workspaceId}/registers`} >
+            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="register.svg" alt="Register"/>
+            <div>
+                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Register</div>
+                <div class="text-sm opacity-75">Create form records or view the existing ones.
+                </div>
+            </div>
+        </a>
+        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+            href={`/workspace/${workspaceId}/tasks`} >
+            
+            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="task.svg" alt="Tasks"/>
+            <div>
+                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Tasks</div>
+                <div class="text-sm opacity-75">Manage the tasks assigned to the team members.
+                </div>
+            </div>
+        </a>
+        {canEditWorkspaceTeam() &&
+        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+            href={`/workspace/${workspaceId}/team`} >
+            
+            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="team.svg" alt="Team"/>
+            <div>
+                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Team</div>
+                <div class="text-sm opacity-75">Manage team members of this workspace.
+                </div>
+            </div>
+        </a>}
+       
+        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+            href={`/workspace/${workspaceId}/docs`} >
+            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="library.svg" alt="Library"/>
+            <div>
+                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Library</div>
+                <div class="text-sm opacity-75">Reposity of all documents for this workspace (images, PDFs, etc.).
+                </div>
+            </div>
+        </a>
+        
+    </div>
+</div>
+
       <Grid verticalAlign="middle">
         <Grid.Row>
           <Grid.Column>
-            <List divided relaxed>
-              <List.Item
-                as="a"
-                onClick={() => nav(`/workspace/${workspaceId}/registers`)}
-              >
-                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
-                Register
-              </List.Item>
-              <List.Item
-                as="a"
-                onClick={() => nav(`/workspace/${workspaceId}/docs`)}
-              >
-                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
-                Library
-              </List.Item>
-              {canEditWorkspaceTeam() && (
-                <List.Item
-                  as="a"
-                  onClick={() => nav(`/workspace/${workspaceId}/team`)}
-                >
-                  <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
-                  Team
-                </List.Item>
-              )}
-
-              <List.Item
-                as="a"
-                onClick={() => nav(`/workspace/${workspaceId}/tasks`)}
-              >
-                <List.Icon name="folder" color="yellow" size="large" className="folder-icon" />
-                Tasks
-              </List.Item>
-            </List>
             {renderNote()}
             {renderChildren()}
           </Grid.Column>
