@@ -78,9 +78,10 @@ export default function FormRegisters() {
       let categories = ['ALL'].concat([...new Set(templates.map(t => t.templateDefinition.category))]);
       
       return (
+        
         <List horizontal size="large">
           {categories.map((category, index) => (
-            <List.Item className="rounded !p-3 !m-1 bg-blue-100 hover:bg-slate-300" key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
+            <List.Item className={`rounded-md !p-3 !m-1 bg-blue-100 text-sky-400  ${category != selectedCategory && "hover:bg-slate-300"} `} key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
           ))}
         </List>
       );
@@ -89,7 +90,7 @@ export default function FormRegisters() {
 
   function renderTemplatesList() {
     return (
-      <>
+      <div className="mx-auto px-4 w-full  xl:w-2/3">
         <WorkspaceInfoBox workspace={workspace} leafFolder="Records Register"/>
         {(!templates || templates.length == 0) && (
           <Message
@@ -99,13 +100,8 @@ export default function FormRegisters() {
           />
         )}
         {renderCategories()}
-
-        <Grid columns={2} doubling>
-          <Grid.Row>
-            <Grid.Column>
-              <Segment>
-                <List divided relaxed>
-                  {templates &&
+        <div class="grid grid-cols-3 gap-6  p-6 justify-center text-lg ">
+        {templates &&
                     templates
                       .filter(
                         (t) =>
@@ -115,49 +111,38 @@ export default function FormRegisters() {
                       .map((t) => {
                         const def = t.templateDefinition;
                         return (
-                          <List.Item key={t.templateId}>
-                            <List.Content floated="right">
-                              <LinkContainer
-                                to={`/workspace/${workspaceId}/form/${t.templateId}`}
-                              >
-                                <div
-                                className="lg:w-auto px-5 !rounded-xl !mx-2 border-2 !text-[#008CDB] border-[#008CDB] py-2 cursor-pointer hover:bg-[#008CDB]/10 transition duration-300"
-                                  basic
-                                  primary
-                                  size="mini"
-                                  disabled={t.isDeleted}
-                                >
-                                  <Icon name="add" />
-                                  Record
-                                </div>
-                              </LinkContainer>
-                            </List.Content>
+                          <a
+                            key={t.templateId}
+                            href={`/workspace/${workspaceId}/register/${t.templateId}`}
+                            class="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-sky-900 rounded-md px-3 py-2 sm:hover:shadow-2xl"
+                          >
+                            {def.title}
 
-                            <List.Icon
-                              name="newspaper outline"
-                              size="large"
-                              verticalAlign="middle"
-                              className="custom-blue-icon outline-none"
-                            />
-                            <List.Content>
-                              <List.Header>{def.title}</List.Header>
-                              <List.Description>
-                                <Link
-                                  to={`/workspace/${workspaceId}/register/${t.templateId}`}
-                                >
-                                  { isSystemTemplate(t.templateId) ? "View" : `${t.formCount} ${pluralize("record", t.formCount)}`}
-                                </Link>
-                              </List.Description>
-                            </List.Content>
-                          </List.Item>
+                            <div class="text-gray-500 font-thin text-sm pt-1">
+                              <a
+                                class="float-right  px-2 py-1 min-w-[80px] text-center text-blue-400 border border-blue-400 rounded hover:bg-blue-600 hover:text-white  focus:outline-none focus:ring"
+                                href={`/workspace/${workspaceId}/form/${t.templateId}`}
+                              >
+                                <Icon name="plus"/>
+                                Create
+                              </a>
+                            </div>
+                            <Link
+                              to={`/workspace/${workspaceId}/register/${t.templateId}`}
+                            >
+                              {isSystemTemplate(t.templateId)
+                                ? "View"
+                                : `${t.formCount} ${pluralize(
+                                    "record",
+                                    t.formCount
+                                  )}`}
+                            </Link>
+                          </a>
                         );
                       })}
-                </List>
-              </Segment>
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-      </>
+    </div>
+    
+      </div>
     );
   }
 

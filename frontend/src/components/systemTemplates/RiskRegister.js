@@ -21,7 +21,7 @@ import {
   TableHeaderCell,
   TableRow
 } from "semantic-ui-react";
-import { DynamicField } from "../DynamicField";
+import { DynamicFieldInput } from "../DynamicFieldInput";
 import RiskMatrix from "./RiskMatrix";
 import "./RiskRegister.css";
 import SwotTable from "./SwotTable";
@@ -313,7 +313,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             )}
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.weakness`,
                                 type: "dropdown",
@@ -337,7 +337,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.threat`,
                                 type: "dropdown",
@@ -361,7 +361,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.impact`,
                                 type: "text",
@@ -385,7 +385,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.existingControl`,
                                 type: "text",
@@ -410,7 +410,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.furtherControl`,
                                 type: "text",
@@ -422,7 +422,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.resources`,
                                 type: "text",
@@ -434,7 +434,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               users={users}
                               fieldDefinition={{
                                 name: `risks.${index}.owner`,
@@ -447,7 +447,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.implementationDate`,
                                 type: "date",
@@ -458,7 +458,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `risks.${index}.progressUpdate`,
                                 type: "text",
@@ -544,7 +544,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             )}
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.strength`,
                                 type: "dropdown",
@@ -568,7 +568,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.opportunity`,
                                 type: "dropdown",
@@ -592,7 +592,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.sostrategy`,
                                 type: "text",
@@ -604,7 +604,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                          <DynamicField
+                          <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.decidedActions`,
                                 type: "text",
@@ -617,7 +617,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                           </TableCell>
                           
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.resources`,
                                 type: "text",
@@ -629,7 +629,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               users={users}
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.owner`,
@@ -642,7 +642,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.implementationDate`,
                                 type: "date",
@@ -653,7 +653,7 @@ export default function RiskRegister({values, setFieldValue, disabled, users}) {
                             />
                           </TableCell>
                           <TableCell>
-                            <DynamicField
+                            <DynamicFieldInput
                               fieldDefinition={{
                                 name: `bizopportunities.${index}.progressUpdate`,
                                 type: "text",

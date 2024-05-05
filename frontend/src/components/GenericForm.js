@@ -15,10 +15,10 @@ import {
   Segment,
   Table
 } from "semantic-ui-react";
-import FormHeader from "../components/FormHeader";
 import placeholderImage from "../fileplaceholder.jpg";
 import { useAppContext } from "../lib/contextLib";
-import { DynamicField } from "./DynamicField";
+import { DynamicFieldInput } from "./DynamicFieldInput";
+import FooterButtons from "./FooterButtons";
 import "./GenericForm.css";
 import UserPicker from "./UserPicker";
 import RiskRegister from "./systemTemplates/RiskRegister";
@@ -113,7 +113,7 @@ export function GenericForm({
   // const validationSchema = generateValidationSchema(formDef);
 
   const preSubmit = (values, formikBag) => {
-
+console.log("preSubmit", values);
     const updatedValues = { ...values };
     if (sigPadRef.current) {
       updatedValues[SIGNATURE_FIELD_NAME] = sigPadRef.current
@@ -169,7 +169,7 @@ export function GenericForm({
   function renderSectionTabular(s, values, setFieldValue) {
     const fields = s.fields.filter((f) => f.type !== "aggregate");
     return (
-      <Segment basic vertical key={s.title} size="tiny">
+      <Segment basic vertical key={s.title} >
         <Table celled compact stackable>
           <Table.Header>
             <Table.Row>
@@ -187,7 +187,7 @@ export function GenericForm({
                 </Table.Cell>
                 {fields.map((f, i) => (
                   <Table.Cell key={i}>
-                    <DynamicField fieldDefinition={ {...f, name: tabularFieldName(rowIndex, f.name)} } value={values[tabularFieldName(rowIndex, f.name)]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
+                    <DynamicFieldInput fieldDefinition={ {...f, name: tabularFieldName(rowIndex, f.name)} } value={values[tabularFieldName(rowIndex, f.name)]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
                   </Table.Cell>
                 ))}
               </Table.Row>
@@ -207,15 +207,12 @@ export function GenericForm({
     const fieldsPerColumn = Math.ceil(sectonFields.length / sectionColumns); // Calculate fields per column
 
     return (
-      <Segment basic vertical key={s.title} size="tiny">
+      <Segment basic vertical key={s.title} >
         {s.title &&
-          (disabled ? (
-            <h1 className="title-disabled">{s.title}</h1>
-          ) : (
-            <Menu size="large" tabular>
+          (<Menu tabular>
               <Menu.Item active>{s.title}</Menu.Item>
             </Menu>
-          ))}
+          )}
         <Grid divided columns={sectionColumns} doubling>
           {gridColumns.map((column) => (
             <Grid.Column key={column}>
@@ -227,23 +224,7 @@ export function GenericForm({
                   ) // Extract fields for current column
 
                   .map((f, i) => (
-                    <Grid.Row
-                      stretched
-                      key={f.guid}
-                      style={{ paddingTop: "0.1rem", paddingButtom: "0.1rem" }}
-                    >
-                      <Grid.Column
-                        width={4}
-                        className={
-                          disabled ? "field-column-disabled" : "field-column"
-                        }
-                      >
-                        {f.type === "info" ? "" : f.name}
-                      </Grid.Column>
-                      <Grid.Column width={12} textAlign="left">
-                        <DynamicField fieldDefinition={f} value={values[f.name]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
-                      </Grid.Column>
-                    </Grid.Row>
+                  <DynamicFieldInput fieldDefinition={f} value={values[f.name]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
                   ))}
               </Grid>
             </Grid.Column>
@@ -254,6 +235,7 @@ export function GenericForm({
   }
 
   function renderAttachments(attachments, setFieldValue) {
+    if (!attachments || !attachments.length) return;
     return (
       <>
         <div>
@@ -263,9 +245,7 @@ export function GenericForm({
         <FieldArray name="attachments">
           {({ insert, remove, push }) => (
             <CardGroup>
-              {attachments &&
-                attachments.length > 0 &&
-                attachments.map((attachment, index) => (
+              {attachments.map((attachment, index) => (
                   <Card key={index}>
                     {!disabled && (
                       <Card.Content>
@@ -333,6 +313,7 @@ export function GenericForm({
                       circular
                       icon="plus"
                       size="mini"
+                      className="!my-3"
                       onClick={() => push({ file: "", fileNote: "" })}
                     />
                   )}
@@ -366,14 +347,27 @@ export function GenericForm({
         : renderSection(s, values, setFieldValue)
     );
   }
+  function renderHeader(heading, subheading, image) {
+    return  <div className="w-full px-3 mt-2 border border-gray-300">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-gray-900">{heading}</h1>
+        {subheading && <span className="text-gray-500 text-sm">{subheading}</span>}
+      </div>
+      <div className="ml-auto">
+        <img
+          src={image}
+          className="w-32 h-32 object-contain rounded-full"
+          alt="Profile"
+        />
+      </div>
+    </div>
+  </div>
+  }
 
   return (
-    <Segment>
-      <FormHeader
-        heading={formDef.title}
-        subheading={formDef.category}
-        image={tenant?.logoURL || "/iso_cloud_logo_v1.png"}
-      />
+    <div className="mx-auto px-4 w-full  xl:w-2/3">
+      {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
       <Formik
         initialValues={formData || defaultValues}
         onSubmit={preSubmit}
@@ -402,28 +396,28 @@ export function GenericForm({
                 renderSignature(values[SIGNATURE_FIELD_NAME])}
 
               {!disabled && handleSubmit && (
-                <div>
-                  <Button primary type="submit" size="mini" floated="right">
-                    Save
-                  </Button>
-                  {handleCancel && (
-                    <Button
-                      size="mini"
-                      onClick={(e) => {
-                        e.preventDefault();
+                <FooterButtons
+                  leftButton={
+                    handleCancel && {
+                      label: "Cancel",
+                      icon: "undo",
+                      onClick: () => {
                         resetForm();
                         handleCancel();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
+                      },
+                    }
+                  }
+                  rightButton={{
+                    label: "Save",
+                    icon: "save",
+                    isSubmit: true,
+                  }}
+                />
               )}
             </Form>
           );
         }}
       </Formik>
-    </Segment>
+    </div>
   );
 }

@@ -16,6 +16,8 @@ import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import FormTemplateSettings from "./FormTemplateSettings";
 import "./FormTemplates.css";
+import pluralize from "pluralize";
+import FooterButtons from "../components/FooterButtons";
 
 
 export default function FormTemplates() {
@@ -56,23 +58,16 @@ export default function FormTemplates() {
     if (td && td.sections) 
       td.sections.forEach(s => fieldCount += s.fields.length);
 
-    return (
-      <List.Item key={t.templateId}>
-        <List.Content floated="right">
-          <LinkContainer to={`/template/${t.templateId}`}>
-            <Button basic primary size="mini">
-              <Icon name="pencil" />
-              Design
-            </Button>
-          </LinkContainer>
-        </List.Content>
-        <List.Icon name='file alternate' size='large' verticalAlign='middle' className="custom-green-icon" />
-        <List.Content>
-          <List.Header>{t.templateDefinition.title}</List.Header>
-          <List.Description>{fieldCount} fields</List.Description>
-        </List.Content>
-      </List.Item>
-    );
+    return <a href={`/template/${t.templateId}`}
+    class="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-teal-500 rounded-md px-3 py-2 w-full md:w-5/12 lg:w-3/12">
+    {td.title}
+
+    <div class="text-gray-500 font-thin text-sm pt-1">
+        <span>{`${fieldCount} ${pluralize("field", fieldCount)}`}</span>
+    </div>
+</a>
+
+    
   }
 
 
@@ -98,56 +93,44 @@ export default function FormTemplates() {
   return (
     <>
       <FormHeader heading="Forms" />
-{ templates && templates.length > 0 && (
+      {templates && templates.length > 0 && (
         <>
-          <Divider />
-          <Grid columns={2} doubling>
-          <Grid.Column >
-            <Segment>
-
-          {groupedChildren &&
-            groupedChildren.map((group, groupIndex) => (
-              <div key={groupIndex}>
-                <Divider horizontal>
-                  <Header as="h4">
-                    {group[0].templateDefinition.category || "-"}
-                  </Header>
-                </Divider>
-                <List divided relaxed>
-                  {group &&
-                    group.map((t) => renderTemplate(t))}
-                </List>
-              </div>
-            ))}
-            </Segment>
-          </Grid.Column>
-        </Grid>
+          <div className="mx-auto px-4 w-full  xl:w-2/3">
+            {groupedChildren &&
+              groupedChildren.map((group, groupIndex) => (
+                <div key={groupIndex}>
+                  <Divider horizontal>
+                    <Header as="h4">
+                      {group[0].templateDefinition.category || "-"}
+                    </Header>
+                  </Divider>
+                  <div className="flex flex-wrap gap-4 p-6 justify-left text-lg ">
+                    {group && group.map((t) => renderTemplate(t))}
+                  </div>
+                </div>
+              ))}
+          </div>
         </>
       )}
 
-        
-        {templates.length == 0 && (
-          <Message
-            header="No Record found"
-            content="Start by creating your first record!"
-            icon="exclamation"
-          />
-        )}
-      <Divider />
-      <LinkContainer to={`/template`}>
-        <Button basic primary>
-          Design New Form
-        </Button>
-      </LinkContainer>
-      
+      {templates.length == 0 && (
+        <Message
+          header="No Record found"
+          content="Start by creating your first record!"
+          icon="exclamation"
+        />
+      )}
+      <FooterButtons rightButton={{label: "Design New Form", icon:"pencil", link:"/template"}} />
 
-      <Divider />
-      {/* <Button basic onClick={() => setTemplateSettingsVisible(true)}>
+
+
+      {/* <Divider />
+       <Button basic onClick={() => setTemplateSettingsVisible(true)}>
         Template Settings
-      </Button> */}
+      </Button> 
       {templateSettingsVisible && (
         <FormTemplateSettings templates={templates} onSave={handleTemplateSettingsSave} />
-      )}
+      )} */}
     </>
   );
 }

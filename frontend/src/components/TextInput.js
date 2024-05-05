@@ -19,7 +19,7 @@ const TextInput = ({
           <span className="text-[#000]/40 text-[0.9rem] ml-2">{miniLabel}</span>
         )}
         {isMandatory && <span className="text-[#DA2A29]">*</span>}
-        <span className="text-[#DA2A29]/0 ml-5">.</span>
+        
       </label>
       <Input
         focus

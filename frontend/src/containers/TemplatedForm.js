@@ -9,6 +9,7 @@ import {
   Divider,
   Header,
   Icon,
+  Label,
   Loader,
   Popup,
   Segment
@@ -21,6 +22,7 @@ import { onError } from "../lib/errorLib";
 import FormRegister from "./FormRegister";
 import "./TemplatedForm.css";
 import { isSystemTemplate, loadSystemTemplate, templateEmployeeField } from "../lib/helpers";
+import FooterButtons from "../components/FooterButtons";
 
 // This is a single record component. It uses FormRegister (which is used to show a list of records) to show the history of changes on this record. A bit confusing!
 export default function TemplatedForm() {
@@ -309,42 +311,40 @@ export default function TemplatedForm() {
   return (
     <>
       <WorkspaceInfoBox workspace={workspace} leafFolder={leafFolder} />
-      
-      <div className="form-background" style={{ background: 'linear-gradient(to right, #3f8fff, #6bc0ff)', height: 'auto!important' }}>
-        <GenericForm
-          formDef={template.templateDefinition}
-          formData={formRecord ? formRecord.formValues : null}
-          handleSubmit={handleSubmit}
-          handleCancel={isNew ? null : cancelEdit}
-          disabled={!editable}
-          users={users}
-          members={memberUsers}
-          isSystemForm={isSystemForm}
-          systemFormName={templateId}
-        />
-      </div>
+
+      <GenericForm
+        formDef={template.templateDefinition}
+        formData={formRecord ? formRecord.formValues : null}
+        handleSubmit={handleSubmit}
+        handleCancel={isNew ? null : cancelEdit}
+        disabled={!editable}
+        users={users}
+        members={memberUsers}
+        isSystemForm={isSystemForm}
+        systemFormName={templateId}
+      />
+
       {workspaceId && templateId && formId && (
-          <Popup
-            content="Link to this record copied."
-            on="click"
-            trigger={
-              <Button
-                circular
-                size="tiny"
-                icon="copy"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `/workspace/${workspaceId}/form/${templateId}/${formId}`
-                  );
-                }}
-              />
-            }
-          />
-        )}
+        <Popup
+          content="Link to this record copied."
+          on="click"
+          trigger={
+            <Button
+              circular
+              size="tiny"
+              icon="copy"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `/workspace/${workspaceId}/form/${templateId}/${formId}`
+                );
+              }}
+            />
+          }
+        />
+      )}
       {formRecord && (
         <p style={{ color: "#bbb" }}>
-          Created{" "}
-          {renderActionInfo(formRecord.createdAt, formRecord.createdBy)}{" "}
+          Created {renderActionInfo(formRecord.createdAt, formRecord.createdBy)}{" "}
           <br />{" "}
           {formRecord.updatedAt
             ? "Last Edited " +
@@ -353,15 +353,24 @@ export default function TemplatedForm() {
         </p>
       )}
       {!editable && (
-        <div>
-          <Button className="hide-on-print" primary basic size="mini" onClick={() => handleEdit(true)}>
-            Edit
-          </Button>
-          {/* this one is Edit in place. Don't need it for the time being.
-           <Button secondary basic size="mini" onClick={() => handleEdit(false)}>
-            Edit
-          </Button> */}
-
+        <>
+          <FooterButtons
+            leftButton={{
+              label: "Edit",
+              icon: "pencil",
+              color: "teal",
+              onClick: () => handleEdit(true),
+            }}
+            rightButton={
+              formId &&
+              (isAdmin || workspace?.role === "Owner") && {
+                label: "Delete Record",
+                icon: "remove circle",
+                color: "red",
+                onClick: () => setDeleteConfirmOpen(true),
+              }
+            }
+          />
           <Confirm
             size="mini"
             header="This will delete the record."
@@ -369,22 +378,10 @@ export default function TemplatedForm() {
             onCancel={() => setDeleteConfirmOpen(false)}
             onConfirm={handleDelete}
           />
-          {formId && (isAdmin || workspace?.role === "Owner") && (
-            <Button
-              className="hide-on-print"
-              floated="right"
-              basic
-              size="mini"
-              color="red"
-              onClick={() => setDeleteConfirmOpen(true)}
-            >
-              <Icon name="remove circle" />
-              Delete Record
-            </Button>
-          )}
-        </div>
+        </>
       )}
-      <Divider  />
+      
+      <Divider />
       <LinkContainer to={`/workspace/${workspaceId}/register/${templateId}`}>
         <Button className="hide-on-print" basic size="mini">
           All Records...

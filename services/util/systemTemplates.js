@@ -1,1 +1,1 @@
-export default (templateId) => templateId.startsWith("SYS_");
+export default (templateId) => templateId && templateId.startsWith("SYS_");

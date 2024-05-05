@@ -305,7 +305,7 @@ function App() {
                 </Sidebar>
 
                 <Sidebar.Pusher dimmed={isSidebarVisible}>
-                  <Segment basic style={{ minHeight: "100vh" }}>
+                  
                     <MasterLayout>
                     <AppContext.Provider
                       value={{
@@ -323,7 +323,7 @@ function App() {
                       
                     </AppContext.Provider>
                     </MasterLayout>
-                  </Segment>
+                  
                 </Sidebar.Pusher>
               </Sidebar.Pushable>
             </Grid.Column>

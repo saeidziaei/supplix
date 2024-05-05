@@ -17,12 +17,12 @@ import {
   Message,
   Modal
 } from "semantic-ui-react";
-import FormHeader from "../components/FormHeader";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
+import FooterButtons from "../components/FooterButtons";
 
 
 export default function Workspaces() {
@@ -174,7 +174,7 @@ export default function Workspaces() {
   const IconRenderer = () => {
     return (
       <Icon.Group size="large">
-        <Icon name="folder" color="yellow" className="folder-icon" />
+        <Icon name="folder" color="yellow"  />
       </Icon.Group>
     );
   };
@@ -214,7 +214,8 @@ export default function Workspaces() {
 
     return (
       <>
-        <FormHeader heading={isTopLevel ? "Workspaces" : "Associated Workspaces"} />
+      <h4>{isTopLevel ? "Workspaces" : "Associated Workspaces"} </h4>
+        
         
         <div
           className="ag-theme-balham"
@@ -272,7 +273,7 @@ export default function Workspaces() {
             href={`/workspace/${workspaceId}/registers`} >
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="register.svg" alt="Register"/>
             <div>
-                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Register</div>
+                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Records Register</div>
                 <div class="text-sm opacity-75">Create form records or view the existing ones.
                 </div>
             </div>
@@ -294,7 +295,7 @@ export default function Workspaces() {
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="team.svg" alt="Team"/>
             <div>
                 <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Team</div>
-                <div class="text-sm opacity-75">Manage team members of this workspace.
+                <div class="text-sm opacity-75">Manage who can access this workspace.
                 </div>
             </div>
         </a>}
@@ -341,12 +342,13 @@ export default function Workspaces() {
           : renderChildren()}
         <Divider hidden />
         {isAdmin && (
-          <Link to={linkToNewWorkspace}>
-            <Button basic primary size="tiny">
-              <Icon name="plus" />
-              Workspace
-            </Button>
-          </Link>
+          
+          <FooterButtons
+          rightButton={{
+            label: "Workspace",
+            icon: "plus",
+            link: linkToNewWorkspace
+          }} />
         )}
         <Divider />
 

@@ -36,6 +36,7 @@ import "./FormTemplate.css";
 import FormRegister from "./FormRegister";
 import { useAppContext } from "../lib/contextLib";
 import TextareaAutosize from 'react-textarea-autosize';
+import FooterButtons from "../components/FooterButtons";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
@@ -371,6 +372,7 @@ export default function FormTemplate() {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          
         />
         <Divider hidden />
         <Input
@@ -380,6 +382,7 @@ export default function FormTemplate() {
           type="text"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          className="my-1"
         />
         <Confirm
           size="mini"
@@ -683,30 +686,21 @@ export default function FormTemplate() {
             ? renderFormDesigner()
             : rednerRegisterDesigner()}
         </Segment>
-        <Button basic color="blue" size="mini" onClick={handleSubmit}>
-          <Icon name="save" />
-          Save
-        </Button>
+<FooterButtons rightButton={{label: "Save", color: "blue", onClick:() => handleSubmit(), icon: "save"}}
+leftButton={templateId && canDeleteTemplate() && {label: "Delete Form", color: "red", onClick:() => setDeleteConfirmOpen(true), icon: "remove circle"}}
+ />
+
+
+
         <Confirm
           size="mini"
           header="This will delete the form."
-          content="The existing records are fine but no new records of this form can be produced. Are you sure?"
+          content="The existing records are fine but no new records of this form can be created. Are you sure?"
           open={deleteConfirmOpen}
           onCancel={() => setDeleteConfirmOpen(false)}
           onConfirm={handleDelete}
         />
-        {templateId && canDeleteTemplate() && (
-          <Button
-            floated="right"
-            basic
-            size="mini"
-            color="red"
-            onClick={() => setDeleteConfirmOpen(true)}
-          >
-            <Icon name="remove circle" />
-            Delete Form
-          </Button>
-        )}
+       
       </Grid.Column>
       <Grid.Column width={9}>
         <Header as="h3" color="teal">

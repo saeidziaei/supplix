@@ -17,6 +17,7 @@ import User from "../components/User";
 import { dateFromEpoch } from "../lib/helpers";
 import "./FormRegisters.css";
 import { useAppContext } from "../lib/contextLib";
+import FooterButtons from "../components/FooterButtons";
 
 
 export default function WorkspaceTasks() {
@@ -380,12 +381,7 @@ export default function WorkspaceTasks() {
         {renderSelectedTask()}
         <Divider hidden />
         {!isMultiWorkspace && (
-          <LinkContainer to={`/workspace/${workspaceId}/task`}>
-            <Button basic size="tiny" color={isNCR() ? "red" : "blue"}>
-              <Icon name="plus" />
-              New
-            </Button>
-          </LinkContainer>
+          <FooterButtons rightButton={{icon: "plus", color: isNCR() ? "red" : "blue", label:"New", link: `/workspace/${workspaceId}/task`}} />
         )}
       </>
     );

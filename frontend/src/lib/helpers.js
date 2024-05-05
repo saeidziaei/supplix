@@ -132,7 +132,7 @@ export const generateRandomPassword = () => {
   return shuffledPassword;
 };
 
-export const isSystemTemplate = (templateId) => templateId.startsWith("SYS_");
+export const isSystemTemplate = (templateId) => templateId && templateId.startsWith("SYS_");
 export const loadSystemTemplate = (templateId) => {
   // Extract the system template from systemTemplateConfig
   const systemTemplate = systemTemplateConfig.systemTemplates.find(

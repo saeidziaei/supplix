@@ -1,8 +1,9 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { parseISO, format } from "date-fns";
-import { Checkbox, Input, Select } from "formik-semantic-ui-react";
-import DatePicker from "react-datepicker";
+import { Checkbox, Input } from "formik-semantic-ui-react";
+import DateInput from "./DateInput";
+import SelectInput from "./SelectInput";
 import "react-datepicker/dist/react-datepicker.css";
 import { NumericFormat } from "react-number-format";
 import TextareaAutosize from "react-textarea-autosize";
@@ -14,23 +15,33 @@ import {
 import Competency from "../components/Competency";
 import UserPicker from "./UserPicker";
 
-export function DynamicField({fieldDefinition, value, valueSetter, disabled, users}) {
+export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled, users, error}) {
     function renderField(f, value, setFieldValue, disabled) {
         return (
-          <div className="dynamic-field">
-            {renderFieldInput(f, value, setFieldValue, disabled)}
-          </div>
+<div className="w-full my-2">
+      <label className="w-full  flex flex-row items-center justify-start ">
+        <div className={disabled && "border-b border-dotted border-gray-400"}>{f.name}</div>
+        {f.miniLabel && (
+          <span className="text-[#000]/40 text-[0.9rem] ml-2">{f.miniLabel}</span>
+        )}
+        {f.isMandatory && <span className="text-[#DA2A29]">*</span>}
+        
+      </label>
+      {renderFieldInput(f, value, setFieldValue, disabled)}
+      
+        
+      
+      {error?.message?.length > 1 && (
+        <span className="text-[#DA2A29] !w-full  flex flex-row items-center justify-start text-[0.7rem]">
+          {error?.message}
+        </span>
+      )}
+    </div>
+
+
+          
         );
-        // return (
-        //   <>
-        //     {renderFieldInput(f, values, setFieldValue)}
-        //     <ErrorMessage
-        //       name={f.name}
-        //       component="div"
-        //       className="ui red pointing above prompt label basic"
-        //     />
-        //   </>
-        // );
+
       }
     
       function renderFieldInput(f, value, setFieldValue, disabled) {
@@ -64,8 +75,9 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
           case "number":
             return (
               <NumericFormat
+              placeholder="(number)"
                 displayType={disabled ? "text" : "input"}
-                className={disabled ? "disabledNumericFormat" : ""}
+                className={disabled ? "font-bold text-lg" : "w-full md:max-w-[300px] p-1 !rounded-xl !mt-1 *:!bg-[#E9EFF6] !bg-[#E9EFF6] *:!border-none *:!rounded-2xl hover:!shadow-lg transition duration-300"}
                 name={name}
                 thousandSeparator={true}
                 value={value}
@@ -87,23 +99,18 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
     
           case "text":
             return disabled ? (
-              f.basic ? (
-                <div>
-                  {typeof value === "object" ? JSON.stringify(value) : value}
-                </div>
-              ) : (
-                <h4>
-                  {typeof value === "object" ? JSON.stringify(value) : value}
-                </h4>
-              )
+              <div className="font-bold text-lg">
+                {typeof value === "object" ? JSON.stringify(value) : value}
+              </div>
             ) : (
               <TextareaAutosize
+                className="w-full p-1 !rounded-xl !mt-1 *:!bg-[#E9EFF6] !bg-[#E9EFF6] *:!border-none *:!rounded-2xl hover:!shadow-lg transition duration-300"
                 rows={1}
                 size={size}
                 name={name}
                 id={id}
                 value={value}
-                onChange={(ev) =>  setFieldValue(name, ev.target.value)}
+                onChange={(ev) => setFieldValue(name, ev.target.value)}
               />
             );
     
@@ -150,15 +157,15 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
             }
             if (selected == "Invalid Date") selected = ""; 
             return disabled ? (
-              <div>{selected ? format(selected, "dd-MM-yyyy") : ""}</div>
+              <div className="font-bold text-lg">{selected ? format(selected, "dd-MM-yyyy") : ""}</div>
             ) : (
-              <DatePicker
+              <DateInput
                 placeholderText="Select"
                 isClearable={!disabled}
                 size={size}
                 name={name}
                 id={id}
-                selected={selected}
+                value={selected}
                 dateFormat="dd-MMM-yy"
                 onChange={(date) =>
                   setFieldValue(name, date ? date.toISOString() : "")
@@ -187,7 +194,7 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
                     if (!selected) {
                       return null;
                     } else {
-                      return <h3>{o.value}</h3>;
+                      return <div className="font-bold text-lg mr-5">{o.value}</div>;
                     }
                   }
     
@@ -241,12 +248,12 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
               value: o.value,
               text: o.text || o.value,
             })) : [];
-            const displayText = options.find((o) => o.value === value)?.text || value
+            const displayText = options.find((o) => o.value === value)?.text || value;
+
             return disabled ? (
-              f.basic ? <div>{displayText}</div> :
-              <h4>{displayText}</h4>
+              <div className="font-bold text-lg">{displayText}</div>
             ) : (
-              <Select
+              <SelectInput
                 compact
                 placeholder="Select"
                 clearable
@@ -254,6 +261,7 @@ export function DynamicField({fieldDefinition, value, valueSetter, disabled, use
                 options={options}
                 name={name}
                 id={id}
+                onChange={(_, data) => setFieldValue(name, data.value)}
               />
             );
     
