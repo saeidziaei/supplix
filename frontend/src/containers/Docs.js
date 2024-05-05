@@ -8,6 +8,7 @@ import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
 import { capitalizeFirstLetter } from '../lib/helpers';
+import FooterButtons from "../components/FooterButtons";
 
 export default function Docs() {
   const [docs, setDocs] = useState([]);
@@ -68,7 +69,20 @@ export default function Docs() {
 
     return (
       <>
-        <WorkspaceInfoBox workspace={workspace} leafFolder="Library" />
+      <WorkspaceInfoBox workspace={workspace} leafFolder="Library" />
+        <div className="h-screen flex justify-center mt-2">
+          <div className="mx-auto px-4 w-full xl:w-3/5">
+            <div class="flex items-center">
+              <img
+                src="../../library.svg"
+                alt="Team"
+                class="h-20 w-20 object-contain mr-4"
+              />
+              <h1>Library</h1>
+            </div>
+
+      
+        
 
         
         {(!docs || docs.length == 0) && (
@@ -80,7 +94,6 @@ export default function Docs() {
         )}
         {docs && docs.length > 0 && (
           <>
-            <Divider />
             {groupedChildren &&
               groupedChildren.map((group, groupIndex) => (
                 <div key={groupIndex}>
@@ -121,13 +134,9 @@ export default function Docs() {
               ))}
           </>
         )}
-        <Divider hidden />
-        <LinkContainer to={`/workspace/${workspaceId}/doc`}>
-          <Button size="mini" basic primary>
-            <Icon name="plus" />
-            New
-          </Button>
-        </LinkContainer>
+ 
+<FooterButtons rightButton={{label: "New", icon: "plus", link: `/workspace/${workspaceId}/doc`}} />
+        </div></div>
       </>
     );
   }

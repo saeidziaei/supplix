@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Button, Dropdown, Form, Grid, Input, Item, List, Radio, Table } from "semantic-ui-react";
-import { BlockPicker } from "react-color";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
+import React, { useState } from "react";
+import { BlockPicker } from "react-color";
+import { Button, Checkbox, Dropdown, Form, Grid, Radio } from "semantic-ui-react";
 import * as Yup from 'yup';
 
 
@@ -350,7 +350,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
           {field.type != "info" && (
             <Form.Input
               width={8}
-              label={isRegisterField ? "Header" : "Prompt"}
+              label={isRegisterField ? "Header" : "Label"}
               type="text"
               value={field.name}
               onChange={(e) => handleFieldChange("name", e.target.value)}
@@ -365,7 +365,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
                   name="radioGroup"
                   value="content"
                   checked={field.as === "content"}
-                  onChange={(e, {value }) => handleFieldChange("as", value)}
+                  onChange={(e, { value }) => handleFieldChange("as", value)}
                 />
               </Form.Field>
               <Form.Field>
@@ -374,7 +374,7 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
                   name="radioGroup"
                   value="help"
                   checked={field.as === "help"}
-                  onChange={(e, {value }) => handleFieldChange("as", value)}
+                  onChange={(e, { value }) => handleFieldChange("as", value)}
                 />
               </Form.Field>
             </>
@@ -393,6 +393,14 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
               }}
             />
           </div>
+        )}
+        {field.type == "employee" && (
+          <Checkbox
+            toggle
+            label="Include in employee record?"
+            checked={field.isEmployeeRecord}
+            onChange={(e, data) => {handleFieldChange("isEmployeeRecord", data.checked)}}
+          />
         )}
         {renderFieldOptions()}
       </Form>

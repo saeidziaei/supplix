@@ -77,7 +77,7 @@ export default function UserFormRegister() {
 
         // Iterate through the template fields
         for (const field of templateFields) {
-          if (field.type === "text" || field.type === "select") {
+          if (field.type === "text" || field.type === "select" || field.type === "number" || field.type === "date") {
             // Check if the field type is 'text'
             const fieldName = field.name;
             const fieldValue = formValues[fieldName];

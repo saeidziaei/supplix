@@ -5,24 +5,21 @@ import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
 import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Accordion,
-  Button,
   Divider,
   Grid,
   Icon,
-  List,
   Loader,
-  Message,
-  Modal
+  Message
 } from "semantic-ui-react";
+import FooterButtons from "../components/FooterButtons";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
-import FooterButtons from "../components/FooterButtons";
 
 
 export default function Workspaces() {

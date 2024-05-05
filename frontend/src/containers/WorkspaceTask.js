@@ -229,11 +229,11 @@ export default function WorkspaceTask() {
 
   const renderTaskForm = () => {
     const color = isNCR() ? "red" : "blue";
-    const iconName = isNCR() ? "target" : "keyboard outline";
+    const iconName = isNCR() ? "target" : "keyboard";
     return (
       <>
-        <Header as="h2" textAlign="center">
-          <Icon.Group>
+        <h1  className="!mt-3 text-center" >
+          <Icon.Group >
             <Icon name={iconName} color={color} />
             <Icon
               corner={isRecurringMode ? "top left" : "bottom right"}
@@ -246,7 +246,7 @@ export default function WorkspaceTask() {
             : isRecurringMode
             ? "Recurring Task"
             : "Task"}
-        </Header>
+        </h1>
         <Formik
           initialValues={task || defaultValues}
           validate={validateForm}
@@ -514,14 +514,17 @@ export default function WorkspaceTask() {
                   onCancel={() => setDeleteConfirmOpen(false)}
                   onConfirm={handleDelete}
                 />
-                <Button
-                  size="mini"
-                  color="red"
+<Button
+                  className="px-3 md:px-0 w-[96%] md:w-full m-auto !mt-4 !bg-gradient-to-tr 
+                       !from-red-400 !to-red-700
+                    !shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] !text-white !rounded-xl hover:!text-gray-300 transition duration-300"
+                  
                   onClick={() => setDeleteConfirmOpen(true)}
                 >
-                  <Icon name="remove circle" />
                   Delete Task
                 </Button>
+
+                
               </>
             )}
           </Grid.Column>

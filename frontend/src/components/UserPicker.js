@@ -3,7 +3,7 @@ import { Select } from "semantic-ui-react";
 import User from "./User";
 import { getUserById } from "../lib/helpers";
 
-export default function UserPicker({ label="Employee", users, value, onChange, disabled = false, upward = false, compact = false, isMandatory = false }) {
+export default function UserPicker({ label="", users, value, onChange, disabled = false, upward = false, compact = false, isMandatory = false }) {
 
   if (!users) return <p>No users available</p>;
   
@@ -23,7 +23,7 @@ export default function UserPicker({ label="Employee", users, value, onChange, d
   return disabled ? (
     selected && <User user={selected} compact={compact} />
   ) : (
-    <div className='w-full '>
+    <div className='w-full md:max-w-[300px]'>
             <label className='w-full  flex flex-row items-center justify-start'>
                 {label} {isMandatory && <span className='text-[#DA2A29]'>*</span>}
             </label>

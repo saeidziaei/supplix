@@ -187,7 +187,7 @@ console.log("preSubmit", values);
                 </Table.Cell>
                 {fields.map((f, i) => (
                   <Table.Cell key={i}>
-                    <DynamicFieldInput fieldDefinition={ {...f, name: tabularFieldName(rowIndex, f.name)} } value={values[tabularFieldName(rowIndex, f.name)]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
+                    <DynamicFieldInput hideLabel="true" fieldDefinition={ {...f, name: tabularFieldName(rowIndex, f.name)} } value={values[tabularFieldName(rowIndex, f.name)]} valueSetter={setFieldValue} disabled={disabled} users={users}/>
                   </Table.Cell>
                 ))}
               </Table.Row>
@@ -209,10 +209,9 @@ console.log("preSubmit", values);
     return (
       <Segment basic vertical key={s.title} >
         {s.title &&
-          (<Menu tabular>
-              <Menu.Item active>{s.title}</Menu.Item>
-            </Menu>
-          )}
+          (<div  className="border-b border-gray-200 my-5">
+          <h3>{s.title}</h3></div>)
+          }
         <Grid divided columns={sectionColumns} doubling>
           {gridColumns.map((column) => (
             <Grid.Column key={column}>
@@ -235,7 +234,7 @@ console.log("preSubmit", values);
   }
 
   function renderAttachments(attachments, setFieldValue) {
-    if (!attachments || !attachments.length) return;
+    
     return (
       <>
         <div>
@@ -245,7 +244,7 @@ console.log("preSubmit", values);
         <FieldArray name="attachments">
           {({ insert, remove, push }) => (
             <CardGroup>
-              {attachments.map((attachment, index) => (
+              {attachments && attachments.length > 0 && attachments.map((attachment, index) => ( 
                   <Card key={index}>
                     {!disabled && (
                       <Card.Content>
@@ -348,25 +347,24 @@ console.log("preSubmit", values);
     );
   }
   function renderHeader(heading, subheading, image) {
-    return  <div className="w-full px-3 mt-2 border border-gray-300">
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-gray-900">{heading}</h1>
-        {subheading && <span className="text-gray-500 text-sm">{subheading}</span>}
-      </div>
-      <div className="ml-auto">
-        <img
-          src={image}
-          className="w-32 h-32 object-contain rounded-full"
-          alt="Profile"
-        />
-      </div>
+    return  <div className="w-full px-3  text-center">
+    <div>
+      <img
+        src={image}
+        className="w-48 h-48 mx-auto object-contain rounded-full mb-1"
+        alt="Logo"
+      />
+    </div>
+    <div>
+      <div className="text-gray-900 font-bold mb-2" style={{ fontSize: '32px' }}>{heading}</div>
+      {subheading && <span className="text-gray-500 text-sm">{subheading}</span>}
     </div>
   </div>
+  
   }
 
   return (
-    <div className="mx-auto px-4 w-full  xl:w-2/3">
+    <div className="mx-auto px-4 w-full  border-b border-l border-r border-gray-300 mt-5">
       {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
       <Formik
         initialValues={formData || defaultValues}

@@ -78,12 +78,18 @@ export default function FormRegisters() {
       let categories = ['ALL'].concat([...new Set(templates.map(t => t.templateDefinition.category))]);
       
       return (
-        
-        <List horizontal size="large">
-          {categories.map((category, index) => (
-            <List.Item className={`rounded-md !p-3 !m-1 bg-blue-100 text-sky-400  ${category != selectedCategory && "hover:bg-slate-300"} `} key={index} as={category === selectedCategory ? "span" : "a"} onClick={() => setSelectedCategory(category)}>{category}</List.Item>
-          ))}
-        </List>
+        <div className="flex flex-wrap mt-2">
+        {categories.map((category, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedCategory(category)}
+            className={`rounded-md p-3 m-1 bg-blue-100 text-sky-400 hover:bg-slate-300 ${category === selectedCategory && "bg-blue-300 !text-black"}`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+      
       );
     } 
   }
@@ -127,16 +133,15 @@ export default function FormRegisters() {
                                 Create
                               </a>
                             </div>
-                            <Link
-                              to={`/workspace/${workspaceId}/register/${t.templateId}`}
-                            >
+                            <div class="text-gray-500 font-thin text-sm pt-1">{def.category}</div>
+                            <div class="text-gray-500 font-thin text-sm pt-1">
                               {isSystemTemplate(t.templateId)
                                 ? "View"
                                 : `${t.formCount} ${pluralize(
                                     "record",
                                     t.formCount
                                   )}`}
-                            </Link>
+                            </div>
                           </a>
                         );
                       })}

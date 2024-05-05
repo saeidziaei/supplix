@@ -99,7 +99,7 @@ export default function TemplatedForm() {
         setTemplate(template);
         
         const fieldName = templateEmployeeField(template?.templateDefinition);
-        if (fieldName) { // there is an employee field in the form definition, we need to load users
+        if (fieldName) { 
           setEmployeeFieldName(fieldName);
         }
 
@@ -311,7 +311,7 @@ export default function TemplatedForm() {
   return (
     <>
       <WorkspaceInfoBox workspace={workspace} leafFolder={leafFolder} />
-
+      <div className="mx-auto px-4 w-full lg:w-1/2   ">
       <GenericForm
         formDef={template.templateDefinition}
         formData={formRecord ? formRecord.formValues : null}
@@ -323,6 +323,7 @@ export default function TemplatedForm() {
         isSystemForm={isSystemForm}
         systemFormName={templateId}
       />
+      </div>
 
       {workspaceId && templateId && formId && (
         <Popup

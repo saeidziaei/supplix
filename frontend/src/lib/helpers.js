@@ -95,7 +95,7 @@ export const templateEmployeeField = (template) => {
   for (const section of template.sections) {
     if (!section.fields) return null;
     for (const field of section.fields) {
-      if (field.type === 'employee') {
+      if (field.type === 'employee' && field.isEmployeeRecord) { // Only if isEmployeeRecord the record gets saved for that user
         return field.name; // Found an "employee" type field
       }
     }

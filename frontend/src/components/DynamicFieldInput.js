@@ -15,31 +15,37 @@ import {
 import Competency from "../components/Competency";
 import UserPicker from "./UserPicker";
 
-export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled, users, error}) {
+export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled, users, error, hideLabel=false}) {
     function renderField(f, value, setFieldValue, disabled) {
         return (
-<div className="w-full my-2">
-      <label className="w-full  flex flex-row items-center justify-start ">
-        <div className={disabled && "border-b border-dotted border-gray-400"}>{f.name}</div>
-        {f.miniLabel && (
-          <span className="text-[#000]/40 text-[0.9rem] ml-2">{f.miniLabel}</span>
-        )}
-        {f.isMandatory && <span className="text-[#DA2A29]">*</span>}
-        
-      </label>
-      {renderFieldInput(f, value, setFieldValue, disabled)}
-      
-        
-      
-      {error?.message?.length > 1 && (
-        <span className="text-[#DA2A29] !w-full  flex flex-row items-center justify-start text-[0.7rem]">
-          {error?.message}
-        </span>
-      )}
-    </div>
+          <div className="w-full my-2">
+            <label className="w-full  flex flex-row items-center justify-start ">
+              {!hideLabel && (
+                <>
+                  <div
+                    className={
+                      disabled && "border-b border-dashed border-gray-400"
+                    }
+                  >
+                    {f.name}
+                  </div>
+                  {f.miniLabel && (
+                    <span className="text-[#000]/40 text-[0.9rem] ml-2">
+                      {f.miniLabel}
+                    </span>
+                  )}
+                </>
+              )}
+              {f.isMandatory && <span className="text-[#DA2A29]">*</span>}
+            </label>
+            {renderFieldInput(f, value, setFieldValue, disabled)}
 
-
-          
+            {error?.message?.length > 1 && (
+              <span className="text-[#DA2A29] !w-full  flex flex-row items-center justify-start text-[0.7rem]">
+                {error?.message}
+              </span>
+            )}
+          </div>
         );
 
       }
@@ -87,6 +93,7 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
     
           case "employee":
             return (
+              <>
               <UserPicker
                 users={users}
                 disabled={disabled}
@@ -95,6 +102,9 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
                 onChange={(userId) => setFieldValue(name, userId)}
                 compact={f.compact}
               />
+              {f.isEmployeeRecord && <div className="font-thin text-sm italic">This record will be shown in this employee's records</div>
+}
+              </>
             );
     
           case "text":

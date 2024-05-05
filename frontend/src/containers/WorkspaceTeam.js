@@ -7,6 +7,7 @@ import { onError } from "../lib/errorLib";
 import { getUserById, normaliseCognitoUsers } from "../lib/helpers";
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
 import { useAppContext } from "../lib/contextLib";
+import SelectInput from "../components/SelectInput";
 
 export default function WorkspaceTeam(props) {
   const { workspaceId } = useParams();
@@ -92,94 +93,120 @@ export default function WorkspaceTeam(props) {
       );
 
     return (
-      <Grid style={{ height: "100vh" }} verticalAlign="top">
-        <Grid.Column >
-        <WorkspaceInfoBox workspace={workspace} leafFolder="Team"/>
-          {(!members || members.length === 0) && (
-            <Message
-              header="No member found"
-              content="Start by adding uses to your team!"
-              icon="exclamation"
-            />
-          )}
-          {members && members.length > 0 && (
-            <Table basic columns="5">
-              <Table.Body>
-                {members.map((m) => {
-                  const userMember = getUserById(users, m.userId);
-                  return (
-                    <Table.Row key={m.userId}>
-                      <Table.Cell>
-                        <Icon
-                          name={m.role === "Owner" ? "chess king" : "user"}
-                          color={m.role === "Owner" ? "black" : "grey"}
-                        />
-                      </Table.Cell>
-                      <Table.Cell>
-                        {userMember.photoURL && <Image src={userMember.photoURL} avatar/> }
-                      </Table.Cell>
-                      <Table.Cell>
-                        <strong>
-                          {userMember.given_name}
-                        </strong>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <strong>
-                          {userMember.family_name}
-                        </strong>
-                      </Table.Cell>
-                      <Table.Cell>{m.role}</Table.Cell>
-                      <Table.Cell>
-                        <Button size="tiny" basic onClick={() => deleteMember(m.userId)} icon="x" circular />
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                })}
-              </Table.Body>
-            </Table>
-          )}
-          {!isInAddMode ? (
-            nonMembers().length > 0 ?
-            (<Button basic onClick={() => setIsInAddMode(true)}>
-              Add Team Member
-            </Button>) : <Header as="h4">All users have already been added to this workspace</Header>
-          ) : (
-            <Segment>
-              <UserPicker
-                users={nonMembers()}
-                value={newMember}
-                onChange={(userId) => setNewMember(userId)}
+      <>
+        <WorkspaceInfoBox workspace={workspace} leafFolder="Team" />
+        <div className="h-screen flex justify-center mt-2">
+          <div className="mx-auto px-4 w-full xl:w-3/5">
+            <div class="flex items-center">
+              <img
+                src="../../team.svg"
+                alt="Team"
+                class="h-20 w-20 object-contain mr-4"
               />
-              <Divider hidden />
-              <Dropdown
-                
-                selection
-                placeholder="Role"
-                value={newMemberRole}
-                onChange={(e, { value }) => setNewMemberRole(value)}
-                options={["Member", "Owner"].map((option) => ({
-                  key: option,
-                  text: option,
-                  value: option,
-                }))}
+              <h1>Team</h1>
+            </div>
+
+            {(!members || members.length === 0) && (
+              <Message
+                header="No member found"
+                content="Start by adding uses to your team!"
+                icon="exclamation"
               />
-              {newMemberRole === "Owner" && (
+            )}
+            {members && members.length > 0 && (
+              <Table basic columns="5">
+                <Table.Body>
+                  {members.map((m) => {
+                    const userMember = getUserById(users, m.userId);
+                    return (
+                      <Table.Row key={m.userId}>
+                        <Table.Cell>
+                          <Icon
+                            name={m.role === "Owner" ? "chess king" : "user"}
+                            color={m.role === "Owner" ? "black" : "grey"}
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          {userMember.photoURL && (
+                            <Image src={userMember.photoURL} avatar />
+                          )}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <strong>{userMember.given_name}</strong>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <strong>{userMember.family_name}</strong>
+                        </Table.Cell>
+                        <Table.Cell>{m.role}</Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="tiny"
+                            basic
+                            onClick={() => deleteMember(m.userId)}
+                            icon="x"
+                            circular
+                          />
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
+                </Table.Body>
+              </Table>
+            )}
+            {!isInAddMode ? (
+              nonMembers().length > 0 ? (
+                <Button basic onClick={() => setIsInAddMode(true)}>
+                  Add Team Member
+                </Button>
+              ) : (
+                <Header as="h4">
+                  All users have already been added to this workspace
+                </Header>
+              )
+            ) : (
+              <Segment>
+                <UserPicker
+                  users={nonMembers()}
+                  value={newMember}
+                  onChange={(userId) => setNewMember(userId)}
+                />
+
+                <div className="my-2" />
+                <SelectInput
+                  label="Role"
+                  selection
+                  placeholder="Role"
+                  value={newMemberRole}
+                  onChange={(e, { value }) => setNewMemberRole(value)}
+                  options={["Member", "Owner"].map((option) => ({
+                    key: option,
+                    text: option,
+                    value: option,
+                  }))}
+                />
+                {newMemberRole === "Owner" && (
                   <p>
-                    <Icon name="warning sign" size="large" color="red" /> Owner can manage users, delete records and library items in this workspace
-                    
+                    <Icon name="warning sign" size="large" color="red" /> Owner
+                    can manage users, delete records and library items in this
+                    workspace
                   </p>
                 )}
-              <Divider  />
-              <Button basic onClick={addMember} disabled={!(newMember && newMemberRole)}>
-                Add
-              </Button>
-              <Button basic onClick={() => setIsInAddMode(false)}>
-                Cancel
-              </Button>
-            </Segment>
-          )}
-        </Grid.Column>
-      </Grid>
+                <Divider />
+                <Button
+                  basic
+                  onClick={addMember}
+                  disabled={!(newMember && newMemberRole)}
+                >
+                  Add
+                </Button>
+                <Button basic onClick={() => setIsInAddMode(false)}>
+                  Cancel
+                </Button>
+              </Segment>
+            )}
+          </div>
+        </div>
+      </>
     );
   }
 
