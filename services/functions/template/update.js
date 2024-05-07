@@ -3,6 +3,7 @@ import dynamoDb from "../../util/dynamodb";
 
 export const main = handler(async (event, tenant) => {
   const data = JSON.parse(event.body);
+  const newTemplateDefinition = data.templateDefinition;
 
   // Fetch the current template
   const getCurrentTemplateParams = {
@@ -14,22 +15,31 @@ export const main = handler(async (event, tenant) => {
   };
   const currentTemplateResult = await dynamoDb.get(getCurrentTemplateParams);
   const currentTemplate = currentTemplateResult.Item;
+  let templateVersion = currentTemplate.templateVersion ?? 0;
+  let updateExpression = "SET templateDefinition = :templateDefinition, templateVersion = :newTemplateVersion";
+  let historyAttribute = {};
 
-  // If the template doesn't have a history array, create one
-  if (!currentTemplate.history) {
-    currentTemplate.history = [];
+  if (isSignificantChange(currentTemplate.templateDefinition, newTemplateDefinition)) {
+    // if title or category has changed we don't need a new version but if there is changes in the fields, we do.
+
+    // Increment the templateVersion
+    templateVersion = templateVersion + 1;
+
+    // If the template doesn't have a history array, create one
+    if (!currentTemplate.history) {
+      currentTemplate.history = [];
+    }
+
+    // Push the current template to the history array
+    currentTemplate.history.push({
+      tenant: currentTemplate.tenant,
+      templateId: currentTemplate.templateId,
+      templateVersion: currentTemplate.templateVersion || 0,
+      templateDefinition: currentTemplate.templateDefinition,
+    });
+    updateExpression += ", history = :history";
+    historyAttribute = {":history": currentTemplate.history}
   }
-
-  // Push the current template to the history array
-  currentTemplate.history.push({
-    tenant: currentTemplate.tenant,
-    templateId: currentTemplate.templateId,
-    templateVersion: currentTemplate.templateVersion || 0,
-    templateDefinition: currentTemplate.templateDefinition,
-  });
-
-  // Increment the templateVersion if it exists, or set to 1 if it doesn't
-  const newTemplateVersion = (currentTemplate.templateVersion ?? 0) + 1;
 
   // Update the template with new values
   const updateTemplateParams = {
@@ -38,11 +48,11 @@ export const main = handler(async (event, tenant) => {
       tenant: tenant,
       templateId: event.pathParameters.templateId,
     },
-    UpdateExpression: "SET templateDefinition = :templateDefinition, templateVersion = :newTemplateVersion, history = :history",
+    UpdateExpression: updateExpression,
     ExpressionAttributeValues: {
-      ":templateDefinition": data.templateDefinition,
-      ":newTemplateVersion": newTemplateVersion,
-      ":history": currentTemplate.history,
+      ":templateDefinition": newTemplateDefinition,
+      ":newTemplateVersion": templateVersion,
+      ...historyAttribute
     },
     ReturnValues: "ALL_NEW",
   };
@@ -53,3 +63,11 @@ export const main = handler(async (event, tenant) => {
     status: true,
   };
 });
+function isSignificantChange(oldFormDefinition, newFormDefinition) {
+  const sectionsChanged =
+    JSON.stringify(oldFormDefinition.sections) !==
+    JSON.stringify(newFormDefinition.sections);
+
+  // If sections have changed, it's a significant change
+  return sectionsChanged;
+}

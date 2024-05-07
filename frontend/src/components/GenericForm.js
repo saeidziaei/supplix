@@ -364,7 +364,7 @@ console.log("preSubmit", values);
   }
 
   return (
-    <div className="mx-auto px-4 w-full  border-b border-l border-r border-gray-300 mt-5">
+    <div className="mx-auto p-6 !pb-10 w-full  border border-gray-300 mt-5 shadow-lg">
       {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
       <Formik
         initialValues={formData || defaultValues}

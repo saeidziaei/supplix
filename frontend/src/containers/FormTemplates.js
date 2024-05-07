@@ -1,30 +1,18 @@
+import pluralize from "pluralize";
 import React, { useEffect, useState } from "react";
-import { LinkContainer } from "react-router-bootstrap";
-import {
-  Button, Card,
-  Divider,
-  Grid,
-  Header,
-  Icon,
-  List,
-  Loader,
-  Message,
-  Segment
-} from "semantic-ui-react";
+import { Loader, Message } from "semantic-ui-react";
+import FooterButtons from "../components/FooterButtons";
 import FormHeader from "../components/FormHeader";
 import { makeApiCall } from "../lib/apiLib";
 import { onError } from "../lib/errorLib";
-import FormTemplateSettings from "./FormTemplateSettings";
 import "./FormTemplates.css";
-import pluralize from "pluralize";
-import FooterButtons from "../components/FooterButtons";
-
 
 export default function FormTemplates() {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [templateSettingsVisible, setTemplateSettingsVisible] = useState(false);
   const [savedSettings, setSavedSettings] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
 
   const handleTemplateSettingsSave = (settings) => {
     // Save the settings to your preferred storage (e.g., API, localStorage)
@@ -38,7 +26,6 @@ export default function FormTemplates() {
       try {
         const templates = await loadTemplates();
         setTemplates(templates);
-
       } catch (e) {
         onError(e);
       }
@@ -52,65 +39,65 @@ export default function FormTemplates() {
   async function loadTemplates() {
     return await makeApiCall("GET", `/templates`);
   }
+  function renderCategories() {
+    if (templates && templates.length) {
+      let categories = ["ALL"].concat([
+        ...new Set(templates.map((t) => t.templateDefinition.category)),
+      ]);
+
+      return (
+        <div className="flex flex-wrap mt-2">
+          {categories.map((category, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedCategory(category)}
+              className={`rounded-md p-3 m-1 bg-green-100 text-green-500 hover:bg-slate-300 ${
+                category === selectedCategory && "!bg-green-700 !text-white !font-bold"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      );
+    }
+  }
   function renderTemplate(t) {
     const td = t.templateDefinition;
     let fieldCount = 0;
-    if (td && td.sections) 
-      td.sections.forEach(s => fieldCount += s.fields.length);
+    if (td && td.sections)
+      td.sections.forEach((s) => (fieldCount += s.fields.length));
 
-    return <a href={`/template/${t.templateId}`}
-    class="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-teal-500 rounded-md px-3 py-2 w-full md:w-5/12 lg:w-3/12">
-    {td.title}
+    return (
+      <a
+        href={`/template/${t.templateId}`}
+        className="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-green-700 rounded-md px-3 py-2 sm:hover:shadow-2xl"
+      >
+        {td.title}
 
-    <div class="text-gray-500 font-thin text-sm pt-1">
-        <span>{`${fieldCount} ${pluralize("field", fieldCount)}`}</span>
-    </div>
-</a>
-
-    
+        <div className="text-gray-500 font-thin text-sm pt-1">
+          <span>{`${fieldCount} ${pluralize("field", fieldCount)}`}</span>
+        </div>
+        <div className="text-gray-500 font-thin text-sm pt-1">{td.category}</div>
+      </a>
+    );
   }
 
-
-
   if (isLoading) return <Loader active />;
-  const groupedChildren =
-  !templates || templates.length == 0
-    ? []
-    : templates.reduce((result, child) => {
-        const group = result.find(
-          (group) => group[0].templateDefinition.category === child.templateDefinition.category
-        );
-
-        if (group) {
-          group.push(child);
-        } else {
-          result.push([child]);
-        }
-
-        return result;
-      }, []);
-
   return (
-    <>
+    <div className="mx-auto px-4 w-full  xl:w-2/3">
       <FormHeader heading="Forms" />
+      {renderCategories()}
       {templates && templates.length > 0 && (
-        <>
-          <div className="mx-auto px-4 w-full  xl:w-2/3">
-            {groupedChildren &&
-              groupedChildren.map((group, groupIndex) => (
-                <div key={groupIndex}>
-                  <Divider horizontal>
-                    <Header as="h4">
-                      {group[0].templateDefinition.category || "-"}
-                    </Header>
-                  </Divider>
-                  <div className="flex flex-wrap gap-4 p-6 justify-left text-lg ">
-                    {group && group.map((t) => renderTemplate(t))}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </>
+        <div className="grid grid-cols-3 gap-6  p-6 justify-center text-lg">
+          {templates
+            .filter(
+              (t) =>
+                selectedCategory === "ALL" ||
+                selectedCategory === t.templateDefinition.category
+            )
+            .map((t) => renderTemplate(t))}
+        </div>
       )}
 
       {templates.length == 0 && (
@@ -120,9 +107,13 @@ export default function FormTemplates() {
           icon="exclamation"
         />
       )}
-      <FooterButtons rightButton={{label: "Design New Form", icon:"pencil", link:"/template"}} />
-
-
+      <FooterButtons
+        rightButton={{
+          label: "Design New Form",
+          icon: "pencil",
+          link: "/template",
+        }}
+      />
 
       {/* <Divider />
        <Button basic onClick={() => setTemplateSettingsVisible(true)}>
@@ -131,6 +122,6 @@ export default function FormTemplates() {
       {templateSettingsVisible && (
         <FormTemplateSettings templates={templates} onSave={handleTemplateSettingsSave} />
       )} */}
-    </>
+    </div>
   );
 }

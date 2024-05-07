@@ -686,10 +686,14 @@ export default function FormTemplate() {
             ? renderFormDesigner()
             : rednerRegisterDesigner()}
         </Segment>
+        {templateId && <div class="border border-gray-300 bg-gray-100 p-4 rounded m-1">
+  <Icon name="warning" color="olive"/>
+  When a form is updated, a new version gets created. This new version will be used for the new records. All the existing records will continue to use the old version.
+</div>}
+
 <FooterButtons rightButton={{label: "Save", color: "blue", onClick:() => handleSubmit(), icon: "save"}}
 leftButton={templateId && canDeleteTemplate() && {label: "Delete Form", color: "red", onClick:() => setDeleteConfirmOpen(true), icon: "remove circle"}}
  />
-
 
 
         <Confirm

@@ -79,11 +79,12 @@ export default function FormRegisters() {
       
       return (
         <div className="flex flex-wrap mt-2">
+        
         {categories.map((category, index) => (
           <button
             key={index}
             onClick={() => setSelectedCategory(category)}
-            className={`rounded-md p-3 m-1 bg-blue-100 text-sky-400 hover:bg-slate-300 ${category === selectedCategory && "bg-blue-300 !text-black"}`}
+            className={`rounded-md p-3 m-1 bg-blue-50 text-blue-400 hover:bg-slate-300 ${category === selectedCategory && "bg-blue-500 !text-white !font-bold"}`}
           >
             {category}
           </button>
@@ -106,7 +107,7 @@ export default function FormRegisters() {
           />
         )}
         {renderCategories()}
-        <div class="grid grid-cols-3 gap-6  p-6 justify-center text-lg ">
+        <div className="grid grid-cols-3 gap-6  p-6 justify-center text-lg ">
         {templates &&
                     templates
                       .filter(
@@ -120,21 +121,21 @@ export default function FormRegisters() {
                           <a
                             key={t.templateId}
                             href={`/workspace/${workspaceId}/register/${t.templateId}`}
-                            class="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-sky-900 rounded-md px-3 py-2 sm:hover:shadow-2xl"
+                            className="bg-gray-100 col-span-6 md:col-span-1 text-black border-l-8 border-sky-900 rounded-md px-3 py-2 sm:hover:shadow-2xl"
                           >
                             {def.title}
 
-                            <div class="text-gray-500 font-thin text-sm pt-1">
+                            <div className="text-gray-500 font-thin text-sm pt-1">
                               <a
-                                class="float-right  px-2 py-1 min-w-[80px] text-center text-blue-400 border border-blue-400 rounded hover:bg-blue-600 hover:text-white  focus:outline-none focus:ring"
+                                className="float-right  px-2 py-1 min-w-[80px] text-center text-blue-400 border border-blue-400 rounded hover:bg-blue-600 hover:text-white  focus:outline-none focus:ring"
                                 href={`/workspace/${workspaceId}/form/${t.templateId}`}
                               >
                                 <Icon name="plus"/>
                                 Create
                               </a>
                             </div>
-                            <div class="text-gray-500 font-thin text-sm pt-1">{def.category}</div>
-                            <div class="text-gray-500 font-thin text-sm pt-1">
+                            <div className="text-gray-500 font-thin text-sm pt-1">{def.category}</div>
+                            <div className="text-gray-500 font-thin text-sm pt-1">
                               {isSystemTemplate(t.templateId)
                                 ? "View"
                                 : `${t.formCount} ${pluralize(

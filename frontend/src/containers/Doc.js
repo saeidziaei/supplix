@@ -10,7 +10,9 @@ import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import placeholderImage from '../fileplaceholder.jpg';
 import { WorkspaceInfoBox } from "../components/WorkspaceInfoBox";
-
+import FooterButtons from "../components/FooterButtons";
+import pdf from "../pdf.svg"
+import TextInput from "../components/TextInput";
 
 
 export default function Doc() {
@@ -151,9 +153,10 @@ export default function Doc() {
   async function updateDoc(item) {
     return await makeApiCall("PUT", `/workspaces/${workspaceId}/docs/${doc.docId}`, { category: item.category, note: item.note });
   }
+
   function renderForm() {
     return (
-      <Grid textAlign="center" style={{ height: "100vh" }}>
+      <Grid textAlign="center" verticalAlign="middle" className="!mt-10">
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" color="black" textAlign="center">
             <Icon name="box" color="grey" />
@@ -174,53 +177,49 @@ export default function Doc() {
               /* and other goodies */
             }) => (
               <Form onSubmit={handleSubmit}>
-                <Segment>
-                  <Form.Input
-                    fluid
-                    iconPosition="left"
-                    icon="tag"
-                    name="category"
-                    placeholder="Category"
+                <>
+                  <TextInput
+                  
                     value={values.category}
+                    name="category"
                     onChange={handleChange}
+                    label="Category"
                   />
-                  {!isEditing && (
-                    <Form.Input onChange={handleFileChange} type="file" />
+
+                  {!isEditing && (<div className="my-3">
+                    <Form.Input  onChange={handleFileChange} type="file" /></div>
                   )}
-                  <Form.Input
-                    fluid
-                    iconPosition="left"
-                    icon="comment"
-                    name="note"
-                    placeholder="Note"
+                  <TextInput
                     value={values.note}
+                    name="note"
                     onChange={handleChange}
+                    label="Note"
                   />
-                </Segment>
-                {isEditing ? (
-                  <Button
-                    basic
-                    floated="left"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Cancel
-                  </Button>
-                ) : (
-                  <LinkContainer to={`/workspace/${workspaceId}/docs`}>
-                    <Button basic floated="left">
-                      Back
-                    </Button>
-                  </LinkContainer>
-                )}
-                <Button
-                  basic
-                  primary
-                  type="submit"
-                  disabled={isSubmitting}
-                  floated="right"
-                >
-                  Save
-                </Button>
+                </>
+                <FooterButtons
+                  rightButton={{
+                    label: "Save",
+                    icon: "save",
+                    color: "blue",
+                    isSubmit: true,
+                  }}
+                  leftButton={
+                    isEditing
+                      ? {
+                          label: "Cancel",
+                          icon: "undo",
+                          color: "gray",
+                          onClick: () => setIsEditing(false),
+                        }
+                      : {
+                          label: "Back",
+                          icon: "arrow left",
+                          color: "gray",
+                          link: `/workspace/${workspaceId}/docs`,
+                        }
+                  }
+                />
+                
               </Form>
             )}
           </Formik>
@@ -228,81 +227,91 @@ export default function Doc() {
       </Grid>
     );
   }
+  function isImageFile(fileName) {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
+    const fileExtension = fileName.substr(fileName.lastIndexOf('.')).toLowerCase();
+    return imageExtensions.includes(fileExtension);
+  }
+  function isPDF(fileName) {
+    const fileExtension = fileName.substr(fileName.lastIndexOf('.')).toLowerCase();
+    return fileExtension === ".pdf"
+  }
+
 
   function renderDoc() {
     return (
       <>
-        <Grid textAlign="center" style={{ height: "100vh" }} columns="1">
-          <Grid.Column>
-            <Image
+        <div className="flex justify-center items-start h-screen mt-10">
+          <div className="max-w-lg w-full">
+            <div className="border rounded p-6 m-1 ">
+            {isImageFile(doc.fileName) ?
+            <img
               src={doc.fileURL}
-              wrapped
               alt={doc.fileName}
+              className="w-full"
               onError={(e) => {
                 e.target.src = placeholderImage;
               }}
-            />
-            <Divider hidden />
-            {isEditing ? (
-              renderForm()
-            ) : (
-              <List horizontal>
-                <List.Item>
-                  <Label>{doc.category}</Label>
-                </List.Item>
-                <List.Item>
-                  <Header>{doc.note}</Header>
-                </List.Item>
-                <List.Item>
-                  <Button
-                    circular
-                    basic
-                    size="tiny"
-                    icon="edit"
-                    floated="left"
-                    onClick={() => setIsEditing(true)}
-                  />
-                </List.Item>
-                <List.Item></List.Item>
-              </List>
-            )}
-            <p>
-              <br />
-              <a href={doc.fileURL} download={doc.fileName}>
-                Download {doc.fileName}
-              </a>
-            </p>
-
-            <Divider />
-            <Confirm
-              size="mini"
-              header="This will delete this library item."
-              open={deleteConfirmOpen}
-              onCancel={() => setDeleteConfirmOpen(false)}
-              onConfirm={handleDelete}
-            />
-            {docId && (isAdmin || workspace?.role === "Owner") && (
-              <Button
-                size="mini"
-                color="red"
-                onClick={() => setDeleteConfirmOpen(true)}
+            /> : <img src={isPDF(doc.fileName) ? pdf : placeholderImage} className="w-[100px]" /> }
+        <a
+                href={doc.fileURL}
+                download={doc.fileName}
+                className="text-blue-500"
               >
-                <Icon name="remove circle" />
-                Delete
-              </Button>
-            )}
-          </Grid.Column>
-        </Grid>
+                {doc.fileName}
+              </a>
+            <div className="mt-4 ">
+              {isEditing ? (
+                renderForm()
+              ) : (
+                <>
+                
+                  <div className="">
+                    Category: {doc.category}
+                  </div>
+                  <div className="mt-5">Note: {doc.note}</div></>
+              )}
+              
+            </div>
+            </div>
+            <div className="mt-4">
+              
+              {!isEditing &&
+              <FooterButtons
+                rightButton={{
+                  label: "Edit",
+                  icon: "pencil",
+                  color: "teal",
+                  onClick: () => setIsEditing(true),
+                }}
+                leftButton={docId && (isAdmin || workspace?.role === "Owner") && {
+                  label: "Delete",
+                  icon: "x",
+                  color: "red",
+                  onClick: () => setDeleteConfirmOpen(true),
+                }}
+              />}
+            </div>
+          </div>
+        </div>
+        <Confirm
+          size="mini"
+          header="This will delete this library item."
+          open={deleteConfirmOpen}
+          onCancel={() => setDeleteConfirmOpen(false)}
+          onConfirm={handleDelete}
+        />
       </>
     );
   }
+  
 
   if (isLoading) return <Loader active />;
 
   return (
-    <>
+    <div className="mx-auto px-4 w-full  xl:w-2/3">
       <WorkspaceInfoBox workspace={workspace} leafFolder="Library" />
       {doc ? renderDoc() : renderForm()}
-    </>
+    </div>
   );
 }
