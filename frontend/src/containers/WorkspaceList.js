@@ -302,7 +302,7 @@ export default function Workspaces() {
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="library.svg" alt="Library"/>
             <div>
                 <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Library</div>
-                <div class="text-sm opacity-75">Reposity of all documents for this workspace (images, PDFs, etc.).
+                <div class="text-sm opacity-75">Repository of all documents for this workspace (images, PDFs, etc.).
                 </div>
             </div>
         </a>
