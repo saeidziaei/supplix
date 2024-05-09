@@ -24,7 +24,7 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
                 <>
                   <div
                     className={
-                      disabled && "border-b border-dashed border-gray-400"
+                      disabled && "border-b border-dashed border-gray-300"
                     }
                   >
                     {f.name}

@@ -266,7 +266,7 @@ export default function Workspaces() {
     
     <div
         class="gr mx-auto max-w-5xl items-stretch space-y-4 text-left sm:flex sm:space-y-0 sm:space-x-8 sm:text-center">
-        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
             href={`/workspace/${workspaceId}/registers`} >
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="register.svg" alt="Register"/>
             <div>
@@ -275,7 +275,7 @@ export default function Workspaces() {
                 </div>
             </div>
         </a>
-        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
             href={`/workspace/${workspaceId}/tasks`} >
             
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="task.svg" alt="Tasks"/>
@@ -286,7 +286,7 @@ export default function Workspaces() {
             </div>
         </a>
         {canEditWorkspaceTeam() &&
-        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
             href={`/workspace/${workspaceId}/team`} >
             
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="team.svg" alt="Team"/>
@@ -297,7 +297,7 @@ export default function Workspaces() {
             </div>
         </a>}
        
-        <a class="flex w-full items-center rounded-xl border border-black border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
             href={`/workspace/${workspaceId}/docs`} >
             <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="library.svg" alt="Library"/>
             <div>

@@ -480,9 +480,9 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         )}
         {!isPreview && (
           <>
-            <Button basic size="tiny" onClick={() => autoSizeAll(true)}>
+            {/* <Button basic size="tiny" onClick={() => autoSizeAll(true)}>
               Auto Size
-            </Button>
+            </Button> */}
             <Button basic size="tiny" onClick={exportGridToCSV}>
               <Icon name="file excel" color="green" /> Export to Excel
             </Button>
