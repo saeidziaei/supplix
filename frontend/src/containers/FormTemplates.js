@@ -51,7 +51,7 @@ export default function FormTemplates() {
             <button
               key={index}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-md p-3 m-1 bg-green-100 text-green-500 hover:bg-slate-300 ${
+              className={`rounded-md p-3 m-1 bg-teal-50 text-green-700 hover:bg-slate-300 ${
                 category === selectedCategory && "!bg-green-700 !text-white !font-bold"
               }`}
             >
