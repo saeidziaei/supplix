@@ -131,7 +131,7 @@ export default function WorkspaceTask() {
     }
 
     onLoad();
-  }, []);
+  }, [users]);
 
   async function createTask(item) {
     const endpoint = `/workspaces/${workspaceId}/${
