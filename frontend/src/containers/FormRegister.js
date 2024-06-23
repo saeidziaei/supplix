@@ -21,6 +21,7 @@ import User from "../components/User";
 import { useAppContext } from "../lib/contextLib";
 import "./FormRegisters.css";
 import FooterButtons from "../components/FooterButtons";
+import NotificationBox from "../components/NotificationBox";
 
 
 export default function FormRegister({ formDefInput, formsInput, isHistory, isPreview }) {
@@ -517,6 +518,8 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         <Divider hidden />
         {!isHistory && !isPreview && (
           <>
+          {isTemplateDeleted && (<NotificationBox msg="This form has been deleted, no new records can be created."/>)}
+
 <FooterButtons leftButton={{
     label: "Back",
     icon: "arrow left",
@@ -525,11 +528,11 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   rightButton={{
     label: "Record",
     icon: "plus",
-    link: `/workspace/${workspaceId}/form/${templateId}`
+    link: `/workspace/${workspaceId}/form/${templateId}`,
+    disabled: isTemplateDeleted
   }} />
 
    
-
             
             {hasChanges && (
               <Button basic color="blue" floated="right" onClick={handleSave}>

@@ -71,7 +71,25 @@ export function StorageStack({ stack, app }) {
       isRecurringIndex: { partitionKey: "isRecurring" },
     },
     stream: "new_and_old_images",
+  });  
+  
+  const workspaceInoutTable = new Table(stack, "WorkspaceInout", {
+    fields: {
+      tenant: "string",
+      workspaceId: "string",
+      tenant_workspaceId: "string",
+      inoutId: "string",
+      userId: "string",
+      inDate: "number",
+    },
+    primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "inoutId" },
+    globalIndexes: {
+      tenant_ws_user_Index: { partitionKey: "tenant_workspaceId", sortKey: "userId" },
+      tenant_user_Index: { partitionKey: "tenant", sortKey: "userId" },
+    },
   });
+
+
    
   const workspaceUserTable = new Table(stack, "WorkspaceUser", {
     fields: {
@@ -144,6 +162,7 @@ export function StorageStack({ stack, app }) {
     workspaceTable,
     workspaceUserTable,
     workspaceTaskTable,
+    workspaceInoutTable,
     deletedArchiveTable,
     stripeEventTable,
     bucket,

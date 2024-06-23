@@ -1,7 +1,7 @@
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 
-import { Cognito, Api, use, Function } from "sst/constructs";
+import { Cognito, Api, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 import { ADMIN_GROUP, RECURRING, TOP_LEVEL_ADMIN_GROUP, WORKSPACE_OWNER_ROLE } from "../services/util/constants";
 import { StringAttribute } from "aws-cdk-lib/aws-cognito";
@@ -19,6 +19,7 @@ export function AuthAndApiStack({ stack, app }) {
     workspaceTable,
     workspaceUserTable,
     workspaceTaskTable,
+    workspaceInoutTable,
     deletedArchiveTable,
     stripeEventTable,
   } = use(StorageStack);
@@ -145,6 +146,7 @@ Temporary Password: {####}
           WORKSPACE_TABLE: workspaceTable.tableName,
           WORKSPACEUSER_TABLE: workspaceUserTable.tableName,
           WORKSPACETASK_TABLE: workspaceTaskTable.tableName,
+          WORKSPACEINOUT_TABLE: workspaceInoutTable.tableName,
           DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
           STRIPEEVENT_TABLE: stripeEventTable.tableName,
           BUCKET: bucket.bucketName,
@@ -304,6 +306,27 @@ Temporary Password: {####}
           },
         },
       },
+
+
+      "POST  /workspaces/{workspaceId}/inouts": {
+        function: {
+          handler: "services/functions/workspaceinout/create.main",
+          bind: [workspaceInoutTable],
+        },
+      },
+      "GET   /workspaces/{workspaceId}/inouts/lastin": {
+        function: {
+          handler: "services/functions/workspaceinout/getlastin.main",
+          bind: [workspaceInoutTable, workspaceTable],
+        },
+      },
+      "PUT  /workspaces/{workspaceId}/inouts/{inoutId}": {
+        function: {
+          handler: "services/functions/workspaceinout/update.main",
+          bind: [workspaceInoutTable],
+        },
+      },
+
 
       "POST /docs/upload-url": {
         function: {

@@ -19,6 +19,10 @@ export const main = handler(async (event, tenant) => {
       endDate: data.endDate || "",
       note: data.note || "",
       templateCategories: data.templateCategories || [],
+      hasInout: data.hasInout || false,
+      siteOwner: data.siteOwner || "",
+      siteAddress: data.siteAddress || "",
+      inoutNote: data.inoutNote || "",
       
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 

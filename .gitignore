@@ -15,3 +15,7 @@ node_modules
 .mynotes
 
 .env
+
+.sst.config*
+
+iso-forms-ynex

@@ -49,9 +49,9 @@
     "yup": "^1.0.2"
   },
   "scripts": {
-    "start": "sst env react-scripts start",
+    "start": "sst bind react-scripts start",
     "build": "react-scripts build",
-    "test": "sst env jest",
+    "test": "sst bind jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

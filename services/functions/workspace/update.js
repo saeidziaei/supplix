@@ -20,7 +20,11 @@ export const main = handler(async (event, tenant) => {
       startDate = :startDate,
       endDate = :endDate,
       workspaceStatus = :workspaceStatus,
-      templateCategories = :templateCategories
+      templateCategories = :templateCategories,
+      hasInout = :hasInout,
+      siteOwner = :siteOwner,
+      siteAddress = :siteAddress,
+      inoutNote = :inoutNote
       `,
     ExpressionAttributeValues: {
       ":parentId": data.parentId,
@@ -33,6 +37,11 @@ export const main = handler(async (event, tenant) => {
       ":endDate": data.endDate || "",
       ":workspaceStatus": data.workspaceStatus || "",
       ":templateCategories": data.templateCategories || [],
+      ":hasInout": data.hasInout || false,
+      ":siteOwner": data.siteOwner || "",
+      ":siteAddress": data.siteAddress || "",
+      ":inoutNote": data.inoutNote || "",
+
     },
     ReturnValues: "ALL_NEW",
   };

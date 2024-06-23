@@ -2,24 +2,33 @@ import React from "react";
 import { Button, Icon } from "semantic-ui-react";
 
 const FooterButtons = ({ leftButton, rightButton }) => {
-  const renderButton = ({ label, link, icon, isSubmit, onClick, color }) => {
+  const renderButton = ({ label, link, icon, isSubmit, onClick, color, disabled=false }) => {
     const handleClick = (e) => {
       if (!isSubmit) {
         e.preventDefault();
       }
       onClick && onClick();
     };
-    const className = `block w-full px-2 py-2 md:min-w-[150px] mx-auto mt-2 text-center  text-${color}-400 border border-${color}-400 rounded hover:bg-${color}-600 hover:text-white focus:outline-none focus:ring`;
+
+    const className = `block w-full px-2 py-2 md:min-w-[150px] mx-auto mt-2 text-center text-${color}-400 border border-${color}-400 rounded hover:bg-${color}-600 hover:text-white focus:outline-none focus:ring ${
+      disabled ? 'opacity-50 cursor-not-allowed' : ''
+    }`;
 
     return link ? (
-      <a href={link} className={className} >
+      <a
+        href={disabled ? "#" : link}
+        className={className}
+        style={disabled ? { pointerEvents: 'none' } : {}}
+      >
         <Icon name={icon} />
         {label}
-      </a> 
+      </a>
+
     ) : (
     
       <button
         type={isSubmit ? "submit" : "button"}
+        disabled={disabled}
         className={className}
         onClick={handleClick}
       >

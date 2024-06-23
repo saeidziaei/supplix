@@ -10,6 +10,8 @@ import { Amplify } from "aws-amplify";
 import config from "./config";
 import 'semantic-ui-css/semantic.min.css'
 
+console.log(config);
+
 Amplify.configure({ 
   Auth: {
     mandatorySignIn: true,

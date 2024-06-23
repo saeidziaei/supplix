@@ -2,9 +2,10 @@
 import type { SSTConfig } from "sst"
 import { AuthAndApiStack } from "./stacks/AuthAndApiStack.js"
 import { StorageStack } from "./stacks/StorageStack.js"
-import { FrontendStack } from "./stacks/FrontendStack.js"
 import { AfterDeployStack } from "./stacks/ScriptStack.js"
 import { CronStack } from "./stacks/CronStack.js"
+import { FrontendStackOld } from "./stacks/FrontendStackOld.js"
+import { FrontendStack } from "./stacks/FrontendStack.js"
 
 export default {
   config(input) {
@@ -15,7 +16,7 @@ export default {
   },
   stacks(app) {
     app.setDefaultFunctionProps({
-      runtime: "nodejs16.x",
+      runtime: "nodejs18.x",
       architecture: "arm_64",
     })
 
@@ -23,7 +24,8 @@ export default {
       .stack(StorageStack)  
       .stack(CronStack)
       .stack(AuthAndApiStack)
-      .stack(FrontendStack)
+      // .stack(FrontendStack)
+      .stack(FrontendStackOld)
       .stack(AfterDeployStack)
   },
 } satisfies SSTConfig

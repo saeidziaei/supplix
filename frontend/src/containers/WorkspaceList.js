@@ -255,7 +255,17 @@ export default function Workspaces() {
     );
   }
   function renderWorkspace(ws) {
+    const MiniBox = ({link, image, title, msg, alt}) => (<a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
+      href={link} >
+      <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src={image} alt={alt}/>
+      <div>
+          <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">{title}</div>
+          <div class="text-sm opacity-75">{msg}
+          </div>
+      </div>
+  </a>);
     const { workspaceId } = ws;
+    console.log("ws", ws);
     return (<>
       <WorkspaceInfoBox
                     workspace={selectedWorkspace}
@@ -266,47 +276,14 @@ export default function Workspaces() {
     
     <div
         class="gr mx-auto max-w-5xl items-stretch space-y-4 text-left sm:flex sm:space-y-0 sm:space-x-8 sm:text-center">
-        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
-            href={`/workspace/${workspaceId}/registers`} >
-            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="register.svg" alt="Register"/>
-            <div>
-                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Records Register</div>
-                <div class="text-sm opacity-75">Create form records or view the existing ones.
-                </div>
-            </div>
-        </a>
-        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
-            href={`/workspace/${workspaceId}/tasks`} >
-            
-            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="task.svg" alt="Tasks"/>
-            <div>
-                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Tasks</div>
-                <div class="text-sm opacity-75">Manage the tasks assigned to the team members.
-                </div>
-            </div>
-        </a>
-        {canEditWorkspaceTeam() &&
-        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
-            href={`/workspace/${workspaceId}/team`} >
-            
-            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="team.svg" alt="Team"/>
-            <div>
-                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Team</div>
-                <div class="text-sm opacity-75">Manage who can access this workspace.
-                </div>
-            </div>
-        </a>}
-       
-        <a class="flex w-full items-center rounded-xl border border-black dark:border-white border-opacity-10 px-4 py-6 text-black duration-200 hover:border-opacity-0 hover:no-underline hover:shadow-lg dark:text-white dark:hover:bg-white dark:hover:bg-opacity-10 sm:flex-col sm:hover:shadow-2xl"
-            href={`/workspace/${workspaceId}/docs`} >
-            <img class="mr-4 w-12 sm:mr-0 sm:h-32 sm:w-32 " src="library.svg" alt="Library"/>
-            <div>
-                <div class="font-semibold text-black dark:text-white sm:mt-4 sm:mb-2">Library</div>
-                <div class="text-sm opacity-75">Repository of all documents for this workspace (images, PDFs, etc.).
-                </div>
-            </div>
-        </a>
-        
+          {ws && ws.hasInout && 
+          <MiniBox link={`/workspace/${workspaceId}/inout`} title="Site In & Out" image="inout.svg" alt="In & Out" msg="Manage site presence." />
+          }
+          <MiniBox link={`/workspace/${workspaceId}/registers`} title="Record Register" image="register.svg" alt="Register" msg="Create form records or view the existing ones." />
+          <MiniBox link={`/workspace/${workspaceId}/tasks`} title="Tasks" image="task.svg" alt="Tasks" msg="Manage the tasks assigned to the team members." />
+          {canEditWorkspaceTeam() &&
+          <MiniBox link={`/workspace/${workspaceId}/team`} title="Team" image="team.svg" alt="Team" msg="Manage who can access this workspace." />}
+          <MiniBox link={`/workspace/${workspaceId}/docs`} title="Library" image="library.svg" alt="Library" msg="Repository of all documents for this workspace (images, PDFs, etc.)." />
     </div>
 </div>
 

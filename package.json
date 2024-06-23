@@ -36,7 +36,7 @@
     "aws-cdk": "^2.64.0",
     "constructs": "^10.1.270",
     "enzyme": "^3.11.0",
-    "sst": "^2.1.12",
+    "sst": "2.42.0",
     "stripe": "^13.7.0"
   },
   "workspaces": [

@@ -19,6 +19,7 @@ import {
   Popup,
   Segment,
   Select,
+  Checkbox,
   Table
 } from "semantic-ui-react";
 import WorkspacePicker from "../components/WorkspacePicker";
@@ -40,6 +41,7 @@ export default function Workspace() {
   const [workspaces, setWorkspaces] = useState(null);
   const [pickedParent, setPickedParent] = useState(null);
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false);
+  const [isInoutSettingsOpen, setIsInoutSettingsOpen] = useState(false);
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -203,6 +205,57 @@ export default function Workspace() {
           <Accordion.Content
             active={isTemplatePickerOpen}
             content={templatesCheckboxes}
+          />
+        </Menu.Item>
+      </Accordion>
+    );
+  }  
+  
+  function renderInoutSettings(values, setFieldValue, handleChange) {
+    return (
+      <Accordion as={Menu} vertical fluid >
+        <Menu.Item >
+          <Accordion.Title 
+            active={isInoutSettingsOpen}
+            content="In & Out Settings"
+            index={0}
+            onClick={() => setIsInoutSettingsOpen(!isInoutSettingsOpen)}
+          />
+          <Accordion.Content
+            active={isInoutSettingsOpen}
+            content={<>
+            <>
+            <Form.Group widths="equal">
+                    <Form.Field>
+                      <label>Site Owner</label>
+                      <Form.Input
+                        name="siteOwner"
+                        value={values.siteOwner}
+                        onChange={handleChange}
+                      />
+                    </Form.Field>
+                    <Form.Field>
+                      <label>Site Address</label>
+                      <Form.Input
+                        name="siteAddress"
+                        value={values.siteAddress}
+                        onChange={handleChange}
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Field>
+                    <label>Other Info (link to documents, emergency contact etc.)</label>
+
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={values.inoutNote}
+                      onChange={(event, editor) => {
+                        const data = editor.getData();
+                        setFieldValue("inoutNote", data);
+                      }}
+                    /></Form.Field>
+            </>
+            </>}
           />
         </Menu.Item>
       </Accordion>
@@ -444,6 +497,16 @@ export default function Workspace() {
 
 
           {renderTemplatePicker()}
+          <Checkbox
+                      toggle
+                      name="hasInout"
+                      label="Enable Site In & Out?"
+                      checked={values.hasInout}
+                      onChange={(e, { checked }) =>
+                        setFieldValue("hasInout", checked)
+                      }
+                    />
+          {values.hasInout && renderInoutSettings(values, setFieldValue, handleChange)}
         
 
                 </Segment>
