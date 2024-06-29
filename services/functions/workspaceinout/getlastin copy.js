@@ -14,6 +14,7 @@ export const main = handler(async (event, tenant, workspaceUser) => {
       ":tenant_workspaceId": `${tenant}_${workspaceId}`,
       ":userId": userId,
     },
+    // ProjectionExpression can be added to limit the fields returned
   };
 
   const result = await dynamoDb.query(params);
@@ -30,3 +31,32 @@ export const main = handler(async (event, tenant, workspaceUser) => {
 
 
 
+
+
+export async function getInoutRecordsByDate(tenant, workspaceId, date) {
+  const tenantWorkspaceId = `${tenant}_${workspaceId}`;
+
+  const startDateTime = new Date(date);
+  startDateTime.setHours(0, 0, 0, 0);
+  const endDateTime = new Date(startDateTime);
+  endDateTime.setHours(23, 59, 59, 999);
+
+  const params = {
+    TableName: process.env.WORKSPACEINOUT_TABLE,
+    IndexName: 'tenant_inat_Index', // GSI name
+    KeyConditionExpression: 'tenant = :tenant AND inAt BETWEEN :start AND :end',
+    ExpressionAttributeValues: {
+      ':tenant': tenant,
+      ':start': startDateTime.getTime(),
+      ':end': endDateTime.getTime()
+    }
+  };
+
+  if (workspaceId) {
+    params.FilterExpression = 'workspaceId = :workspaceId';
+    params.ExpressionAttributeValues[':workspaceId'] = workspaceId;
+  }
+
+  const result = await dynamoDb.query(params);
+  return result.Items;
+}

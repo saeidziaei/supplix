@@ -320,6 +320,12 @@ Temporary Password: {####}
           bind: [workspaceInoutTable, workspaceTable],
         },
       },
+      "GET   /workspaces/{workspaceId}/inouts": { // ?date={effectiveDate}
+        function: {
+          handler: "services/functions/workspaceinout/getbydate.main",
+          bind: [workspaceInoutTable, workspaceTable],
+        },
+      },
       "PUT  /workspaces/{workspaceId}/inouts/{inoutId}": {
         function: {
           handler: "services/functions/workspaceinout/update.main",

@@ -27,6 +27,7 @@ import WorkspaceTasks from "./containers/WorkspaceTasks";
 import UserFormRegister from "./containers/UserFormRegister";
 import Signup from "./containers/Signup";
 import WorkspaceInout from "./containers/WorkspaceInout";
+import WorkspaceInouts from "./containers/WorkspaceInouts";
 
 
 export default function Links(tenant) {
@@ -64,6 +65,7 @@ export default function Links(tenant) {
       <Route path="/workspace/:workspaceId/task/:taskId?" element={<AuthenticatedRoute><WorkspaceTask/></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
       <Route path="/workspace/:workspaceId/inout" element={<AuthenticatedRoute><WorkspaceInout/></AuthenticatedRoute>} />
+      <Route path="/workspace/:workspaceId/inouts" element={<AuthenticatedRoute><WorkspaceInouts/></AuthenticatedRoute>} />
       <Route path="/mytasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
       <Route path="/user/:username/tasks" element={<AuthenticatedRoute><WorkspaceTasks/></AuthenticatedRoute>} />
 

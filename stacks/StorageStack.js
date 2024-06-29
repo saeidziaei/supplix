@@ -80,12 +80,13 @@ export function StorageStack({ stack, app }) {
       tenant_workspaceId: "string",
       inoutId: "string",
       userId: "string",
-      inDate: "number",
+      inAt: "number",
     },
     primaryIndex: { partitionKey: "tenant_workspaceId", sortKey: "inoutId" },
     globalIndexes: {
       tenant_ws_user_Index: { partitionKey: "tenant_workspaceId", sortKey: "userId" },
       tenant_user_Index: { partitionKey: "tenant", sortKey: "userId" },
+      tenant_inat_Index: { partitionKey: "tenant", sortKey: "inAt" },
     },
   });
 
