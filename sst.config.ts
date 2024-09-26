@@ -6,6 +6,8 @@ import { AfterDeployStack } from "./stacks/ScriptStack.js"
 import { CronStack } from "./stacks/CronStack.js"
 import { FrontendStackOld } from "./stacks/FrontendStackOld.js"
 import { FrontendStack } from "./stacks/FrontendStack.js"
+import { ContractorsApiStack } from "./stacks/ContractorsApiStack.js"
+import { WorkspaceInoutApiStack } from "./stacks/WorkspaceInoutApiStack.js"
 
 export default {
   config(input) {
@@ -24,8 +26,10 @@ export default {
       .stack(StorageStack)  
       .stack(CronStack)
       .stack(AuthAndApiStack)
-      // .stack(FrontendStack)
-      .stack(FrontendStackOld)
+      .stack(ContractorsApiStack)
+      // .stack(WorkspaceInoutApiStack)
+      .stack(FrontendStack)
+      // .stack(FrontendStackOld)
       .stack(AfterDeployStack)
   },
 } satisfies SSTConfig

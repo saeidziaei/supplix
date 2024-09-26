@@ -13,15 +13,16 @@ import { onError } from "../lib/errorLib";
 import { useAppContext } from "../lib/contextLib";
 import User from "../components/User";
 import WorkspacePicker from "../components/WorkspacePicker";
-import { Modal, Label, Button, Loader } from  "semantic-ui-react";
+import { Modal, Label, Button, Loader, Grid } from  "semantic-ui-react";
 import { dateFromEpoch } from "../lib/helpers";
+import DateInput from "../components/DateInput";
 
 export default function WorkspaceInouts() {
   const { workspaceId } = useParams();
   const [workspace, setWorkspace] = useState(null);
   const [workspaces, setWorkspaces] = useState(null);
   const [inouts, setInouts] = useState([]);
-  const [effectiveDate, setEffectiveDate] = useState(null);
+  const [effectiveDate, setEffectiveDate] = useState(new Date());
   const [formattedDate, setFormattedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );  
@@ -97,11 +98,11 @@ export default function WorkspaceInouts() {
 
     if (outAt) {
       onSite = false;
-      timeBreach = differenceInHours(new Date(outAt), new Date(inAt)) > 1;
+      timeBreach = differenceInHours(new Date(outAt), new Date(inAt)) > 24;
 
     } else {
       onSite = true;
-      timeBreach = differenceInHours(new Date(), new Date(inAt)) > 1;
+      timeBreach = differenceInHours(new Date(), new Date(inAt)) > 24;
     }
 
     color = timeBreach ? "bg-red-500" : onSite ? "bg-green-500" : "bg-gray-400";
@@ -127,7 +128,7 @@ export default function WorkspaceInouts() {
       const date = dateFromEpoch(params.data[fieldName]);
       if (date == "Invalid Date") return "";
 
-      return format(date, "dd/MMM/yy HH:mm");
+      return format(date, "dd-MMM-yyyy   HH:mm");
     } catch {
       return "";
     }
@@ -174,8 +175,28 @@ export default function WorkspaceInouts() {
   if (isLoading) return <Loader active />;
 
   return (
-    <div style={{ height: "500px" }}>
-      <Modal
+<div className="max-w-4xl mx-auto p-6">
+
+    <div>
+      <div className="flex items-center justify-between rounded-md p-4 border border-gray-300 my-4">
+
+      <div className="col-span-6 md:col-span-2 px-0 md:px-3">
+                          <DateInput
+                            
+                            name="effectiveDate"
+                            value={effectiveDate}
+                            onChange={(date) => {
+                              setEffectiveDate(date);
+                              if (date) {
+                                setFormattedDate(format(date, "yyyy-MM-dd"));
+                              } else {
+                                setFormattedDate("");
+                              }
+                            }}
+                          />
+                        </div>
+<div>
+<Modal className="col-span-6 md:col-span-2 px-0 md:px-3"
         onClose={() => setIsWsPickerOpen(false)}
         onOpen={() => setIsWsPickerOpen(true)}
         open={isWsPickerOpen}
@@ -203,7 +224,7 @@ export default function WorkspaceInouts() {
             <WorkspacePicker
               workspaces={workspaces}
               allowNull={true}
-              onChange={(selecte) => setPickedWorkspace(selecte)} // doesn't set the parent, just sets state
+              onChange={(selecte) => setPickedWorkspace(selecte)} // doesn't set the workspace, just sets state
               selectedWorkspaceId={workspaceId || workspace.workspaceId}
             />
           </Modal.Description>
@@ -235,30 +256,13 @@ export default function WorkspaceInouts() {
           />
         </Modal.Actions>
       </Modal>
+</div>
+</div>
 
-      <DatePicker
-        name="effectiveDate"
-        placeholderText="Select"
-        className="ti-form-input focus:z-10"
-        showIcon
-        selected={effectiveDate}
-        onChange={(date) => {
-          setEffectiveDate(date);
-          if (date) {
-            setFormattedDate(format(date, "yyyy-MM-dd"));
-          } else {
-            setFormattedDate("");
-          }
-        }}
-        isClearable={true}
-        dateFormat="dd-MMM-yy" // display format
-      />
       {isInoutLoading ? (
         <p>Loading data ...</p>
       ) : (
         <div>
-          <h1>Workspace Inouts</h1>
-          {workspace && <p>Workspace: {workspace.name}</p>}
           <div
             key="tasks"
             className="ag-theme-balham"
@@ -277,6 +281,7 @@ export default function WorkspaceInouts() {
 
         </div>
       )}
+    </div>
     </div>
   );
 }

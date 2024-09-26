@@ -33,6 +33,27 @@ export function StorageStack({ stack, app }) {
     primaryIndex: { partitionKey: "tenant", sortKey: "Username" },
 
   });
+
+  const contractorCompanyTable = new Table(stack, "ContractorCompany", {
+    fields: {
+      tenant: "string",
+      contractorCompanyId: "string",
+    },
+    primaryIndex: { partitionKey: "tenant", sortKey: "contractorCompanyId" },
+
+  });
+
+  const contractorTable = new Table(stack, "Contractor", {
+    fields: {
+      tenant: "string",
+      contractorCompanyId: "string",
+      tenant_contractorCompanyId: "string",
+      contractorId: "string",
+    },
+    primaryIndex: { partitionKey: "tenant_contractorCompanyId", sortKey: "contractorId" },
+
+  });
+
   
   const workspaceTable = new Table(stack, "Workspace", {
     fields: {
@@ -163,9 +184,11 @@ export function StorageStack({ stack, app }) {
     workspaceTable,
     workspaceUserTable,
     workspaceTaskTable,
-    workspaceInoutTable,
+    workspaceInoutTable, 
     deletedArchiveTable,
     stripeEventTable,
+    contractorCompanyTable,
+    contractorTable,
     bucket,
   };
 }

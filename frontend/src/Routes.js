@@ -26,6 +26,7 @@ import WorkspaceTask from "./containers/WorkspaceTask";
 import WorkspaceTasks from "./containers/WorkspaceTasks";
 import UserFormRegister from "./containers/UserFormRegister";
 import Signup from "./containers/Signup";
+import ContractorDocUpload from "./containers/ContractorDocUpload";
 import WorkspaceInout from "./containers/WorkspaceInout";
 import WorkspaceInouts from "./containers/WorkspaceInouts";
 
@@ -34,6 +35,7 @@ export default function Links(tenant) {
 
   return (
     <Routes>
+      <Route path="/upload" element={<UnauthenticatedRoute><ContractorDocUpload /></UnauthenticatedRoute>} />
       <Route path="/signup" element={<UnauthenticatedRoute><Signup /></UnauthenticatedRoute>} />
       <Route path={`/`} element={<AuthenticatedRoute><WorkspaceList /></AuthenticatedRoute>} />
       <Route path={`/iso`}  element={<ISO />} />

@@ -22,6 +22,9 @@ export function AuthAndApiStack({ stack, app }) {
     workspaceInoutTable,
     deletedArchiveTable,
     stripeEventTable,
+    contractorCompanyTable,
+    contractorTable,
+
   } = use(StorageStack);
 
   // Create a Cognito User Pool and Identity Pool
@@ -149,21 +152,24 @@ Temporary Password: {####}
           WORKSPACEINOUT_TABLE: workspaceInoutTable.tableName,
           DELETEDARCHIVE_TABLE: deletedArchiveTable.tableName,
           STRIPEEVENT_TABLE: stripeEventTable.tableName,
+          CONTRACTOR_COMPANY_TABLE: contractorCompanyTable.tableName,
+          CONTRACTOR_TABLE: contractorTable.tableName,
           BUCKET: bucket.bucketName,
         },
         permissions: [workspaceUserTable],
       },
     },
     routes: {
+      
+
       "POST   /stripe-webhook": {
         function: {
           handler: "services/functions/stripe/webhook.main",
           bind: [stripeEventTable],
           environment: {
-            STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY,
-            ENDPOINT_SECRET : process.env.ENDPOINT_SECRET
+            STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+            ENDPOINT_SECRET: process.env.ENDPOINT_SECRET,
           },
-
         },
         authorizer: "none",
       },
@@ -308,32 +314,6 @@ Temporary Password: {####}
       },
 
 
-      "POST  /workspaces/{workspaceId}/inouts": {
-        function: {
-          handler: "services/functions/workspaceinout/create.main",
-          bind: [workspaceInoutTable],
-        },
-      },
-      "GET   /workspaces/{workspaceId}/inouts/lastin": {
-        function: {
-          handler: "services/functions/workspaceinout/getlastin.main",
-          bind: [workspaceInoutTable, workspaceTable],
-        },
-      },
-      "GET   /workspaces/{workspaceId}/inouts": { // ?date={effectiveDate}
-        function: {
-          handler: "services/functions/workspaceinout/getbydate.main",
-          bind: [workspaceInoutTable, workspaceTable],
-        },
-      },
-      "PUT  /workspaces/{workspaceId}/inouts/{inoutId}": {
-        function: {
-          handler: "services/functions/workspaceinout/update.main",
-          bind: [workspaceInoutTable],
-        },
-      },
-
-
       "POST /docs/upload-url": {
         function: {
           handler: "services/functions/doc/getUrlForPut.main",
@@ -452,7 +432,7 @@ Temporary Password: {####}
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
-      },      
+      },
       "DELETE   /templates/{templateId}": {
         function: {
           handler: "services/functions/template/delete.main",
@@ -671,7 +651,7 @@ Temporary Password: {####}
             ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
-      },      
+      },
     },
   });
 
