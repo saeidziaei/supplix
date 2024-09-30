@@ -5,10 +5,11 @@ export const main = handler(async (event, tenant) => {
 
   const data = JSON.parse(event.body);
     
+  
   // Upload the file to S3
   const params = {
     Bucket: process.env.BUCKET,
-    Key: `private/${tenant}/${data.folder}/${data.fileName}`,
+    Key: `private/${tenant}/${encodeURIComponent(data.folder)}/${encodeURIComponent(data.fileName)}`,
     ContentType:  data.contentType,
     Expires: 120, // 2 minutes
   };

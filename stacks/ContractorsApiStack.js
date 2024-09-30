@@ -24,7 +24,6 @@ export function ContractorsApiStack({ stack, app }) {
           handler: "services/functions/contractorCompany/list.main",
           bind: [contractorCompanyTable],
           environment: {
-            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -33,7 +32,6 @@ export function ContractorsApiStack({ stack, app }) {
           handler: "services/functions/contractorCompany/get.main",
           bind: [contractorCompanyTable],
           environment: {
-            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -70,7 +68,6 @@ export function ContractorsApiStack({ stack, app }) {
           handler: "services/functions/contractor/list.main",
           bind: [contractorCompanyTable, contractorTable],
           environment: {
-            ALLOWED_GROUPS: ADMIN_GROUP,
           },
         },
       },
@@ -80,7 +77,6 @@ export function ContractorsApiStack({ stack, app }) {
             handler: "services/functions/contractor/get.main",
             bind: [contractorCompanyTable, contractorTable],
             environment: {
-              ALLOWED_GROUPS: ADMIN_GROUP,
             },
           },
         },
@@ -113,6 +109,38 @@ export function ContractorsApiStack({ stack, app }) {
             },
           },
         },
+
+        "POST   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads": {
+          function: {
+            handler: "services/functions/contractorUpload.createUpload",
+            bind: [contractorUploadsTable],
+            environment: {
+              ALLOWED_GROUPS: ADMIN_GROUP,
+            },
+          },
+        },
+        "GET   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads": {
+          function: {
+            handler: "services/functions/contractorUpload.listUploads",
+            bind: [contractorUploadsTable],
+          },
+        },
+        "GET   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads/{uploadId}": {
+          function: {
+            handler: "services/functions/contractorUpload.getUpload",
+            bind: [contractorUploadsTable],
+          },
+        },
+        "PUT   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads/{uploadId}": {
+          function: {
+            handler: "services/functions/contractorUpload.updateUpload",
+            bind: [contractorUploadsTable],
+            environment: {
+              ALLOWED_GROUPS: ADMIN_GROUP,
+            },
+          },
+        },
+        
     },
   );
 }

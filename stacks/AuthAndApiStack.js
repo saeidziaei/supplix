@@ -24,6 +24,7 @@ export function AuthAndApiStack({ stack, app }) {
     stripeEventTable,
     contractorCompanyTable,
     contractorTable,
+    contractorUploadTable,
 
   } = use(StorageStack);
 
@@ -154,6 +155,7 @@ Temporary Password: {####}
           STRIPEEVENT_TABLE: stripeEventTable.tableName,
           CONTRACTOR_COMPANY_TABLE: contractorCompanyTable.tableName,
           CONTRACTOR_TABLE: contractorTable.tableName,
+          CONTRACTOR_UPLOAD_TABLE: contractorUploadTable.tableName,
           BUCKET: bucket.bucketName,
         },
         permissions: [workspaceUserTable],

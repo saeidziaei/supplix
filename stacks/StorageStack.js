@@ -54,7 +54,17 @@ export function StorageStack({ stack, app }) {
 
   });
 
-  
+  const contractorUploadTable = new Table(stack, "ContractorCompany", {
+    fields: {
+      tenant: "string",
+      contractorId: "string",
+      tenant_contractorId: "string",
+      uploadId: "string",
+    },
+    primaryIndex: { partitionKey: "tenant_contractorId", sortKey: "uploadId" },
+
+  });
+
   const workspaceTable = new Table(stack, "Workspace", {
     fields: {
       tenant: "string",
@@ -189,6 +199,7 @@ export function StorageStack({ stack, app }) {
     stripeEventTable,
     contractorCompanyTable,
     contractorTable,
+    contractorUploadTable,
     bucket,
   };
 }

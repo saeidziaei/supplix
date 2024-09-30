@@ -14,13 +14,18 @@ export const main = handler(async (event, tenant) => {
       name = :name,
       trade = :trade,
       phone = :phone,
-      email = :email
+      email = :email,
+      updatedBy = :updatedBy,
+      updatedAt = :updatedAt
       `,
     ExpressionAttributeValues: {
       ":name": data.name,
       ":trade": data.trade || "",
       ":phone": data.phone || "",
       ":email": data.email || "",
+      ":updatedBy": event.requestContext.authorizer.jwt.claims.sub,
+      ":updatedAt": Date.now(),
+
     },
     ReturnValues: "ALL_NEW",
   };
