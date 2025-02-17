@@ -22,6 +22,7 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [tenant, setTenant] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('table');
 
   class NameRenderer {
     init(params) {
@@ -120,6 +121,50 @@ export default function Users() {
     }
   }
 
+  function renderUserCards() {
+    return (
+      <div className="user-cards-container">
+        {users.map(user => (
+          <div key={user.Username} className="user-card">
+            <div className="user-image-container">
+              <div className="user-image">
+                <User user={user} />
+              </div>
+            </div>
+            <div className="user-card-content">
+              <div className="user-card-info">
+                <div className="user-name">
+                  <a href={tenantId ? `/tenants/${tenantId}/user/${user.Username}`: `/user/${user.Username}`}>
+                    {capitalizeFirstLetter(user.given_name)} {capitalizeFirstLetter(user.family_name)} 
+                    {user.isAdmin && <span style={{marginLeft: '0.5rem', color: '#666'}}>(Admin)</span>}
+                  </a>
+                </div>
+                <div className="user-email">
+                  <a href={`mailto:${user.email}`}>{user.email}</a>
+                </div>
+                {user.employeeNumber && (
+                  <div className="user-email">
+                    Employee ID: {user.employeeNumber}
+                  </div>
+                )}
+              </div>
+              <div className="user-card-actions">
+                <a href={`/user/register/${user.Username}`}>
+                  <Icon name="id card" />
+                  Register
+                </a>
+                <a href={`/user/${user.Username}/tasks`}>
+                  <Icon name="tasks" />
+                  Tasks
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   function renderUsers() {
     return (
       <>
@@ -149,23 +194,50 @@ export default function Users() {
             }}
           />
         )}
-        {users && (
-          <div
-            className="ag-theme-balham"
-            style={{
-              height: "500px",
-              width: "100%",
-            }}
+
+        <Button.Group size="tiny" style={{ marginBottom: '1rem' }}>
+          <Button 
+            basic={viewMode !== 'table'} 
+            color="blue" 
+            onClick={() => setViewMode('table')}
           >
-            <AgGridReact
-              ref={gridRef}
-              columnDefs={columnDefs}
-              rowData={users}
-              rowHeight="35"
-              animateRows={true}
-            ></AgGridReact>
+            <Icon name="table" />
+            Table View
+          </Button>
+          <Button 
+            basic={viewMode !== 'cards'} 
+            color="blue" 
+            onClick={() => setViewMode('cards')}
+          >
+            <Icon name="grid layout" />
+            Card View
+          </Button>
+        </Button.Group>
+
+        {users && viewMode === 'table' && (
+          <div className="table-container">
+            <div
+              className="ag-theme-balham"
+              style={{
+                height: "500px",
+                width: "100%",
+              }}
+            >
+              <AgGridReact
+                ref={gridRef}
+                columnDefs={columnDefs}
+                rowData={users}
+                rowHeight={50}
+                animateRows={true}
+                domLayout="autoHeight"
+                suppressCellFocus={true}
+              ></AgGridReact>
+            </div>
           </div>
         )}
+
+        {users && viewMode === 'cards' && renderUserCards()}
+
         <Divider hidden />
         {tenantId ? (
           <LinkContainer to={`/tenants/${tenantId}/user`}>
@@ -181,7 +253,6 @@ export default function Users() {
         )}
       </>
     );
-    
   }
 
 

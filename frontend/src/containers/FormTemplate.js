@@ -55,6 +55,7 @@ export default function FormTemplate() {
   
   const [jsonInput, setJsonInput] = useState('');
   const [isRawEditing, setIsRawEditing] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
 
 
   document.addEventListener('keydown', function (event) {
@@ -365,25 +366,63 @@ export default function FormTemplate() {
   function renderFormDesigner() {
     return (
       <>
-        <Input
-          fluid
-          label="Form Title"
-          size="small"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          
-        />
+        <Segment 
+          style={{ 
+            borderLeft: '5px solid #2185d0',
+            background: 'linear-gradient(to bottom, #fafcff 0%, #f7faff 50%, #f3f8ff 100%)'
+          }}
+        >
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{ 
+              fontSize: '1.1em', 
+              fontWeight: '300',
+              color: '#666',
+              display: 'block',
+              marginBottom: '4px'
+            }}>
+              Form Title
+            </span>
+            <Input
+              fluid
+              size="small"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ 
+                backgroundColor: 'white',
+                border: '1px solid #e6f0ff',
+                borderRadius: '4px',
+                padding: '4px'
+              }}
+            />
+          </div>
+          <Divider hidden />
+          <div style={{ marginBottom: '8px' }}>
+            <span style={{ 
+              fontSize: '1.1em', 
+              fontWeight: '300',
+              color: '#666',
+              display: 'block',
+              marginBottom: '4px'
+            }}>
+              Category
+            </span>
+            <Input
+              fluid
+              size="small"
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ 
+                backgroundColor: 'white',
+                border: '1px solid #e6f0ff',
+                borderRadius: '4px',
+                padding: '4px'
+              }}
+            />
+          </div>
+        </Segment>
         <Divider hidden />
-        <Input
-          fluid
-          label="Category"
-          size="small"
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="my-1"
-        />
         <Confirm
           size="mini"
           header="This will delete the section and all the fields in the section."
@@ -395,7 +434,13 @@ export default function FormTemplate() {
           }}
         />
         {sections.map((section, sectionIndex) => (
-          <Segment key={`section-${sectionIndex}`}>
+          <Segment 
+            key={`section-${sectionIndex}`}
+            style={{ 
+              borderLeft: '3px solid #cce4ff',
+              background: 'linear-gradient(to bottom, #fbfcff 0%, #f8faff 50%, #f5f8ff 100%)'
+            }}
+          >
             <Item>
               <Grid>
                 <GridRow>
@@ -412,12 +457,24 @@ export default function FormTemplate() {
                       }
                       style={{ float: "left" }}
                       icon="x"
-                    ></Button>
+                    />
                   </Grid.Column>
                   <Grid.Column width={10} verticalAlign="middle">
                     <Input
                       fluid
-                      label="Section"
+                      label={
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ marginRight: '10px' }}>Section</span>
+                          <Icon 
+                            name={expandedSections[sectionIndex] ? 'chevron down' : 'chevron right'} 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => setExpandedSections(prev => ({
+                              ...prev,
+                              [sectionIndex]: !prev[sectionIndex]
+                            }))}
+                          />
+                        </div>
+                      }
                       type="text"
                       size="small"
                       value={section.title}
@@ -450,47 +507,94 @@ export default function FormTemplate() {
                 {!section.isTable && (
                   <Grid.Row>
                     <Grid.Column width={1}></Grid.Column>
-                    <Grid.Column width={10}>
-                      <Button.Group size="mini">
-                        <Button
-                          color={section.sectionColumns == 1 ? "black" : "grey"}
-                          onClick={() => setSectionColumn(sectionIndex, 1)}
-                        >
-                          Single Column
-                        </Button>
-                        <Button
-                          color={section.sectionColumns == 2 ? "black" : "grey"}
-                          onClick={() => setSectionColumn(sectionIndex, 2)}
-                        >
-                          Two Columns
-                        </Button>
-                        <Button
-                          color={section.sectionColumns == 3 ? "black" : "grey"}
-                          onClick={() => setSectionColumn(sectionIndex, 3)}
-                        >
-                          Three Columns
-                        </Button>
-                      </Button.Group>
-                    </Grid.Column>
-                    <Grid.Column width={5} textAlign="right">
-                      {sectionIndex > 0 && (
-                        <Button
-                          size="mini"
-                          basic
-                          circular
-                          onClick={() => moveSectionUp(sectionIndex)}
-                          icon="chevron up"
-                        ></Button>
-                      )}
-                      {sectionIndex < sections.length - 1 && (
-                        <Button
-                          size="mini"
-                          basic
-                          circular
-                          onClick={() => moveSectionDown(sectionIndex)}
-                          icon="chevron down"
-                        ></Button>
-                      )}
+                    <Grid.Column width={13}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
+                        <span style={{ 
+                          fontSize: '0.85em', 
+                          fontWeight: '300',
+                          color: '#666',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Number of columns:
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <Button
+                            size="tiny"
+                            compact
+                            style={{
+                              backgroundColor: section.sectionColumns === 1 ? '#e6f2ff' : 'white',
+                              color: section.sectionColumns === 1 ? '#2185d0' : '#666',
+                              border: `1px solid ${section.sectionColumns === 1 ? '#2185d0' : '#ddd'}`,
+                              boxShadow: section.sectionColumns === 1 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
+                              transition: 'all 0.2s ease',
+                              padding: '4px 8px',
+                              fontWeight: '400',
+                              height: '24px'
+                            }}
+                            onClick={() => setSectionColumn(sectionIndex, 1)}
+                          >
+                            One
+                          </Button>
+                          <Button
+                            size="tiny"
+                            compact
+                            style={{
+                              backgroundColor: section.sectionColumns === 2 ? '#e6f2ff' : 'white',
+                              color: section.sectionColumns === 2 ? '#2185d0' : '#666',
+                              border: `1px solid ${section.sectionColumns === 2 ? '#2185d0' : '#ddd'}`,
+                              boxShadow: section.sectionColumns === 2 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
+                              transition: 'all 0.2s ease',
+                              padding: '4px 8px',
+                              fontWeight: '400',
+                              height: '24px'
+                            }}
+                            onClick={() => setSectionColumn(sectionIndex, 2)}
+                          >
+                            Two
+                          </Button>
+                          <Button
+                            size="tiny"
+                            compact
+                            style={{
+                              backgroundColor: section.sectionColumns === 3 ? '#e6f2ff' : 'white',
+                              color: section.sectionColumns === 3 ? '#2185d0' : '#666',
+                              border: `1px solid ${section.sectionColumns === 3 ? '#2185d0' : '#ddd'}`,
+                              boxShadow: section.sectionColumns === 3 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
+                              transition: 'all 0.2s ease',
+                              padding: '4px 8px',
+                              fontWeight: '400',
+                              height: '24px'
+                            }}
+                            onClick={() => setSectionColumn(sectionIndex, 3)}
+                          >
+                            Three
+                          </Button>
+                        </div>
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '4px' }}>
+                          {sectionIndex > 0 && (
+                            <Button
+                              basic
+                              circular
+                              size="tiny"
+                              compact
+                              
+                              onClick={() => moveSectionUp(sectionIndex)}
+                              icon="chevron up"
+                            />
+                          )}
+                          {sectionIndex < sections.length - 1 && (
+                            <Button
+                            basic
+                            circular
+                              size="tiny"
+                              compact
+                              
+                              onClick={() => moveSectionDown(sectionIndex)}
+                              icon="chevron down"
+                            />
+                          )}
+                        </div>
+                      </div>
                     </Grid.Column>
                   </Grid.Row>
                 )}
@@ -556,83 +660,87 @@ export default function FormTemplate() {
                 )}
               </Grid>
             </Item>
-            <Divider hidden />
+            
+            {expandedSections[sectionIndex] && (
+              <>
+                <Divider hidden />
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
+                >
+                  <SortableContext
+                    items={section.fields.map((f, i) => f.guid)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <>
+                      <Confirm
+                        size="mini"
+                        header="This will delete the field."
+                        open={removeFieldConfirm.open}
+                        onCancel={() => setRemoveFieldConfirm({ open: false })}
+                        onConfirm={() => {
+                          removeField(
+                            removeFieldConfirm.sectionIndex,
+                            removeFieldConfirm.fieldIndex
+                          );
+                          setRemoveFieldConfirm({ open: false });
+                        }}
+                      />
+                      {section.fields.map((field, fieldIndex) => (
+                        <div key={field.guid}>
+                          <SortableItem id={field.guid}>
+                            <FieldEditor
+                              key={fieldIndex}
+                              value={field}
+                              onDelete={() =>
+                                setRemoveFieldConfirm({
+                                  open: true,
+                                  sectionIndex,
+                                  fieldIndex,
+                                })
+                              }
+                              onChange={(value) => {
+                                const newSections = [...sections];
+                                newSections[sectionIndex].fields[fieldIndex] =
+                                  value;
+                                setSections(newSections);
+                              }}
+                              onDuplicate={() => {
+                                const newSections = [...sections];
 
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
-            >
-              <SortableContext
-                items={section.fields.map((f, i) => f.guid)}
-                strategy={verticalListSortingStrategy}
-              >
-                <>
-                  <Confirm
-                    size="mini"
-                    header="This will delete the field."
-                    open={removeFieldConfirm.open}
-                    onCancel={() => setRemoveFieldConfirm({ open: false })}
-                    onConfirm={() => {
-                      removeField(
-                        removeFieldConfirm.sectionIndex,
-                        removeFieldConfirm.fieldIndex
-                      );
-                      setRemoveFieldConfirm({ open: false });
-                    }}
-                  />
-                  {section.fields.map((field, fieldIndex) => (
-                    <div key={field.guid}>
-                      <SortableItem id={field.guid}>
-                        <FieldEditor
-                          key={fieldIndex}
-                          value={field}
-                          onDelete={() =>
-                            setRemoveFieldConfirm({
-                              open: true,
-                              sectionIndex,
-                              fieldIndex,
-                            })
-                          }
-                          onChange={(value) => {
-                            const newSections = [...sections];
-                            newSections[sectionIndex].fields[fieldIndex] =
-                              value;
-                            setSections(newSections);
-                          }}
-                          onDuplicate={() => {
-                            const newSections = [...sections];
-
-                            const duplicatedField = {
-                              ...field,
-                              title: `${field.title} copy`,
-                              name: `${field.name} copy`,
-                              guid: uuidv4(),
-                            };
-                            newSections[sectionIndex].fields.push(
-                              duplicatedField
-                            );
-                            setSections(newSections);
-                          }}
-                          showWeight={section.fields.some(
-                            (f) => f.type === "aggregate"
-                          )} // only show weight if there is an aggregate field in this seciton
-                          showAggregateFunction={section.isTable}
-                        />
-                        <Divider />
-                      </SortableItem>
-                    </div>
-                  ))}
-                </>
-              </SortableContext>
-            </DndContext>
-            <Button size="mini" basic onClick={() => addField(sectionIndex)}>
-              <Icon name="plus" />
-              Field
-            </Button>
+                                const duplicatedField = {
+                                  ...field,
+                                  title: `${field.title} copy`,
+                                  name: `${field.name} copy`,
+                                  guid: uuidv4(),
+                                };
+                                newSections[sectionIndex].fields.push(
+                                  duplicatedField
+                                );
+                                setSections(newSections);
+                              }}
+                              showWeight={section.fields.some(
+                                (f) => f.type === "aggregate"
+                              )} // only show weight if there is an aggregate field in this seciton
+                              showAggregateFunction={section.isTable}
+                            />
+                            <Divider />
+                          </SortableItem>
+                        </div>
+                      ))}
+                    </>
+                  </SortableContext>
+                </DndContext>
+                <Button size="mini" basic color="blue" onClick={() => addField(sectionIndex)}>
+                  <Icon name="plus" />
+                  Field
+                </Button>
+              </>
+            )}
           </Segment>
         ))}
-        <Button size="mini" basic onClick={addSection}>
+        <Button size="mini" basic color="blue" onClick={addSection}>
           <Icon name="plus" />
           Section
         </Button>

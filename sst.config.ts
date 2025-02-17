@@ -7,7 +7,7 @@ import { CronStack } from "./stacks/CronStack.js"
 import { FrontendStackOld } from "./stacks/FrontendStackOld.js"
 import { FrontendStack } from "./stacks/FrontendStack.js"
 import { ContractorsApiStack } from "./stacks/ContractorsApiStack.js"
-import { WorkspaceInoutApiStack } from "./stacks/WorkspaceInoutApiStack.js"
+// import { WorkspaceInoutApiStack } from "./stacks/WorkspaceInoutApiStack.js"
 
 export default {
   config(input) {
@@ -28,8 +28,8 @@ export default {
       .stack(AuthAndApiStack)
       .stack(ContractorsApiStack)
       // .stack(WorkspaceInoutApiStack)
-      .stack(FrontendStack)
-      // .stack(FrontendStackOld)
+      // .stack(FrontendStack)
+      .stack(FrontendStackOld)
       .stack(AfterDeployStack)
   },
 } satisfies SSTConfig

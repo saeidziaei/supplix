@@ -110,30 +110,42 @@ export default function UserFormRegister() {
           const def = form.template?.templateDefinition;
           const textValues = extractTextValues(form);
           return (
-            <Card>
-              <Card.Content header={def.title} />
-
+            <Card raised>
+              <Card.Content 
+                header={def.title}
+                style={{ 
+                  background: '#f0f7ff',
+                  borderBottom: '2px solid #2185d0'
+                }} 
+              />
               <Card.Content>
                 <Table basic compact size="small">
                   <Table.Body>
                   {textValues.map((v) => (
                     <Table.Row>
-                      <Table.Cell>{v.fieldName}</Table.Cell>
-                      <Table.Cell className="bold">{v.fieldValue}</Table.Cell>
+                      <Table.Cell style={{ color: '#666' }}>{v.fieldName}</Table.Cell>
+                      <Table.Cell className="bold" style={{ color: '#2185d0' }}>{v.fieldValue}</Table.Cell>
                     </Table.Row>
                   ))}
                   </Table.Body>
                 </Table>
-                
 
-                <Card.Meta>
+                <Card.Meta style={{ color: '#888', marginTop: '10px' }}>
                   {new Date(form.createdAt).toLocaleDateString()}
                 </Card.Meta>
               </Card.Content>
-              <Card.Content extra>
-                <Icon name="folder" />
-                {form.workspace.workspaceName}
-                <Button basic size="tiny" floated="right" circular icon="external alternate" onClick={() => nav(`/workspace/${form.workspace.workspaceId}/form/${form.templateId}/${form.formId}`)}/>
+              <Card.Content extra style={{ background: '#f8f9fa' }}>
+                <Icon name="folder" color="blue" />
+                <span style={{ color: '#444' }}>{form.workspace.workspaceName}</span>
+                <Button 
+                  basic 
+                  color="blue"
+                  size="tiny" 
+                  floated="right" 
+                  circular 
+                  icon="external alternate" 
+                  onClick={() => nav(`/workspace/${form.workspace.workspaceId}/form/${form.templateId}/${form.formId}`)}
+                />
               </Card.Content>
             </Card>
           );

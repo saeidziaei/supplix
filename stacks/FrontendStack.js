@@ -26,7 +26,8 @@ export function FrontendStack({ stack, app }) {
         undefined,
 
 
-    path: "iso-forms-ynex",     
+    // path: "iso-forms-ynex",     
+    path: "iso-clouad-final",     
     buildCommand: "npm run build", // or "yarn build"
     buildOutput: "dist", 
 

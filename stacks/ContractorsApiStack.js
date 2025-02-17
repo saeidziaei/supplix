@@ -5,7 +5,7 @@ import { AuthAndApiStack } from "./AuthAndApiStack";
 
 
 export function ContractorsApiStack({ stack, app }) {
-  const { contractorCompanyTable, contractorTable } = use(StorageStack);
+  const { contractorCompanyTable, contractorTable, contractorUploadTable } = use(StorageStack);
   const { api, auth } = use(AuthAndApiStack);
 
   api.addRoutes(stack, {
@@ -112,8 +112,8 @@ export function ContractorsApiStack({ stack, app }) {
 
         "POST   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads": {
           function: {
-            handler: "services/functions/contractorUpload.createUpload",
-            bind: [contractorUploadsTable],
+            handler: "services/functions/contractor/contractorUpload.createUpload",
+            bind: [contractorTable, contractorUploadTable],
             environment: {
               ALLOWED_GROUPS: ADMIN_GROUP,
             },
@@ -121,20 +121,20 @@ export function ContractorsApiStack({ stack, app }) {
         },
         "GET   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads": {
           function: {
-            handler: "services/functions/contractorUpload.listUploads",
-            bind: [contractorUploadsTable],
+            handler: "services/functions/contractor/contractorUpload.listUploads",
+            bind: [contractorUploadTable],
           },
         },
         "GET   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads/{uploadId}": {
           function: {
-            handler: "services/functions/contractorUpload.getUpload",
-            bind: [contractorUploadsTable],
+            handler: "services/functions/contractor/contractorUpload.getUpload",
+            bind: [contractorUploadTable],
           },
         },
         "PUT   /contractor-companies/{contractorCompanyId}/contractors/{contractorId}/uploads/{uploadId}": {
           function: {
-            handler: "services/functions/contractorUpload.updateUpload",
-            bind: [contractorUploadsTable],
+            handler: "services/functions/contractor/contractorUpload.updateUpload",
+            bind: [contractorUploadTable],
             environment: {
               ALLOWED_GROUPS: ADMIN_GROUP,
             },

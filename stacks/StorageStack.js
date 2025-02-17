@@ -54,7 +54,7 @@ export function StorageStack({ stack, app }) {
 
   });
 
-  const contractorUploadTable = new Table(stack, "ContractorCompany", {
+  const contractorUploadTable = new Table(stack, "ContractorUpload", {
     fields: {
       tenant: "string",
       contractorId: "string",
