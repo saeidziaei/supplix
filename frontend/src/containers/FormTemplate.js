@@ -10,7 +10,8 @@ import {
   Input,
   Item, Loader,
   Menu,
-  Segment
+  Segment,
+  Popup
 } from "semantic-ui-react";
 
 import {
@@ -56,7 +57,7 @@ export default function FormTemplate() {
   const [jsonInput, setJsonInput] = useState('');
   const [isRawEditing, setIsRawEditing] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
-
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
 
   document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.shiftKey && event.key === 'J') {
@@ -372,14 +373,8 @@ export default function FormTemplate() {
             background: 'linear-gradient(to bottom, #fafcff 0%, #f7faff 50%, #f3f8ff 100%)'
           }}
         >
-          <div style={{ marginBottom: '8px' }}>
-            <span style={{ 
-              fontSize: '1.1em', 
-              fontWeight: '300',
-              color: '#666',
-              display: 'block',
-              marginBottom: '4px'
-            }}>
+          <div className="mb-2">
+            <span className="text-sm font-medium text-gray-600 mb-1 block">
               Form Title
             </span>
             <Input
@@ -388,23 +383,11 @@ export default function FormTemplate() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              style={{ 
-                backgroundColor: 'white',
-                border: '1px solid #e6f0ff',
-                borderRadius: '4px',
-                padding: '4px'
-              }}
+              className="text-base"
             />
           </div>
-          <Divider hidden />
-          <div style={{ marginBottom: '8px' }}>
-            <span style={{ 
-              fontSize: '1.1em', 
-              fontWeight: '300',
-              color: '#666',
-              display: 'block',
-              marginBottom: '4px'
-            }}>
+          <div className="mb-2">
+            <span className="text-sm font-medium text-gray-600 mb-1 block">
               Category
             </span>
             <Input
@@ -413,12 +396,7 @@ export default function FormTemplate() {
               type="text"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              style={{ 
-                backgroundColor: 'white',
-                border: '1px solid #e6f0ff',
-                borderRadius: '4px',
-                padding: '4px'
-              }}
+              className="text-base"
             />
           </div>
         </Segment>
@@ -434,311 +412,205 @@ export default function FormTemplate() {
           }}
         />
         {sections.map((section, sectionIndex) => (
-          <Segment 
+          <div 
             key={`section-${sectionIndex}`}
-            style={{ 
-              borderLeft: '3px solid #cce4ff',
-              background: 'linear-gradient(to bottom, #fbfcff 0%, #f8faff 50%, #f5f8ff 100%)'
-            }}
+            className="mb-6 bg-gradient-to-b from-[#fbfcff] via-[#f8faff] to-[#f5f8ff] border-l-4 border-blue-300 rounded-lg shadow-sm hover:border-blue-400 transition-colors"
           >
-            <Item>
-              <Grid>
-                <GridRow>
-                  <Grid.Column width={1} verticalAlign="middle">
-                    <Button
-                      size="mini"
-                      basic
-                      circular
-                      onClick={() =>
-                        setRemoveSectionConfirm({
-                          open: true,
-                          sectionIndex,
-                        })
-                      }
-                      style={{ float: "left" }}
-                      icon="x"
-                    />
-                  </Grid.Column>
-                  <Grid.Column width={10} verticalAlign="middle">
-                    <Input
-                      fluid
-                      label={
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span style={{ marginRight: '10px' }}>Section</span>
-                          <Icon 
-                            name={expandedSections[sectionIndex] ? 'chevron down' : 'chevron right'} 
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setExpandedSections(prev => ({
-                              ...prev,
-                              [sectionIndex]: !prev[sectionIndex]
-                            }))}
-                          />
-                        </div>
-                      }
-                      type="text"
-                      size="small"
-                      value={section.title}
-                      onChange={(e) => {
-                        const newSections = [...sections];
-                        newSections[sectionIndex].title = e.target.value;
-                        setSections(newSections);
-                      }}
-                    />
-                  </Grid.Column>
-                  <Grid.Column
-                    width={3}
-                    textAlign="left"
-                    verticalAlign="middle"
-                  >
-                    <Checkbox
-                      toggle
-                      label="Table?"
-                      onChange={(e, data) => {
-                        const newSections = [...sections];
-                        newSections[sectionIndex].isTable = data.checked;
-                        newSections[sectionIndex].rows =
-                          newSections[sectionIndex].rows || [];
-                        setSections(newSections);
-                      }}
-                      checked={section.isTable}
-                    />
-                  </Grid.Column>
-                </GridRow>
-                {!section.isTable && (
-                  <Grid.Row>
-                    <Grid.Column width={1}></Grid.Column>
-                    <Grid.Column width={13}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                        <span style={{ 
-                          fontSize: '0.85em', 
-                          fontWeight: '300',
-                          color: '#666',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          Number of columns:
-                        </span>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <Button
-                            size="tiny"
-                            compact
-                            style={{
-                              backgroundColor: section.sectionColumns === 1 ? '#e6f2ff' : 'white',
-                              color: section.sectionColumns === 1 ? '#2185d0' : '#666',
-                              border: `1px solid ${section.sectionColumns === 1 ? '#2185d0' : '#ddd'}`,
-                              boxShadow: section.sectionColumns === 1 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
-                              transition: 'all 0.2s ease',
-                              padding: '4px 8px',
-                              fontWeight: '400',
-                              height: '24px'
-                            }}
-                            onClick={() => setSectionColumn(sectionIndex, 1)}
-                          >
-                            One
-                          </Button>
-                          <Button
-                            size="tiny"
-                            compact
-                            style={{
-                              backgroundColor: section.sectionColumns === 2 ? '#e6f2ff' : 'white',
-                              color: section.sectionColumns === 2 ? '#2185d0' : '#666',
-                              border: `1px solid ${section.sectionColumns === 2 ? '#2185d0' : '#ddd'}`,
-                              boxShadow: section.sectionColumns === 2 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
-                              transition: 'all 0.2s ease',
-                              padding: '4px 8px',
-                              fontWeight: '400',
-                              height: '24px'
-                            }}
-                            onClick={() => setSectionColumn(sectionIndex, 2)}
-                          >
-                            Two
-                          </Button>
-                          <Button
-                            size="tiny"
-                            compact
-                            style={{
-                              backgroundColor: section.sectionColumns === 3 ? '#e6f2ff' : 'white',
-                              color: section.sectionColumns === 3 ? '#2185d0' : '#666',
-                              border: `1px solid ${section.sectionColumns === 3 ? '#2185d0' : '#ddd'}`,
-                              boxShadow: section.sectionColumns === 3 ? '0 2px 4px rgba(33, 133, 208, 0.1)' : 'none',
-                              transition: 'all 0.2s ease',
-                              padding: '4px 8px',
-                              fontWeight: '400',
-                              height: '24px'
-                            }}
-                            onClick={() => setSectionColumn(sectionIndex, 3)}
-                          >
-                            Three
-                          </Button>
-                        </div>
-                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '4px' }}>
-                          {sectionIndex > 0 && (
-                            <Button
-                              basic
-                              circular
-                              size="tiny"
-                              compact
-                              
-                              onClick={() => moveSectionUp(sectionIndex)}
-                              icon="chevron up"
-                            />
-                          )}
-                          {sectionIndex < sections.length - 1 && (
-                            <Button
-                            basic
-                            circular
-                              size="tiny"
-                              compact
-                              
-                              onClick={() => moveSectionDown(sectionIndex)}
-                              icon="chevron down"
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </Grid.Column>
-                  </Grid.Row>
-                )}
-                {section.isTable && (
-                  <>
-                    <Grid.Row>
-                      <Grid.Column width={1}>Rows</Grid.Column>
-                      <Grid.Column width={13}>Text</Grid.Column>
-                    </Grid.Row>
-                    {section.rows.map((row, rowIndex) => (
-                      <Grid.Row key={rowIndex}>
-                        <Grid.Column width={1}>
-                          <Button
-                            icon="x"
-                            circular
-                            basic
-                            size="mini"
-                            onClick={() => {
-                              const newSections = [...sections];
-                              const newRows = newSections[
-                                sectionIndex
-                              ].rows.filter((_, index) => index !== rowIndex);
-                              newSections[sectionIndex].rows = newRows;
-                              setSections(newSections);
-                            }}
-                          ></Button>
-                        </Grid.Column>
-                        <Grid.Column width={13}>
-                          <Input
-                            type="text"
-                            size="mini"
-                            fluid
-                            width={8}
-                            value={row.value}
-                            onChange={(e) => {
-                              const newSections = [...sections];
-                              const newRows = newSections[sectionIndex].rows;
-                              newRows[rowIndex].value = e.target.value;
-                              newSections[sectionIndex].rows = newRows;
-                              setSections(newSections);
-                            }}
-                          />
-                        </Grid.Column>
-                      </Grid.Row>
-                    ))}
-                    <Grid.Row key="row4">
-                      <Grid.Column>
-                        <Button
-                          icon="plus"
-                          circular
-                          basic
-                          size="mini"
-                          color="black"
-                          onClick={() => {
-                            const newSections = [...sections];
-                            newSections[sectionIndex].rows.push({ value: "" });
-                            setSections(newSections);
-                          }}
-                        ></Button>
-                      </Grid.Column>
-                    </Grid.Row>
-                  </>
-                )}
-              </Grid>
-            </Item>
-            
-            {expandedSections[sectionIndex] && (
-              <>
-                <Divider hidden />
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
-                >
-                  <SortableContext
-                    items={section.fields.map((f, i) => f.guid)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <>
-                      <Confirm
-                        size="mini"
-                        header="This will delete the field."
-                        open={removeFieldConfirm.open}
-                        onCancel={() => setRemoveFieldConfirm({ open: false })}
-                        onConfirm={() => {
-                          removeField(
-                            removeFieldConfirm.sectionIndex,
-                            removeFieldConfirm.fieldIndex
-                          );
-                          setRemoveFieldConfirm({ open: false });
-                        }}
-                      />
-                      {section.fields.map((field, fieldIndex) => (
-                        <div key={field.guid}>
-                          <SortableItem id={field.guid}>
-                            <FieldEditor
-                              key={fieldIndex}
-                              value={field}
-                              onDelete={() =>
-                                setRemoveFieldConfirm({
-                                  open: true,
-                                  sectionIndex,
-                                  fieldIndex,
-                                })
-                              }
-                              onChange={(value) => {
-                                const newSections = [...sections];
-                                newSections[sectionIndex].fields[fieldIndex] =
-                                  value;
-                                setSections(newSections);
-                              }}
-                              onDuplicate={() => {
-                                const newSections = [...sections];
+            <div className="p-4">
+              <div className="flex items-center gap-4">
+                <Popup
+                  content="Delete section"
+                  trigger={
+                    <button
+                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      onClick={() => setRemoveSectionConfirm({
+                        open: true,
+                        sectionIndex,
+                      })}
+                    >
+                      <Icon name="x" className="text-gray-500" />
+                    </button>
+                  }
+                  position="top center"
+                  size="mini"
+                />
 
-                                const duplicatedField = {
-                                  ...field,
-                                  title: `${field.title} copy`,
-                                  name: `${field.name} copy`,
-                                  guid: uuidv4(),
-                                };
-                                newSections[sectionIndex].fields.push(
-                                  duplicatedField
-                                );
-                                setSections(newSections);
-                              }}
-                              showWeight={section.fields.some(
-                                (f) => f.type === "aggregate"
-                              )} // only show weight if there is an aggregate field in this seciton
-                              showAggregateFunction={section.isTable}
-                            />
-                            <Divider />
-                          </SortableItem>
-                        </div>
-                      ))}
-                    </>
-                  </SortableContext>
-                </DndContext>
-                <Button size="mini" basic color="blue" onClick={() => addField(sectionIndex)}>
-                  <Icon name="plus" />
-                  Field
-                </Button>
-              </>
-            )}
-          </Segment>
+                <div className="flex-1">
+                  <Input
+                    fluid
+                    label={
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700">Section</span>
+                        <Icon 
+                          name={expandedSections[sectionIndex] ? 'chevron down' : 'chevron right'} 
+                          className="cursor-pointer"
+                          onClick={() => setExpandedSections(prev => ({
+                            ...prev,
+                            [sectionIndex]: !prev[sectionIndex]
+                          }))}
+                        />
+                      </div>
+                    }
+                    className="text-base"
+                    type="text"
+                    size="small"
+                    value={section.title}
+                    onChange={(e) => {
+                      const newSections = [...sections];
+                      newSections[sectionIndex].title = e.target.value;
+                      setSections(newSections);
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 min-w-[100px] justify-end">
+                  <Checkbox
+                    toggle
+                    label="Table?"
+                    onChange={(e, data) => {
+                      const newSections = [...sections];
+                      newSections[sectionIndex].isTable = data.checked;
+                      newSections[sectionIndex].rows = newSections[sectionIndex].rows || [];
+                      setSections(newSections);
+                    }}
+                    checked={section.isTable}
+                  />
+
+                  <div className="flex w-[60px] justify-end">
+                    {sectionIndex > 0 && (
+                      <Popup
+                        content="Move section up"
+                        trigger={
+                          <button
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            onClick={() => moveSectionUp(sectionIndex)}
+                          >
+                            <Icon name="chevron up" className="text-gray-500" />
+                          </button>
+                        }
+                        position="top center"
+                        size="mini"
+                      />
+                    )}
+                    {sectionIndex < sections.length - 1 && (
+                      <Popup
+                        content="Move section down"
+                        trigger={
+                          <button
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            onClick={() => moveSectionDown(sectionIndex)}
+                          >
+                            <Icon name="chevron down" className="text-gray-500" />
+                          </button>
+                        }
+                        position="top center"
+                        size="mini"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {expandedSections[sectionIndex] && (
+                <>
+                  <Divider hidden />
+                  {!section.isTable && (
+                    <div className="mb-4 flex items-center gap-4 mt-4">
+                      <span className="text-sm text-gray-600">Number of columns:</span>
+                      <div className="flex gap-2">
+                        {[1, 2, 3].map(num => (
+                          <button
+                            key={num}
+                            className={`px-3 py-1 text-sm rounded-md transition-all ${
+                              section.sectionColumns === num 
+                                ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm' 
+                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                            }`}
+                            onClick={() => setSectionColumn(sectionIndex, num)}
+                          >
+                            {num === 1 ? 'One' : num === 2 ? 'Two' : 'Three'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(e) => handleDragEnd(sectionIndex, e)}
+                  >
+                    <SortableContext
+                      items={section.fields.map((f, i) => f.guid)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <>
+                        <Confirm
+                          size="mini"
+                          header="This will delete the field."
+                          open={removeFieldConfirm.open}
+                          onCancel={() => setRemoveFieldConfirm({ open: false })}
+                          onConfirm={() => {
+                            removeField(
+                              removeFieldConfirm.sectionIndex,
+                              removeFieldConfirm.fieldIndex
+                            );
+                            setRemoveFieldConfirm({ open: false });
+                          }}
+                        />
+                        {section.fields.map((field, fieldIndex) => (
+                          <div key={field.guid}>
+                            <SortableItem id={field.guid}>
+                              <FieldEditor
+                                key={fieldIndex}
+                                value={field}
+                                onDelete={() =>
+                                  setRemoveFieldConfirm({
+                                    open: true,
+                                    sectionIndex,
+                                    fieldIndex,
+                                  })
+                                }
+                                onChange={(value) => {
+                                  const newSections = [...sections];
+                                  newSections[sectionIndex].fields[fieldIndex] =
+                                    value;
+                                  setSections(newSections);
+                                }}
+                                onDuplicate={() => {
+                                  const newSections = [...sections];
+
+                                  const duplicatedField = {
+                                    ...field,
+                                    title: `${field.title} copy`,
+                                    name: `${field.name} copy`,
+                                    guid: uuidv4(),
+                                  };
+                                  newSections[sectionIndex].fields.push(
+                                    duplicatedField
+                                  );
+                                  setSections(newSections);
+                                }}
+                                showWeight={section.fields.some(
+                                  (f) => f.type === "aggregate"
+                                )} // only show weight if there is an aggregate field in this seciton
+                                showAggregateFunction={section.isTable}
+                              />
+                              <Divider />
+                            </SortableItem>
+                          </div>
+                        ))}
+                      </>
+                    </SortableContext>
+                  </DndContext>
+                  <Button size="mini" basic color="blue" onClick={() => addField(sectionIndex)}>
+                    <Icon name="plus" />
+                    Field
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
         ))}
         <Button size="mini" basic color="blue" onClick={addSection}>
           <Icon name="plus" />
@@ -755,7 +627,6 @@ export default function FormTemplate() {
         />
       </>
     );
-
   }
 
   
@@ -818,7 +689,24 @@ leftButton={templateId && canDeleteTemplate() && {label: "Delete Form", color: "
         <Header as="h3" color="teal">
           Form Preview
         </Header>
-        <GenericForm formDef={{ title, category, sections, hasSignature }} users={users} />
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginTop: '15px'  // Add some space below the button
+        }}>
+          <Checkbox
+            toggle
+            label="Record View"
+            checked={isFormDisabled}
+            onChange={(e, data) => setIsFormDisabled(data.checked)}
+          />
+        </div>
+        <GenericForm
+          formDef={{ title, category, sections, hasSignature }} users={users}
+          disabled={isFormDisabled}
+        />
+        
         <Divider />
         <Header as="h3" color="teal">
           Register Preview

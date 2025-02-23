@@ -5,3 +5,12 @@
 .field:hover{
   background-color: #eee!important;
 }
+
+/* Override Semantic UI's hover background */
+.ui.form .field:hover {
+  background-color: transparent !important;
+}
+
+.ui.dropdown:hover {
+  background-color: transparent !important;
+}

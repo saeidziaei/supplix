@@ -2,7 +2,7 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import React, { useState } from "react";
 import { BlockPicker } from "react-color";
-import { Button, Checkbox, Dropdown, Form, Grid, Radio } from "semantic-ui-react";
+import { Button, Checkbox, Dropdown, Form, Grid, Radio, Popup } from "semantic-ui-react";
 import * as Yup from 'yup';
 
 
@@ -301,28 +301,43 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
   return (
     <>
       <Form size="tiny">
-        <Button
+        <Popup
+          content="Delete field"
+          trigger={
+            <Button
+              size="mini"
+              basic
+              icon="x"
+              style={{ float: "left", marginRight: "0.5rem" }}
+              circular
+              onClick={() => onDelete()}
+            />
+          }
+          position="top center"
           size="mini"
-          basic
-          icon="x"
-          style={{ float: "left" }}
-          circular
-          onClick={() => onDelete()}
-        ></Button>
-        <Button
+        />
+        <Popup
+          content="Duplicate field"
+          trigger={
+            <Button
+              size="mini"
+              basic
+              icon="copy"
+              style={{ float: "left", marginRight: "2rem" }}
+              circular
+              onClick={() => onDuplicate()}
+            />
+          }
+          position="top center"
           size="mini"
-          basic
-          icon="copy"
-          style={{ float: "left" }}
-          circular
-          onClick={() => onDuplicate()}
-        ></Button>
+        />
         <Form.Group inline>
           {!isRegisterField && (
             <Form.Dropdown
-              label="Type"
+              label={<span className="text-sm font-medium text-gray-600">Type</span>}
               value={field.type}
               text={getFieldTypeText(field.type)}
+              style={{ width: '150px' }}
             >
               <Dropdown.Menu>
                 {fieldTypes.map((ft) => (
@@ -332,12 +347,8 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
                     onClick={() => {
                       const newType = ft.value;
                       let updatedField = { ...field, type: newType };
-
                       if (ft.hasOptions) {
-                        updatedField = {
-                          ...updatedField,
-                          options: field.options || [],
-                        };
+                        updatedField = { ...updatedField, options: field.options || [] };
                       }
                       setField(updatedField);
                       onChange(updatedField);
@@ -350,7 +361,12 @@ export default function FieldEditor({ value, onChange, onDelete, onDuplicate, is
           {field.type != "info" && (
             <Form.Input
               width={8}
-              label={isRegisterField ? "Header" : "Label"}
+              label={
+                <span className="text-sm font-medium text-gray-600">
+                  {isRegisterField ? "Header" : "Label"}
+                </span>
+              }
+              className="text-base hover:bg-transparent"
               type="text"
               value={field.name}
               onChange={(e) => handleFieldChange("name", e.target.value)}

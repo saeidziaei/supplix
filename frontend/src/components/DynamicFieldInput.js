@@ -23,9 +23,9 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
               {!hideLabel && (
                 <>
                   <div
-                    className={
-                      disabled && "border-b border-dashed border-gray-300"
-                    }
+                    className={`font-medium text-gray-700 ${
+                      disabled ? "opacity-75" : "opacity-100"
+                    }`}
                   >
                     {f.name}
                   </div>
@@ -54,6 +54,9 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
         const size = "mini";
         const name = f.name;
         const id = `input-${f.name}`;
+
+        const disabledClass = disabled ? "bg-gray-50 text-gray-700 cursor-not-allowed border-gray-200" : "bg-white";
+
         switch (f.type) {
           case "info":
             return f.as === "content" ? (
@@ -81,13 +84,13 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
           case "number":
             return (
               <NumericFormat
-              placeholder="(number)"
-                displayType={disabled ? "text" : "input"}
-                className={disabled ? "font-bold text-lg" : "w-full md:max-w-[300px] p-1 !rounded-xl !mt-1 *:!bg-[#E9EFF6] !bg-[#E9EFF6] *:!border-none *:!rounded-2xl hover:!shadow-lg transition duration-300"}
+                placeholder="(number)"
+                className={`w-full md:max-w-[300px] p-2 rounded-lg border ${disabledClass} transition-colors`}
                 name={name}
                 thousandSeparator={true}
                 value={value}
-                onValueChange={(v) => setFieldValue(name, v.floatValue)}
+                disabled={disabled}
+                onValueChange={(v) => !disabled && setFieldValue(name, v.floatValue)}
               />
             );
     
@@ -108,19 +111,16 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
             );
     
           case "text":
-            return disabled ? (
-              <div className="font-bold text-lg">
-                {typeof value === "object" ? JSON.stringify(value) : value}
-              </div>
-            ) : (
+            return (
               <TextareaAutosize
-                className="w-full p-1 !rounded-xl !mt-1 *:!bg-[#E9EFF6] !bg-[#E9EFF6] *:!border-none *:!rounded-2xl hover:!shadow-lg transition duration-300"
+                className={`w-full md:max-w-[350px] p-2 rounded-lg border ${disabledClass} transition-colors`}
                 rows={1}
                 size={size}
                 name={name}
                 id={id}
-                value={value}
-                onChange={(ev) => setFieldValue(name, ev.target.value)}
+                value={value || ""}
+                disabled={disabled}
+                onChange={(ev) => !disabled && setFieldValue(name, ev.target.value)}
               />
             );
     
@@ -142,9 +142,10 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
             );
     
           case "wysiwyg":
+            
             return disabled ? (
-              <span
-                className="disabledWysiwygFormat"
+              <div
+                className="w-full  p-2 rounded-lg border bg-white text-gray-700"
                 dangerouslySetInnerHTML={{ __html: value }}
               />
             ) : (
@@ -167,7 +168,7 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
             }
             if (selected == "Invalid Date") selected = ""; 
             return disabled ? (
-              <div className="font-bold text-lg">{selected ? format(selected, "dd-MM-yyyy") : ""}</div>
+              <div className="w-full md:max-w-[300px] p-2 rounded-lg border bg-white text-gray-700">{selected ? format(selected, "dd MMM yyyy") : ""}</div>
             ) : (
               <DateInput
                 placeholderText="Select"
@@ -187,55 +188,43 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
     
           case "multi":
           case "select":
-            let newValues = value;
-            if (!Array.isArray(newValues)) {
-              // check to see newValues is actually an array as the type might have changed.
-              newValues = [];
-            }
-    
+            let newValues = Array.isArray(value) ? value : [];
+
             return (
-              <div
-                key={f.name}
-                style={{ display: "flex", flexWrap: "wrap", alignItems: "center" }}
-              >
+              <div className="flex flex-wrap gap-2">
                 {f.options.map((o, i) => {
                   const selected = newValues.includes(o.value);
-                  if (disabled) {
-                    if (!selected) {
-                      return null;
-                    } else {
-                      return <div className="font-bold text-lg mr-5">{o.value}</div>;
-                    }
-                  }
-    
+                  
                   return (
                     <Button
                       key={i}
-                      basic={f.type == "multi" || !selected}
-                      disabled={disabled}
-                      color={selected ? "blue" : ""}
+                      basic={!selected}
+                      color={selected ? "blue" : "gray"} 
                       size={size}
-                      style={{ marginBottom: "2px" }}
+                      className={`
+                        flex items-center gap-2 px-4 py-2 rounded-full
+                        ${disabled ? 'opacity-85' : 'hover:shadow-sm'}
+                        ${selected ? 'bg-blue-50' : ''}
+                      `}
                       onClick={(e) => {
+                        if (disabled) return;
                         e.preventDefault();
-    
+
+                        let updatedValues;
                         if (selected) {
-                          newValues = newValues.filter((item) => item !== o.value);
+                          updatedValues = newValues.filter(item => item !== o.value);
                         } else {
-                          if (!Array.isArray(newValues)) newValues = [];
-    
-                          if (f.type !== "multi") newValues = []; // for single value, empty the answers. For multi keep the existing ones and add the new one
-    
-                          newValues.push(o.value);
+                          updatedValues = f.type === "multi" 
+                            ? [...newValues, o.value]  // Multi-select: add to existing
+                            : [o.value];               // Single-select: replace existing
                         }
-    
-                        setFieldValue(name, newValues);
+                        setFieldValue(name, updatedValues);
                       }}
                     >
-                      {f.type == "multi" && (
-                        <Icon name={selected ? "check" : ""} color="blue" />
-                      )}
-                      {o.value}
+                      {selected && <Icon name="check" size="small" />}
+                      <span className={selected ? 'font-medium' : ''}>
+                        {o.value}
+                      </span>
                     </Button>
                   );
                 })}
@@ -258,20 +247,22 @@ export function DynamicFieldInput({fieldDefinition, value, valueSetter, disabled
               value: o.value,
               text: o.text || o.value,
             })) : [];
-            const displayText = options.find((o) => o.value === value)?.text || value;
-
+            
             return disabled ? (
-              <div className="font-bold text-lg">{displayText}</div>
+              <div className="w-full md:max-w-[300px] p-2 rounded-lg border bg-white text-gray-700">{value}</div>
             ) : (
               <SelectInput
                 compact
                 placeholder="Select"
-                clearable
+                clearable={!disabled}
                 size={size}
                 options={options}
                 name={name}
                 id={id}
-                onChange={(_, data) => setFieldValue(name, data.value)}
+                value={value}
+                disabled={disabled}
+                onChange={(_, data) => !disabled && setFieldValue(name, data.value)}
+                className={disabledClass}
               />
             );
     

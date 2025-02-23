@@ -302,7 +302,7 @@ console.log("preSubmit", values);
                 ))}
               <Grid.Row>
                 <Grid.Column>
-                  {!disabled && (
+                  
                     <Button
                       type="button"
                       basic
@@ -315,7 +315,7 @@ console.log("preSubmit", values);
                       className="!my-3"
                       onClick={() => push({ file: "", fileNote: "" })}
                     />
-                  )}
+                  
                 </Grid.Column>
               </Grid.Row>
             </CardGroup>
@@ -364,8 +364,11 @@ console.log("preSubmit", values);
   }
 
   return (
-    <div className="mx-auto p-6 !pb-10 w-full  border border-gray-300 mt-5 shadow-lg">
-      {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
+    <div className="mx-auto  !pb-3 w-full  border border-gray-300 mt-5 shadow-lg rounded-[4rem]">
+      <div className="bg-[#e6f3ff] rounded-t-[4rem] border-b-4 border-b-[#b3d9ff]">
+        {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
+      </div>
+      <div className="bg-[#F8FAFC] px-12  rounded-b-[4rem]">
       <Formik
         initialValues={formData || defaultValues}
         onSubmit={preSubmit}
@@ -416,6 +419,7 @@ console.log("preSubmit", values);
           );
         }}
       </Formik>
+      </div>
     </div>
   );
 }

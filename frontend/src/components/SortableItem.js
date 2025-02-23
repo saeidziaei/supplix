@@ -1,31 +1,34 @@
+import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import React from "react";
-import { Button } from "semantic-ui-react";
+import { Icon } from "semantic-ui-react";
 
-export function SortableItem(props) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: props.id });
+export function SortableItem({ id, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition
+    transition,
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      
-        <Button
-          className="grabbable"
-          style={{ boxShadow: "none", opacity: "50%" }}
-          basic
-          icon="th"
-          size="tiny"
-          {...listeners}
-          {...attributes}
-        />
-        <div>{props.children}</div>
-      
+    <div ref={setNodeRef} style={style} className="flex items-center gap-4">
+      <div 
+        className="cursor-move text-gray-300 hover:text-gray-600 flex items-center -mt-14" 
+        {...attributes} 
+        {...listeners}
+      >
+        <Icon name="bars" />
+      </div>
+      <div className="flex-1">
+        {children}
+      </div>
     </div>
   );
 }

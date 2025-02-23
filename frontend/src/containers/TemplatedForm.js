@@ -311,7 +311,7 @@ export default function TemplatedForm() {
   return (
     <>
       <WorkspaceInfoBox workspace={workspace} leafFolder={leafFolder} />
-      <div className="mx-auto px-4 w-full lg:w-1/2   ">
+      <div className="mx-auto  w-full lg:w-1/2 ">
       <GenericForm
         formDef={template.templateDefinition}
         formData={formRecord ? formRecord.formValues : null}
