@@ -403,12 +403,7 @@ Temporary Password: {####}
           bind: [templateTable],
         },
       },
-      "GET   /templates-categories": {
-        function: {
-          handler: "services/functions/template/categoriesList.main",
-          bind: [templateTable],
-        },
-      },
+      
       // templates are not workspace aware but forms are.
       // This endpoint returns form count for the templates so it needs to be workspace aware.
       "GET   /workspaces/{workspaceId}/templates": {

@@ -9,8 +9,6 @@ const AppContext = createContext({
   setUsers: () => {},
   tenant: null,
   setTenant: () => {},
-  currentWorkspace: null,
-  setCurrentWorkspace: () => {},
 });
 
 export function useAppContext() {

@@ -23,6 +23,8 @@ export const main = handler(async (event, tenant) => {
       siteOwner: data.siteOwner || "",
       siteAddress: data.siteAddress || "",
       inoutNote: data.inoutNote || "",
+      showInMenu: data.showInMenu || "",
+      isPlaceholder: data.isPlaceholder || "",
       
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 

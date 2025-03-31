@@ -34,7 +34,7 @@ export default function Workspaces() {
   const [preppedContent, setPreppedContent] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const { currentUserRoles, tenant, currentWorkspace, setCurrentWorkspace } = useAppContext();
+  const { currentUserRoles, tenant } = useAppContext();
   const isAdmin = currentUserRoles.includes("admins");
 
 
@@ -67,9 +67,6 @@ export default function Workspaces() {
             : null,
         }));
         setWorkspaces(userWorkspaces);
-        if (!currentWorkspace && userWorkspaces.length > 0) {
-          setCurrentWorkspace(userWorkspaces[0]);
-        }
       } catch (e) {
         onError(e);
       } finally {
@@ -207,7 +204,6 @@ export default function Workspaces() {
     const ws = selectedRows.length === 1 ? selectedRows[0] : null;
     if (ws) {
       nav(`?id=${ws.workspaceId}`);
-      setCurrentWorkspace(ws);
     }
   }
   function renderChildren() {

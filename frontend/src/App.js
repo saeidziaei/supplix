@@ -34,9 +34,17 @@ function App() {
   const [employee, setEmployee] = useState(null);
   const [tasks, setTasks] = useState(null);
   const [users, setUsers] = useState([]);
-  const [templateCategories, setTemplateCategories] = useState([]);
-  const [currentWorkspace, setCurrentWorkspace] = useState(null);
-
+  const [sidebarWorkspaces, setSidebarWorkspaces] = useState([]);
+  const [expandedWorkspaces, setExpandedWorkspaces] = useState(() => {
+    try {
+      const saved = localStorage.getItem('expandedWorkspaces');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.error('Error loading expandedWorkspaces from localStorage:', e);
+      return {};
+    }
+  });
+  
 
   const nav = useNavigate();
 
@@ -83,8 +91,8 @@ function App() {
       }
       return tenant;
     }
-    async function loadTemplateCategories() {
-      return await makeApiCall("GET", `/templates-categories`);
+    async function loadWorkspaces() {
+      return await makeApiCall("GET", `/workspaces`);
     }
     async function loadUsers() {
       return await makeApiCall("GET", `/users`);
@@ -101,16 +109,32 @@ function App() {
       return normaliseCognitoUser(item);
     }
 
+    const buildSidebarWorkspaces = (workspaces) => {
+      const buildChildren = (parentId) => {
+        return workspaces
+          .filter(ws => ws.parentId === parentId)
+          .map(ws => ({
+            ...ws,
+            children: buildChildren(ws.workspaceId)
+          }));
+      };
+
+      const topLevel = workspaces.filter(ws => ws.showInMenu && ws.parentId === null);
+      return topLevel.map(parent => ({
+        ...parent,
+        children: buildChildren(parent.workspaceId)
+      }));
+    }
 
     async function onLoad() {
       try {
-        const [tenant, employee, tasks, userItems, templateCategories] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks(), loadUsers(), loadTemplateCategories()]);
+        const [tenant, employee, tasks, userItems, workspaces] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks(), loadUsers(), loadWorkspaces()]);
 
         setTenant(tenant);
         setEmployee(employee);
         setTasks(tasks);
         setUsers(normaliseCognitoUsers(userItems));
-        setTemplateCategories(templateCategories);
+        setSidebarWorkspaces(buildSidebarWorkspaces(workspaces));
       } catch (e) {
         onError(e);
       }
@@ -131,6 +155,10 @@ function App() {
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
+  // Add effect to save to localStorage when state changes
+  useEffect(() => {
+    localStorage.setItem('expandedWorkspaces', JSON.stringify(expandedWorkspaces));
+  }, [expandedWorkspaces]);
 
   function renderApp() {
     const isAdmin = currentUserRoles.includes('admins');
@@ -231,30 +259,61 @@ function App() {
                       </LinkContainer>
 
                       
-{currentWorkspace && templateCategories && templateCategories.map(c => (
-  <Menu.Item key={c.category}>
-    {c.templateId ? (
-      <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/register/${c.templateId}`}>
-        <Nav.Link onClick={() => setIsSidebarVisible(false)}>
+{ sidebarWorkspaces && sidebarWorkspaces.map(ws => (
+  <Menu.Item 
+    key={ws.workspaceId} 
+    style={{ color: '#2185d0' }}
+    onClick={(e) => {
+      if (ws.children && ws.children.length > 0 ) {
+        e.preventDefault();
+        setExpandedWorkspaces(prev => ({
+          ...prev,
+          [ws.workspaceId]: !prev[ws.workspaceId]
+        }));
+      }
+    }}
+  >
+    {ws.children && ws.children.length > 0 && (
+      <Icon 
+        name={expandedWorkspaces[ws.workspaceId] ? 'chevron down' : 'chevron right'} 
+        style={{ marginRight: '5px' }}
+      />
+    )}
+    {!ws.isPlaceholder ? (
+      <LinkContainer to={{pathname:"/", search:`?id=${ws.workspaceId}`}}>
+        <Nav.Link onClick={() => setIsSidebarVisible(false)} style={{ color: 'white' }}>
           <Icon name="folder" />
-          {c.category}
+          {ws.workspaceName}
         </Nav.Link>
       </LinkContainer>
     ) : (
       <span>
-        <Icon name="folder" />
-        {c.category}
+        {ws.workspaceName}
       </span>
     )}
-    {c.children && c.children.length > 0 && (
-      <Menu.Menu>
-        {c.children.map(child => (
-          child.templateId && (
-            <Menu.Item key={child.templateId}>
-              <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/register/${child.templateId}`}>
-                <Nav.Link onClick={() => setIsSidebarVisible(false)}>
-                  <Icon name="file" />
-                  {child.category}
+    {ws.children && ws.children.length > 0 && expandedWorkspaces[ws.workspaceId] && (
+      <Menu.Menu style={{ marginTop: '5px' }}>
+        {ws.children.map(child => (
+          child.workspaceId && (
+            <Menu.Item 
+              key={child.workspaceId} 
+              style={{ 
+                backgroundColor: '#f9f9f9', 
+                color: "white",
+                padding: '10px 20px',
+                marginBottom: '2px',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <LinkContainer to={{pathname:"/", search:`?id=${child.workspaceId}`}}>
+                <Nav.Link 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSidebarVisible(false);
+                  }} 
+                >
+                  <Icon name="chevron right" />
+                  {child.workspaceName}
                 </Nav.Link>
               </LinkContainer>
             </Menu.Item>
@@ -263,7 +322,7 @@ function App() {
       </Menu.Menu>
     )}
   </Menu.Item>
-))}
+))} 
                      
 
                       {(isAdmin || isTopLevelAdmin) && (
@@ -357,8 +416,6 @@ function App() {
                         setUsers,
                         tenant,
                         setTenant,
-                        currentWorkspace,
-                        setCurrentWorkspace,
                       }}
                     >
                       <Routes

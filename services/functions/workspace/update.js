@@ -24,7 +24,9 @@ export const main = handler(async (event, tenant) => {
       hasInout = :hasInout,
       siteOwner = :siteOwner,
       siteAddress = :siteAddress,
-      inoutNote = :inoutNote
+      inoutNote = :inoutNote,
+      showInMenu = :showInMenu,
+      isPlaceholder = :isPlaceholder
       `,
     ExpressionAttributeValues: {
       ":parentId": data.parentId,
@@ -41,6 +43,8 @@ export const main = handler(async (event, tenant) => {
       ":siteOwner": data.siteOwner || "",
       ":siteAddress": data.siteAddress || "",
       ":inoutNote": data.inoutNote || "",
+      ":showInMenu": data.showInMenu || "",
+      ":isPlaceholder": data.isPlaceholder || "",
 
     },
     ReturnValues: "ALL_NEW",

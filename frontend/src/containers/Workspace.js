@@ -99,6 +99,7 @@ export default function Workspace() {
         if (workspaceId) {
           const item = await loadWorkspace();// loadWorkspace has workspace in the path therefore it return workspace in a child element
           workspaceData = item.workspace ?? {};
+               // Ensure showInMenu has a default value
           setSelectedTemplateCategories(workspaceData.templateCategories || []);
         }
     
@@ -126,7 +127,7 @@ export default function Workspace() {
     setIsLoading(true);
     values.parentId = workspace.parentId || null;
     values.templateCategories = selectedTemplateCategories;
-
+    
     try {
       if (workspaceId) {
         await updateWorkspace(values);
@@ -499,7 +500,28 @@ export default function Workspace() {
           {renderTemplatePicker()}
           <Checkbox
                       toggle
+                      name="showInMenu"
+                      className="my-2"
+                      label="Show in Sidebar Menu"
+                      checked={values.showInMenu}
+                      onChange={(e, { checked }) =>
+                        setFieldValue("showInMenu", checked)
+                      }
+                    /><span className="mini-text"><i> adds a link to the side menu for convenience.</i></span><br/>
+          <Checkbox
+                      toggle
+                      name="isPlaceholder"
+                      className="my-2"
+                      label="Is Placeholder?"
+                      checked={values.isPlaceholder}
+                      onChange={(e, { checked }) =>
+                        setFieldValue("isPlaceholder", checked)
+                      }
+                    /><span className="mini-text"><i> indicates the workspace doesn't have direct form or doc items.</i></span><br/>
+          <Checkbox
+                      toggle
                       name="hasInout"
+                      className="my-2"
                       label="Enable Site In & Out?"
                       checked={values.hasInout}
                       onChange={(e, { checked }) =>
