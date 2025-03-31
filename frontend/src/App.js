@@ -18,7 +18,7 @@ import User from "./components/User";
 import placeholderImage from "./fileplaceholder.jpg";
 import { makeApiCall } from "./lib/apiLib";
 import { s3Get } from "./lib/awsLib";
-import { AppContext } from "./lib/contextLib";
+import AppContext from "./lib/contextLib";
 import { onError } from "./lib/errorLib";
 import { normaliseCognitoUser, normaliseCognitoUsers } from "./lib/helpers";
 import MasterLayout from "./components/MasterLayout";
@@ -29,11 +29,13 @@ export default App;
 function App() {
   const [authenticatedUser, setAuthenticatedUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  
+  const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [tenant, setTenant] = useState(null);
   const [employee, setEmployee] = useState(null);
   const [tasks, setTasks] = useState(null);
   const [users, setUsers] = useState([]);
+  const [templateCategories, setTemplateCategories] = useState([]);
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
 
 
   const nav = useNavigate();
@@ -81,6 +83,9 @@ function App() {
       }
       return tenant;
     }
+    async function loadTemplateCategories() {
+      return await makeApiCall("GET", `/templates-categories`);
+    }
     async function loadUsers() {
       return await makeApiCall("GET", `/users`);
     }
@@ -99,12 +104,13 @@ function App() {
 
     async function onLoad() {
       try {
-        const [tenant, employee, tasks, userItems] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks(), loadUsers()]);
+        const [tenant, employee, tasks, userItems, templateCategories] = await Promise.all([loadMyTenant(), loadMyEmployee(), loadMyTasks(), loadUsers(), loadTemplateCategories()]);
 
         setTenant(tenant);
         setEmployee(employee);
         setTasks(tasks);
-        setUsers(normaliseCognitoUsers(userItems))
+        setUsers(normaliseCognitoUsers(userItems));
+        setTemplateCategories(templateCategories);
       } catch (e) {
         onError(e);
       }
@@ -115,13 +121,18 @@ function App() {
     }
   }, [authenticatedUser]);
 
+  useEffect(() => {
+    if (authenticatedUser) {
+      setCurrentUserRoles(authenticatedUser["cognito:groups"] || []);
+    } else {
+      setCurrentUserRoles([]);
+    }
+  }, [authenticatedUser]);
 
   const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
 
   function renderApp() {
-    
-    const currentUserRoles = authenticatedUser ? authenticatedUser["cognito:groups"] || [] : [];
     const isAdmin = currentUserRoles.includes('admins');
     const isTopLevelAdmin = currentUserRoles.includes('top-level-admins');
 
@@ -219,12 +230,40 @@ function App() {
                         </Menu.Item>
                       </LinkContainer>
 
-                      {/*
-                  <Menu.Item as="a">
-                    <Label color="orange">3</Label>
-                    Notifications
-                  </Menu.Item> */}
-
+                      
+{currentWorkspace && templateCategories && templateCategories.map(c => (
+  <Menu.Item key={c.category}>
+    {c.templateId ? (
+      <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/register/${c.templateId}`}>
+        <Nav.Link onClick={() => setIsSidebarVisible(false)}>
+          <Icon name="folder" />
+          {c.category}
+        </Nav.Link>
+      </LinkContainer>
+    ) : (
+      <span>
+        <Icon name="folder" />
+        {c.category}
+      </span>
+    )}
+    {c.children && c.children.length > 0 && (
+      <Menu.Menu>
+        {c.children.map(child => (
+          child.templateId && (
+            <Menu.Item key={child.templateId}>
+              <LinkContainer to={`/workspace/${currentWorkspace.workspaceId}/register/${child.templateId}`}>
+                <Nav.Link onClick={() => setIsSidebarVisible(false)}>
+                  <Icon name="file" />
+                  {child.category}
+                </Nav.Link>
+              </LinkContainer>
+            </Menu.Item>
+          )
+        ))}
+      </Menu.Menu>
+    )}
+  </Menu.Item>
+))}
                      
 
                       {(isAdmin || isTopLevelAdmin) && (
@@ -235,7 +274,7 @@ function App() {
                           <Nav.Link as={Menu.Item}>
                             <span>
                               <Icon name="clipboard list" />
-                              Forms
+                              Form Builder
                             </span>
                           </Nav.Link>
                         </LinkContainer>
@@ -302,6 +341,7 @@ function App() {
                       {employee ? employee.given_name : ""}
                     </p>
                   </Menu.Item>
+                  
                 </Sidebar>
 
                 <Sidebar.Pusher dimmed={isSidebarVisible}>
@@ -312,8 +352,13 @@ function App() {
                         authenticatedUser,
                         setAuthenticatedUser,
                         currentUserRoles,
-                        tenant,
+                        setCurrentUserRoles,
                         users,
+                        setUsers,
+                        tenant,
+                        setTenant,
+                        currentWorkspace,
+                        setCurrentWorkspace,
                       }}
                     >
                       <Routes

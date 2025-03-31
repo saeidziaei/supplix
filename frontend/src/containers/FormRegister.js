@@ -51,14 +51,13 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   }, [formDefInput]);
 
   useEffect(() => {
-
     async function onLoad() {
       try {
         setIsLoading(true);
 
-        if (formDef) {
-          // all data have been passed from another component, we are just checking formDef
-          setColumnDefs(getColumnDefs(formDef));
+        if (formDefInput) {
+          // Only return early if this is initial data passed from parent
+          setColumnDefs(getColumnDefs(formDefInput));
           setIsLoading(false);
           return;
         }
@@ -67,7 +66,12 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
           return;
         }
 
-        // todo: how do we avoid two roundtrips?
+        // Clear previous data when loading new template
+        setFormDef(null);
+        setForms([]);
+        setOriginalForms([]);
+        setWorkspace(null);
+
         const template = await loadTemplate(templateId);
         setFormDef(template.templateDefinition);
         setIsTemplateDeleted(template.isDeleted);
@@ -80,11 +84,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
         setWorkspace(workspace);
 
         const formsCopy = cloneDeep(data);
-
         setOriginalForms(formsCopy);
-
-
-        // setColumnDefs(getColumnDefs(template.templateDefinition));
       } catch (e) {
         setHasError(true);
         onError(e);
@@ -93,7 +93,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       setIsLoading(false);
     }
     onLoad();
-  }, []);
+  }, [workspaceId, templateId, formDefInput]);
 
   useEffect(() => {
     setColumnDefs(getColumnDefs(formDef));
