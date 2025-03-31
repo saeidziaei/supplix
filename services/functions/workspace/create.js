@@ -25,7 +25,7 @@ export const main = handler(async (event, tenant) => {
       inoutNote: data.inoutNote || "",
       showInMenu: data.showInMenu || "",
       isPlaceholder: data.isPlaceholder || "",
-      
+      workflow: data.workflow || null,
       createdBy: event.requestContext.authorizer.jwt.claims.sub,
       createdAt: Date.now(), 
     },

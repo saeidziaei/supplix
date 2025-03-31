@@ -26,7 +26,8 @@ export const main = handler(async (event, tenant) => {
       siteAddress = :siteAddress,
       inoutNote = :inoutNote,
       showInMenu = :showInMenu,
-      isPlaceholder = :isPlaceholder
+      isPlaceholder = :isPlaceholder,
+      workflow = :workflow
       `,
     ExpressionAttributeValues: {
       ":parentId": data.parentId,
@@ -45,6 +46,7 @@ export const main = handler(async (event, tenant) => {
       ":inoutNote": data.inoutNote || "",
       ":showInMenu": data.showInMenu || "",
       ":isPlaceholder": data.isPlaceholder || "",
+      ":workflow": data.workflow || null
 
     },
     ReturnValues: "ALL_NEW",

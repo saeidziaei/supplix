@@ -20,6 +20,7 @@ import { makeApiCall } from "../lib/apiLib";
 import { useAppContext } from "../lib/contextLib";
 import { onError } from "../lib/errorLib";
 import "./WorkspaceList.css";
+import WorkflowViewer from '../components/WorkflowViewer';
 
 
 export default function Workspaces() {
@@ -32,6 +33,7 @@ export default function Workspaces() {
   const [pickedWorkspace, setPickedWorkspace] = useState(null);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
   const [preppedContent, setPreppedContent] = useState(null);
+  const [isWorkflowExpanded, setIsWorkflowExpanded] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const { currentUserRoles, tenant } = useAppContext();
@@ -270,6 +272,37 @@ export default function Workspaces() {
                     workspace={selectedWorkspace}
                     editable={canEditWorkspace()}
                   />
+
+{selectedWorkspace && selectedWorkspace.workflow && (
+  <Accordion styled fluid>
+    <Accordion.Title
+      active={isWorkflowExpanded}
+      onClick={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
+      style={{
+        backgroundColor: '#f8f9fa',
+        borderBottom: '1px solid #e9ecef',
+        marginTop: '1rem',
+        width: '100%'
+      }}
+    >
+      <Icon name="dropdown" />
+      <Icon name="sitemap" style={{ marginRight: '0.5rem' }} />
+      Workflow Diagram
+    </Accordion.Title>
+    <Accordion.Content 
+      active={isWorkflowExpanded}
+      style={{
+        backgroundColor: 'white',
+        padding: '1rem',
+        border: '1px solid #e9ecef',
+        borderTop: 'none',
+        width: '100%'
+      }}
+    >
+      <WorkflowViewer xml={selectedWorkspace.workflow} />
+    </Accordion.Content>
+  </Accordion>
+)}
 
 <div class="mx-auto max-w-6xl text-center p-6 dark:bg-gray-900">
     
