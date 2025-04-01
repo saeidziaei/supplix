@@ -153,7 +153,7 @@ export default function Competency(props) {
       <Grid.Column width={7}>
         <Input
           disabled={courseDisabled}
-          inputLabel="Conducten on date"
+          inputLabel="Conducted on date"
           name={`${name}.conductedOn`}
           size="mini" />
       </Grid.Column>

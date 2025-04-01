@@ -172,8 +172,9 @@ function App() {
 
     return (
       !isAuthenticating && (
-        <>
-          <Grid  style={{ marginBottom: "-3rem" }}>
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Grid style={{ margin: 0, flexShrink: 0 }}>
             <Grid.Row verticalAlign="middle">
               <Grid.Column width="10">
                 <List divided horizontal>
@@ -219,46 +220,43 @@ function App() {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <Grid columns={1}>
-            <Grid.Column>
-              <Sidebar.Pushable as={Segment}>
-                <Sidebar
-                  as={Menu}
-                  visible={isSidebarVisible}
+
+          {/* Main content area */}
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <Sidebar.Pushable as={Segment} style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+              <Sidebar
+                as={Menu}
+                visible={isSidebarVisible}
+                vertical
+                animation="slide along"
+                size="medium"
+              >
+                {authenticatedUser ? (
+                  <>
+                  <LinkContainer
+                  to="/"
                   
-                  vertical
-                  onHide={() => setIsSidebarVisible(false)}
-                  animation="overlay"
-                  size="small"
                 >
-                  
-
-                  {authenticatedUser ? (
-                    <>
+                  <Nav.Link as={Menu.Item}>
+                    <span>
+                      <Icon name="home" />
+                      Workspaces
+                    </span>
+                  </Nav.Link>
+                </LinkContainer>
                     <LinkContainer
-                    to="/"
-                    onClick={() => setIsSidebarVisible(false)}
-                  >
-                    <Nav.Link as={Menu.Item}>
-                      <span>
-                        <Icon name="home" />
-                        Workspaces
-                      </span>
-                    </Nav.Link>
-                  </LinkContainer>
-                      <LinkContainer
-                        to="/mytasks"
-                        onClick={() => setIsSidebarVisible(false)}
-                      >
-                        <Menu.Item as="a">
-                          <Label color={tasksCount ? "teal" : "black"}>
-                            {tasksCount}
-                          </Label>
-                          Tasks
-                        </Menu.Item>
-                      </LinkContainer>
-
+                      to="/mytasks"
                       
+                    >
+                      <Menu.Item as="a" >
+                        <Label color={tasksCount ? "teal" : "black"}>
+                          {tasksCount}
+                        </Label>
+                        <span style={{color: "white"}}>Tasks</span>
+                      </Menu.Item>
+                    </LinkContainer>
+
+                    
 { sidebarWorkspaces && sidebarWorkspaces.map(ws => (
   <Menu.Item 
     key={ws.workspaceId} 
@@ -280,8 +278,9 @@ function App() {
       />
     )}
     {!ws.isPlaceholder ? (
-      <LinkContainer to={{pathname:"/", search:`?id=${ws.workspaceId}`}}>
-        <Nav.Link onClick={() => setIsSidebarVisible(false)} style={{ color: 'white' }}>
+      
+      <LinkContainer to={`workspace/${ws.workspaceId}/registers`}>
+        <Nav.Link  style={{ color: 'white' }}>
           <Icon name="folder" />
           {ws.workspaceName}
         </Nav.Link>
@@ -305,11 +304,11 @@ function App() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <LinkContainer to={{pathname:"/", search:`?id=${child.workspaceId}`}}>
+              <LinkContainer to={`workspace/${child.workspaceId}/registers`} >
                 <Nav.Link 
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsSidebarVisible(false);
+                    
                   }} 
                 >
                   <Icon name="chevron right" />
@@ -323,89 +322,89 @@ function App() {
     )}
   </Menu.Item>
 ))} 
-                     
+                   
 
-                      {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer
-                          to="/templates"
-                          onClick={() => setIsSidebarVisible(false)}
-                        >
-                          <Nav.Link as={Menu.Item}>
-                            <span>
-                              <Icon name="clipboard list" />
-                              Form Builder
-                            </span>
-                          </Nav.Link>
-                        </LinkContainer>
-                      )}
+                    {(isAdmin || isTopLevelAdmin) && (
+                      <LinkContainer
+                        to="/templates"
+                        
+                      >
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="clipboard list" />
+                            Form Builder
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
+                    )}
 
-                      {isTopLevelAdmin && (
-                        <LinkContainer
-                          to="/tenants"
-                          onClick={() => setIsSidebarVisible(false)}
-                        >
-                          <Nav.Link as={Menu.Item}>
-                            <span>
-                              <Icon name="building" color="red" />
-                              Tenants
-                            </span>
-                            <Icon name="hand paper" color="red" />
-                          </Nav.Link>
-                        </LinkContainer>
-                      )}
-                      {(isAdmin || isTopLevelAdmin) && (
-                        <LinkContainer
-                          to="/users"
-                          onClick={() => setIsSidebarVisible(false)}
-                        >
-                          <Nav.Link as={Menu.Item}>
-                            <span>
-                              <Icon name="users" />
-                              Employees
-                            </span>
-                          </Nav.Link>
-                        </LinkContainer>
-                      )}
-                      {authenticatedUser && (
-                    <Menu.Item>
-                      <NCR label={tenant?.NCRLabel} />
-                    </Menu.Item>
-                  )}
-                    </>
-                  ) : (
-                    <>
-                      <Menu.Item>
-                        <LinkContainer to="/login">
-                          <Nav.Link>
-                            <Icon name="sign-in" />
-                            Login
-                          </Nav.Link>
-                        </LinkContainer>
-                      </Menu.Item>
-                    </>
-                  )}
-
+                    {isTopLevelAdmin && (
+                      <LinkContainer
+                        to="/tenants"
+                        
+                      >
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="building" color="red" />
+                            Tenants
+                          </span>
+                          <Icon name="hand paper" color="red" />
+                        </Nav.Link>
+                      </LinkContainer>
+                    )}
+                    {(isAdmin || isTopLevelAdmin) && (
+                      <LinkContainer
+                        to="/users"
+                        
+                      >
+                        <Nav.Link as={Menu.Item}>
+                          <span>
+                            <Icon name="users" />
+                            Employees
+                          </span>
+                        </Nav.Link>
+                      </LinkContainer>
+                    )}
+                    {authenticatedUser && (
                   <Menu.Item>
-                    <img alt="logo" src="/iso_cloud_logo_v1.png" />
+                    <NCR label={tenant?.NCRLabel} />
                   </Menu.Item>
+                )}
+                  </>
+                ) : (
+                  <>
+                    <Menu.Item>
+                      <LinkContainer to="/login">
+                        <Nav.Link>
+                          <Icon name="sign-in" />
+                          Login
+                        </Nav.Link>
+                      </LinkContainer>
+                    </Menu.Item>
+                  </>
+                )}
 
-                  <Menu.Item color="blue">
-                    <p style={{ fontSize: "0.8em" }}>
-                      <br />
-                      <br />
-                      <br />
-                      {tenant ? tenant.tenantName : ""}
-                      <br />
-                      <br />
-                      {employee ? employee.given_name : ""}
-                    </p>
-                  </Menu.Item>
-                  
-                </Sidebar>
+                <Menu.Item>
+                  <img alt="logo" src="/iso_cloud_logo_v1.png" />
+                </Menu.Item>
 
-                <Sidebar.Pusher dimmed={isSidebarVisible}>
-                  
-                    <MasterLayout>
+                <Menu.Item >
+                  <p style={{ fontSize: "0.8em", color:"white" }}>
+                    <br />
+                    <br />
+                    <br />
+                    {tenant ? tenant.tenantName : ""}
+                    <br />
+                    <br />
+                    {employee ? employee.given_name : ""}
+                  </p>
+                </Menu.Item>
+                
+              </Sidebar>
+
+              <Sidebar.Pusher>
+                <div className="main-content">
+                  <MasterLayout>
                     <AppContext.Provider
                       value={{
                         authenticatedUser,
@@ -424,13 +423,12 @@ function App() {
                       />
                       
                     </AppContext.Provider>
-                    </MasterLayout>
-                  
-                </Sidebar.Pusher>
-              </Sidebar.Pushable>
-            </Grid.Column>
-          </Grid>
-        </>
+                  </MasterLayout>
+                </div>
+              </Sidebar.Pusher>
+            </Sidebar.Pushable>
+          </div>
+        </div>
       )
     );
   }
