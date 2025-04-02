@@ -136,7 +136,7 @@ export default function TemplatedForm() {
           },
         });
 
-        resolve(`forms/${fileName}`);
+        resolve(`forms/${encodeURIComponent(fileName)}`);
       });
 
       reader.readAsArrayBuffer(file);

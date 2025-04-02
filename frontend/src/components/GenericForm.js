@@ -113,7 +113,6 @@ export function GenericForm({
   // const validationSchema = generateValidationSchema(formDef);
 
   const preSubmit = (values, formikBag) => {
-console.log("preSubmit", values);
     const updatedValues = { ...values };
     if (sigPadRef.current) {
       updatedValues[SIGNATURE_FIELD_NAME] = sigPadRef.current
