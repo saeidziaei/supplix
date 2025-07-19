@@ -10,17 +10,15 @@
 
 /* Set font for the entire app */
 body, #root {
-  font-family: 'Helvetica Neue', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 
-    sans-serif;
+  font-family: Lato, Helvetica Neue, Arial, Helvetica, sans-serif;
 }
 
 /* Set font specifically for the sidebar */
 .ui.sidebar {
-  font-family: 'Helvetica Neue', 'Roboto' !important;
+  font-family: Montserrat, sans-serif !important;
   height: 100vh !important;
   overflow-y: auto !important;
-  background-color: #1a237e !important; /* Deep navy */
+  background-color: #16193d !important; /* Deep navy */
   color: #ffffff !important;
 }
 
@@ -40,13 +38,13 @@ body, #root {
 .ui.sidebar .menu .menu .item {
   color: rgba(255, 255, 255, 0.9) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: #1a237e !important;
+  background-color: #16193d !important;
 }
 
 /* Hover state for all menu items */
 .ui.sidebar .menu .item:hover,
 .ui.sidebar .menu .menu .item:hover {
-  background-color: #283593 !important; /* Slightly lighter navy */
+  background-color: #161933 !important; /* Slightly lighter navy */
   color: #ffffff !important;
 }
 
@@ -93,7 +91,7 @@ body, #root {
 .ui.menu .active.item
 .ui.sidebar .menu .active.item,
 .ui.sidebar .menu .menu .active.item {
-  background-color: #283593 !important;
+  background-color: #16193d !important;
   color: #ffffff !important;
 }
 
@@ -142,7 +140,7 @@ body.sidebar-open {
 .ui.sidebar .nav-link.active span,
 .ui.sidebar .menu .item.active a.nav-link {
   color: #ffffff !important;
-  background-color: #283593 !important;
+  background-color: #16193d !important;
 }
 
 /* Target Tasks menu item specifically */

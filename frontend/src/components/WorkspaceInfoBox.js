@@ -104,80 +104,85 @@ export const WorkspaceInfoBox = ({ workspace, editable, leafFolder="" }) => {
       </Accordion.Title>
       {hasContent() && (
         <Accordion.Content active={isExpanded}>
-          {canEdit && (
-            <Button
-              basic
-              circular
-              size="tiny"
-              icon="edit"
-              floated="right"
-              onClick={handleEditButtonClick}
-            />
-          )}
-          <Table basic="very" celled compact>
-            <Table.Body>
-              <Table.Row>
-                <Table.Cell>
-                  <strong>Name:</strong>
-                </Table.Cell>
-                <Table.Cell>{workspaceName}</Table.Cell>
-              </Table.Row>
-              {workspace.parent && (
-                <Table.Row>
-                  <Table.Cell>
-                    <strong>Parent:</strong>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Breadcrumb>
-                      {workspaceWithParents.map((workspace, index) => (
-                        <span key={workspace.workspaceId}>
-                          <Breadcrumb.Section>
-                            {workspace.workspaceName}
-                          </Breadcrumb.Section>
-                          {index !== workspaceWithParents.length - 1 && (
-                            <Breadcrumb.Divider icon="right chevron" />
-                          )}
-                        </span>
-                      ))}
-                    </Breadcrumb>
-                  </Table.Cell>
-                </Table.Row>
-              )}
-              <Table.Row>
-                <Table.Cell>
-                  <strong>Status:</strong>
-                </Table.Cell>
-                <Table.Cell>
-                  <Label color={getStatusColor()}>{workspaceStatus}</Label>
-                </Table.Cell>
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell>
-                  <strong>Category:</strong>
-                </Table.Cell>
-                <Table.Cell>{category}</Table.Cell>
-              </Table.Row>
+          <div className="flex gap-4">
+            {canEdit && (
+              <div>
+                <Button
+                  basic
+                  size="tiny"
+                  onClick={handleEditButtonClick}
+                ><Icon name="edit"/>
+                  Edit Workspace
+                </Button>
+              </div>
+            )}
+            <div className="flex-1">
+              <Table basic="very" celled compact>
+                <Table.Body>
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>Name:</strong>
+                    </Table.Cell>
+                    <Table.Cell>{workspaceName}</Table.Cell>
+                  </Table.Row>
+                  {workspace.parent && (
+                    <Table.Row>
+                      <Table.Cell>
+                        <strong>Parent:</strong>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Breadcrumb>
+                          {workspaceWithParents.map((workspace, index) => (
+                            <span key={workspace.workspaceId}>
+                              <Breadcrumb.Section>
+                                {workspace.workspaceName}
+                              </Breadcrumb.Section>
+                              {index !== workspaceWithParents.length - 1 && (
+                                <Breadcrumb.Divider icon="right chevron" />
+                              )}
+                            </span>
+                          ))}
+                        </Breadcrumb>
+                      </Table.Cell>
+                    </Table.Row>
+                  )}
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>Status:</strong>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Label color={getStatusColor()}>{workspaceStatus}</Label>
+                    </Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>Category:</strong>
+                    </Table.Cell>
+                    <Table.Cell>{category}</Table.Cell>
+                  </Table.Row>
 
-              <Table.Row>
-                <Table.Cell>
-                  <strong>Client Name:</strong>
-                </Table.Cell>
-                <Table.Cell>{clientName}</Table.Cell>
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell>
-                  <strong>Start Date:</strong>
-                </Table.Cell>
-                <Table.Cell>{formatDate(startDate)}</Table.Cell>
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell>
-                  <strong>End Date:</strong>
-                </Table.Cell>
-                <Table.Cell>{formatDate(endDate)}</Table.Cell>
-              </Table.Row>
-            </Table.Body>
-          </Table>
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>Client Name:</strong>
+                    </Table.Cell>
+                    <Table.Cell>{clientName}</Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>Start Date:</strong>
+                    </Table.Cell>
+                    <Table.Cell>{formatDate(startDate)}</Table.Cell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.Cell>
+                      <strong>End Date:</strong>
+                    </Table.Cell>
+                    <Table.Cell>{formatDate(endDate)}</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              </Table>
+            </div>
+          </div>
         </Accordion.Content>
       )}
     </Accordion>
