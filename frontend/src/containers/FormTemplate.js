@@ -4,14 +4,12 @@ import {
   Checkbox,
   Confirm,
   Divider,
-  Grid,
-  GridRow, Header,
   Icon,
   Input,
-  Item, Loader,
+  Loader,
   Menu,
-  Segment,
-  Popup
+  Popup,
+  Segment
 } from "semantic-ui-react";
 
 import {
@@ -27,17 +25,22 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { useNavigate, useParams } from "react-router-dom";
+import TextareaAutosize from 'react-textarea-autosize';
 import { v4 as uuidv4 } from 'uuid';
 import FieldEditor from "../components/FieldEditor";
+import FooterButtons from "../components/FooterButtons";
 import { GenericForm } from "../components/GenericForm";
 import { SortableItem } from "../components/SortableItem";
 import { makeApiCall } from "../lib/apiLib";
-import { onError } from "../lib/errorLib";
-import "./FormTemplate.css";
-import FormRegister from "./FormRegister";
 import { useAppContext } from "../lib/contextLib";
-import TextareaAutosize from 'react-textarea-autosize';
-import FooterButtons from "../components/FooterButtons";
+import { onError } from "../lib/errorLib";
+import FormRegister from "./FormRegister";
+import "./FormTemplate.css";
+
+import { Model } from "survey-core";
+import "survey-core/survey-core.min.css";
+import { Survey } from "survey-react-ui";
+import "survey-creator-core/survey-creator-core.min.css";
 
 export default function FormTemplate() {
   const {templateId} = useParams();
@@ -58,6 +61,10 @@ export default function FormTemplate() {
   const [isRawEditing, setIsRawEditing] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
   const [isFormDisabled, setIsFormDisabled] = useState(false);
+  const [isSurveyjs, setIsSurveyjs] = useState(false);
+  const [surveyjsJSON, setSurveyjsJSON] = useState("");
+  const [surveyjsModel, setSurveyjsModel] = useState(null);
+
 
   document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.shiftKey && event.key === 'J') {
@@ -100,12 +107,32 @@ export default function FormTemplate() {
 
     onLoad();
   }, []);
+
+  useEffect(() => {
+    if (surveyjsModel) {
+      surveyjsModel.readOnly = isFormDisabled;
+    }
+  }, [surveyjsModel, isFormDisabled]);
+
   function setFormDef(formDef) {
-    setTitle(formDef.title);
-    setCategory(formDef.category);
-    setSections(formDef.sections);
-    setHasSignature(!!formDef.hasSignature);
-    setRegisterFields(formDef.registerFields || []);
+    
+    if (formDef.isSurveyjs) {
+      const jsonString =
+        typeof formDef.surveyjsJSON === "string"
+          ? formDef.surveyjsJSON
+          : JSON.stringify(formDef.surveyjsJSON, null, 2);
+      setIsSurveyjs(true);
+      setTitle(formDef.title);
+      setCategory(formDef.category);
+      setSurveyjsJSON(jsonString);
+      setSurveyjsModel(getSurveyjsModel(jsonString));
+    } else {
+      setTitle(formDef.title);
+      setCategory(formDef.category);
+      setSections(formDef.sections);
+      setHasSignature(!!formDef.hasSignature);
+      setRegisterFields(formDef.registerFields || []);
+    }
   }
 
   async function deleteTemplate() {
@@ -125,11 +152,23 @@ export default function FormTemplate() {
   }
   async function handleSubmit() {
     setIsLoading(true);
+    
+    let parsedSurveyJson;
+
+    if (isSurveyjs) {
+      const model = getSurveyjsModel(surveyjsJSON); 
+      if (!model) {
+        throw new Error("Invalid SurveyJS JSON");
+      }
+      parsedSurveyJson = model.toJSON(); // or JSON.parse(surveyjsJSON);
+    }
+
+    const template = isSurveyjs ? {isSurveyjs, title, category, surveyjsJSON: parsedSurveyJson} : {title, category, sections, registerFields, hasSignature};
     try {
       if (templateId) {
-        await updateTemplate({title, category, sections, registerFields, hasSignature});
+        await updateTemplate(template);
       } else {
-        await createTemplate({title, category, sections, registerFields, hasSignature});
+        await createTemplate(template);
       }
       nav(`/templates`);
     } catch (e) {
@@ -137,6 +176,7 @@ export default function FormTemplate() {
     } finally {
       setIsLoading(false);
     }
+    
   }
   async function createTemplate(def) {
     return await makeApiCall("POST", `/templates`, {
@@ -363,7 +403,7 @@ export default function FormTemplate() {
     );
 
   }
-
+  
   function renderFormDesigner() {
     return (
       <>
@@ -628,15 +668,87 @@ export default function FormTemplate() {
       </>
     );
   }
+  const getSurveyjsModel = (input) => {
+    try {
+      const parsedJSON = JSON.parse(input);
+      return new Model(parsedJSON);
+    } catch (err) {
+      return null;
+    }
+  }
+  function renderSurveyjsDesigner() {
+    return (
+      <Segment
+        style={{
+          borderLeft: "5px solid #2185d0",
+          background:
+            "linear-gradient(to bottom, #fafcff 0%, #f7faff 50%, #f3f8ff 100%)",
+        }}
+      >
+        
+        <div className="mb-2">
+            <span className="text-sm font-medium text-gray-600 mb-1 block">
+              Form Title 
+            </span>
+            <Input
+              readOnly // it is read from surveyjs json
+              fluid
+              size="small"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="text-base"
+            />
+          </div>
+          <div className="mb-2">
+            <span className="text-sm font-medium text-gray-600 mb-1 block">
+              Category
+            </span>
+            <Input
+              fluid
+              size="small"
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="text-base"
+            />
+          </div>
+
+        <span className="text-sm font-medium text-gray-600 mb-1 block">
+          Surveyjs JSON
+        </span>
+        <TextareaAutosize
+          value={surveyjsJSON}
+          style={{
+            width: "100%",
+            fontSize: "14px",
+            padding: "8px",
+            boxSizing: "border-box",
+          }}
+          maxRows="40"
+          onChange={(e) => {
+            const json = e.target.value;
+            setSurveyjsJSON(json);
+
+            let survey = getSurveyjsModel(json);
+            if (survey) { // it means the json is in good surveyjs format
+              setTitle(survey.toJSON().title);
+            }
+            setSurveyjsModel(survey);
+          }}
+          minRows={10}
+          rows={100}
+          cols={80}
+        />
+      </Segment>
+    );
+  }
+
 
   
-
-  if (isLoading) return <Loader active />;
-
-  return (
-    <Grid stackable>
-      <Grid.Column width={7}>
-        <Menu tabular attached="top">
+function renderFormBuilder() {
+  return <>
+  <Menu tabular attached="top">
           <Menu.Item
             name="form designer"
             active={activeDesigner === "form designer"}
@@ -648,32 +760,72 @@ export default function FormTemplate() {
             onClick={handleMenuClick}
           />
         </Menu>
-        {isRawEditing && (<>
-         
-          <TextareaAutosize
-          
-            value={jsonInput} 
-            onChange={(e) => setJsonInput(e.target.value)}
-            rows={10}
-            cols={40}
-          />
-          <Divider hidden />
-          <Button onClick={handleRawEdit}  color="green" icon="check circle" /></>
+        {isRawEditing && (
+          <>
+            <TextareaAutosize
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              rows={10}
+              cols={40}
+            />
+            <Divider hidden />
+            <Button onClick={handleRawEdit} color="green" icon="check circle" />
+          </>
         )}
         <Segment attached="bottom">
-          {activeDesigner == "form designer"
+          {activeDesigner === "form designer"
             ? renderFormDesigner()
             : rednerRegisterDesigner()}
         </Segment>
-        {templateId && <div class="border border-gray-300 bg-gray-100 p-4 rounded m-1">
-  <Icon name="warning" color="olive"/>
-  When a form is updated, a new version gets created. This new version will be used for the new records. All the existing records will continue to use the old version.
-</div>}
+        {templateId && (
+          <div class="border border-gray-300 bg-gray-100 p-4 rounded m-1">
+            <Icon name="warning" color="olive" />
+            When a form is updated, a new version gets created. This new version
+            will be used for the new records. All the existing records will
+            continue to use the old version.
+          </div>
+        )}
+  </>
+}
 
-<FooterButtons rightButton={{label: "Save", color: "blue", onClick:() => handleSubmit(), icon: "save"}}
-leftButton={templateId && canDeleteTemplate() && {label: "Delete Form", color: "red", onClick:() => setDeleteConfirmOpen(true), icon: "remove circle"}}
- />
 
+  if (isLoading) return <Loader active />;
+
+
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6">
+  {/* Left Column */}
+  <div className="w-full lg:w-5/12">
+    <div className="mb-4">
+      <label className="inline-flex items-center gap-2">
+        <input
+          type="checkbox"
+          className="toggle-checkbox"
+          checked={isSurveyjs}
+          onChange={(e) => setIsSurveyjs(e.target.checked)}
+        />
+        <span className="text-gray-700 font-medium">JSON Editor</span>
+      </label>
+    </div>
+    {isSurveyjs ? renderSurveyjsDesigner() : renderFormBuilder()}
+    <FooterButtons
+          rightButton={{
+            label: "Save",
+            color: "blue",
+            onClick: () => handleSubmit(),
+            icon: "save",
+          }}
+          leftButton={
+            templateId &&
+            canDeleteTemplate() && {
+              label: "Delete Form",
+              color: "red",
+              onClick: () => setDeleteConfirmOpen(true),
+              icon: "remove circle",
+            }
+          }
+        />
 
         <Confirm
           size="mini"
@@ -683,41 +835,56 @@ leftButton={templateId && canDeleteTemplate() && {label: "Delete Form", color: "
           onCancel={() => setDeleteConfirmOpen(false)}
           onConfirm={handleDelete}
         />
-       
-      </Grid.Column>
-      <Grid.Column width={9}>
-        <Header as="h3" color="teal">
-          Form Preview
-        </Header>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginTop: '15px'  // Add some space below the button
-        }}>
-          <Checkbox
-            toggle
-            label="Record View"
-            checked={isFormDisabled}
-            onChange={(e, data) => setIsFormDisabled(data.checked)}
-          />
-        </div>
-        <GenericForm
-          formDef={{ title, category, sections, hasSignature }} users={users}
-          disabled={isFormDisabled}
+  </div>
+
+  {/* Right Column */}
+  <div className="w-full lg:w-7/12">
+    <h3 className="text-teal-600 text-xl font-semibold mb-2">Form Preview</h3>
+
+    <div className="flex justify-between items-center mt-4 mb-4">
+      <label className="inline-flex items-center gap-2">
+        <input
+          type="checkbox"
+          className="toggle-checkbox"
+          checked={isFormDisabled}
+          onChange={(e) => setIsFormDisabled(e.target.checked)}
         />
-        
-        <Divider />
-        <Header as="h3" color="teal">
+        <span className="text-gray-700 font-medium">Record View</span>
+      </label>
+    </div>
+
+    {isSurveyjs ? (
+      <div className="w-full min-h-[500px] overflow-auto border border-gray-300 mt-5 shadow-lg rounded-2xl p-4 bg-white">
+        {surveyjsModel ? (
+          <Survey model={surveyjsModel} />
+        ) : (
+          <div className="text-red-600">Invalid or incomplete JSON</div>
+        )}
+      </div>
+    ) : (
+      <GenericForm
+        formDef={{ title, category, sections, hasSignature }}
+        users={users}
+        disabled={isFormDisabled}
+      />
+    )}
+
+    {!isSurveyjs && (
+      <>
+        <hr className="my-6 border-gray-300" />
+        <h3 className="text-teal-600 text-xl font-semibold mb-2">
           Register Preview
-        </Header>
+        </h3>
 
         <FormRegister
           formDefInput={{ title, category, sections, registerFields }}
           formsInput={[]}
           isPreview={true}
         />
-      </Grid.Column>
-    </Grid>
-  );
+      </>
+    )}
+  </div>
+</div>
+
+  )
 }

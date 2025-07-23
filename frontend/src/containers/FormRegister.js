@@ -230,9 +230,16 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
   function getOptionbyName(options, name) {
     return options.find((option) => option.key === name);
   }
+
+
   const formValueGetter = (params) => {
-    return params.data.formValues[params.colDef.field];
+    if (formDef.isSurveyjs) {
+      return params.data.formValues ? params.data.formValues[params.colDef.field] : undefined;
+    } else {
+      return params.data.formValues[params.colDef.field];
+    }
   };
+  
 
   const registerValueGetter = (params) => {
     return params.data.formValues.register
@@ -378,7 +385,7 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
     let color = "";
 
     
-    for (let section of formDef.sections) {
+    for (let section of formDef?.sections || []) {
       
       for (let field of section.fields) {
         const canHaveColor = (field.type === "select" || field.type === "dropdown");
@@ -545,44 +552,68 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       </>
     );
   }
-
-  if (isLoading) return <Loader active />;
-
+  function getSurveyjsColumns(surveyJson) {
+    const columns = [];
+    if (!surveyJson?.pages) return columns;
+  
+    surveyJson.pages.forEach((page) => {
+      page.elements.forEach((el) => {
+        columns.push({
+          field: el.name,
+          headerName: el.title || el.name,
+          cellRenderer: formValueRenderer(el.type), // Map SurveyJS question types
+          cellClass: "ag-cell-bordered ag-cell-readonly",
+        });
+      });
+    });
+  
+    return columns;
+  }
+  
+  
   function getColumnDefs(def) {
     if (!def) return [];
-    const formColumns = def.sections
-      .map((s) => ({
-        headerName: s.title,
-        children: s.fields
-          .filter((f) => f.type !== "info")
-          .filter(
-            (f) =>
-              !s.isTable ||
-              ["SUM", "AVG", "COUNT", "MIN", "MAX"].includes(
-                f.aggregateFunction
-              )
-          ) // in Table sections only show fields with aggegate
-          .map((f) => ({
-            field: f.name,
-            headerName: !s.isTable
-              ? f.name
-              : `${f.aggregateFunction}(${f.name})`,
-            cellClass: "ag-cell-bordered ag-cell-readonly",
-            valueGetter: (params) =>
-              s.isTable
-                ? tableAggregateFieldValueGetter(params, f)
-                : f.type === "aggregate"
-                ? aggregateFiledValueGetter(params, s, f)
-                : formValueGetter(params),
-            cellStyle: (params) =>
-              f.type === "aggregate"
-                ? { backgroundColor: params.value.color }
-                : null,
-            cellRenderer: formValueRenderer(f.type),
-          })),
-      }))
-      .flat();
-
+    
+    let formColumns;
+    if (def.isSurveyjs) {
+      // Surveyjs forms
+      formColumns = getSurveyjsColumns(typeof def.surveyjsJSON === "string" ? JSON.parse(def.surveyjsJSON) : def.surveyjsJSON);
+    } else {
+      // ISOCloud forms
+      if (!def || !def.sections) return [];
+      formColumns = def.sections
+        .map((s) => ({
+          headerName: s.title,
+          children: s.fields
+            .filter((f) => f.type !== "info")
+            .filter(
+              (f) =>
+                !s.isTable ||
+                ["SUM", "AVG", "COUNT", "MIN", "MAX"].includes(
+                  f.aggregateFunction
+                )
+            ) // in Table sections only show fields with aggegate
+            .map((f) => ({
+              field: f.name,
+              headerName: !s.isTable
+                ? f.name
+                : `${f.aggregateFunction}(${f.name})`,
+              cellClass: "ag-cell-bordered ag-cell-readonly",
+              valueGetter: (params) =>
+                s.isTable
+                  ? tableAggregateFieldValueGetter(params, f)
+                  : f.type === "aggregate"
+                  ? aggregateFiledValueGetter(params, s, f)
+                  : formValueGetter(params),
+              cellStyle: (params) =>
+                f.type === "aggregate"
+                  ? { backgroundColor: params.value.color }
+                  : null,
+              cellRenderer: formValueRenderer(f.type),
+            })),
+        }))
+        .flat();
+    }
     const registerColumns = !def.registerFields
       ? []
       : [
@@ -638,6 +669,9 @@ export default function FormRegister({ formDefInput, formsInput, isHistory, isPr
       ...auditColums,
     ];
   }
+
+  if (isLoading) return <Loader active />;
+
   if (savingStatus.isSaving)
     return (
       <Loader

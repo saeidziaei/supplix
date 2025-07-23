@@ -22,6 +22,7 @@ import FooterButtons from "./FooterButtons";
 import "./GenericForm.css";
 import UserPicker from "./UserPicker";
 import RiskRegister from "./systemTemplates/RiskRegister";
+import SurveyViewer from "../components/SurveyViewer";
 
 export function GenericForm({
   formDef,
@@ -368,7 +369,37 @@ export function GenericForm({
         {renderHeader(formDef.title, formDef.category, tenant?.logoURL || "/iso_cloud_logo_v1.png")}
       </div>
       <div className="bg-[#F8FAFC] px-12  rounded-b-[4rem]">
-      <Formik
+      {formDef.isSurveyjs ? (
+          <>
+<SurveyViewer
+      surveyJson={
+        typeof formDef.surveyjsJSON === "string"
+          ? JSON.parse(formDef.surveyjsJSON)
+          : formDef.surveyjsJSON
+      }
+      onSubmit={handleSubmit}
+      formData={formData}
+      disabled={disabled}
+    />
+
+          {!disabled && handleSubmit && (
+            <FooterButtons
+              leftButton={
+                handleCancel && {
+                  label: "Cancel",
+                  icon: "undo",
+                  onClick: () => {
+                    // Reset survey answers
+                    handleCancel();
+                  },
+                }
+              }
+              
+            />
+          )}
+          
+          </> ) : 
+      (<Formik
         initialValues={formData || defaultValues}
         onSubmit={preSubmit}
       >
@@ -417,7 +448,7 @@ export function GenericForm({
             </Form>
           );
         }}
-      </Formik>
+      </Formik>)}
       </div>
     </div>
   );
